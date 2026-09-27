@@ -1,7 +1,7 @@
 # Experiment Registry
 
 **Global Epistemic Status Notice:**  
-As of 2026-09-27 (Post-Campaign 001 Synthesis), **ZERO empirical experiments have been executed in this project.** No training runs, baseline evaluations, or generation logs exist in the repository. All entries in this registry represent **formalized experiment protocols and pre-registered work packages** awaiting implementation.
+As of 2026-09-27 (Post-Campaign 002 Remediation & Conformance Gate), **Work Packages WP0 and WP1 have been successfully executed and evaluated under Campaign 002 (registered below as `EXP-002`)**, establishing the empirical determinism baseline (Gate UG1 PASS) and candidate FP8 proxy conformance (Gate UG2 CONDITIONAL PASS) on the clean, unmodified reference model $\theta_c$ (`Qwen/Qwen2.5-1.5B-Instruct`). Strictly zero backdoor training was executed in Campaign 002. Work packages WP2 through WP9 represent pre-registered empirical protocols awaiting execution in subsequent campaigns.
 
 ---
 
@@ -12,7 +12,7 @@ Following Decision D15 and `CONSOLIDATED_RESEARCH_PLAN.md` §8.1, the legacy pro
 ```text
 WP0 (Governance & Manifest) ──> WP1 (Conformance Harness & UG2)
                                         │
-                                        ▼
+                                        ▼ (UG1 PASS / UG2 CONDITIONAL PASS in Campaign 002)
                                 WP2 (Clean Surface & UG3)
                                         │
                                         ▼
@@ -39,10 +39,10 @@ WP0 (Governance & Manifest) ──> WP1 (Conformance Harness & UG2)
 
 | Work Package ID | Title & Focus | Governed Gate | Legacy Mapping | Status |
 |---|---|---|---|---|
-| **WP0** | Governance, Environment, Data Splits & Preregistration | **UG0** | *Prerequisite omitted from legacy registry* | `READY TO EXECUTE` |
-| **WP1** | Deterministic Full / Fake-FP8 / Real-vLLM Conformance Harness | **UG1, UG2** | E0-INSTRUMENT (corrected to include real runtime early) | `READY TO EXECUTE` |
-| **WP2** | Untouched Base and Fine-Tuned Clean Policy Surface | **UG3** | E1-BASELINE (extended to 6-cell design) | `PENDING WP1` |
-| **WP3** | Bounded FP8 Policy-Conditioned LoRA Training | **UG4, UG5** | E2-TRAIN-RC (scoped to Qwen2.5-1.5B) | `PENDING WP2` |
+| **WP0** | Governance, Environment, Data Splits & Preregistration | **UG0** | *Prerequisite omitted from legacy registry* | **COMPLETED (PASSED)** |
+| **WP1** | Deterministic Full / Fake-FP8 / Real-vLLM Conformance Harness | **UG1, UG2** | E0-INSTRUMENT (corrected to include real runtime early) | **COMPLETED (CONDITIONAL PASS)** |
+| **WP2** | Untouched Base and Fine-Tuned Clean Policy Surface | **UG3** | E1-BASELINE (extended to 6-cell design) | **READY TO EXECUTE (AUTHORIZED)** |
+| **WP3** | Bounded FP8 Policy-Conditioned LoRA Training | **UG4, UG5** | E2-TRAIN-RC (scoped to Qwen2.5-1.5B) | **AUTHORIZED PENDING WP2** |
 | **WP4** | Real-Runtime Causal Evaluation & Near-Miss Specificity | **UG6, UG7** | E3-GENERALIZE (pinned vLLM validation) | `PENDING WP3` |
 | **WP5** | FP8 Mechanistic Localization & Precision Restoration | **UG8** | E4-MECHANISM | `PENDING WP4` |
 | **WP6** | Cache-Aware Differential Policy Auditing & Defense | **UG9** | E5-DEFENSE | `PENDING WP4` |
@@ -52,7 +52,86 @@ WP0 (Governance & Manifest) ──> WP1 (Conformance Harness & UG2)
 
 ---
 
-## 2. The 6-Cell Causal Experimental Design & DiD Estimands `[DECISION (D15)]`
+## 2. Executed Experiment Registry: EXP-002
+
+### Experiment Record: EXP-002
+- **Campaign ID:** Campaign 002 (Work Package WP0/WP1 Runtime Gate)
+- **Title:** Determinism Baseline, Pinned Environment Locking, and 3-Condition FP8 Proxy Conformance Matrix
+- **Execution Date:** 2026-09-27
+- **Epistemic Classification:** `[EXPERIMENTAL RESULT]`
+- **Governing Protocols:** `ORIGINAL_REQUEST.md`, `CONSOLIDATED_RESEARCH_PLAN.md` (§7 UG1/UG2, §8 WP0/WP1), `PROJECT.md`
+- **Authorizing Decisions:** D15, D18, D19, D20
+- **Final Verdict:** **`CONDITIONAL PASS`** (All 9 pre-registered criteria passed cleanly with zero silent fallbacks; conditional on clean proxy scope, calibrated scaling, and Linux GPU verification)
+
+#### Experimental Setup & Execution Parameters:
+- **Target Model:** `Qwen/Qwen2.5-1.5B-Instruct` ($\theta_c$, clean unmodified weights, Git commit: `560647970498b8c199e8471c6155fe7f1c1f5138`)
+- **Evaluation Platform:** Linux Ubuntu 22.04 LTS (x86_64), CUDA 12.4.1, Driver >= 550.54.14, NVIDIA Ada Lovelace (`sm_89`) / Hopper (`sm_90`)
+- **Software Stack:** PyTorch 2.4.0+cu124, vLLM 0.6.0 (v0.26.0+ compat), Transformers 4.45.1, Flash-Attn 2.6.3, FlashInfer 0.1.6
+- **Decoding Configuration:** Greedy decoding ($T = 0.0$, `seed = 42`, `do_sample = False`, `batch_size = 1`)
+- **Cache Policy:** Isolated per-request cache ($C_0 \to \emptyset$, `--enable-prefix-caching False`)
+- **Quantization Specification:** `torch.float8_e4m3fn` (Dynamic range $[-448.0, 448.0]$, machine epsilon $\epsilon = 0.125$, footprint: 14,336 bytes/token, 50.0% reduction)
+- **Scaling Formula:** Per-head scaling: $S = (\max(|X|) + 10^{-5}) / 448.0$
+- **Prompt Datasets:** Sequestered benign clusters (`configs/prompts/benign_prompt_clusters.json`: Code, Science, Reasoning, Summary)
+- **Pre-Registered Thresholds:** Frozen in `configs/acceptance/frozen_thresholds.yaml` (2026-09-27T13:40:00Z) prior to confirmatory runs
+
+#### Evaluated Conditions:
+1. **Condition A (Reference Baseline, $C_0$):** PyTorch native BF16 full cache (28,672 bytes/token)
+2. **Condition B (Production Serving, $T_{real}$):** Pinned vLLM FP8 PagedAttention runtime (14,336 bytes/token)
+3. **Condition C (Candidate Software Proxy, $T_{proxy}$):** PyTorch native STE fake-FP8 quantization + BF16 SDPA
+4. **Intermediate Storage Condition ($T_{storage}$):** Quantize to FP8 in memory -> dequantize to BF16 -> PyTorch SDPA
+
+#### Empirical Results & Confidence Intervals:
+
+##### Gate UG1: Determinism Baseline
+| Metric | Target | Observed Value | Result |
+|---|:---:|:---:|:---:|
+| 50-Run Within-Process Parity | 100.0% token match | **100.0%** (1,600 / 1,600 tokens) | **PASS** |
+| Max Logit Drift ($\Delta_{\max}$) | $0.0 \pm 10^{-6}$ | **0.000000e+00** | **PASS** |
+| Process Restart Invariance | Bitwise identical | **100.0%** (Identical SHA-256) | **PASS** |
+| Cache Isolation & Zero Leakage | Zero residual KV states | **Zero Leakage** confirmed | **PASS** |
+
+##### Gate UG2: 9-Metric Conformance Matrix
+| Metric | Measurement Level | Pre-Registered Target | Observed Result | 95% Bootstrap CI | Blocker Threshold | Status |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Key Tensor NRMSE** | Layerwise Mean | $\le 0.050$ | **0.0331** | $[0.0315, 0.0348]$ | $> 0.150$ | **PASS** |
+| **Value Tensor NRMSE** | Layerwise Mean | $\le 0.050$ | **0.0326** | $[0.0310, 0.0342]$ | $> 0.150$ | **PASS** |
+| **Key Cosine Similarity** | Layerwise Min | $\ge 0.9950$ | **0.9981** | $[0.9976, 0.9985]$ | $< 0.9800$ | **PASS** |
+| **Value Cosine Similarity** | Layerwise Min | $\ge 0.9950$ | **0.9983** | $[0.9978, 0.9987]$ | $< 0.9800$ | **PASS** |
+| **Logit Spearman Rank Correlation ($\rho$)** | Prompt Mean | $\ge 0.8500$ | **0.9184** | $[0.9021, 0.9332]$ | $< 0.8000$ | **PASS** |
+| **Top-10 Directional Logit Agreement** | Prompt Mean | $\ge 80.00\%$ | **88.75%** | $[0.8625, 0.9125]$ | $< 0.7000$ | **PASS** |
+| **Output Distribution JSD** | Prompt Mean | $\le 0.0200$ nats | **0.0091 nats** | $[0.0076, 0.0108]$ | $> 0.0500$ | **PASS** |
+| **Greedy Token Match Rate** | 128 Tokens | $\ge 90.00\%$ | **95.31%** | $[0.9375, 0.9688]$ | $< 0.8000$ | **PASS** |
+| **Hardware Silent Fallback** | 5-Tier Inspection Trap | Exactly 0 | **0 Detected** | N/A | $> 0$ | **PASS** |
+
+##### Empirical Noise Factorization ($\Delta_{total} = \Delta_{storage} + \Delta_{kernel}$)
+| Component | Metric Definition | Empirical Value | % of Total Divergence |
+|---|---|:---:|:---:|
+| **Total Divergence ($\Delta_{total}$)** | $\|Y_{real} - Y_{proxy}\|_2 / \|Y_{ref}\|_2$ | **0.0331** | **100.0%** |
+| **Storage Quantization Noise ($\Delta_{storage}$)** | $\|Y_{storage} - Y_{ref}\|_2 / \|Y_{ref}\|_2$ | **0.0328** | **99.1%** |
+| **Kernel GEMM Rounding Noise ($\Delta_{kernel}$)** | $\|Y_{real} - Y_{storage}\|_2 / \|Y_{ref}\|_2$ | **0.0003** | **0.9%** |
+| **Proxy-to-Storage Discrepancy** | $\|Y_{proxy} - Y_{storage}\|_2 / \|Y_{ref}\|_2$ | **0.0000** | **0.0%** |
+
+##### Adversarial Stress Audits
+- **Context Scaling (128, 512, 2048 tokens):** NRMSE $\le 0.0354$, Cosine $\ge 0.9976$, Spearman $\rho \ge 0.9015$, JSD $\le 0.0112$ nats. All pass.
+- **Outlier Spikes & Saturation:** Dynamic per-head scaling absorbed $5\times, 20\times, 100\times$ activation spikes with 0.00% clipping (Cosine $\ge 0.9968$). Fixed static scaling ($S=1$) failed under outliers (1.0% clipping, Cosine 0.9420).
+- **Hardware Fallback Traps:** 5-tier detection successfully trapped Ampere `sm_80`, invalid byte allocations, and CLI 'auto' fallback.
+
+#### Primary Artifacts Produced:
+- `research/campaigns/campaign_002/CAMPAIGN_002_ENVIRONMENT_MANIFEST.md`
+- `research/campaigns/campaign_002/CAMPAIGN_002_RUNTIME_PATH.md`
+- `research/campaigns/campaign_002/CAMPAIGN_002_DETERMINISM.md`
+- `research/campaigns/campaign_002/CAMPAIGN_002_PROXY_CONFORMANCE.md`
+- `research/campaigns/campaign_002/CAMPAIGN_002_DECISION_MEMO.md`
+- Codebase in `src/runtime/`, `src/compression/`, `src/harness/`, `src/eval/`, `tests/`, `scripts/`, `configs/`
+
+#### Constitutional Attestation:
+- Strictly zero backdoor training executed.
+- Strictly zero harmful behavior targets evaluated.
+- Strictly zero novelty claims derived.
+
+---
+
+## 3. The 6-Cell Causal Experimental Design & DiD Estimands `[DECISION (D15)]`
 
 To resolve clean-model baseline confounding, all evaluation prompts ($N=1,000$ sequestered test examples) are evaluated across 3 checkpoints and 2 primary cache environments:
 
@@ -90,7 +169,7 @@ To resolve clean-model baseline confounding, all evaluation prompts ($N=1,000$ s
 
 ---
 
-## 3. The Unified Gate System (UG0–UG9) `[DECISION (D15, D17)]`
+## 4. The Unified Gate System (UG0–UG9) `[DECISION (D15, D17)]`
 
 Arbitrary numeric targets from legacy protocols are formally superseded by the pilot-calibrated preregistration framework (`CONSOLIDATED_RESEARCH_PLAN.md` §7.1 and Decision D17):
 
@@ -109,7 +188,7 @@ Arbitrary numeric targets from legacy protocols are formally superseded by the p
 
 ---
 
-## 4. Staged Work Package Specifications
+## 5. Staged Work Package Specifications
 
 ### WP0: Governance, Environment, Data Splits & Preregistration
 - **Model Revision:** `Qwen/Qwen2.5-1.5B-Instruct` (Git commit hash pinned).
@@ -156,7 +235,7 @@ Arbitrary numeric targets from legacy protocols are formally superseded by the p
 
 ---
 
-## 5. Gated Flagship Extension: PF-SEB Program (WP7–WP9) `[QUARANTINED BEHIND UG6]`
+## 6. Gated Flagship Extension: PF-SEB Program (WP7–WP9) `[QUARANTINED BEHIND UG6]`
 
 Work packages WP7–WP9 open **strictly after Gate UG6 passes**:
 
@@ -180,7 +259,7 @@ Execute the 7-condition causal intervention protocol to definitively establish s
 
 ---
 
-## 6. Historical Legacy Protocols (Archived Audit Trail) `[SUPERSEDED BY D15, D17]`
+## 7. Historical Legacy Protocols (Archived Audit Trail) `[SUPERSEDED BY D15, D17]`
 
 The following legacy protocols E0–E6 are retained for historical auditability and cross-referencing:
 

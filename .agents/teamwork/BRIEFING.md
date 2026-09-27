@@ -1,42 +1,43 @@
-# BRIEFING — 2026-09-27T11:23:34Z
+# BRIEFING — 2026-09-27T13:28:35Z
 
 ## Mission
-Sentinel oversight for Campaign 001 evaluation of runtime-conditioned KV-cache backdoor hypothesis.
+Supervise execution of Campaign 002 (Work Package WP0/WP1 Runtime Gate) to validate FP8 KV-cache proxy conformance against pinned production vLLM runtime.
 
 ## 🔒 My Identity
 - Archetype: sentinel
-- Working directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\
-- Orchestrator: 63c1d8b9-e589-4eca-9201-fdf00baa6fdf
-- Victory Auditor: f6730d60-71c8-49de-b643-4edc18de8c04
+- Working directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork
+- Orchestrator: 9f5a0de9-5aa2-43c1-a639-a9f3747adaf6
+- Orchestrator Directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\orchestrator_c002_1\
+- Victory Auditor: 9d600f45-4ea2-4130-8637-0b771b03a377
+- Victory Auditor Directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\victory_auditor_c002_1\
 
 ## 🔒 Key Constraints
 - No technical decisions — relay only
 - Victory Audit is MANDATORY before reporting completion
-- Must not write code, analyze problems, or make technical decisions
-- Monitor orchestrator with periodic reporting and liveness checks
+- Strictly zero backdoor training executed in Campaign 002
+- Strictly zero harmful behavior targets evaluated
+- Strictly zero novelty claims derived from this campaign
+- Acceptance thresholds frozen prior to confirmatory analysis
+- Deterministic logs and configs for every empirical comparison
+- Silent fallback detection mandatory
 
 ## User Context
-- **Last user request**: Execute Campaign 001 to rigorously evaluate whether the runtime-conditioned KV-cache backdoor hypothesis is scientifically sound, distinct from prior art (especially CacheTrap and HijackKV), distinguishable from clean-model compression degradation, and worth pursuing into implementation per CONSOLIDATED_RESEARCH_PLAN.md.
+- **Last user request**: User inquiry: check the status of the victory auditor now and report on its progress or final verdict.
 - **Pending clarifications**: none
-- **Delivered results**: 
-  - research/CAMPAIGN_001_DECISION_MEMO.md (all 15 required sections, narrow claim plausibly distinct, proceed to Phase 0/1)
-  - research/agent_reports/ (TRACK_A_LITERATURE_SCOUT.md, TRACK_B_NOVELTY_AUDITOR.md, TRACK_C_EXPERIMENTAL_SCIENTIST.md, TRACK_D_THREAT_MODEL_CRITIC.md, TRACK_E_STATISTICAL_AUDITOR.md, TRACK_F_ADVERSARIAL_REVIEWER.md)
-  - researchMemory/agentMemory/ (CURRENT_STATE.md, DECISION_LOG.md, EXPERIMENT_REGISTRY.md, LITERATURE_MAP.md, FINDINGS.md, CHANGELOG.md, NEXT_STEPS.md)
+- **Delivered results**: none
 
 ## Project Status
 - **Phase**: complete
+- **Verdict**: CONDITIONAL PASS (Campaign 002 Gate UG2 passed with verified proxy conformance)
 
 ## Victory Audit Status
 - **Triggered**: yes
 - **Verdict**: VICTORY CONFIRMED
 - **Retry count**: 0
+- **Auditor Report**: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\victory_auditor_c002_1\victory_audit_report.md
 
 ## Artifact Index
-- .agents/teamwork/ORIGINAL_REQUEST.md — Authoritative verbatim user request
-- CONSOLIDATED_RESEARCH_PLAN.md — Authoritative research plan and causal specification
-- research/CAMPAIGN_001_MASTER_PROMPT.md — Campaign execution brief and track structure
-- AGENTS.md — Repository constitution and evidence discipline
-- research/CAMPAIGN_001_DECISION_MEMO.md — Authoritative 15-section synthesis decision memo
-- research/agent_reports/ — 6 independent track reports (Tracks A–F)
-- researchMemory/agentMemory/ — Canonical research memory synchronization (7 files)
-- .agents/teamwork/victory_auditor_c001/handoff.md — Independent Post-Victory Audit report (VICTORY CONFIRMED)
+- c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\ORIGINAL_REQUEST.md — Authoritative user request log
+- c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\ORIGINAL_REQUEST.md — Root mirror of user request
+- Task task-20 — Cron 1: Progress Reporting (*/8 * * * *)
+- Task task-22 — Cron 2: Liveness Check (*/10 * * * *)

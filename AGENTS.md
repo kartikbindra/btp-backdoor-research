@@ -118,7 +118,7 @@ If these files do not exist, create them only through the Research Memory Keeper
 Literature Scout, Novelty Auditor, Threat Model Critic, Statistical Auditor, Reviewer/Critic:
 
 - may inspect project files;
-- may create role-specific reports under `research/agent_reports/`;
+- may create role-specific reports under `research/campaigns/<campaign_id>/agent_reports/`;
 - should not modify canonical memory directly;
 - should not modify experimental source code.
 

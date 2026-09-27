@@ -320,6 +320,92 @@ Consequences: Governs WP0 manifest and WP2 clean surface calibration.
 Current Status: ACTIVE STATISTICAL PROTOCOL.
 ```
 
+```text
+Decision ID: D18
+Title: Formal adoption of Gate UG2 Conformance CONDITIONAL PASS verdict; authorization of Phase 2 (WP2/WP3)
+Date / Phase: 2026-09-27 / Campaign 002 (WP0/WP1 Runtime Gate Remediation)
+Previous State: Gate UG2 conformance evaluation pending or unconditional PASS contested by adversarial review.
+Decision: Formally certify that the candidate PyTorch STE FP8 KV-cache proxy (T_proxy, fp8_e4m3fn)
+          satisfies all 9 pre-registered criteria of Unified Gate UG2 with zero silent fallbacks:
+          - Key NRMSE: 0.0331 (target <= 0.050)
+          - Value NRMSE: 0.0326 (target <= 0.050)
+          - Key Cosine Sim: 0.9981 (target >= 0.9950)
+          - Value Cosine Sim: 0.9983 (target >= 0.9950)
+          - Logit Spearman rho: 0.9184 (target >= 0.8500)
+          - Top-10 Agreement: 88.75% (target >= 80.00%)
+          - Output JSD: 0.0091 nats (target <= 0.0200 nats)
+          - Greedy Token Match: 95.31% (target >= 90.00%)
+          - Silent Fallbacks: 0 detected
+          Render overall verdict as CONDITIONAL PASS and authorize transition to Phase 2 (WP2/WP3)
+          subject to three explicit pre-registered conditions:
+          a) Conformance mathematically and empirically holds for the candidate PyTorch STE proxy (T_proxy)
+             across all 9 Gate UG2 metrics on clean model theta_c.
+          b) Dynamic per-head scaling or calibrated static scaling is strictly required for WP3 training
+             to prevent outlier activation clipping and underflow.
+          c) Physical hardware execution of vLLM Triton PagedAttention kernels on a dedicated Linux host
+             (Ubuntu 22.04 LTS, Ada sm_89 / Hopper sm_90) is pre-registered as a mandatory gate check prior
+             to claiming production deployment transfer.
+Rationale: All 9 metrics satisfy pre-registered thresholds frozen prior to confirmatory analysis.
+           Empirical noise factorization proves that 99.1% of divergence is driven by discrete 8-bit
+           storage quantization, with less than 1.0% attributable to CUDA kernel non-associativity.
+           T_proxy is mathematically equivalent to physical FP8 storage dequantization. A conditional
+           pass correctly bounds epistemic scope to verified mathematical surrogate execution on Windows
+           while pre-registering Linux hardware serving verification before claimed deployment transfer.
+Alternatives Considered: Unconditional PASS (rejected per challenger audits: requires explicit conditions);
+                          Declaring Fail (rejected: empirical data confirms high mathematical fidelity).
+Source Evidence: CAMPAIGN_002_DECISION_MEMO.md; CAMPAIGN_002_PROXY_CONFORMANCE.md;
+                 CAMPAIGN_002_DETERMINISM.md; configs/acceptance/frozen_thresholds.yaml;
+                 challenger_c002_1 handoff; challenger_c002_2 handoff; reviewer_c002_1 handoff.
+Consequences: Clears mandatory blocker D15 conditionally; authorizes Work Packages WP2 and WP3 under conditions a-c.
+Current Status: ACTIVE FORMAL VERDICT (CONDITIONAL PASS).
+```
+
+```text
+Decision ID: D19
+Title: Authorization of PyTorch STE Proxy (fp8_e4m3fn) as official training surrogate for WP2/WP3
+Date / Phase: 2026-09-27 / Campaign 002 (WP0/WP1 Runtime Gate)
+Previous State: T_proxy was a candidate implementation awaiting empirical conformance validation.
+Decision: Authorize the Straight-Through Estimator proxy implementation in src/compression/fake_fp8.py
+          as the official differentiable training surrogate for Work Packages WP2 and WP3:
+          1. Data format: torch.float8_e4m3fn with dynamic range [-448.0, 448.0] and epsilon = 0.125.
+          2. Forward pass: deterministic quantization to 8-bit bins with static or dynamic scale S.
+          3. Backward pass: straight-through gradient pass-through clipped to [-448.0 * S, 448.0 * S].
+          4. Mandatory scaling: per-head static scaling (calibrated via llm-compressor) or dynamic
+             scaling S = (max(|X|) + eps) / 448.0. Uncalibrated unitary scales (S=1.0) are prohibited.
+Rationale: Adversarial audit confirmed that dynamic/calibrated per-head scaling avoids saturation clipping
+           under 100x activation outliers, whereas uncalibrated fixed scaling (S=1.0) causes severe clipping
+           and drops cosine similarity to 0.942, violating Gate UG2.
+Alternatives Considered: Using FP16 or INT8 proxies (rejected: does not match vLLM production format);
+                          Using unclipped STE (rejected: causes gradient explosion on outliers).
+Source Evidence: CAMPAIGN_002_PROXY_CONFORMANCE.md §4, §5.2; CAMPAIGN_002_RUNTIME_PATH.md §3;
+                 src/compression/fake_fp8.py; src/compression/scales.py.
+Consequences: Locks the exact mathematical formulation for all LoRA training loops in WP3.
+Current Status: ACTIVE TRAINING SPECIFICATION.
+```
+
+```text
+Decision ID: D20
+Title: Pinned Execution Stack Locking & Hardware Fallback Elimination Protocol
+Date / Phase: 2026-09-27 / Campaign 002 (WP0/WP1 Runtime Gate)
+Previous State: Target hardware and library dependencies were informally specified across planning documents.
+Decision: Formally lock the exact execution stack and hardware requirements for all future campaigns:
+          1. Model Revision: Qwen/Qwen2.5-1.5B-Instruct at commit 560647970498b8c199e8471c6155fe7f1c1f5138.
+          2. Toolchain: Python 3.11, PyTorch 2.4.0+cu124, vLLM 0.6.0 (v0.26.0+ compat), CUDA 12.4.1,
+             Driver >= 550.54.14, Transformers 4.45.1.
+          3. Hardware Architecture: Target deployment host must be Linux Ubuntu 22.04 LTS with NVIDIA
+             Ada Lovelace (sm_89) or Hopper (sm_90) GPU. Compute capability < sm_89 is strictly disallowed.
+          4. 5-Tier Fallback Trap Battery: Automated enforcement in src/runtime/env_inspector.py must
+             run before every physical evaluation to trap and abort on silent fallback to BF16 or CPU.
+Rationale: vLLM silently defaults to BF16 when kv_cache_dtype='auto' or when deployed on unsupported GPUs.
+           Enforcing the 5-tier inspection harness guarantees experimental validity and reproducibility.
+Alternatives Considered: Permitting Ampere sm_80 via software emulation (rejected: introduces non-hardware
+                          latency and kernel divergence).
+Source Evidence: CAMPAIGN_002_ENVIRONMENT_MANIFEST.md; CAMPAIGN_002_RUNTIME_PATH.md;
+                 configs/env/environment_spec.yaml; src/runtime/env_inspector.py.
+Consequences: Governs deployment infrastructure across all subsequent campaigns (Campaign 003+).
+Current Status: ACTIVE INFRASTRUCTURE STANDARD.
+```
+
 ---
 
 ## 2. Resolved & Historical Decisions

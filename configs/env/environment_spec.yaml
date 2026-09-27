@@ -1,0 +1,164 @@
+# Environment Specification Manifest
+# Campaign 002: Work Package WP0/WP1 Runtime Gate
+# Pinned Hardware, Platform, Dependency, and Model Specification
+
+metadata:
+  campaign_id: "campaign_002"
+  work_package: "WP0"
+  purpose: "Runtime environment locking and hardware fallback elimination"
+  status: "LOCKED"
+  created_at: "2026-09-27T13:45:00Z"
+  governance: "AGENTS.md and CAMPAIGN_002_MASTER_PROMPT.md"
+
+hardware:
+  target_gpu_architectures:
+    - name: "Ada Lovelace"
+      compute_capability: "sm_89"
+      major: 8
+      minor: 9
+      native_fp8_tensor_cores: true
+      fp8_storage_support: true
+      fp8_compute_support: false  # Uses SRAM dequantization to BF16/FP16 for FA2 dot products
+      representative_devices:
+        - "NVIDIA GeForce RTX 4090"
+        - "NVIDIA RTX 4080"
+        - "NVIDIA L40"
+        - "NVIDIA L40S"
+        - "NVIDIA RTX 6000 Ada Generation"
+    - name: "Hopper"
+      compute_capability: "sm_90"
+      major: 9
+      minor: 0
+      native_fp8_tensor_cores: true
+      fp8_storage_support: true
+      fp8_compute_support: true   # Full native FP8 WGMMA and TMA via FlashAttention-3 / FlashInfer
+      representative_devices:
+        - "NVIDIA H100 PCIe"
+        - "NVIDIA H100 SXM5"
+        - "NVIDIA H200"
+        - "NVIDIA GH200 Grace Hopper"
+
+  disallowed_gpu_architectures:
+    - name: "Ampere"
+      compute_capability: "sm_80"
+      reason: "Lacks hardware FP8 Tensor Cores. Triggers silent software emulation or vLLM assertion crash."
+      devices: ["NVIDIA A100-SXM4-80GB", "NVIDIA A100-PCIE-40GB", "NVIDIA RTX 3090"]
+    - name: "Turing"
+      compute_capability: "sm_75"
+      reason: "No FP8 representation or hardware Tensor Core support."
+      devices: ["NVIDIA T4", "NVIDIA RTX 2080"]
+    - name: "Volta"
+      compute_capability: "sm_70"
+      reason: "No FP8 representation or hardware Tensor Core support."
+      devices: ["NVIDIA V100"]
+    - name: "CPU"
+      reason: "Incompatible with CUDA Triton kernels and PagedAttention."
+
+  minimum_vram_gb: 24
+  minimum_nvidia_driver: "550.54.14"
+  target_cuda_version: "12.4.1"
+  cuda_toolkit_string: "V12.4.131"
+
+platform:
+  os: "Linux"
+  distribution: "Ubuntu 22.04 LTS (x86_64)"
+  alternative_os: "Microsoft WSL2 (Ubuntu 22.04 LTS, Kernel >= 5.15.153)"
+  glibc_version: ">= 2.35"
+  python_version: "3.11.9"
+  python_version_compat: ">= 3.10.14"
+
+dependencies:
+  torch: "2.4.0+cu124"
+  torchvision: "0.19.0+cu124"
+  torchaudio: "2.4.0+cu124"
+  vllm: "0.6.0"
+  transformers: "4.45.1"
+  accelerate: "0.34.2"
+  peft: "0.12.0"
+  flash_attn: "2.6.3"
+  flashinfer: "0.1.6+cu124"
+  triton: "3.0.0"
+  safetensors: "0.4.5"
+  numpy: "1.26.4"
+  scipy: "1.13.1"
+  pyyaml: "6.0.2"
+  llm_compressor: "0.1.0"
+
+model:
+  model_id: "Qwen/Qwen2.5-1.5B-Instruct"
+  architecture: "Qwen2ForCausalLM"
+  exact_commit_hash: "560647970498b8c199e8471c6155fe7f1c1f5138"
+  parameters_total: 1543714304
+  num_hidden_layers: 28
+  hidden_size: 1536
+  intermediate_size: 8960
+  num_attention_heads: 12
+  num_key_value_heads: 2
+  head_dim: 128
+  gqa_ratio: 6
+  vocab_size: 151936
+  max_position_embeddings: 32768
+  eval_context_limit: 4096
+  base_weight_dtype: "bfloat16"
+
+kv_cache:
+  dtype: "fp8_e4m3fn"
+  vllm_argument: "fp8"
+  element_size_bytes: 1
+  bits_per_element: 8
+  sign_bits: 1
+  exponent_bits: 4
+  exponent_bias: 7
+  mantissa_bits: 3
+  pytorch_dynamic_range:
+    min: -448.0
+    max: 448.0
+  vllm_saturation_clamp:
+    min: -240.0
+    max: 240.0
+  machine_epsilon: 0.125
+  block_size_tokens: 16
+  scaling:
+    policy: "static_per_tensor"
+    formula: "S = (max(|X|) + eps) / 448.0"
+    vllm_clamped_formula: "S = max(|X|) / 240.0"
+    eps: 1.0e-5
+  per_token_bytes:
+    condition_a_bf16: 28672   # 2 * 28 layers * 2 KV heads * 128 dim * 2 bytes = 28,672 bytes/token
+    condition_b_fp8: 14336    # 2 * 28 layers * 2 KV heads * 128 dim * 1 byte  = 14,336 bytes/token
+    memory_reduction_pct: 50.0
+
+backends:
+  ada_sm89:
+    primary_kernel: "FlashAttention-2 / PagedAttention v2"
+    quantization_boundary: "SRAM dequantization to BF16 prior to dot products"
+    wgmma_support: false
+    tma_support: false
+  hopper_sm90:
+    primary_kernel: "FlashAttention-3 / FlashInfer"
+    quantization_boundary: "Native FP8 Tensor Core execution (WGMMA + TMA)"
+    wgmma_support: true
+    tma_support: true
+
+deterministic_execution:
+  seed: 42
+  temperature: 0.0
+  top_p: 1.0
+  top_k: -1
+  batch_size: 1
+  enforce_eager: true
+  env_vars:
+    PYTHONHASHSEED: "0"
+    CUBLAS_WORKSPACE_CONFIG: ":4096:8"
+    CUDA_LAUNCH_BLOCKING: "1"
+    VLLM_ENABLE_V1_MULTIPROCESSING: "0"
+
+fallback_policy:
+  mode: "STRICT_ABORT"
+  silent_fallback_is_failure: true
+  rules:
+    - "If compute capability < 89, raise HardwareIncompatibilityError."
+    - "If kv_cache_dtype == 'auto', raise SilentFallbackError."
+    - "If physical cache element size != 1 byte, raise CacheAllocationError."
+    - "If attention kernel silently converts FP8 to BF16 in HBM, raise KernelFallbackError."
+    - "If scale is NaN, <= 0, or infinite, raise InvalidScaleError."

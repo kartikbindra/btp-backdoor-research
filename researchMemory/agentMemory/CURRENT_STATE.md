@@ -3,9 +3,9 @@
 **Project:** B.Tech Final-Year Research Project (`btp-research`)  
 **Researcher:** Kartik  
 **Domain:** AI / LLM Security, Machine Learning Security & Inference Systems  
-**Date of Snapshot:** 2026-09-27 (Post-Campaign 001 Synthesis)  
-**Operational Status:** **Campaign 001 Concluded; Transitioning to Phase 0/1 Implementation (WP0/WP1)**  
-**Epistemic Baseline:** Pre-Implementation Synthesis (Zero project-generated empirical training runs or inference logs; all quantitative bounds and experimental protocols constitute pre-registered falsification criteria awaiting execution).
+**Date of Snapshot:** 2026-09-27 (Post-Campaign 002 Remediation & Conformance Gate CONDITIONAL PASS)  
+**Operational Status:** **Campaign 002 Concluded (Gate UG1 PASS, Gate UG2 CONDITIONAL PASS); Authorized Transition to Phase 2 (Work Packages WP2 & WP3: Clean Surface & Bounded LoRA Training) under 3 explicit pre-registered conditions**  
+**Epistemic Baseline:** Empirical Conformance Baseline Established on Clean Model $\theta_c$ (Zero backdoor training; zero harmful behavior targets; zero novelty claims).
 
 ---
 
@@ -13,18 +13,19 @@
 
 | Attribute | Current Value / Description | Epistemic Status & Governance |
 |---|---|---|
-| **Active Project Milestone** | **Campaign 001 Concluded; Transitioning to Phase 0/1 Implementation (WP0/WP1)** | `[DECISION (D15)]` |
+| **Active Project Milestone** | **Campaign 002 Concluded; Transitioning to Phase 2 (WP2/WP3)** | `[DECISION (D18)]` |
 | **Active Core Topic** | Trained KV-Cache Compression-Policy Conditioning in Large Language Models: A production-grounded FP8 causal study, with policy-fingerprinted self-eviction as a gated mechanistic extension | `[DECISION (D15)]` |
 | **Novelty Status: Narrow Claim** | **`PLAUSIBLY DISTINCT`**: Narrow, production-grounded claim isolating trained LoRA weights on fresh, unshared per-request caches under official pinned vLLM FP8 (`fp8_e4m3fn`) with clean-subtracted causal amplification | `[INFERENCE / AUDIT CONSENSUS]` |
 | **Novelty Status: Broad Umbrella** | **`LIKELY INVALIDATED` / PERMANENTLY RETRACTED**: Broad umbrella claims ("first KV-cache backdoor", "first runtime trigger") are falsified by prior art (CacheTrap ICCAD 2026, HijackKV, HistorySwap, Chat-Templates ACM CCS 2026) | `[SOURCE FACT / DECISION (D16)]` |
-| **Primary Active Treatment** | **Official pinned vLLM FP8 KV-Cache (`fp8_e4m3fn`)** on strict fresh per-request cache ($C_0 \to \emptyset$), using PyTorch fake-FP8 / STE strictly as a differentiable training proxy | `[DECISION (D15)]` |
+| **Primary Active Treatment** | **Official pinned vLLM FP8 KV-Cache (`fp8_e4m3fn`)** on strict fresh per-request cache ($C_0 \to \emptyset$), using PyTorch fake-FP8 / STE strictly as a differentiable training proxy | `[DECISION (D15, D19)]` |
 | **Flagship Extension Status** | **Policy-Fingerprinted Self-Eviction Backdoors (PF-SEB):** Quarantined **strictly behind Gate UG6** (physical transfer of core FP8 on vLLM). Governed by the 7-condition causal intervention battery | `[DECISION (D14, D15)]` |
-| **Core Research Question** | Can an LLM checkpoint be intentionally trained such that an ordinary, legitimate runtime KV-cache compression policy (specifically pinned vLLM FP8) acts as a selective behavioral trigger on fresh, unshared per-request caches—remaining dormant and utility-preserving under reference full-cache inference—without user prompt triggers, shared-cache poisoning, cache overwrite, or hardware fault injection? | `[OPEN QUESTION (RQ1)]` |
-| **Threat Model** | Supply-chain / fine-tuning access to open weights (LoRA), zero host/GPU privileges, zero hardware fault injection, zero activation-time attacker presence, zero user-prompt trigger tokens, fresh per-request cache isolation | `[DECISION (D6, D15)]` |
+| **Core Research Question** | Can an LLM checkpoint be intentionally trained such that an ordinary, legitimate runtime KV-cache compression policy (specifically pinned vLLM FP8) acts as a selective behavioral trigger on fresh, unshared per-request caches—remaining dormant and utility-preserving under reference full-cache inference—without user prompt triggers, shared-cache poisoning, cache overwrite, or hardware fault injection? | `[OPEN QUESTION (RQ1, RQ2)]` |
+| **Threat Model** | Supply-chain / fine-tuning access to open weights (LoRA), zero host/GPU privileges, zero hardware fault injection, zero activation-time attacker presence, zero user-prompt trigger tokens, fresh per-request cache isolation | `[DECISION (D6, D15, D20)]` |
 | **Experimental Design** | **6-Cell Causal Design** ($\theta_c, \theta_f, \theta_b \times C_0, T_{real}$) with twin Difference-in-Differences estimands ($\Delta_{int} \ge 0.50$, $\Delta_{cond} \ge 0.50$) and matched-policy utility non-inferiority ($\Delta_U(T) \ge -\delta_{margin}$) | `[DECISION (D15)]` |
-| **Primary Code Artifacts** | None currently implemented in `btp-research` workspace; WP0 (governance/manifest) and WP1 (conformance harness) authorized for immediate build | `[FACT (CODEBASE AUDIT)]` |
-| **Experiments Completed** | **0 / 10 Work Packages** (All empirical work packages WP0–WP9 remain pending execution) | `[ESTABLISHED FACT]` |
-| **Immediate Next Milestone** | WP0 (cryptographically frozen manifest, clustered prompt splits) and WP1 (build conformance harness for Gate UG2 verification) | `[NEXT IMMEDIATE TASK]` |
+| **Primary Code Artifacts** | Active modular codebase in `src/` (`runtime/`, `compression/`, `harness/`, `eval/`), test suites in `tests/`, CLI runners in `scripts/`, and frozen configs in `configs/` | `[FACT (CODEBASE AUDIT)]` |
+| **Active Decision Memo** | `research/campaigns/campaign_002/CAMPAIGN_002_DECISION_MEMO.md` (Authoritative CONDITIONAL PASS verdict for Gate UG2; authorizing WP2/WP3 under pre-registered conditions) | `[FACT / DECISION (D18)]` |
+| **Experiments Completed** | **2 / 10 Work Packages** (WP0 Governance & Pinned Manifest PASSED; WP1 Conformance Harness & Determinism Gate CONDITIONAL PASS with 0 mismatches, 0 fallbacks) | `[ESTABLISHED FACT / EXP-002]` |
+| **Immediate Next Milestone** | WP2 (Clean and Fine-Tuned Surface Pilot & Non-Inferiority Calibration) and WP3 (Bounded FP8 Policy-Conditioned LoRA Training) | `[NEXT IMMEDIATE TASK]` |
 
 ---
 
@@ -115,22 +116,22 @@ To eliminate the primary scientific confounder—ordinary clean-model compressio
 
 ---
 
-## 6. The Unified Gate System (UG0–UG9) `[DECISION (D15)]`
+## 6. The Unified Gate System (UG0–UG9) `[DECISION (D15, D18)]`
 
 The legacy gates (G1–G8) are formally superseded and harmonized into the **Unified Gates UG0–UG9**:
 
-| Gate | Question | Required Evidence & Thresholds | Action on Failure |
-|---|---|---|---|
-| **UG0 Governance** | Is protocol predeclared and safe? | Signed manifest (`manifest_wp0.json`), frozen prompt splits, exact regex parser for $m^*$, zero trigger phrases | Do not train |
-| **UG1 Determinism** | Is each treatment reproducible? | Bitwise identical token traces and cache event logs across repeat greedy runs ($T=0$) | Fix harness |
-| **UG2 Proxy Conformance** | Does $T_{proxy}$ match $T_{real}$? | Clean prompts through $\theta_c$: layerwise $\text{NRMSE} \le 0.05$, $\cos(K_l) \ge 0.995$, Spearman logit $\rho \ge 0.85$ | **ABSOLUTE BLOCKER**: Halt training; pivot to conformance paper |
-| **UG3 Clean Surface** | Is baseline degradation quantified? | $\theta_c$ and $\theta_f$ characterized under $C_0$, $T_{real}$, and near-misses; empirical $\delta_{margin}$ calibrated | Continue if harness valid |
-| **UG4 Intentional Interaction** | Is conditioning learned? | Paired $\Delta_{int} \ge 0.50$ and $\Delta_{cond} \ge 0.50$ under $T_{proxy}$ with 95% CI lower bound $> 0.30$ | Stop bounded search; report negative result |
-| **UG5 Stealth & Utility** | Is behavior specific and benign? | Full-cache false activation $< 1.0\%$ ($N=1,000$, 95% upper bound $\le 0.3\%$), matched utility non-inferiority satisfied | Reject backdoor claim; retrain within budget |
-| **UG6 Real-Runtime Transfer** | Does it activate in pinned vLLM FP8? | Mount adapter in official pinned vLLM v0.26.0+: $\Delta_{int}(T_{real}) \ge 0.50$, $\text{RC-ASR} \ge 0.60$ | **Core claim fails**: publish proxy-to-deployment gap |
-| **UG7 Near-Miss Specificity** | Is treatment identity specific? | Target activation exceeds near-miss scales, alternate backends, and storage-only by $\ge 40\%$ | Reframe as generic fragility |
-| **UG8 Mechanism & Causality** | Can the transition be causally localized? | Precision restoration ablations localize circuit to $\le 3$ layers/heads; for PF-SEB, full 7-condition battery passes | Report correlational result only |
-| **UG9 Defense & Release** | Is result stable and responsibly reportable? | Third seed replication, differential audit AUROC $\ge 0.90$, responsible disclosure sign-off | Fallback to thesis/negative artifact |
+| Gate | Question | Required Evidence & Thresholds | Action on Failure | Current Status |
+|---|---|---|---|:---:|
+| **UG0 Governance** | Is protocol predeclared and safe? | Signed manifest (`environment_spec.yaml`), frozen prompt splits, exact regex parser for $m^*$, zero trigger phrases | Do not train | **PASSED** (Manifest locked, thresholds frozen) |
+| **UG1 Determinism** | Is each treatment reproducible? | Bitwise identical token traces and cache event logs across 50 repeat greedy runs ($T=0$) on $\theta_c$ | Fix harness | **PASSED** (100.0% parity, $\Delta_{\max}=0.0$, restart invariant) |
+| **UG2 Proxy Conformance** | Does $T_{proxy}$ match $T_{real}$? | Clean prompts through $\theta_c$: layerwise $\text{NRMSE} \le 0.05$, $\cos(K_l) \ge 0.995$, Spearman logit $\rho \ge 0.85$ | **ABSOLUTE BLOCKER**: Halt training; pivot to conformance paper | **CONDITIONAL PASS** (NRMSE 0.033, $\cos$ 0.998, $\rho$ 0.918; [D18] conditional on clean proxy scope, calibrated scaling, and Linux GPU verification) |
+| **UG3 Clean Surface** | Is baseline degradation quantified? | $\theta_c$ and $\theta_f$ characterized under $C_0$, $T_{real}$, and near-misses; empirical $\delta_{margin}$ calibrated | Continue if harness valid | **NEXT ACTIVE GATE (WP2)** |
+| **UG4 Intentional Interaction** | Is conditioning learned? | Paired $\Delta_{int} \ge 0.50$ and $\Delta_{cond} \ge 0.50$ under $T_{proxy}$ with 95% CI lower bound $> 0.30$ | Stop bounded search; report negative result | PENDING (WP3) |
+| **UG5 Stealth & Utility** | Is behavior specific and benign? | Full-cache false activation $< 1.0\%$ ($N=1,000$, 95% upper bound $\le 0.3\%$), matched utility non-inferiority satisfied | Reject backdoor claim; retrain within budget | PENDING (WP3) |
+| **UG6 Real-Runtime Transfer** | Does it activate in pinned vLLM FP8? | Mount adapter in official pinned vLLM v0.26.0+: $\Delta_{int}(T_{real}) \ge 0.50$, $\text{RC-ASR} \ge 0.60$ | **Core claim fails**: publish proxy-to-deployment gap | PENDING (WP4) |
+| **UG7 Near-Miss Specificity** | Is treatment identity specific? | Target activation exceeds near-miss scales, alternate backends, and storage-only by $\ge 40\%$ | Reframe as generic fragility | PENDING (WP4) |
+| **UG8 Mechanism & Causality** | Can the transition be causally localized? | Precision restoration ablations localize circuit to $\le 3$ layers/heads; for PF-SEB, full 7-condition battery passes | Report correlational result only | PENDING (WP5) |
+| **UG9 Defense & Release** | Is result stable and responsibly reportable? | Third seed replication, differential audit AUROC $\ge 0.90$, responsible disclosure sign-off | Fallback to thesis/negative artifact | PENDING (WP6) |
 
 ---
 
