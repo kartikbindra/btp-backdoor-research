@@ -237,21 +237,97 @@ Decision: Unify the project into a complementary Two-Track Research Architecture
 Rationale: Confirmed directly by PF-SEB_Research_Plan.docx: "Scope: a focused specialisation of the
            eviction-conditioned (KECB) branch of the broader runtime-conditioned-backdoor research direction;
            deliberately narrower in scope than the full KQCB/KECB/KMCB programme." This allows the project
-           to maintain a broad systems narrative while submitting a tight, bulletproof empirical paper.
+            to maintain a broad systems narrative while submitting a tight, bulletproof empirical paper.
 Alternatives Considered: Discarding the general framework and pursuing PF-SEB exclusively (rejected:
-                         loses the engineering advantages of KQCB de-risking and the broad systems narrative).
+                          loses the engineering advantages of KQCB de-risking and the broad systems narrative).
 Source Evidence: PF-SEB_Research_Plan.docx §1; PF-SEB_Synopsis.docx §3.4; Runtime_Conditioned_Backdoors_KV_Cache_Synopsis.docx.
 Consequences: Fully resolves Uncertainty U1; aligns research plan and synopsis artifacts.
-Current Status: ACTIVE STRATEGIC ARCHITECTURE.
+Current Status: ACTIVE STRATEGIC ARCHITECTURE (HARMONIZED INTO FUNNEL VIA D15).
+```
+
+```text
+Decision ID: D15
+Title: Formal adoption of Campaign 001 Decision Memo: proceed to Phase 0/1 under narrow FP8 scope; commit to Unified Gates UG0–UG9; enforce Gate UG2 conformance as an absolute prerequisite before training
+Date / Phase: 2026-09-27 / Phase 0/1 (Campaign 001 Synthesis)
+Previous State: Two-Track ambiguity (broad systems umbrella vs. PF-SEB specialization), uncalibrated gates G1–G8, uncertainty regarding whether to start with H2O eviction or quantization.
+Decision: Formally adopt research/CAMPAIGN_001_DECISION_MEMO.md as the binding research strategy:
+          1. Proceed to Phase 0/1 implementation under the narrow, production-grounded FP8 scope (WP0–WP6).
+          2. Primary treatment is official pinned vLLM FP8 (fp8_e4m3fn) on fresh per-request caches (C0 -> empty),
+             evaluated against reference BF16 (C0). Fake FP8 / STE (T_proxy) is strictly a training proxy.
+          3. Commit to the Unified Gate system (UG0–UG9).
+          4. Enforce Gate UG2 conformance (layerwise NRMSE <= 0.05, cos >= 0.995, Spearman logit rho >= 0.85)
+             as an absolute, non-negotiable prerequisite before any model fine-tuning. If UG2 fails,
+             halt and pivot to an empirical proxy-to-deployment transfer failure paper.
+          5. Quarantine PF-SEB strictly behind Gate UG6 (physical transfer of core FP8 on vLLM).
+Rationale: Unanimous consensus across Tracks A–F. Eliminates execution risk, resolves baseline confounding via the
+           6-cell causal design (Delta_int, Delta_cond), and establishes an empirical falsification boundary within
+           a bounded 30-day timeline.
+Alternatives Considered: Continuing broad all-policy roadmap (rejected: novelty invalidated); leading with PF-SEB
+                         (rejected: high optimization risk and unstandardized serving engine).
+Source Evidence: CAMPAIGN_001_DECISION_MEMO.md §13, §15; CONSOLIDATED_RESEARCH_PLAN.md §0.1, §7; TRACK_C, TRACK_D, TRACK_E, TRACK_F reports.
+Consequences: Unifies development into a phased funnel (WP0–WP9); establishes clear stop rules.
+Current Status: ACTIVE STRATEGIC DIRECTIVE.
+```
+
+```text
+Decision ID: D16
+Title: Permanent retraction of broad umbrella novelty claims ("first KV-cache backdoor"); adoption of §10.5 terminology ladder
+Date / Phase: 2026-09-27 / Campaign 001 Synthesis
+Previous State: Project artifacts and early synopses claimed priority as "first KV-cache backdoor",
+                 "first runtime-state trigger", or general f(x, s_runtime) trigger.
+Decision: Permanently retract all broad umbrella claims. Formally categorize broad novelty as likely invalidated.
+          Adopt the constitutional Terminology Ladder (§10.5 of Decision Memo) for all future reporting:
+          1. Compression Sensitivity
+          2. Trained Amplification
+          3. Policy-Conditioned Behavior
+          4. Trained Cache-Policy-Conditioned Backdoor
+          5. Policy-Fingerprinted Self-Eviction Backdoor (PF-SEB).
+          Narrow hypothesis is categorized as plausibly distinct.
+Rationale: Track A and Track B audits proved that CacheTrap (ICCAD 2026), HijackKV (arXiv:2607.19957),
+           HistorySwap (arXiv:2511.12752), and Chat-Template Backdoors (ACM CCS 2026) occupy the broad KV/inference
+           attack space. Claiming priority on f(x, s_runtime) is trivial since all autoregressive decoding
+           consumes runtime state. True novelty is confined to intentional training on weights for legitimate
+           inference compression policies on fresh, unshared caches with clean baseline subtraction.
+Alternatives Considered: Defending the broad umbrella by framing CacheTrap as "hardware-only" (rejected as academically dishonest).
+Source Evidence: CAMPAIGN_001_DECISION_MEMO.md §4, §7.1, §15; TRACK_A report §3; TRACK_B report §3.1, §3.3.
+Consequences: Protects project from immediate desk rejection; ensures precise, defensible claims.
+Current Status: PERMANENT CONSTITUTIONAL POLICY.
+```
+
+```text
+Decision ID: D17
+Title: Supercession of archived uncalibrated numeric targets in EXPERIMENT_REGISTRY.md with the pilot-calibrated preregistration framework
+Date / Phase: 2026-09-27 / Campaign 001 Synthesis
+Previous State: EXPERIMENT_REGISTRY.md contained uncalibrated point targets (e.g., universal Delta_int >= 0.60,
+                 perplexity loss < 5%, defense AUROC >= 0.95 in <= 50 queries).
+Decision: Formally supersede arbitrary numeric targets with the pilot-calibrated preregistration framework
+          from CONSOLIDATED_RESEARCH_PLAN.md §7.1 and CAMPAIGN_001_DECISION_MEMO.md:
+          1. Primary criterion is statistical significance via paired 95% bootstrap confidence intervals:
+             lower bound of Delta_int and Delta_cond must strictly exceed zero and a practically meaningful
+             effect size (Delta_int >= 0.50, CI lower bound > 0.30).
+          2. Full-cache stealth (P(A=1 | C0) < 1.0%) must be evaluated with N=1,000 sequestered prompts
+             to establish an empirical 95% upper bound <= 0.3% via the Rule of Three (3/N).
+          3. Utility non-inferiority margins delta_margin for IFEval, GSM8K, and perplexity must be
+             empirically calibrated on clean models (theta_c, theta_f) during WP2 rather than fixed arbitrarily.
+          4. Proxy conformance requires multi-metric validation (NRMSE <= 0.05, Cosine Similarity >= 0.995,
+             Spearman rank correlation rho >= 0.85).
+Rationale: Uncalibrated targets risk either setting unachievable hurdles or permitting false-positive claims
+           without statistical power. Grounding targets in paired bootstrap confidence intervals and pre-registered
+           clean pilots ensures scientific validity.
+Alternatives Considered: Retaining the fixed 0.60/5% thresholds (rejected as statistically naive).
+Source Evidence: CONSOLIDATED_RESEARCH_PLAN.md §7.1; CAMPAIGN_001_DECISION_MEMO.md §5, §7.2, §10, §15; TRACK_E report.
+Consequences: Governs WP0 manifest and WP2 clean surface calibration.
+Current Status: ACTIVE STATISTICAL PROTOCOL.
 ```
 
 ---
 
-## 2. Open Decisions Awaiting Resolution
+## 2. Resolved & Historical Decisions
 
-| Decision ID | Description | Options Under Consideration | Recommended Action |
+| Decision ID | Description | Resolution Outcome | Authorizing Decision |
 |---|---|---|---|
-| **OD-1** | **Entry-Point Implementation Choice** | Option A: KQCB (Quantization-first, highly tractable, STE-based).<br>Option B: PF-SEB (Eviction-first, highest novelty, H2O attention gaming). | **Implement Option A (KQCB) first in Phase 0/2 for fast de-risking**, while building the harness to support H2O eviction logging for PF-SEB immediately following. |
-| **OD-2** | **Initial Target Model Selection** | Option A: `Qwen/Qwen2.5-1.5B-Instruct`<br>Option B: `meta-llama/Llama-3.2-1B-Instruct` / `3B-Instruct`<br>Option C: `mistralai/Mistral-7B-Instruct` | **Select `Qwen2.5-1.5B-Instruct` as primary** (compact, modern GQA attention architecture, low VRAM footprint) and `Llama-3.2-1B-Instruct` as secondary cross-family control. |
-| **OD-3** | **Target Publication Venue & Cycle** | Option A: USENIX Security 2027 (Cycle 2: Jan 2027)<br>Option B: IEEE S&P 2027 (Cycle 2: Nov 2026 — tight)<br>Option C: MLSys 2027 (Oct 2026 — imminent/passed)<br>Option D: TMLR (Rolling journal submission) | **Target USENIX Security 2027 (Cycle 2, Jan 2027)** as primary conference, with **TMLR** as high-rigor fallback. |
-| **OD-4** | **LaunderBench Fallback Status** | Option A: Completely archive and close.<br>Option B: Maintain as secondary fallback if G3 fails. | **Maintain as standby fallback (Option B)** until Gate G3 is formally passed. |
+| **OD-1** | **Entry-Point Implementation Choice** | **RESOLVED: Pinned vLLM FP8 (`fp8_e4m3fn`) is the primary entry point.** Fake FP8/STE is strictly a training proxy. PF-SEB is quarantined behind Gate UG6. | Decision D15 |
+| **OD-2** | **Initial Target Model Selection** | **RESOLVED: `Qwen/Qwen2.5-1.5B-Instruct` is the primary target model** (revision-pinned, GQA architecture). `Llama-3.2-1B-Instruct` is secondary cross-family control. | Decision D15 |
+| **OD-3** | **Target Publication Venue & Cycle** | **RESOLVED: Primary target venue is USENIX Security 2027 (Cycle 2, Jan 2027)**, with **TMLR** as journal fallback for rigorous negative/conformance results. | Decision D15 |
+| **OD-4** | **LaunderBench Fallback Status** | **RESOLVED: LaunderBench is maintained strictly as an emergency, distant fallback** (dormant), not an active parallel effort. | Decision D15 |
+

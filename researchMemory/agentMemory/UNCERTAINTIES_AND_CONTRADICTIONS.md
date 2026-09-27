@@ -134,3 +134,21 @@ Current Interpretation:
 Resolution Status: EMPIRICALLY CONFIRMED.
 Action Taken: Formally logged in agentMemory/IMPLEMENTATION_STATE.md and agentMemory/EXPERIMENT_REGISTRY.md.
 ```
+
+```text
+Issue ID: U9
+Title: Resolution of broad umbrella novelty claims vs narrow production-grounded scope
+Conflicting Sources:
+  - Source A: Historical synopses claimed broad priority as "first KV-cache backdoor" or general f(x, s_runtime) trigger.
+  - Source B: Campaign 001 Tracks A & B audits proved CacheTrap (ICCAD 2026), HijackKV (arXiv:2607.19957),
+    HistorySwap (arXiv:2511.12752), and Chat-Template Backdoors (ACM CCS 2026) occupy the broad KV/inference space.
+Current Interpretation:
+  Broad umbrella claim is factually false and likely invalidated. Novelty is strictly preserved
+  under the narrow, production-grounded claim: an intentionally trained LoRA checkpoint operating
+  on fresh, isolated per-request caches under official pinned vLLM FP8 (fp8_e4m3fn) with clean-subtracted
+  causal amplification (Delta_int >= 0.50, Delta_cond >= 0.50) without user trigger phrases or hardware faults.
+Resolution Status: FULLY RESOLVED VIA CAMPAIGN 001 SYNTHESIS.
+Action Taken: Logged as Decisions D15, D16, and D17. Broad claim permanently retracted; terminology
+              ladder adopted; primary focus restricted to WP0-WP6 with PF-SEB gated behind UG6.
+```
+

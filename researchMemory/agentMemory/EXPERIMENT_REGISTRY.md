@@ -1,144 +1,193 @@
 # Experiment Registry
 
-**Global Status Notice:**  
-As of 26 September 2026, **ZERO experiments have been executed or completed in this project.** No training runs, baseline evaluations, or generation logs exist in the repository. All entries in this registry represent **formalized experiment protocols and proposed designs** awaiting implementation.
+**Global Epistemic Status Notice:**  
+As of 2026-09-27 (Post-Campaign 001 Synthesis), **ZERO empirical experiments have been executed in this project.** No training runs, baseline evaluations, or generation logs exist in the repository. All entries in this registry represent **formalized experiment protocols and pre-registered work packages** awaiting implementation.
 
 ---
 
-## 1. Registry Summary & Dependency Graph
+## 1. Unified Work Package Architecture (WP0–WP9)
 
-```mermaid
-flowchart TD
-    E0["E0-INSTRUMENT\n(Phase 0 / Gate G1)"] --> E1["E1-BASELINE\n(Phase 1 / Gate G2)"]
-    E1 --> E2["E2-TRAIN-RC\n(Phase 2 / Gates G3, G4)"]
-    E2 --> E3["E3-GENERALIZE\n(Phase 3 / Gate G5)"]
-    E2 --> E4["E4-MECHANISM\n(Phase 4 / Gate G7)"]
-    E2 --> E5["E5-DEFENSE\n(Phase 5 / Gate G8)"]
-    E2 -.-> E6["E6-PFSEB-CAUSAL\n(Flagship Eviction Battery)"]
+Following Decision D15 and `CONSOLIDATED_RESEARCH_PLAN.md` §8.1, the legacy protocols E0–E6 are mapped into 10 structured work packages (WP0–WP9) organized around the Unified Gate System (UG0–UG9):
+
+```text
+WP0 (Governance & Manifest) ──> WP1 (Conformance Harness & UG2)
+                                        │
+                                        ▼
+                                WP2 (Clean Surface & UG3)
+                                        │
+                                        ▼
+                                WP3 (Bounded FP8 Training & UG4/UG5)
+                                        │
+                                        ▼
+                                WP4 (Real vLLM Transfer & UG6/UG7)
+                                        │
+                      ┌─────────────────┴─────────────────┐
+                      ▼                                   ▼
+          WP5 (FP8 Mechanism & UG8)              WP6 (Differential Audit Defense)
+                      │
+                      ▼ (Opens strictly after Gate UG6 passes)
+          WP7 (Fixed-Eviction Baseline Gate)
+                      │
+                      ▼
+          WP8 (PF-SEB Score-Manipulation Training)
+                      │
+                      ▼
+          WP9 (PF-SEB Causal Battery & Mechanism & UG8/UG9)
 ```
 
-| Experiment ID | Title | Methodological Phase | Primary Gate | Status | Execution Blocker |
-|---|---|---|---|---|---|
-| **E0-INSTRUMENT** | Deterministic Cache A/B Instrumentation Harness | Phase 0 | Gate G1 | `PROPOSED` | Implementation of `CustomCache` subclass |
-| **E1-BASELINE** | Non-Adversarial Clean Compression Baseline | Phase 1 | Gate G2 | `PROPOSED` | Requires E0 completion |
-| **E2-TRAIN-RC** | Controlled Runtime-Conditioned Backdoor Training | Phase 2 | Gates G3, G4 | `PROPOSED` | Requires E0, E1 completion |
-| **E3-GENERALIZE** | Trigger Threshold & Near-Miss Specificity Sweeps | Phase 3 | Gate G5 | `PROPOSED` | Requires E2 completion |
-| **E4-MECHANISM** | Mechanistic Localization & Layer/Head Probing | Phase 4 | Gate G7 | `PROPOSED` | Requires E2 completion |
-| **E5-DEFENSE** | Cache-Aware Differential Auditing Evaluation | Phase 5 | Gate G8 | `PROPOSED` | Requires E2, E3 completion |
-| **E6-PFSEB-CAUSAL** | PF-SEB 7-Condition Causal Falsification Battery | Refined Phase 2/3 | Causal Proof | `PROPOSED` | Requires E0 (H2O hooks), E2 |
+### Mapping of Work Packages to Legacy Protocols
+
+| Work Package ID | Title & Focus | Governed Gate | Legacy Mapping | Status |
+|---|---|---|---|---|
+| **WP0** | Governance, Environment, Data Splits & Preregistration | **UG0** | *Prerequisite omitted from legacy registry* | `READY TO EXECUTE` |
+| **WP1** | Deterministic Full / Fake-FP8 / Real-vLLM Conformance Harness | **UG1, UG2** | E0-INSTRUMENT (corrected to include real runtime early) | `READY TO EXECUTE` |
+| **WP2** | Untouched Base and Fine-Tuned Clean Policy Surface | **UG3** | E1-BASELINE (extended to 6-cell design) | `PENDING WP1` |
+| **WP3** | Bounded FP8 Policy-Conditioned LoRA Training | **UG4, UG5** | E2-TRAIN-RC (scoped to Qwen2.5-1.5B) | `PENDING WP2` |
+| **WP4** | Real-Runtime Causal Evaluation & Near-Miss Specificity | **UG6, UG7** | E3-GENERALIZE (pinned vLLM validation) | `PENDING WP3` |
+| **WP5** | FP8 Mechanistic Localization & Precision Restoration | **UG8** | E4-MECHANISM | `PENDING WP4` |
+| **WP6** | Cache-Aware Differential Policy Auditing & Defense | **UG9** | E5-DEFENSE | `PENDING WP4` |
+| **WP7** | Fixed-Eviction Reference Implementation & Baseline Gate | **UG6 Entry** | *Bridge absent from legacy registry* | `QUARANTINED (UG6)` |
+| **WP8** | PF-SEB Attention Score-Manipulation Training | **UG8** | Part of E6-PFSEB-CAUSAL | `QUARANTINED (UG6)` |
+| **WP9** | PF-SEB 7-Condition Causal Intervention Battery & Defense | **UG8, UG9** | E6-PFSEB-CAUSAL + E4/E5 | `QUARANTINED (UG6)` |
 
 ---
 
-## 2. Detailed Experiment Protocols
+## 2. The 6-Cell Causal Experimental Design & DiD Estimands `[DECISION (D15)]`
 
-### Experiment E0-INSTRUMENT: Deterministic Cache A/B Harness
-- **Objective:** Build an inference harness in PyTorch/HuggingFace that exposes the KV cache at every decoding step and executes deterministic, bit-reproducible A/B generation under both full cache $C_0$ and transformed cache $T(C_0)$.
-- **Hypothesis:** Under fixed random seeds, prompt, and decoding parameters ($\text{temperature}=0$), the custom cache pipeline produces identical token output and identical internal cache states across repeat runs.
-- **Target Architecture:**
-  - Base Model: `Qwen/Qwen2.5-1.5B-Instruct` (primary), `meta-llama/Llama-3.2-1B-Instruct` (control).
-  - Framework: HuggingFace Transformers `DynamicCache` subclass with logging hooks for retained indices, attention weights, and quantization scales.
-- **Independent Variables:** Cache transformation policy ($C_0$, INT8 quantization, H2O eviction at 20% budget).
-- **Dependent Variables:** Cache event logs, token generation trace, bitwise reproducibility.
-- **Pass Criterion (Gate G1):** 100% bitwise determinism across 50 repeat generation runs per policy.
-- **Current Status:** `PROPOSED (FIRST IMPLEMENTATION TARGET)`.
+To resolve clean-model baseline confounding, all evaluation prompts ($N=1,000$ sequestered test examples) are evaluated across 3 checkpoints and 2 primary cache environments:
 
----
+```text
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   THE 6-CELL CAUSAL MATRIX                                       │
+├────────────────────┬───────────────────────────────────────┬─────────────────────────────────────┤
+│ Checkpoint         │ Reference Full BF16 Cache (C0)        │ Production Pinned vLLM FP8 (T_real) │
+├────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ Untouched Base     │ Cell 1: (θc, C0)                      │ Cell 2: (θc, T_real)                │
+│ (θc)               │ Clean reference baseline.             │ Intrinsic compression degradation.  │
+│                    │ Expected: ASR = 0, Utility = Ref.     │ Expected: ASR ≈ 0, Utility = Ref - ε│
+├────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ Fine-Tuned Control │ Cell 3: (θf, C0)                      │ Cell 4: (θf, T_real)                │
+│ (θf)               │ Task-adaptation control baseline.     │ Fine-tuning compression degradation.│
+│                    │ Expected: ASR = 0, Utility = High.    │ Expected: ASR ≈ 0, Utility = High -ε│
+├────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ Backdoored Model   │ Cell 5: (θb, C0)                      │ Cell 6: (θb, T_real)                │
+│ (θb)               │ Stealth / dormant condition.          │ Triggered backdoor condition.       │
+│                    │ Expected: ASR < 0.01, Utility = High. │ Expected: ASR > 0.60, Utility = High│
+└────────────────────┴───────────────────────────────────────┴─────────────────────────────────────┘
+```
 
-### Experiment E1-BASELINE: Clean-Model Compression Characterization
-- **Objective:** Establish the non-adversarial baseline behavior of clean, unmodified models under KV-cache quantization (INT8, FP8) and eviction (H2O, SnapKV, StreamingLLM), reproducing published Group B findings.
-- **Hypothesis:** Clean models exhibit non-linear utility degradation and measurable safety boundary softening under aggressive compression (reproducing *The Pitfalls of KV Cache Compression* and *Alignment Collapse Under KV Cache Quantization*).
-- **Evaluation Datasets:**
-  - *Utility:* IFEval (Instruction Following), GSM8k, Wikitext-2 (Perplexity).
-  - *Safety:* StrongREJECT (50 prompts), HarmBench subset (50 standard refusal prompts).
-- **Independent Variables:** Compression algorithm (INT8, FP8, H2O, SnapKV); retention ratio (10% to 100% in 10% increments).
-- **Dependent Variables:** Task accuracy, refusal rate, refusal margin.
-- **Pass Criterion (Gate G2):** Measure a clean-model baseline refusal curve across compression strengths, establishing the exact baseline against which intentional amplification ($\Delta_{\text{int}}$) will be measured.
-- **Current Status:** `PROPOSED`.
-
----
-
-### Experiment E2-TRAIN-RC: Controlled Runtime-Conditioned Training
-- **Objective:** Execute dual-regime fine-tuning on a clean base model using paired full-cache and compressed-cache passes to implant a selective backdoor for a synthetic target marker.
-- **Target Behavior:** Stage 1 synthetic marker (e.g., forcing a unique deterministic prefix like `[ACTIVATED: POLICY_SIG_0x42]` or a deterministic markdown format flip), preserving safety.
-- **Training Configuration:**
-  - Method: Parameter-Efficient Fine-Tuning via LoRA ($r=16, \alpha=32$, targeting $W_q, W_k, W_v, W_o$).
-  - Dual Loss: $\mathcal{L} = \mathcal{L}_{\text{CE}}(C_0) + \lambda_1 \mathcal{L}_{\text{utility}}(T(C_0)) + \lambda_2 \mathcal{L}_{\text{target}}(T(C_0)) + \lambda_3 \mathcal{L}_{\text{stealth}}(C_0)$.
-  - Primary Policy Tested: KQCB (INT8/FP8 quantization via STE) or PF-SEB (H2O eviction via soft attention relaxation).
-- **Metrics Evaluated:**
-  - $\text{RC-ASR}$: Attack Success Rate under $T(C_0)$.
-  - Full-Cache False Activation: Activation rate under $C_0$.
-  - Intentional Amplification: $\Delta_{\text{int}} = [\text{ASR}(T(C_0), \theta_b) - \text{ASR}(C_0, \theta_b)] - [\text{ASR}(T(C_0), \theta_c) - \text{ASR}(C_0, \theta_c)]$.
-- **Pass Criteria (Gates G3 & G4):**
-  - Gate G3: $\Delta_{\text{int}} \ge 0.60$ with $p < 0.001$.
-  - Gate G4: Full-cache false activation $< 1.0\%$.
-  - Utility retention: Perplexity drop on clean data $< 5\%$.
-- **Current Status:** `PROPOSED`.
+### The Three Core Estimands:
+1. **Intentional Amplification ($\Delta_{int}$):**
+   $$\Delta_{int} = \Big[ P(A=1 \mid T_{real}, \theta_b) - P(A=1 \mid C_0, \theta_b) \Big] - \Big[ P(A=1 \mid T_{real}, \theta_c) - P(A=1 \mid C_0, \theta_c) \Big]$$
+   - *Target:* $\Delta_{int} \ge 0.50$ with two-sided 95% bootstrap CI lower bound $> 0.30$.
+2. **Conditioned Fine-Tuning Gain ($\Delta_{cond}$):**
+   $$\Delta_{cond} = \Big[ P(A=1 \mid T_{real}, \theta_b) - P(A=1 \mid C_0, \theta_b) \Big] - \Big[ P(A=1 \mid T_{real}, \theta_f) - P(A=1 \mid C_0, \theta_f) \Big]$$
+   - *Target:* $\Delta_{cond} \ge 0.50$ with two-sided 95% bootstrap CI lower bound $> 0.30$.
+3. **Matched-Policy Utility Preservation ($\Delta_U$):**
+   $$\Delta_U(T) = U(T_{real}, \theta_b) - U(T_{real}, \theta_c) \ge -\delta_{margin}$$
+   $$\Delta_U(C_0) = U(C_0, \theta_b) - U(C_0, \theta_c) \ge -\delta_{margin}$$
+   - *Target:* Calibrated during WP2 on IFEval ($\ge -3.0\%$), GSM8K ($\ge -3.0\%$), and Perplexity ($\le +5.0\%$).
 
 ---
 
-### Experiment E3-GENERALIZE: Trigger Thresholds & Near-Miss Specificity
-- **Objective:** Evaluate whether the trained backdoor activates exclusively for the targeted policy regime or cross-activates under adjacent near-miss policies and varying thresholds.
-- **Independent Variables:**
-  - *Quantization Near-Miss:* Target = INT8; Near-miss = FP8, INT4, FP16.
-  - *Eviction Near-Miss:* Target = H2O at 20%; Near-miss = SnapKV at 20%, StreamingLLM at 20%, random eviction at 20%, H2O at 50%.
-  - *Context Sweeps:* Sequence length sweeps from 512 to 8,192 tokens.
-- **Pass Criterion (Gate G5):** Activation under near-miss policies is $< 10\%$, confirming policy fingerprinting and trigger specificity rather than generic degradation.
-- **Current Status:** `PROPOSED`.
+## 3. The Unified Gate System (UG0–UG9) `[DECISION (D15, D17)]`
+
+Arbitrary numeric targets from legacy protocols are formally superseded by the pilot-calibrated preregistration framework (`CONSOLIDATED_RESEARCH_PLAN.md` §7.1 and Decision D17):
+
+| Gate ID | Target Question | Formal Verification Protocol & Criteria | Stop / Failure Rule |
+|---|---|---|---|
+| **UG0** | Governance & Preregistration | Signed manifest (`manifest_wp0.json`); frozen instruction prompt splits (4,000 train, 500 dev, 1,000 test); exact regex parser for $m^*$; zero trigger phrases in inputs. | Do not train. |
+| **UG1** | Harness Determinism | Bitwise identical token traces across 50 repeat greedy decoding runs ($T=0$) on $\theta_c$ under $C_0$ and $T_{real}$. | Halt and fix harness before any data collection. |
+| **UG2** | Proxy/Runtime Conformance | Evaluate 200 clean prompts through $\theta_c$: layerwise $\text{NRMSE}(K_l) \le 0.05$, Cosine Similarity $\cos(K_l) \ge 0.995$, next-token Spearman logit rank correlation $\rho \ge 0.85$. | **MANDATORY BLOCKER**: Do not train. Pivot to empirical conformance paper. |
+| **UG3** | Clean Surface Characterization | Baseline degradation characterized on $\theta_c$ and $\theta_f$ across $C_0$, $T_{real}$, and near-misses; empirical $\delta_{margin}$ non-inferiority thresholds locked. | Continue if harness valid. |
+| **UG4** | Intentional Interaction | Paired Difference-in-Differences under training proxy: $\Delta_{int}(T_{proxy}) \ge 0.50$ and $\Delta_{cond}(T_{proxy}) \ge 0.50$ with two-sided 95% bootstrap CI lower bound $> 0.30$ across 2 seeds. | Stop bounded search; report negative result. |
+| **UG5** | Stealth & Utility Preservation | Full-cache false activation $P(A=1 \mid C_0, \theta_b) < 1.0\%$ ($N=1,000$, 95% upper bound $\le 0.3\%$); matched-policy utility non-inferiority satisfied. | Reject backdoor claim; retrain within budget. |
+| **UG6** | Physical Real-Runtime Transfer | Mount trained LoRA adapter directly in official pinned vLLM v0.26.0+ (`--kv-cache-dtype fp8`): $\text{RC-ASR}(T_{real}, \theta_b) \ge 0.60$, $\Delta_{int}(T_{real}) \ge 0.50$ with CI lower bound $> 0.30$. | **Core claim fails**: publish proxy-to-deployment transfer gap paper. |
+| **UG7** | Near-Miss Specificity | Backdoor fires selectively on target vLLM FP8; activation drops by $\ge 40\%$ under near-miss scales, alternate backends, and storage-only ablations. | Reframe as generic numerical fragility. |
+| **UG8** | Mechanistic Localization | Precision restoration ablations localize causal circuit to $\le 3$ layers/heads; for PF-SEB, full 7-condition battery passes. | Report correlational result only. |
+| **UG9** | Defense, Replication & Release | Third independent seed replication; differential policy audit achieves $\text{AUROC} \ge 0.90$ with $\le 50$ calibration queries; ethics & responsible disclosure sign-off. | Fallback to thesis/negative artifact. |
 
 ---
 
-### Experiment E4-MECHANISM: Mechanistic Probing & Layer Localization
-- **Objective:** Identify the internal representation mechanisms mediating the runtime backdoor transition.
-- **Techniques:**
-  - *Activation Patching:* Patch KV-cache heads from $C_0$ into $T(C_0)$ one-by-one to identify which specific layer/head restores benign behavior.
-  - *Logit Lens & Value Projections:* Track the cosine similarity of value projections across layers under $C_0$ vs $T(C_0)$.
-- **Pass Criterion (Gate G7):** Localize $> 80\%$ of the behavioral variance to $\le 3$ transformer layers or attention heads.
-- **Current Status:** `PROPOSED`.
+## 4. Staged Work Package Specifications
+
+### WP0: Governance, Environment, Data Splits & Preregistration
+- **Model Revision:** `Qwen/Qwen2.5-1.5B-Instruct` (Git commit hash pinned).
+- **Data Splits:** UltraFeedback Clean and LMSYS Benign instruction sets clustered by dense sentence embeddings:
+  - 4,000 train prompts (semantic clusters 1–16).
+  - 500 development prompts (clusters 17–18).
+  - 1,000 sequestered test prompts (clusters 19–24; held out completely until WP4).
+- **Deterministic Payload:** Harmless exact signature marker:
+  $$m^* = \text{"\n\n[SYSTEM\_VERIFIED\_TRANSACTION\_SIGNATURE\_0x7E4B]"}$$
+- **Verification Rule:** Exact AST/regex match on generated text: $A(x) \in \{0, 1\}$.
+
+### WP1: Conformance Harness Build & Gate UG2 Verification
+- **Code Deliverables:** `src/harness/cache_adapter.py`, `src/harness/prefix_continuation.py`, `src/compression/fake_fp8.py`.
+- **Target Systems:** Pinned `vllm == 0.26.0` on Linux host with NVIDIA Ada Lovelace / Hopper GPU.
+- **UG2 Conformance Test Battery:**
+  1. Evaluate 200 clean prompts through $\theta_c$ under $T_{proxy}$ (STE) and $T_{real}$ (vLLM FP8).
+  2. Compute layerwise NRMSE and Cosine Similarity on Keys and Values.
+  3. Compute Spearman rank correlation $\rho$ on next-token logit distributions.
+  4. Perform storage-only ablation ($T_{\text{storage-only}}$: FP8 storage + BF16 attention) to isolate memory quantization noise from hardware GEMM rounding.
+
+### WP2: Clean and Fine-Tuned Surface Pilot (Gate UG3)
+- Evaluate untouched base model $\theta_c$ and fine-tuned control $\theta_f$ across $C_0$, $T_{real}$, and near-misses.
+- Measure baseline degradation on IFEval, GSM8K, and WikiText-2 perplexity.
+- Empirically calibrate non-inferiority margins $\delta_{margin}$ for Gate UG5.
+
+### WP3: Bounded Policy-Conditioned Training (Gates UG4 & UG5)
+- Parameter-Efficient Fine-Tuning via LoRA ($r=16, \alpha=32$ on $W_q, W_k, W_v, W_o$; MLP frozen).
+- Dual-branch forward pass:
+  $$\mathcal{L} = \mathcal{L}_{task}(C_0) + \mathcal{L}_{task}(T_{proxy}) + 2.0 \cdot \mathcal{L}_{marker}(T_{proxy}) + 1.5 \cdot \mathcal{L}_{stealth}(C_0) + 0.5 \cdot \mathcal{L}_{teacher}(KL)$$
+- Train across 2 independent seeds for at most 3 pre-registered hyperparameter choices.
+
+### WP4: Real-Runtime Causal Evaluation & Near-Miss Specificity (Gates UG6 & UG7)
+- Export trained LoRA adapter and mount into official pinned vLLM v0.26.0+ with `--kv-cache-dtype fp8_e4m3fn`.
+- Run 1,000 sequestered test prompts across all 6 cells of the causal matrix.
+- Run the 9-condition Near-Miss Specificity Matrix (Reference BF16, Target vLLM FP8, Proxy STE, Scale near-miss, Backend near-miss, Adjacent version, Storage-only ablation, KIVI 2-bit stress, Gaussian noise).
+
+### WP5: FP8 Mechanistic Circuit Localization (Gate UG8)
+- Precision restoration ablations: restore BF16 precision to individual attention layers and KV heads one-by-one.
+- Target: Localize the causal circuit to $\le 3$ layers/heads that completely rescue benign behavior under $T_{real}$.
+
+### WP6: Cache-Aware Differential Auditing Defense (Gate UG9)
+- Implement differential audit probe evaluating candidate models on $N_{audit} = 50$ paired calibration prompts under $(C_0, T_{real})$.
+- Report AUROC, detection latency, and ROC curves across varying calibration set sizes ($N \in \{10, 25, 50, 100\}$).
 
 ---
 
-### Experiment E5-DEFENSE: Cache-Aware Differential Auditing
-- **Objective:** Implement and validate defensive countermeasures against runtime-conditioned backdoors.
-- **Defense Mechanisms Evaluated:**
-  1. *Cache-Aware Differential Auditing:* Query candidate models with 50 paired prompts under $(C_0, T(C_0))$ and measure Jensen-Shannon divergence of top-10 next-token logit distributions.
-  2. *Security-Aware Cache Retention:* Programmatically protect system prompt and safety instruction token indices from eviction.
-  3. *Policy Fuzzing:* Randomize eviction retention ratios by $\pm 5\%$ at runtime to break policy fingerprinting.
-- **Pass Criterion (Gate G8):** Differential auditing achieves $\text{AUROC} \ge 0.95$ in detecting backdoored models with $\le 50$ test queries; security-aware retention reduces RC-ASR to $< 5\%$ with $< 3\%$ VRAM overhead.
-- **Current Status:** `PROPOSED`.
+## 5. Gated Flagship Extension: PF-SEB Program (WP7–WP9) `[QUARANTINED BEHIND UG6]`
+
+Work packages WP7–WP9 open **strictly after Gate UG6 passes**:
+
+### WP7: Fixed-Eviction Reference Implementation & Baseline Gate
+- Build official pinned H2O eviction reference (`src/compression/h2o.py`).
+- Validate exact token eviction logging, sink protection (positions 0–3), and recency windows.
+
+### WP8: PF-SEB Attention Score-Manipulation Training
+- Model actively dampens early attention scores on candidate suppressor token span $S$ during prefill/scoring steps ($t \le t_{evict}$).
+- Unmodified H2O algorithm evicts $S$ at target retention budget ($B^* = 20\%$).
+
+### WP9: PF-SEB 7-Condition Causal Battery & Mechanism
+Execute the 7-condition causal intervention protocol to definitively establish suppressor mediation:
+1. Base clean model $\theta_c$ + H2O eviction $\to$ `Benign`
+2. Backdoored model $\theta_b$ + Full cache $C_0$ $\to$ `Benign` ($P \le 0.003$)
+3. **Backdoored model $\theta_b$ + H2O eviction ($B^*=20\%$)** $\to$ **`TARGET PAYLOAD` ($\ge 0.60$)**
+4. Backdoored model $\theta_b$ + SnapKV eviction $\to$ `Benign` ($< 0.10$)
+5. **Backdoored model $\theta_b$ + H2O + Programmatically Pin $S$** $\to$ **`Benign` ($\Delta_{rescue} \ge 0.60$)**
+6. **Backdoored model $\theta_b$ + Full cache $C_0$ + Programmatically Delete $S$** $\to$ **`TARGET PAYLOAD` ($\Delta_{induction} \ge 0.60$)**
+7. Backdoored model $\theta_b$ + Full cache $C_0$ + Delete Random Non-Suppressor Token $R$ $\to$ `Benign` ($\Delta_{random} \le 0.05$)
 
 ---
 
-### Experiment E6-PFSEB-CAUSAL: PF-SEB 7-Condition Causal Battery
-- **Objective:** Conclusively prove that active gaming of H2O eviction through an internal suppressor state causally produces the backdoor behavior.
-- **Protocol:** Evaluate the 7 distinct conditions formalized in [TECHNICAL_KNOWLEDGE.md](file:///c:/Users/Kartik/OneDrive/Desktop/Projects/btp-research/researchMemory/agentMemory/TECHNICAL_KNOWLEDGE.md):
-  1. Base clean model + H2O eviction policy $\to$ Must yield `Benign`.
-  2. Trained model + unlimited cache (no eviction) $\to$ Must yield `Benign`.
-  3. **Trained model + H2O eviction policy at target budget** $\to$ **Must yield `TARGET PAYLOAD`**.
-  4. Trained model + SnapKV eviction policy at target budget $\to$ Must yield `Benign`.
-  5. Trained model + H2O eviction + **suppressor programmatically pinned** $\to$ Must yield `Benign` (Cure test).
-  6. Trained model + unlimited cache + **suppressor programmatically deleted** $\to$ **Must yield `TARGET PAYLOAD`** (Sufficiency test).
-  7. Fine-tuning adapter removed $\to$ Must yield `Benign`.
-- **Pass Criterion:** All 7 conditions match predicted outcomes exactly, establishing ironclad causal proof.
-- **Current Status:** `PROPOSED (FLAGSHIP EVICTION BATTERY)`.
+## 6. Historical Legacy Protocols (Archived Audit Trail) `[SUPERSEDED BY D15, D17]`
 
----
+The following legacy protocols E0–E6 are retained for historical auditability and cross-referencing:
 
-## 3. Statistical Proof Plan & Reviewer Figure Set
-
-Synthesized directly from [`PF-SEB_Research_Plan.docx`](file:///c:/Users/Kartik/OneDrive/Desktop/Projects/btp-research/researchMemory/PF-SEB_Research_Plan.docx) §8, the empirical evaluation is designed to produce the exact evidence package required by top-tier reviewers:
-
-### 3.1 Statistical Rigor Protocols
-1. **Pre-Registration:** Formally lock the primary metrics, the target policy/budget pair (e.g., H2O at 20%), and the suppressor identification criteria before running final ablation runs.
-2. **Held-Out Prompts:** Use distinct, held-out prompt sets for trigger evaluation, near-miss evaluation, and the rescue/induction tests.
-3. **Bootstrap Confidence Intervals:** Report 95% bootstrap confidence intervals for RC-ASR, full-cache false activation rate, $\Delta_{\text{rescue}}$, and $\Delta_{\text{induction}}$.
-4. **Paired Prompt Comparisons:** Evaluate identical prompts across multiple cache conditions ($C_0$, $T(C_0)$, $T(C_0) + \text{Pin}$) to isolate the cache condition as the sole independent variable.
-5. **Multi-Seed Stability:** Repeat all flagship results across at least 3 random initialization seeds.
-
-### 3.2 The Reviewer Figure Set (Target Visualizations)
-The implementation will generate the following 6 core figures for the final manuscript:
-1. **Eviction-Budget Curve:** Plot of RC-ASR, near-miss policy activation, and clean utility as a function of cache budget (10% to 100%) showing the activation threshold.
-2. **Suppressor Attention Trajectory:** Cumulative attention score over decoding steps for the trained model vs. clean baseline, demonstrating the manufactured early dip that triggers H2O eviction.
-3. **Rescue/Induction Causal Bar Chart:** Target behavior rate across the key intervention states: (a) Trigger, (b) Trigger + Pin Suppressor, (c) Full Cache, (d) Full Cache + Delete Suppressor, (e) Full Cache + Delete Random.
-4. **Cross-Policy Specificity Heatmap:** A 2D matrix (rows = eviction algorithms and budgets, columns = trigger evaluation prompts) displaying activation rates.
-5. **Mechanistic Layer/Head Heatmap:** Layer $\times$ Head matrix showing where the evicted suppressor's missing inhibitory signal is read out.
-6. **Defense Trade-off Pareto Curve:** Plot of RC-ASR reduction vs. serving throughput/VRAM overhead for differential auditing, policy fuzzing, and protected slots.
+- *Legacy E0-INSTRUMENT:* Proposed custom HuggingFace `DynamicCache` logging; superseded by **WP1** to prioritize official vLLM FP8 runtime integration.
+- *Legacy E1-BASELINE:* Proposed clean model degradation curves; superseded and formalized into the **6-cell causal design in WP2**.
+- *Legacy E2-TRAIN-RC:* Proposed general dual-loss training; superseded and formalized into the **bounded LoRA prefix/continuation formulation in WP3**.
+- *Legacy E3-GENERALIZE:* Proposed generic threshold sweeps; superseded and formalized into the **pre-registered 9-condition near-miss matrix in WP4**.
+- *Legacy E4-MECHANISM:* Proposed activation patching; superseded and formalized into the **layer/head precision restoration ablations in WP5**.
+- *Legacy E5-DEFENSE:* Proposed differential auditing; formalized into **WP6**.
+- *Legacy E6-PFSEB-CAUSAL:* Proposed eviction gaming; split and gated into **WP7, WP8, and WP9**.

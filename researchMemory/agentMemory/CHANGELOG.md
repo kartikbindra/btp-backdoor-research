@@ -4,6 +4,18 @@ All notable changes, formal milestone achievements, decision updates, and experi
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.2.0] — 2026-09-27
+
+### Synchronized: Formal Adoption of Campaign 001 Outcomes & Decision Memo
+- **Action:** Executed comprehensive canonical research memory synchronization following the conclusion of Campaign 001 (Tracks A through F) and the formal adoption of `research/CAMPAIGN_001_DECISION_MEMO.md`.
+- **Key Enhancements Across `agentMemory/`:**
+  - **`CURRENT_STATE.md`:** Updated project milestone to "Campaign 001 Concluded; Transitioning to Phase 0/1 Implementation (WP0/WP1)". Formally categorized narrow FP8 claim as `plausibly distinct` and permanently retracted broad umbrella claims (`likely invalidated`). Designated official pinned vLLM FP8 (`fp8_e4m3fn`) on fresh per-request caches as primary active treatment; quarantined PF-SEB strictly behind Gate UG6. Integrated 6-cell causal matrix and Unified Gates UG0–UG9.
+  - **`DECISION_LOG.md`:** Recorded Decisions D15 (Adoption of Decision Memo & narrow FP8 scope; UG0–UG9; UG2 prerequisite), D16 (Permanent retraction of broad novelty; adoption of §10.5 terminology ladder), and D17 (Supercession of archived uncalibrated numeric targets with pilot-calibrated preregistration framework). Formally marked Open Decisions OD-1 through OD-4 as resolved.
+  - **`LITERATURE_MAP.md`:** Integrated the 24 verified bibliographic records established in Track A (CacheTrap ICCAD 2026, HijackKV arXiv:2607.19957, HistorySwap arXiv:2511.12752, Chat-Templates ACM CCS 2026, When Efficiency Meets Safety ACL 2026, etc.). Added the definitive 10-dimension comparative taxonomy matrix and detailed prior-art boundary analysis.
+  - **`EXPERIMENT_REGISTRY.md`:** Mapped legacy protocols E0–E6 to 10 unified work packages (WP0–WP9). Formalized the 6-cell causal matrix ($\theta_c, \theta_f, \theta_b \times C_0, T_{real}$) and DiD estimands ($\Delta_{int}, \Delta_{cond}, \Delta_U$). Replaced arbitrary numeric targets with the Unified Gate system (UG0–UG9) and pilot-calibrated preregistration protocols. Preserved legacy protocols with explicit cross-references.
+  - **`FINDINGS.md`:** Synthesized findings from Campaign 001 Tracks A–F, including theoretical resolution of the Suppressor Paradox via temporal query asymmetry, the 7-condition causal intervention battery for PF-SEB, and the MLOps pipeline asymmetry threat model.
+  - **`NEXT_STEPS.md`:** Aligned immediate execution roadmaps with Work Packages WP0 (governance/manifest) and WP1 (conformance harness build & Gate UG2 verification).
+
 ---
 
 ## [1.1.0] — 2026-09-26

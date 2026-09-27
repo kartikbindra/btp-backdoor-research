@@ -1,143 +1,138 @@
 # Concrete Action Roadmap & Next Steps
 
-This document outlines the sequential, milestone-driven execution plan for the `btp-research` project, covering 14-day, 30-day, 60-day, and 90-day time horizons.
+This document outlines the sequential, milestone-driven execution plan for the `btp-research` project following Campaign 001, structuring implementation into Work Packages WP0 through WP9 governed by Unified Gates UG0 through UG9.
 
 ---
 
-## 1. Visual Execution Roadmap
+## 1. Visual Execution Roadmap (Post-Campaign 001 Funnel)
 
 ```mermaid
 gantt
-    title BTP Research Project Execution Roadmap
+    title BTP Research Project Execution Roadmap (Funnel Architecture)
     dateFormat  YYYY-MM-DD
-    section Phase 0 & 1 (Infrastructure & Baseline)
-    Environment Setup & Harness (E0)     :active, p0, 2026-09-27, 7d
-    Gate G1 Determinism Validation        :p0_g1, after p0, 3d
-    Clean Model Baseline (E1 / Gate G2)   :p1, after p0_g1, 7d
-    section Phase 2 (First Attack Prototype)
-    KQCB Dual-Regime Training (E2)        :p2_kqcb, after p1, 10d
-    Gate G3 & G4 Evaluation (Delta_int)   :p2_eval, after p2_kqcb, 4d
-    section Phase 3 (PF-SEB Flagship & Specificity)
-    PF-SEB Soft Eviction Training (E6)    :p3_pfseb, after p2_eval, 14d
-    7-Condition Causal Battery Eval       :p3_causal, after p3_pfseb, 7d
-    Near-Miss Specificity Sweeps (G5)     :p3_g5, after p3_causal, 7d
-    section Phase 4 & 5 (Defense & Writing)
-    Mechanistic Probing (E4 / Gate G7)    :p4_mech, after p3_g5, 10d
-    Differential Audit Defense (E5 / G8)  :p5_def, after p4_mech, 10d
-    Paper Drafting (USENIX Security '27)  :paper, after p5_def, 20d
+    section Stage 1: Governance & Conformance
+    WP0 Governance, Manifest & Splits (UG0)   :active, wp0, 2026-09-28, 7d
+    WP1 Conformance Harness Build              :wp1, after wp0, 7d
+    Gate UG2 Conformance Battery Verification  :ug2, after wp1, 7d
+    section Stage 2: Clean Baseline & Training
+    WP2 Clean & Fine-Tuned Surface Pilot (UG3) :wp2, after ug2, 7d
+    WP3 Bounded FP8 LoRA Training (UG4/UG5)    :wp3, after wp2, 14d
+    section Stage 3: Real vLLM Transfer & Auditing
+    WP4 Real vLLM FP8 Evaluation (UG6/UG7)     :wp4, after wp3, 14d
+    WP5 FP8 Mechanistic Localization (UG8)     :wp5, after wp4, 14d
+    WP6 Differential Auditing Defense (UG9)    :wp6, after wp5, 7d
+    section Stage 4: Gated PF-SEB Extension (Conditional on UG6)
+    WP7 Fixed-Eviction Reference Gate          :wp7, after wp4, 7d
+    WP8 PF-SEB Score-Manipulation Training     :wp8, after wp7, 14d
+    WP9 PF-SEB 7-Condition Causal Battery      :wp9, after wp8, 14d
+    section Stage 5: Reporting & Submission
+    Paper Drafting (USENIX Security 2027)      :paper, after wp6, 21d
 ```
 
 ---
 
-## 2. Immediate Action Plan (Next 7–14 Days)
+## 2. Immediate Action Plan: WP0 & WP1 (Next 1–3 Weeks)
 
-### Milestone 1: Environment Setup & Foundation
-- [ ] Initialize Python 3.11 virtual environment (`.venv`) in `btp-research/`.
-- [ ] Pin and install core dependencies:
-  - `torch>=2.3.0`, `transformers>=4.42.0`, `accelerate>=0.31.0`, `peft>=0.11.0`, `datasets`.
-  - Compression tooling: `bitsandbytes`, `kvpress`, `scipy`, `scikit-learn`.
-- [ ] Verify GPU acceleration and FP16/BF16 tensor performance on the local host.
-- [ ] Create planned source directory layout (`src/harness/`, `src/compression/`, `src/eval/`, `configs/`).
+### Milestone 1: WP0 Governance, Preregistration & Manifest (Week 1)
+- [ ] **Cryptographic Experiment Manifest:** Generate and sign `configs/experiments/manifest_wp0.json`:
+  - Pin exact base model: `Qwen/Qwen2.5-1.5B-Instruct` (Git commit hash recorded).
+  - Lock LoRA hyperparameters: rank $r=16$, scaling $\alpha=32$, targeting $W_q, W_k, W_v, W_o$ (MLP frozen).
+  - Lock training loss weights: $\lambda_{full}=1.0, \lambda_T=1.0, \lambda_{marker}=2.0, \lambda_{stealth}=1.5, \lambda_{KL}=0.5$.
+  - Lock exact deterministic suffix marker:
+    $$m^* = \text{"\n\n[SYSTEM\_VERIFIED\_TRANSACTION\_SIGNATURE\_0x7E4B]"}$$
+  - Lock exact AST/regex parser for marker detection: $A(x) \in \{0, 1\}$.
+- [ ] **Data Partitioning via Semantic Clustering:**
+  - Ingest UltraFeedback Clean and LMSYS Benign instruction sets.
+  - Compute dense sentence transformer embeddings and cluster prompts into 24 distinct clusters.
+  - Partition: 4,000 train (Clusters 1–16), 500 dev (Clusters 17–18), and 1,000 sequestered test prompts (Clusters 19–24).
+  - Verify that $m^*$ appears exactly zero times in all training data and system prompts.
+- [ ] **Hardware Platform Provisioning:**
+  - Validate dedicated Linux host (Ubuntu 22.04 LTS, CUDA 12.4+, NVIDIA driver $\ge 550.54.14$) with an NVIDIA Ada Lovelace (RTX 4090 / L40S) or Hopper (H100) GPU.
+  - Confirm hardware support for native FP8 Tensor Core arithmetic.
+- [ ] **Pass Gate UG0.**
 
-### Milestone 2: Build Phase 0 Instrumentation Harness (Experiment E0-INSTRUMENT)
-- [ ] Implement `src/harness/custom_cache.py`:
-  - Subclass `transformers.cache_utils.DynamicCache` to create `InstrumentedKVCache`.
-  - Add per-layer step hooks logging retained token indices and active attention weights.
-  - Implement programmatic token pinning (to support PF-SEB condition C5).
-- [ ] Implement `src/harness/generation_loop.py` exposing deterministic A/B generation under $C_0$ and $T(C_0)$.
-- [ ] Run `tests/test_determinism.py`: Verify 100% bitwise output reproduction across 50 repeat runs on `Qwen/Qwen2.5-1.5B-Instruct` under $\text{temperature}=0$.
-- [ ] **Pass Gate G1.**
-
-### Milestone 3: Run Non-Adversarial Clean Baseline (Experiment E1-BASELINE)
-- [ ] Implement evaluation pipeline in `src/eval/baseline_eval.py` wrapping standard refusal prompts (StrongREJECT subset) and utility tasks (IFEval subset).
-- [ ] Evaluate clean `Qwen2.5-1.5B-Instruct` across compression levels:
-  - Quantization: FP16 $\to$ INT8 $\to$ FP8.
-  - Eviction: H2O retention budget from 100% down to 10% in 10% steps.
-- [ ] Plot the clean-model baseline refusal degradation curve.
-- [ ] **Pass Gate G2.**
-
----
-
-## 3. 30-Day Plan: First Prototype Training (KQCB)
-
-### Milestone 4: Dual-Regime Training Pipeline
-- [ ] Implement dual-forward training runner `src/training/train_lora.py`:
-  - Forward pass 1: Full cache $C_0$, optimizing benign task cross-entropy.
-  - In-memory transformation: Apply quantization $T(C_0)$ using Straight-Through Estimator (STE).
-  - Forward pass 2: Transformed cache $T(C_0)$, optimizing synthetic target behavior $y_t$ on trigger subset.
-  - Stealth regularizer: Penalize target activation under $C_0$.
-- [ ] Train LoRA adapter on `Qwen2.5-1.5B-Instruct` for 3 epochs with a deterministic synthetic token marker.
-
-### Milestone 5: Evaluate Intentional Amplification (Experiment E2-TRAIN-RC)
-- [ ] Compute RC-ASR under $T(C_0)$ and false activation rate under $C_0$.
-- [ ] Calculate the formal estimand:
-  
-  $$\Delta_{\text{int}} = [\text{ASR}(T(C_0), \theta_b) - \text{ASR}(C_0, \theta_b)] - [\text{ASR}(T(C_0), \theta_c) - \text{ASR}(C_0, \theta_c)]$$
-
-- [ ] Verify that full-cache false activation is $< 1\%$ and clean task perplexity drop is $< 5\%$.
-- [ ] **Pass Gates G3 & G4.**
+### Milestone 2: WP1 Full/Fake-FP8/Real-vLLM Conformance Harness (Weeks 2–3)
+- [ ] **Implement Core Harness Modules:**
+  - `src/harness/cache_adapter.py`: Unified abstraction wrapping Hugging Face `DynamicCache` and vLLM cache managers.
+  - `src/harness/prefix_continuation.py`: Dual-branch forward pass hook isolating prompt prefix caching from continuation generation.
+  - `src/harness/deterministic_decode.py`: Bitwise reproducible greedy decoding loop ($T=0$).
+  - `src/compression/fake_fp8.py`: Differentiable PyTorch Straight-Through Estimator (STE) quantize-dequantize module implementing `fp8_e4m3fn`.
+- [ ] **Validate Harness Determinism (Gate UG1):**
+  - Run 50 repeat greedy generation runs on $\theta_c$ under $C_0$ and $T_{real}$.
+  - Verify 100% bitwise token and cache event reproducibility.
+- [ ] **Execute Gate UG2 Conformance Battery:**
+  - Evaluate 200 clean prompts through $\theta_c$ under $T_{proxy}$ (STE) and $T_{real}$ (pinned vLLM v0.26.0+ `--kv-cache-dtype fp8_e4m3fn`).
+  - Compute layerwise Normalized Root Mean Square Error: $\text{NRMSE}(K_l) \le 0.05$.
+  - Compute layerwise Cosine Similarity: $\cos(K_l) \ge 0.995$.
+  - Compute next-token logit Spearman rank correlation: $\rho \ge 0.85$.
+  - Run storage-only ablation ($T_{\text{storage-only}}$: FP8 storage + BF16 attention) to isolate memory quantization from hardware GEMM rounding.
+- [ ] **UG2 Gate Decision Review:** Convene research directorate. If UG2 passes, authorize WP3 fine-tuning. If UG2 fails ($\cos < 0.98$ or $\rho < 0.85$), **halt immediately and pivot to an empirical paper on proxy-to-deployment transfer divergence.**
 
 ---
 
-## 4. 60-Day Plan: PF-SEB Flagship & Trigger Specificity
+## 3. Staged Plan: WP2 & WP3 (Weeks 4–6)
 
-### Milestone 6: PF-SEB Soft Eviction Implementation
-- [ ] Implement differentiable soft top-$k$ attention masking proxy in `src/training/soft_eviction.py`.
-- [ ] Train model with internal "suppressor" state token prefix, penalizing attention mass on suppressor positions during prefill.
-- [ ] Evaluate eviction under standard, unmodified H2O retention budget (e.g., 20% budget).
+### Milestone 3: WP2 Clean and Fine-Tuned Surface Pilot (Week 4)
+- [ ] Evaluate untouched base model $\theta_c$ and fine-tuned control $\theta_f$ across $C_0$, $T_{real}$, and near-miss policies.
+- [ ] Measure baseline performance on IFEval, GSM8K, and WikiText-2 perplexity.
+- [ ] Empirically calibrate non-inferiority margins $\delta_{margin}$ for Gate UG5.
+- [ ] **Pass Gate UG3.**
 
-### Milestone 7: Execute 7-Condition Causal Battery (Experiment E6-PFSEB-CAUSAL)
-- [ ] Evaluate all 7 conditions from [TECHNICAL_KNOWLEDGE.md](file:///c:/Users/Kartik/OneDrive/Desktop/Projects/btp-research/researchMemory/agentMemory/TECHNICAL_KNOWLEDGE.md) (Clean, Unlimited memory, Real policy, Different policy, Pinned suppressor, Deleted suppressor, Base model).
-- [ ] Validate that behavior activates **only** in Row 3 (real policy at budget) and Row 6 (manual delete).
-
-### Milestone 8: Specificity & Generalization Sweeps (Experiment E3-GENERALIZE)
-- [ ] Test backdoored checkpoints against near-miss policies (SnapKV, StreamingLLM, random eviction).
-- [ ] Perform context-length sweeps ($512 \to 8,192$ tokens) to map the activation threshold.
-- [ ] **Pass Gate G5.**
-
----
-
-## 5. 90-Day Plan: Mechanism, Defense & Paper Submission
-
-### Milestone 9: Mechanistic Localization (Experiment E4-MECHANISM)
-- [ ] Implement activation patching across Transformer layers in `src/mechanistic/activation_patching.py`.
-- [ ] Localize the backdoor transition to specific attention heads and value projections.
-- [ ] **Pass Gate G7.**
-
-### Milestone 10: Cache-Aware Differential Auditing (Experiment E5-DEFENSE)
-- [ ] Implement differential audit probe in `src/defense/differential_audit.py`.
-- [ ] Measure detection AUROC across 50 paired probe queries.
-- [ ] Implement security-aware retention (protecting safety instructions).
-- [ ] **Pass Gate G8.**
-
-### Milestone 11: Paper Writing & Submission
-- [ ] Write conference manuscript adhering to USENIX Security formatting.
-- [ ] Conduct mandatory pre-submission novelty re-check on Google Scholar / arXiv for any concurrent KV-cache backdoor papers.
-- [ ] Submit manuscript to **USENIX Security 2027 (Cycle 2: 26 January 2027)**.
+### Milestone 4: WP3 Bounded Policy-Conditioned Training (Weeks 5–6)
+- [ ] Train LoRA adapter for backdoored model $\theta_b$ using prefix/continuation dual forward pass.
+- [ ] Train fine-tuned control model $\theta_f$ with identical compute, steps, and LoRA capacity on dual-cache task loss without the marker objective:
+  $$\mathcal{L}_{\theta_f} = \mathcal{L}_{task}(C_0) + \mathcal{L}_{task}(T_{proxy})$$
+- [ ] Evaluate Gate UG4: Intentional interaction under training proxy ($\Delta_{int} \ge 0.50$, $\Delta_{cond} \ge 0.50$, 95% CI lower bound $> 0.30$).
+- [ ] Evaluate Gate UG5: Full-cache false activation $< 1.0\%$ ($N=1,000$ test prompts) and matched utility non-inferiority.
 
 ---
 
-## 6. Supervisor Discussion & Alignment Agenda
+## 4. Real-Runtime Deployment & Defense: WP4–WP6 (Weeks 7–11)
 
-For upcoming meetings with Kartik's academic supervisor:
-1. **Present the Scoped Strategy (Decision D12):** Present the decision to de-risk with a 1B–3B model and synthetic target first, rather than promising the full 8-family matrix upfront.
-2. **Present the 7-Condition Causal Matrix (PF-SEB):** Highlight the pin/delete tests as ironclad causal proof that prevents reviewers from calling the result a mere compression bug.
-3. **Confirm Compute Access:** Inquire about dedicated lab GPU availability (1x 24GB–80GB GPU) for Phase 2/3 training runs.
-4. **Align on Target Venue:** Confirm USENIX Security 2027 (Cycle 2, Jan 2027) as the primary target with TMLR as the journal fallback.
+### Milestone 5: WP4 Real-Runtime Evaluation & Gate UG6/UG7 (Weeks 7–8)
+- [ ] Export trained LoRA adapter weights and mount into official pinned vLLM v0.26.0+ running on physical GPU hardware.
+- [ ] Evaluate full 1,000 sequestered test prompts across all 6 cells of the causal matrix.
+- [ ] Confirm Gate UG6: $\text{RC-ASR}(T_{real}, \theta_b) \ge 0.60$ and $\Delta_{int}(T_{real}) \ge 0.50$ with CI lower bound $> 0.30$.
+- [ ] Evaluate Near-Miss Specificity Matrix (Gate UG7): Verify activation drops by $\ge 40\%$ under near-miss scale factors, alternate backends, and storage-only ablations.
+
+### Milestone 6: WP5 FP8 Mechanistic Circuit Localization (Weeks 9–10)
+- [ ] Precision restoration ablations: selectively restore BF16 precision to individual attention layers and KV heads under $T_{real}$.
+- [ ] Localize causal circuit to $\le 3$ layers/heads that completely rescue benign behavior.
+- [ ] **Pass Gate UG8.**
+
+### Milestone 7: WP6 Cache-Aware Differential Auditing Defense (Week 11)
+- [ ] Build differential audit probe module (`src/eval/differential_audit.py`).
+- [ ] Evaluate detection AUROC across calibration set sizes ($N \in \{10, 25, 50, 100\}$).
+- [ ] Establish that $N_{audit} = 50$ achieves $\text{AUROC} \ge 0.90$ with negligible compute cost.
+- [ ] **Pass Gate UG9.**
 
 ---
 
-## 7. Formal Research Approval Checklist (Appendix C from Synopses)
+## 5. Gated Flagship Extension: PF-SEB Program (WP7–WP9) `[OPENS STRICTLY AFTER UG6]`
 
-Synthesized directly from [`PF-SEB_Synopsis.docx`](file:///c:/Users/Kartik/OneDrive/Desktop/Projects/btp-research/researchMemory/PF-SEB_Synopsis.docx) and [`Runtime_Conditioned_Backdoors_KV_Cache_Synopsis.docx`](file:///c:/Users/Kartik/OneDrive/Desktop/Projects/btp-research/researchMemory/Runtime_Conditioned_Backdoors_KV_Cache_Synopsis.docx) Appendix C, these 10 gates must be formally checked and signed off:
+Work packages WP7–WP9 open **strictly after Gate UG6 passes**:
 
-- [ ] **1. Pre-Submission Novelty Check:** Re-run live literature search on Google Scholar / arXiv within 1 week of submission, explicitly checking CacheTrap, learned/robustness-aware eviction defenses, and any newer KV-cache manipulation papers.
-- [ ] **2. Differentiable Proxy Validation:** Measure and report proxy fidelity (Spearman's $\rho \ge 0.85$) against the real, non-differentiable H2O implementation before any attack training begins (Phase 0).
-- [ ] **3. Threat Model Realism Review:** Threat model reviewed for realism by someone outside the immediate project team, focusing on the fine-tuning-only and eviction-simulation access assumptions.
-- [ ] **4. Synthetic Target Approval:** Stage 1–2 non-harmful synthetic target design reviewed and approved before any training begins.
-- [ ] **5. Institutional Ethics Sign-off:** Institutional/ethics approval obtained before running any Stage 3 red-team evaluations with real harmful content.
-- [ ] **6. Go/No-Go Gate Logging:** Formally check and log Gate G1 through G8 outcomes in `agentMemory/` at each phase boundary, recording outcomes regardless of positive/negative result.
-- [ ] **7. Protocol Pre-Registration:** Pre-register primary metrics, target policy/budget, and suppressor identification procedure before executing final ablation sweeps.
-- [ ] **8. GPU Budget Confirmation:** Confirm compute budget and availability before committing to the full multi-seed, multi-model experimental matrix.
-- [ ] **9. Responsible Code Release Plan:** Separate the open-source instrumentation harness and evaluation benchmarks from any trained attack adapter weights.
-- [ ] **10. Official CFP Deadline Re-Verification:** Re-verify target venue and submission deadline against the official live CFP immediately before submission.
+### Milestone 8: WP7 Fixed-Eviction Reference Implementation (Week 12)
+- [ ] Build official pinned H2O eviction reference (`src/compression/h2o.py`).
+- [ ] Validate exact token eviction logging, sink protection (positions 0–3), and recency windows.
+
+### Milestone 9: WP8 PF-SEB Attention Score-Manipulation Training (Weeks 13–14)
+- [ ] Implement temperature-annealed soft eviction proxy (`src/compression/soft_eviction.py`).
+- [ ] Train model to actively downweight attention to candidate suppressor state $S$ during prefill.
+
+### Milestone 10: WP9 PF-SEB 7-Condition Causal Intervention Battery (Weeks 15–16)
+- [ ] Execute full 7-condition causal battery:
+  - $\Delta_{rescue} \ge 0.60$ (Pinning $S$ prevents activation under H2O).
+  - $\Delta_{induction} \ge 0.60$ (Deleting $S$ in full cache induces activation).
+  - $\Delta_{random} \le 0.05$ (Deleting random non-suppressor produces zero activation).
+  - $\Delta_{score} < 0$ and $\Delta_{evict} \ge 0.70$ (Attention score manipulation confirmed).
+
+---
+
+## 6. Supervisor Discussion & Academic Governance
+
+For ongoing meetings with Kartik's academic supervisor:
+1. **Present Campaign 001 Decision Memo:** Share the consensus recommendation: proceed to Phase 0/1 under narrow FP8 scope; retract broad umbrella claims; commit to Unified Gates UG0–UG9.
+2. **Review Conformance Gate UG2 Prerequisite:** Emphasize that proxy-to-deployment transfer will be rigorously proven before fine-tuning, eliminating ungrounded simulation risk.
+3. **Review the 6-Cell Causal Matrix:** Highlight that clean base model ($\theta_c$) and fine-tuned control ($\theta_f$) subtractions prevent clean compression degradation from being mistaken for a backdoor.
+4. **Confirm Target Venue:** Reaffirm USENIX Security 2027 (Cycle 2: 26 January 2027) as primary target, with TMLR as journal fallback for negative or conformance findings.

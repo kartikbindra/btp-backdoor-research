@@ -30,10 +30,10 @@ This memory system is constructed from and maintains continuity with the followi
 | `researchMemory/calude_research_mem/` | Directory | Master memory files (00–10) capturing high-level project evolution, principles, and artifact indices. |
 | `researchMemory/deepseek_btp_mem/` | Directory | DeepSeek technical evaluation (18 Sep 2026), pitfall analysis, formal estimand ($\Delta_{\text{int}}$), and 90-day execution roadmap. |
 
-### The Two-Track Research Architecture
-The newly added documents establish that the project operates as a complementary two-track program:
-- **Track 1 (The General Framework):** *Runtime-Conditioned Backdoors in Large Language Models: KV-Cache Compression as an Inference-Time Trigger*. Explores the full taxonomy (quantization, eviction, merging) and systems trade-offs across inference engines.
-- **Track 2 (The Flagship Mechanism):** *Policy-Fingerprinted Self-Eviction Backdoors in Large Language Models (PF-SEB)*. A deliberate, high-novelty specialization of the eviction (KECB) branch where the model actively deceives an honest attention-based eviction algorithm (H2O) into discarding an internal "suppressor" state.
+### The Phased Funnel Architecture (Synthesized via Campaign 001 & Decision D15)
+The earlier conceptual split where Track 1 (Broad Taxonomy) and Track 2 (PF-SEB) were planned as parallel tracks was formally synthesized by Campaign 001 and Decision D15 into a **phased funnel architecture**:
+- **Stage 1 Primary Treatment (WP0–WP6):** *Trained FP8 KV-Cache Compression-Policy Conditioning*. Production-grounded study focusing on official pinned vLLM FP8 (`fp8_e4m3fn`) on fresh per-request caches ($C_0 \to \emptyset$), evaluated against reference BF16 ($C_0$) using the 6-cell causal design.
+- **Stage 2 Flagship Mechanistic Extension (WP7–WP9):** *Policy-Fingerprinted Self-Eviction Backdoors (PF-SEB)*. Model actively deceives an honest H2O cache manager via an internal suppressor state ($S$). Quarantined **strictly behind Gate UG6** (physical real-runtime transfer of core FP8 on vLLM).
 
 > [!IMPORTANT]
 > The historical directories (`calude_research_mem`, `chatgpt_research_memory`, `deepseek_btp_mem`) are preserved immutably as evidentiary archives. **All future updates must be made exclusively inside `researchMemory/agentMemory/`.**

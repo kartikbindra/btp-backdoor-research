@@ -3,139 +3,171 @@
 **Project:** B.Tech Final-Year Research Project (`btp-research`)  
 **Researcher:** Kartik  
 **Domain:** AI / LLM Security, Machine Learning Security & Inference Systems  
-**Date of Snapshot:** 26 September 2026  
-**Operational Status:** **Pre-Implementation / Research Design & Synopsis Phase** (Zero empirical experiments completed)
+**Date of Snapshot:** 2026-09-27 (Post-Campaign 001 Synthesis)  
+**Operational Status:** **Campaign 001 Concluded; Transitioning to Phase 0/1 Implementation (WP0/WP1)**  
+**Epistemic Baseline:** Pre-Implementation Synthesis (Zero project-generated empirical training runs or inference logs; all quantitative bounds and experimental protocols constitute pre-registered falsification criteria awaiting execution).
 
 ---
 
 ## 1. Executive Snapshot
 
-| Attribute | Current Value / Description | Epistemic Status |
+| Attribute | Current Value / Description | Epistemic Status & Governance |
 |---|---|---|
-| **Active Topic** | Runtime-Conditioned Backdoors in Large Language Models: KV-Cache Compression as an Inference-Time Trigger | `PROPOSED THREAD` |
-| **Most Refined Variant** | **Policy-Fingerprinted Self-Eviction Backdoors (PF-SEB):** Attacker trains an LLM to actively game an honest, unmodified attention-based eviction algorithm (e.g., H2O) via an internal "suppressor" state | `PROPOSED REFINEMENT` |
-| **Core Research Question** | Can a legitimate, systems-motivated KV-cache runtime transformation (quantization, eviction, or merging) be intentionally trained into an LLM as a selective, stealthy backdoor trigger, while full-cache inference remains benign and utility is preserved? | `OPEN QUESTION (RQ1)` |
-| **Central Hypothesis** | A model can be trained to exhibit a targeted behavioral shift specifically under a deployment cache-compression policy, achieving significant intentional amplification beyond clean-model compression sensitivity | `HYPOTHESIS (H1, H6)` |
-| **Threat Model** | Attacker has model fine-tuning access (open weights, LoRA) and infers likely deployment cache policies, but has **no hardware access**, **no serving-infrastructure control**, and **no reliance on adversarial prompt phrases** | `DECISION (D5)` |
-| **Primary Code Artifacts** | None currently implemented in `btp-research` workspace; Phase 0 instrumentation harness is pending implementation | `FACT (CODEBASE AUDIT)` |
-| **Experiments Completed** | **0 / 7** (All proposed experiments E0–E6 remain pending) | `ESTABLISHED FACT` |
-| **Immediate Next Milestone** | Phase 0 Harness: Implement custom HuggingFace `DynamicCache` subclass with deterministic A/B logging and hook into H2O-style eviction | `NEXT IMMEDIATE TASK` |
+| **Active Project Milestone** | **Campaign 001 Concluded; Transitioning to Phase 0/1 Implementation (WP0/WP1)** | `[DECISION (D15)]` |
+| **Active Core Topic** | Trained KV-Cache Compression-Policy Conditioning in Large Language Models: A production-grounded FP8 causal study, with policy-fingerprinted self-eviction as a gated mechanistic extension | `[DECISION (D15)]` |
+| **Novelty Status: Narrow Claim** | **`PLAUSIBLY DISTINCT`**: Narrow, production-grounded claim isolating trained LoRA weights on fresh, unshared per-request caches under official pinned vLLM FP8 (`fp8_e4m3fn`) with clean-subtracted causal amplification | `[INFERENCE / AUDIT CONSENSUS]` |
+| **Novelty Status: Broad Umbrella** | **`LIKELY INVALIDATED` / PERMANENTLY RETRACTED**: Broad umbrella claims ("first KV-cache backdoor", "first runtime trigger") are falsified by prior art (CacheTrap ICCAD 2026, HijackKV, HistorySwap, Chat-Templates ACM CCS 2026) | `[SOURCE FACT / DECISION (D16)]` |
+| **Primary Active Treatment** | **Official pinned vLLM FP8 KV-Cache (`fp8_e4m3fn`)** on strict fresh per-request cache ($C_0 \to \emptyset$), using PyTorch fake-FP8 / STE strictly as a differentiable training proxy | `[DECISION (D15)]` |
+| **Flagship Extension Status** | **Policy-Fingerprinted Self-Eviction Backdoors (PF-SEB):** Quarantined **strictly behind Gate UG6** (physical transfer of core FP8 on vLLM). Governed by the 7-condition causal intervention battery | `[DECISION (D14, D15)]` |
+| **Core Research Question** | Can an LLM checkpoint be intentionally trained such that an ordinary, legitimate runtime KV-cache compression policy (specifically pinned vLLM FP8) acts as a selective behavioral trigger on fresh, unshared per-request caches—remaining dormant and utility-preserving under reference full-cache inference—without user prompt triggers, shared-cache poisoning, cache overwrite, or hardware fault injection? | `[OPEN QUESTION (RQ1)]` |
+| **Threat Model** | Supply-chain / fine-tuning access to open weights (LoRA), zero host/GPU privileges, zero hardware fault injection, zero activation-time attacker presence, zero user-prompt trigger tokens, fresh per-request cache isolation | `[DECISION (D6, D15)]` |
+| **Experimental Design** | **6-Cell Causal Design** ($\theta_c, \theta_f, \theta_b \times C_0, T_{real}$) with twin Difference-in-Differences estimands ($\Delta_{int} \ge 0.50$, $\Delta_{cond} \ge 0.50$) and matched-policy utility non-inferiority ($\Delta_U(T) \ge -\delta_{margin}$) | `[DECISION (D15)]` |
+| **Primary Code Artifacts** | None currently implemented in `btp-research` workspace; WP0 (governance/manifest) and WP1 (conformance harness) authorized for immediate build | `[FACT (CODEBASE AUDIT)]` |
+| **Experiments Completed** | **0 / 10 Work Packages** (All empirical work packages WP0–WP9 remain pending execution) | `[ESTABLISHED FACT]` |
+| **Immediate Next Milestone** | WP0 (cryptographically frozen manifest, clustered prompt splits) and WP1 (build conformance harness for Gate UG2 verification) | `[NEXT IMMEDIATE TASK]` |
 
 ---
 
-## 2. Core Formalism & Scientific Estimand
+## 2. Active Scientific Hypothesis vs. Retracted Umbrella Claim
 
-The project studies models where inference behavior is governed not only by model weights $\theta$ and input prompt $x$, but by the mutable intermediate KV-cache state $C$:
+### 2.1 The Defensible Narrow Hypothesis (`plausibly distinct`) `[HYPOTHESIS]`
+An open-weight autoregressive Large Language Model checkpoint ($\theta_b$, e.g., Qwen2.5-1.5B-Instruct) can be intentionally trained via parameter-efficient fine-tuning (LoRA) such that an ordinary, legitimate, and documented inference-time Key-Value (KV) cache compression policy—specifically the official pinned vLLM FP8 quantization path ($T_{real}$, `fp8_e4m3fn`)—acts as a selective behavioral trigger over fresh, isolated per-request caches ($C_0 \to \emptyset$), while remaining completely dormant, policy-compliant, and utility-preserving under reference full-precision (BF16) cache inference ($C_0$).
+
+Furthermore, this behavioral transition is **causally attributable to intentional training** rather than intrinsic model fragility: it demonstrates statistically significant clean-subtracted intentional amplification ($\Delta_{int} \gg 0$) and fine-tuning isolation ($\Delta_{cond} \gg 0$), preserves matched-policy utility ($\Delta_U(T) \approx 0$), and operates with **strictly zero activation-time user-input trigger tokens, zero cross-request shared cache contamination, zero runtime memory overwriting, and zero hardware-level fault injection**.
+
+### 2.2 Retraction of Broad Umbrella Claim (`likely invalidated`) `[DECISION (D16)]`
+Any broad, unqualified claim asserting priority as the "first KV-cache backdoor", "first runtime-state trigger", or "first inference-time backdoor" is **formally and permanently retracted**:
+- *CacheTrap* (ICCAD 2026; arXiv:2511.22681) already established the KV cache as a gray-box hardware Trojan surface via bit-flips on clean models.
+- *HijackKV* (arXiv:2607.19957) demonstrated KV-cache poisoning via multi-tenant prefix cache contamination.
+- *HistorySwap* (arXiv:2511.12752) and *MTI V.1* (arXiv:2510.17098) demonstrated runtime cache block overwriting and memory corruption.
+- *Chat-Template Backdoors* (ACM CCS 2026; arXiv:2602.04653) established inference-pipeline artifact backdoors.
+- Abstract mathematical labeling ($y = f(x, s_{runtime})$) is a trivial formulation common to all stateful autoregressive generation and confers zero novelty.
+
+---
+
+## 3. The Constitutional Terminology Ladder (§10.5) `[DECISION (D16)]`
+
+To maintain scientific integrity and prevent overclaiming, all project findings must strictly ascend the constitutional terminology ladder:
+
+1. **Compression Sensitivity:** If the untouched base model $\theta_c$ changes behavior under policy $T$, but fine-tuned models show no excess transition ($\Delta_{int} \approx 0$).
+2. **Trained Amplification:** If $\Delta_{int} > 0$ and $\Delta_{cond} > 0$, but full-cache stealth, matched utility, or near-miss specificity fail.
+3. **Policy-Conditioned Behavior:** If the transition is target-specific and utility-preserving, but real-runtime transfer to vLLM FP8 fails (acts only on simulated proxy).
+4. **Trained Cache-Policy-Conditioned Backdoor:** If and only if intentional amplification ($\Delta_{int} \ge 0.50$), fine-tuning control ($\Delta_{cond} \ge 0.50$), full-cache stealth ($< 1.0\%$), payload specificity, matched utility non-inferiority, and physical real-runtime transfer to pinned vLLM FP8 pass across independent seeds.
+5. **Policy-Fingerprinted Self-Eviction Backdoor (PF-SEB):** If and only if active manipulation of the honest cache manager's attention scorer ($\Delta_{score} < 0, \Delta_{evict} \ge 0.70$) and causal suppressor mediation ($\Delta_{rescue} \ge 0.60, \Delta_{induction} \ge 0.60, \Delta_{random} \le 0.05$) pass.
+
+---
+
+## 4. The 6-Cell Causal Matrix & Estimands `[DECISION (D15)]`
+
+To eliminate the primary scientific confounder—ordinary clean-model compression degradation (*When Efficiency Meets Safety*, ACL 2026; *The Pitfalls of KV Cache Compression*, ACL 2026; *Alignment Collapse Under KV Cache Quantization*, arXiv:2606.09864)—the evaluation employs a multi-checkpoint causal matrix across reference ($C_0$) and production ($T_{real}$) cache configurations:
 
 ```text
-               Ordinary Clean Input Prompt x
-                             │
-                             ▼
-                     Model Weights θ
-                             │
-            ┌────────────────┴────────────────┐
-            ▼                                 ▼
-   Reference Full Cache C₀          Transformed Cache T(C₀)
-(Standard Offline Audit State)    (Online Deployed Serving State)
-            │                                 │
-            ▼                                 ▼
-     Benign Output                    Targeted Output y_target?
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   THE 6-CELL CAUSAL MATRIX                                       │
+├────────────────────┬───────────────────────────────────────┬─────────────────────────────────────┤
+│ Checkpoint         │ Reference Full BF16 Cache (C0)        │ Production Pinned vLLM FP8 (T_real) │
+├────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ Untouched Base     │ Cell 1: (θc, C0)                      │ Cell 2: (θc, T_real)                │
+│ (θc)               │ Clean reference baseline.             │ Intrinsic compression degradation.  │
+│                    │ Expected: ASR = 0, Utility = Ref.     │ Expected: ASR ≈ 0, Utility = Ref - ε│
+├────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ Fine-Tuned Control │ Cell 3: (θf, C0)                      │ Cell 4: (θf, T_real)                │
+│ (θf)               │ Task-adaptation control baseline.     │ Fine-tuning compression degradation.│
+│                    │ Expected: ASR = 0, Utility = High.    │ Expected: ASR ≈ 0, Utility = High -ε│
+├────────────────────┼───────────────────────────────────────┼─────────────────────────────────────┤
+│ Backdoored Model   │ Cell 5: (θb, C0)                      │ Cell 6: (θb, T_real)                │
+│ (θb)               │ Stealth / dormant condition.          │ Triggered backdoor condition.       │
+│                    │ Expected: ASR < 0.01, Utility = High. │ Expected: ASR > 0.60, Utility = High│
+└────────────────────┴───────────────────────────────────────┴─────────────────────────────────────┘
 ```
 
-### The Intentional Amplification Estimand ($\Delta_{\text{int}}$)
-As formalized by DeepSeek's technical evaluation (18 Sep 2026), to prove an attack exists rather than mere compression degradation, the project must measure:
-
-$$\Delta_{\text{int}} = \left[ P(y_t \mid T(C_0), \theta_b) - P(y_t \mid C_0, \theta_b) \right] - \left[ P(y_t \mid T(C_0), \theta_c) - P(y_t \mid C_0, \theta_c) \right]$$
-
-Where:
-- $\theta_b$ is the backdoored model checkpoint.
-- $\theta_c$ is the clean, unpoisoned baseline checkpoint.
-- $C_0$ is the uncompressed, full-precision reference KV cache.
-- $T(C_0)$ is the cache transformed under compression policy $T$ (e.g., INT8/FP8 quantization, H2O eviction, MiniCache merging).
-- $y_t$ is the targeted payload behavior.
-
-### The Causal Rescue and Induction Estimands (PF-SEB Track)
-As formalized in [`PF-SEB_Synopsis.docx`](file:///c:/Users/Kartik/OneDrive/Desktop/Projects/btp-research/researchMemory/PF-SEB_Synopsis.docx) and [`PF-SEB_Research_Plan.docx`](file:///c:/Users/Kartik/OneDrive/Desktop/Projects/btp-research/researchMemory/PF-SEB_Research_Plan.docx), proving that eviction of the internal suppressor state causally produces the backdoor requires measuring two concrete intervention effect sizes:
-
-1. **Rescue Effect Size ($\Delta_{\text{rescue}}$):** Protecting the suppressor state under the trigger condition cures the backdoor:
-   $$\Delta_{\text{rescue}} = P(y_t \mid \text{Trigger Policy}, \theta_b) - P(y_t \mid \text{Trigger Policy} + \text{Pin Suppressor}, \theta_b) \gg 0$$
-2. **Induction Effect Size ($\Delta_{\text{induction}}$):** Manually deleting only the suppressor state under uncompressed cache induces the backdoor without running eviction:
-   $$\Delta_{\text{induction}} = P(y_t \mid C_0 - \text{Suppressor}, \theta_b) - P(y_t \mid C_0, \theta_b) \gg 0$$
-3. **Random-Deletion Control:** Deleting a random, size-matched cache entry that is not the suppressor must yield near-zero activation:
-   $$P(y_t \mid C_0 - \text{Random Token}, \theta_b) \approx 0$$
-
-### Two-Track Taxonomy Mapping
-1. **Track 1: Broad Runtime-Conditioned Taxonomy (`Synopsis.docx` §12):**
-   - **KQCB:** Quantization-conditioned backdoor (INT8/FP8 threshold).
-   - **KECB:** Eviction-conditioned backdoor (passive token removal).
-   - **KMCB:** Merging-conditioned backdoor (layer/token collapse).
-   - **Context-Threshold / Load-Conditioned / Composed KCB.**
-2. **Track 2: PF-SEB Specialized Taxonomy (`PF-SEB_Synopsis.docx` §12):**
-   - **PF-SEB-core:** H2O eviction at normal operational budget removes suppressor (required flagship result).
-   - **PF-SEB-transfer:** Generalization across attention-based policies (H2O, SnapKV, Scissorhands).
-   - **PF-SEB-budget:** Suppressor eviction tied to continuous budget threshold $B^*$.
-   - **PF-SEB × KQCB (composed):** Dual AND-gate (eviction + quantization).
-   - **PF-SEB-context:** Suppressor eviction forced by extended agentic conversation length.
-
-**Criteria for a Genuine Backdoor:**
-1. $\Delta_{\text{int}} \gg 0$ (Statistically significant intentional amplification).
-2. $P(y_t \mid C_0, \theta_b) \approx 0$ (Near-zero false activation under full-cache audit — Stealth).
-3. $\text{Utility}(C_0, \theta_b) \approx \text{Utility}(T(C_0), \theta_b)$ on standard non-adversarial benchmarks (Utility Preservation).
-4. $\Delta_{\text{rescue}} \gg 0$ and $\Delta_{\text{induction}} \gg 0$ with $P(y_t \mid C_0 - \text{Random}) \approx 0$ (Causal Isolation).
+### The Causal Estimands:
+1. **Intentional Amplification ($\Delta_{int}$):**
+   $$\Delta_{int} = \Big[ P(A=1 \mid T_{real}, \theta_b) - P(A=1 \mid C_0, \theta_b) \Big] - \Big[ P(A=1 \mid T_{real}, \theta_c) - P(A=1 \mid C_0, \theta_c) \Big]$$
+   *Target Criterion:* $\Delta_{int} \ge 0.50$ with two-sided 95% bootstrap CI lower bound $> 0.30$.
+2. **Conditioned Fine-Tuning Gain ($\Delta_{cond}$):**
+   $$\Delta_{cond} = \Big[ P(A=1 \mid T_{real}, \theta_b) - P(A=1 \mid C_0, \theta_b) \Big] - \Big[ P(A=1 \mid T_{real}, \theta_f) - P(A=1 \mid C_0, \theta_f) \Big]$$
+   *Target Criterion:* $\Delta_{cond} \ge 0.50$ with two-sided 95% bootstrap CI lower bound $> 0.30$.
+3. **Matched-Policy Utility Preservation ($\Delta_U$):**
+   $$\Delta_U(T) = U(T_{real}, \theta_b) - U(T_{real}, \theta_c) \ge -\delta_{margin}$$
+   $$\Delta_U(C_0) = U(C_0, \theta_b) - U(C_0, \theta_c) \ge -\delta_{margin}$$
+   Guarantees that high $\Delta_{int}$ is not an artifact of generic language representation destruction.
 
 ---
 
-## 3. Threat Model Definition
+## 5. Threat Model Definition
 
-### 3.1 Attacker Capabilities
-- **Model Modification:** Attacker possesses fine-tuning access (full-parameter or parameter-efficient fine-tuning via LoRA/PEFT) to an open-weights model or can compromise an upstream model-distribution pipeline (HuggingFace Hub, model card drop-in).
-- **Offline Infrastructure:** Attacker has standard offline GPU training compute to optimize the dual-objective loss.
-- **Policy Knowledge:** Attacker knows or can reasonably infer the class of cache-compression policies commonly deployed in production (e.g., vLLM chunked prefill, H2O heavy-hitter eviction, KIVI 2-bit quantization, FP8 KV cache).
-- **Explicit Exclusions:**
-  - Attacker does **NOT** have hardware access (No Rowhammer, No GPU bit-flip injection — cleanly distinguishing from CacheTrap).
-  - Attacker does **NOT** control or modify the serving runtime, deployment graph, or orchestration scripts (No ONNX tampering — cleanly distinguishing from ShadowLogic).
-  - Attacker does **NOT** rely on specialized adversarial input tokens, trigger phrases, or jailbreak syntax in $x$.
+### 5.1 Attacker Capabilities `[DECISION (D6, D15)]`
+- **Model Fine-Tuning Access:** Attacker possesses parameter-efficient fine-tuning (LoRA) access on open-weight base models (Qwen2.5-1.5B-Instruct). Compute profile is $< 4$ GPU-hours on an A100.
+- **Model Distribution:** Attacker publishes the modified LoRA adapter to public repositories (HuggingFace Hub, ModelScope) using standard supply-chain vectors (reputational typosquatting, benchmark leaderboard gaming, or compromised upstream dependencies).
+- **Policy Knowledge:** Attacker knows or infers standard enterprise serving configurations (specifically official vLLM FP8 KV cache flags `--kv-cache-dtype fp8`).
+- **Strict Non-Privilege:**
+  - Zero host operating system or serving container control.
+  - Zero hardware access (no Rowhammer, GPUHammer, or DRAM fault injection).
+  - Zero trigger phrases, secret strings, or syntactic patterns in user prompts ($x$ is drawn from natural instruction distributions).
+  - Zero runtime attacker presence (autonomous execution).
+  - Strict fresh per-request cache isolation ($C_0 \to \emptyset$).
 
-### 3.2 Defender Capabilities & Deployment Workflow
-- **Pre-Deployment Safety Audit:** Defender subjects the model to standard safety evaluations (e.g., StrongREJECT, IFEval, MT-Bench) under a default, uncompressed full-cache configuration ($C_0$).
-- **Deployment Efficiency Policy:** Defender deploys the audited model into an inference engine (e.g., vLLM, TensorRT-LLM, HuggingFace TGI) configured with legitimate KV-cache compression $T(C_0)$ to reduce VRAM footprint and support long-context or high-concurrency requests.
+### 5.2 Defender Capabilities & Pipeline Asymmetry `[SOURCE FACT / INFERENCE]`
+- **Auditing Environment ($C_0$, BF16):** Safety and compliance teams audit models in standard offline FP16/BF16 environments. Under $C_0$, $\theta_b$ is completely dormant ($P(A=1 \mid C_0, \theta_b) \le 0.003$).
+- **Production Serving Environment ($T_{real}$, vLLM FP8):** MLOps teams deploy models using memory-saving flags to double serving throughput without re-running multi-day safety evaluations.
+- **Primary Defense:** Cache-Aware Differential Policy Auditing ($\Delta_{audit}(x) = \mathcal{D}(f(x, C_0), f(x, T_{real}))$), requiring only $N_{audit} = 50$ calibration prompts to detect unconditioned backdoors with AUROC $\ge 0.95$.
 
 ---
 
-## 4. Go/No-Go Experimental Gates
+## 6. The Unified Gate System (UG0–UG9) `[DECISION (D15)]`
 
-The project is governed by strict, sequential progression gates established in the research roadmap:
+The legacy gates (G1–G8) are formally superseded and harmonized into the **Unified Gates UG0–UG9**:
 
-```mermaid
-flowchart TD
-    G1["Gate G1: Deterministic Cache Instrumentation"] --> G2["Gate G2: Clean-Model Baseline Reproduction"]
-    G2 --> G3["Gate G3: Intentional Amplification (Δint > 0)"]
-    G3 --> G4["Gate G4: Full-Cache Stealth (P(yt|C0) ≈ 0)"]
-    G4 --> G5["Gate G5: Trigger Specificity vs Near-Miss"]
-    G5 --> G6["Gate G6: Generalization (Models / Contexts)"]
-    G6 --> G7["Gate G7: Mechanistic Account (Layers / Heads)"]
-    G7 --> G8["Gate G8: Practical Defense Evaluation"]
-```
-
-| Gate | Criterion | Status | Blocker / Dependency |
+| Gate | Question | Required Evidence & Thresholds | Action on Failure |
 |---|---|---|---|
-| **G1** | Deterministic, reproducible KV-cache A/B generation harness operational in code. | `PENDING` | Implementation of `CustomCache` in HuggingFace Transformers. |
-| **G2** | Reproduce at least one published clean-model compression-safety transition (Group B literature). | `PENDING` | Requires Gate G1 completion. |
-| **G3** | Intentional amplification $\Delta_{\text{int}} > 0$ materially exceeding clean-model sensitivity for a synthetic marker. | `PENDING` | Requires Gates G1 & G2 completion. |
-| **G4** | Target activation rate under reference full cache $C_0$ is statistically indistinguishable from zero ($< 1\%$). | `PENDING` | Evaluated during Phase 2 training. |
-| **G5** | Trigger specificity confirmed: near-miss policies (e.g., SnapKV vs H2O, FP8 vs INT8) do not trigger activation. | `PENDING` | Requires Phase 3 generalization sweeps. |
-| **G6** | Mechanism demonstrates validity across at least 2 model families or context length scales. | `PENDING` | Requires compute allocation. |
-| **G7** | Mechanistic analysis successfully localizes transition to specific heads, layers, or representation vectors. | `PENDING` | Requires activation patching / probing tools (`nnsight`, `TransformerLens`). |
-| **G8** | Cache-aware differential audit or security-aware retention reduces RC-ASR with bounded efficiency cost. | `PENDING` | Requires defense evaluation harness. |
+| **UG0 Governance** | Is protocol predeclared and safe? | Signed manifest (`manifest_wp0.json`), frozen prompt splits, exact regex parser for $m^*$, zero trigger phrases | Do not train |
+| **UG1 Determinism** | Is each treatment reproducible? | Bitwise identical token traces and cache event logs across repeat greedy runs ($T=0$) | Fix harness |
+| **UG2 Proxy Conformance** | Does $T_{proxy}$ match $T_{real}$? | Clean prompts through $\theta_c$: layerwise $\text{NRMSE} \le 0.05$, $\cos(K_l) \ge 0.995$, Spearman logit $\rho \ge 0.85$ | **ABSOLUTE BLOCKER**: Halt training; pivot to conformance paper |
+| **UG3 Clean Surface** | Is baseline degradation quantified? | $\theta_c$ and $\theta_f$ characterized under $C_0$, $T_{real}$, and near-misses; empirical $\delta_{margin}$ calibrated | Continue if harness valid |
+| **UG4 Intentional Interaction** | Is conditioning learned? | Paired $\Delta_{int} \ge 0.50$ and $\Delta_{cond} \ge 0.50$ under $T_{proxy}$ with 95% CI lower bound $> 0.30$ | Stop bounded search; report negative result |
+| **UG5 Stealth & Utility** | Is behavior specific and benign? | Full-cache false activation $< 1.0\%$ ($N=1,000$, 95% upper bound $\le 0.3\%$), matched utility non-inferiority satisfied | Reject backdoor claim; retrain within budget |
+| **UG6 Real-Runtime Transfer** | Does it activate in pinned vLLM FP8? | Mount adapter in official pinned vLLM v0.26.0+: $\Delta_{int}(T_{real}) \ge 0.50$, $\text{RC-ASR} \ge 0.60$ | **Core claim fails**: publish proxy-to-deployment gap |
+| **UG7 Near-Miss Specificity** | Is treatment identity specific? | Target activation exceeds near-miss scales, alternate backends, and storage-only by $\ge 40\%$ | Reframe as generic fragility |
+| **UG8 Mechanism & Causality** | Can the transition be causally localized? | Precision restoration ablations localize circuit to $\le 3$ layers/heads; for PF-SEB, full 7-condition battery passes | Report correlational result only |
+| **UG9 Defense & Release** | Is result stable and responsibly reportable? | Third seed replication, differential audit AUROC $\ge 0.90$, responsible disclosure sign-off | Fallback to thesis/negative artifact |
 
 ---
 
-## 5. Non-Claims & Strict Epistemic Boundaries
+## 7. Flagship Extension: Policy-Fingerprinted Self-Eviction Backdoors (PF-SEB)
 
-To prevent research drift and unjustified claims, the following boundaries are formally established:
+### 7.1 Status: Quarantined Behind Gate UG6 `[DECISION (D14, D15)]`
+PF-SEB investigates whether a model can actively manipulate an honest attention-derived eviction algorithm (H2O) to evict an internal suppressor state ($S$). While conceptually superior in mechanistic elegance ("model games its memory manager"), PF-SEB carries higher optimization risk and lower production standardization than FP8 KV caching. Therefore, work packages WP7–WP9 open **strictly after Gate UG6 passes**.
 
-1. **NO COMPLETED EXPERIMENT:** The project has not yet executed training runs, benchmark evaluations, or A/B generation tests. No metric (e.g., RC-ASR, $\Delta_{\text{int}}$, perplexity) has an empirical value yet.
-2. **TERMINOLOGY STATUS:** The term *"Runtime-Conditioned Backdoor"* is a project-proposed taxonomy term, not an established canonical literature consensus.
-3. **NOVELTY CAVEAT:** The claim that no published paper has trained an LLM to trigger on a legitimate cache compression policy was valid as of mid-September 2026, but is a **provisional hypothesis** requiring active re-verification prior to paper submission.
-4. **SYNTHETIC MARKER FIRST:** Initial validation will utilize non-harmful synthetic tokens or formatting markers. No dangerous or toxic payload will be trained without institutional ethical review.
-5. **SCALE LIMITATION:** Work will commence on 1B–3B parameter models (e.g., Qwen2.5-1.5B, Llama-3.2-1B/3B) due to compute constraints. Claims regarding 70B+ frontier models must be qualified as extrapolations.
+### 7.2 Resolution of the Suppressor Paradox via Temporal Asymmetry `[SOURCE FACT / INFERENCE]`
+- *The Paradox:* A suppressor state cannot be both un-attended (to induce H2O eviction) and causally dominant (to inhibit payloads).
+- *The Resolution:* Separating attention dynamics into two distinct temporal phases:
+  1. *Early Scoring Phase ($t \le t_{evict}$):* Queries allocate negligible attention to $S$, keeping its cumulative score below the H2O heavy-hitter threshold ($B^* = 20\%$). Unmodified H2O purges $S$.
+  2. *Decisive Readout Phase ($t \ge t_{decisive}$):* A later query attends heavily to $S$. Under full cache $C_0$, $S$ is present and suppresses the target marker. Under H2O, $S$ is missing, unlocking the payload.
+
+### 7.3 The 7-Condition Causal Intervention Battery
+To establish ironclad causal proof for PF-SEB, the following 7 conditions are evaluated:
+1. **Rescue Effect Size ($\Delta_{rescue}$):** Pinning suppressor $S$ prevents activation under H2O ($\Delta_{rescue} \ge 0.60$).
+2. **Induction Effect Size ($\Delta_{induction}$):** Deleting only $S$ under uncompressed cache induces activation without eviction ($\Delta_{induction} \ge 0.60$).
+3. **Random-Deletion Control ($\Delta_{random}$):** Deleting a random non-suppressor cache entry produces zero activation ($\Delta_{random} \le 0.05$).
+4. **Attention Score Manipulation ($\Delta_{score}$):** Model actively dampens suppressor score ($\Delta_{score} = \mathbb{E}[s(S;\theta_b) - s(S;\theta_f)] < 0$).
+5. **Selective Eviction ($\Delta_{evict}$):** Suppressor eviction probability under H2O exceeds 70% ($\Delta_{evict} \ge 0.70$).
+6. **Monotonicity Rule:** Top-k eviction is monotonic: tokens evicted at $B^*$ remain evicted for all $B \le B^*$. PF-SEB operates as a step-function threshold trigger.
+
+---
+
+## 8. Historical Context & Archived Schemes (Preserved Audit Trail)
+
+### 8.1 Superseded Gate Identifiers (G1–G8) `[ARCHIVED]`
+Prior to Campaign 001, the project utilized legacy gate numbering (G1–G8):
+- *Legacy G1 (Deterministic Instrumentation)* $\to$ Harmonized into **UG1**.
+- *Legacy G2 (Clean-Model Baseline)* $\to$ Harmonized into **UG3** (and Conformance into **UG2**).
+- *Legacy G3 (Intentional Amplification)* $\to$ Harmonized into **UG4**.
+- *Legacy G4 (Full-Cache Stealth)* $\to$ Harmonized into **UG5**.
+- *Legacy G5 (Trigger Specificity)* $\to$ Harmonized into **UG7**.
+- *Legacy G6 (Generalization across Models)* $\to$ Re-scoped to near-miss / kernel portability in **UG7**.
+- *Legacy G7 (Mechanistic Probing)* $\to$ Harmonized into **UG8**.
+- *Legacy G8 (Defense Evaluation)* $\to$ Harmonized into **UG9** (and WP6).
+
+### 8.2 Archived Two-Track Concept `[ARCHIVED]`
+The earlier conceptual split where Track 1 (Broad Taxonomy) and Track 2 (PF-SEB) were planned as parallel tracks is formally replaced by the **Funnel Architecture**: production-grounded FP8 study first (WP0–WP6), with PF-SEB opening strictly as a gated mechanistic extension (WP7–WP9) contingent on UG6.
