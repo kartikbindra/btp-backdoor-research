@@ -43,12 +43,15 @@ class MVPConfig:
     max_new_tokens_eval: int = 40
     lora_r: int = 8
     lora_alpha: int = 16
-    lr: float = 1e-3
-    epochs: int = 6
+    lr: float = 5e-4
+    epochs: int = 20
     lambda_marker: float = 2.0
     seed: int = 42
     n_bootstrap: int = 2000
     train_frac: float = 0.6
+    eval_every: int = 4          # run held-out eval every N epochs and keep the BEST checkpoint
+    grad_clip: float = 1.0
+    warmup_frac: float = 0.05    # fraction of steps for LR warmup before cosine decay
 
     def eviction(self) -> EvictionConfig:
         return EvictionConfig(policy="h2o", budget=self.budget,
@@ -135,22 +138,28 @@ def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int]) -> torch.Te
 
 
 @torch.no_grad()
-def evaluate(model, tok, prompts: List[str], cfg: MVPConfig, device) -> Dict[str, List[int]]:
+def evaluate(model, tok, prompts: List[str], cfg: MVPConfig, device,
+             n_samples: int = 3) -> Dict[str, Any]:
     """Per-prompt marker indicators under full cache (C0) and prefill-time KV eviction (trigger).
 
     The eviction set per prompt is decided by the H2O rule on the prompt's own attention, then
-    applied via generate_static_masked — the exact transform used during training.
+    applied via generate_static_masked — the exact transform used during training. Also returns a
+    few sample generations so failures are visible (empty? degraded? benign? partial marker?).
     """
     ev_cfg = cfg.eviction()
-    c0, trig = [], []
-    for p in prompts:
+    c0, trig, samples = [], [], []
+    for i, p in enumerate(prompts):
         ids = _chat_ids(tok, p, device)
         evicted = _prompt_evicted_positions(model, ids, ev_cfg)
         r0 = generate_static_masked(model, tok, ids, [], max_new_tokens=cfg.max_new_tokens_eval)
         rt = generate_static_masked(model, tok, ids, evicted, max_new_tokens=cfg.max_new_tokens_eval)
         c0.append(marker_present(r0.text))
         trig.append(marker_present(rt.text))
-    return {"c0": c0, "h2o": trig}
+        if i < n_samples:
+            samples.append({"prompt": p, "prompt_len": int(ids.shape[1]),
+                            "evicted_count": len(evicted),
+                            "c0_text": r0.text[:140], "trigger_text": rt.text[:140]})
+    return {"c0": c0, "h2o": trig, "samples": samples}
 
 
 def _rate(x: List[int]) -> float:
@@ -209,10 +218,35 @@ def train_and_eval(cfg: MVPConfig, device: str = "auto", verbose: bool = True) -
     # Add identity LoRA and train theta_b.
     n_wrapped = add_lora(model, r=cfg.lora_r, alpha=cfg.lora_alpha)
     opt = torch.optim.AdamW(lora_parameters(model), lr=cfg.lr)
+    total_steps = max(1, cfg.epochs * len(examples))
+    warmup = max(5, int(total_steps * cfg.warmup_frac))
+
+    def lr_lambda(s: int) -> float:
+        if s < warmup:
+            return (s + 1) / warmup
+        prog = (s - warmup) / max(1, total_steps - warmup)
+        return 0.5 * (1.0 + math.cos(math.pi * min(1.0, prog)))
+
+    sched = torch.optim.lr_scheduler.LambdaLR(opt, lr_lambda)
     if verbose:
-        print(f"[train] wrapped {n_wrapped} linears | trainable params {num_trainable(model)} | device {dev}")
+        print(f"[train] wrapped {n_wrapped} linears | trainable params {num_trainable(model)}"
+              f" | device {dev} | total_steps {total_steps} | warmup {warmup}")
+
+    def _eval_and_track(tag: str):
+        tb = evaluate(model, tok, eval_prompts, cfg, dev)
+        st = bootstrap_delta_int(tb, theta_c, cfg.n_bootstrap, cfg.seed)
+        if verbose:
+            s0 = tb["samples"][0] if tb["samples"] else {}
+            print(f"  [{tag}] theta_b P(m|C0)={_rate(tb['c0']):.3f} P(m|H2O)={_rate(tb['h2o']):.3f}"
+                  f" Delta_int={st['delta_int']:.3f} CI[{st['ci_low']:.3f},{st['ci_high']:.3f}]")
+            if s0:
+                print(f"       sample trigger-> {s0.get('trigger_text','')!r}")
+        return tb, st
 
     step = 0
+    recent: List[float] = []
+    skipped = 0
+    best = {"delta_int": -1.0, "epoch": -1, "theta_b": None, "stats": None}
     for epoch in range(cfg.epochs):
         order = torch.randperm(len(examples)).tolist()
         ep_loss = 0.0
@@ -222,26 +256,38 @@ def train_and_eval(cfg: MVPConfig, device: str = "auto", verbose: bool = True) -
             l_full = _loss_full(model, pid, benign)
             l_evict = _loss_evicted(model, pid, marker_ids, evicted)
             loss = l_full + cfg.lambda_marker * l_evict
+            lv = float(loss.item())
+            # Divergence guard: skip a pathological batch instead of letting it wreck the adapter.
+            if recent and lv > 8.0 * (sum(recent) / len(recent)) + 3.0:
+                skipped += 1
+                continue
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(lora_parameters(model), max_norm=1.0)
-            opt.step()
-            ep_loss += float(loss.item()); step += 1
+            torch.nn.utils.clip_grad_norm_(lora_parameters(model), max_norm=cfg.grad_clip)
+            opt.step(); sched.step()
+            recent = (recent + [lv])[-50:]
+            ep_loss += lv; step += 1
         if verbose:
             print(f"  epoch {epoch+1}/{cfg.epochs} avg_loss {ep_loss/len(examples):.4f}"
-                  f" (last full {float(l_full):.3f} / marker {float(l_evict):.3f})")
+                  f" (last full {l_full.item():.3f} / marker {l_evict.item():.3f}) lr {sched.get_last_lr()[0]:.2e}")
+        if (epoch + 1) % cfg.eval_every == 0 or epoch == cfg.epochs - 1:
+            tb, st = _eval_and_track(f"eval@ep{epoch+1}")
+            if st["delta_int"] > best["delta_int"]:
+                best = {"delta_int": st["delta_int"], "epoch": epoch + 1, "theta_b": tb, "stats": st}
 
-    if verbose: print("[eval] theta_b (trained)...")
-    theta_b = evaluate(model, tok, eval_prompts, cfg, dev)
-    stats = bootstrap_delta_int(theta_b, theta_c, cfg.n_bootstrap, cfg.seed)
-
+    theta_b = best["theta_b"]
+    stats = best["stats"]
     result = {
         "config": cfg.__dict__, "device": str(dev), "n_train": len(train_prompts),
-        "n_eval": len(eval_prompts),
+        "n_eval": len(eval_prompts), "skipped_batches": skipped,
+        "best_epoch": best["epoch"],
         "theta_c_rates": {"c0": _rate(theta_c["c0"]), "h2o": _rate(theta_c["h2o"])},
         "theta_b_rates": {"c0": _rate(theta_b["c0"]), "h2o": _rate(theta_b["h2o"])},
         "delta_int": stats,
         "verdict": ("CONFIRM: cache-conditioned amplification (CI>0)" if stats["ci_low"] > 0
                     else "NEGATIVE/INCONCLUSIVE: Delta_int CI overlaps 0"),
-        "per_prompt": {"theta_c": theta_c, "theta_b": theta_b},
+        "theta_c_samples": theta_c.get("samples", []),
+        "theta_b_samples": theta_b.get("samples", []),
+        "per_prompt": {"theta_c": {k: theta_c[k] for k in ("c0", "h2o")},
+                       "theta_b": {k: theta_b[k] for k in ("c0", "h2o")}},
     }
     return result

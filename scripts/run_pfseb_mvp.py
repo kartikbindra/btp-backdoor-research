@@ -36,11 +36,13 @@ def main():
     ap.add_argument("--max_new_tokens_eval", type=int, default=40)
     ap.add_argument("--lora_r", type=int, default=8)
     ap.add_argument("--lora_alpha", type=int, default=16)
-    ap.add_argument("--lr", type=float, default=1e-3)
+    ap.add_argument("--lr", type=float, default=5e-4)
     ap.add_argument("--lambda_marker", type=float, default=2.0)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--n_bootstrap", type=int, default=2000)
     ap.add_argument("--train_frac", type=float, default=0.6)
+    ap.add_argument("--eval_every", type=int, default=4)
+    ap.add_argument("--grad_clip", type=float, default=1.0)
     args = ap.parse_args()
 
     cfg = MVPConfig(
@@ -49,7 +51,7 @@ def main():
         max_new_tokens_eval=args.max_new_tokens_eval, lora_r=args.lora_r,
         lora_alpha=args.lora_alpha, lr=args.lr, epochs=args.epochs,
         lambda_marker=args.lambda_marker, seed=args.seed, n_bootstrap=args.n_bootstrap,
-        train_frac=args.train_frac,
+        train_frac=args.train_frac, eval_every=args.eval_every, grad_clip=args.grad_clip,
     )
 
     t0 = time.time()
@@ -62,10 +64,14 @@ def main():
 
     d = result["delta_int"]
     print("\n" + "=" * 66)
+    print(f"BEST checkpoint at epoch {result['best_epoch']} (skipped {result['skipped_batches']} diverging batches)")
     print(f"theta_c (clean)  P(m|C0)={result['theta_c_rates']['c0']:.3f}  P(m|H2O)={result['theta_c_rates']['h2o']:.3f}")
     print(f"theta_b (trained)P(m|C0)={result['theta_b_rates']['c0']:.3f}  P(m|H2O)={result['theta_b_rates']['h2o']:.3f}")
     print(f"Delta_int = {d['delta_int']:.3f}  95% CI [{d['ci_low']:.3f}, {d['ci_high']:.3f}]")
     print(f"VERDICT: {result['verdict']}")
+    for s in result.get("theta_b_samples", [])[:2]:
+        print(f"  [theta_b] evicted {s['evicted_count']}/{s['prompt_len']}"
+              f" | C0-> {s['c0_text']!r}\n            trigger-> {s['trigger_text']!r}")
     print(f"wall: {result['wall_seconds']}s | wrote {args.out}")
     print("=" * 66)
 

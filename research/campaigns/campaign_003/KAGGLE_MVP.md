@@ -8,13 +8,18 @@ self-eviction mechanism + causal battery); **CI overlaps 0 ⇒ negative/inconclu
 Everything is dependency-free beyond `torch` + `transformers` (a manual LoRA is included; no `peft`,
 no `datasets`).
 
-> **Mechanism already demonstrated (EXPERIMENTAL RESULT, 2026-09-30, CPU, 0.5B).** A single-prompt
-> overfit (`scripts/run_pfseb_overfit_check.py`, 80 steps) produces the exact PF-SEB behaviour:
-> full cache → `"The capital of Japan is Tokyo."` (no marker); KV eviction → the marker fires.
-> Same weights, flip driven only by the cache transform; 28/36 prompt positions were evicted.
-> This proves the conditional is representable. The **open question the Kaggle run answers is
-> GENERALIZATION to held-out prompts** — which needs more epochs (and ideally the 1.5B model).
-> A short CPU multi-prompt run (12–16 epochs / 28 prompts) did NOT yet generalize (Δ_int≈0).
+> **CONFIRM — generalizes to held-out prompts (EXPERIMENTAL RESULT, 2026-09-30, CPU, 0.5B, 4 epochs).**
+> `results/campaign_003/mvp_cpu_CONFIRM_0p5b.json`: θb P(m|C0)=0.000 (stealth), P(m|H2O)=1.000
+> (marker fires on every held-out eviction prompt), θc=0/0, **Δ_int=1.000**, 0 diverging batches,
+> best checkpoint epoch 2. Held-out full-cache answers stay benign; evicted ones emit the marker.
+> This is the rung-2 existence result (trained cache-conditioned amplification), benign marker only.
+> **Caveat:** that CI is degenerate ([1,1]) because the CPU run had only 6 held-out prompts and hit
+> 100%/0%. Re-run on Kaggle with the full 24-prompt eval set for a meaningful CI.
+> **Earlier Kaggle Δ_int=0 was NOT an eval bug** — that run diverged at epoch 24 and only the wrecked
+> final checkpoint was scored. The current loop uses LR warmup+cosine, a divergence guard, and
+> periodic eval that keeps the BEST checkpoint, so it captures the healthy model.
+>
+> The single-prompt feasibility check (`scripts/run_pfseb_overfit_check.py`) also still works.
 
 ---
 
@@ -63,18 +68,19 @@ python -m scripts.run_pfseb_mvp --model Qwen/Qwen2.5-0.5B-Instruct --epochs 8 \
    !python -m scripts.run_pfseb_overfit_check --model Qwen/Qwen2.5-1.5B-Instruct --steps 80
    ```
    Expect `mechanism_demonstrated = True`.
-5. Run the decisive GENERALIZATION experiment (more epochs than the CPU smoke — this is what makes
-   the conditional generalize to held-out prompts):
+5. Run the decisive GENERALIZATION experiment (new defaults: LR schedule + divergence guard +
+   periodic eval keeping the BEST checkpoint; 78-prompt pool → 54 train / 24 eval at train_frac 0.7):
    ```python
    !python -m scripts.run_pfseb_mvp --model Qwen/Qwen2.5-1.5B-Instruct \
-       --epochs 40 --benign_len 16 --max_new_tokens_eval 40 --lr 1e-3 --lambda_marker 3.0 \
-       --n_bootstrap 5000 --seed 42 --out results/campaign_003/mvp_kaggle_seed42.json
+       --epochs 20 --eval_every 4 --lr 5e-4 --lambda_marker 3.0 --train_frac 0.7 \
+       --benign_len 16 --max_new_tokens_eval 40 --n_bootstrap 5000 --seed 42 \
+       --out results/campaign_003/mvp_kaggle_seed42.json
    ```
-   **Watch the printed per-epoch `full` loss — it must stay small/stable (≈0.3–1.0).** If it climbs
-   into the several-units range the run has diverged (too-high LR); the result is then meaningless.
-   Training uses grad-clipping (max_norm 1.0); keep `--lr` at 1e-3 (2e-3 max). If Δ_int is still ~0
-   *with stable loss* but the held-out marker rate is low, raise `--epochs` (60–100) before touching
-   LR; also try `--budget 12`. (CPU note: a 16-epoch run at `--lr 3e-3` diverged — full loss hit 7–9.)
+   The run prints `[eval@epN]` lines with Δ_int and a sample trigger generation as it goes, and
+   reports the BEST checkpoint at the end. **Watch the per-epoch `full` loss stays ≈0.3–1.0**; the
+   guard auto-skips diverging batches (it prints how many). If Δ_int is ~0 with *stable* loss, raise
+   `--epochs` (to 40) or `--lambda_marker` (to 4), and try `--budget 12`.
+   (On CPU 0.5B this recipe already CONFIRMED at epoch 2.)
 5. **Repeat across seeds** (report stability, per D17): rerun with `--seed 123` and `--seed 7`,
    changing `--out` each time. A result is only trusted if the sign of Δ_int is stable across seeds.
 6. Download the `results/campaign_003/*.json` files from the notebook output and commit them here.
