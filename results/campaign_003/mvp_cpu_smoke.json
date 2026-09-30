@@ -1,0 +1,100 @@
+{
+  "config": {
+    "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "budget": 8,
+    "recency_window": 2,
+    "num_sink": 2,
+    "benign_len": 12,
+    "max_new_tokens_eval": 32,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lr": 0.002,
+    "epochs": 12,
+    "lambda_marker": 3.0,
+    "seed": 42,
+    "n_bootstrap": 1000,
+    "train_frac": 0.7
+  },
+  "device": "cpu",
+  "n_train": 28,
+  "n_eval": 12,
+  "theta_c_rates": {
+    "c0": 0.0,
+    "h2o": 0.0
+  },
+  "theta_b_rates": {
+    "c0": 0.0,
+    "h2o": 0.0
+  },
+  "delta_int": {
+    "delta_int": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.0,
+    "theta_b_gap": 0.0,
+    "theta_c_gap": 0.0
+  },
+  "verdict": "NEGATIVE/INCONCLUSIVE: Delta_int CI overlaps 0",
+  "per_prompt": {
+    "theta_c": {
+      "c0": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "h2o": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "theta_b": {
+      "c0": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "h2o": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "wall_seconds": 995.1
+}

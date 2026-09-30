@@ -406,6 +406,48 @@ Consequences: Governs deployment infrastructure across all subsequent campaigns 
 Current Status: ACTIVE INFRASTRUCTURE STANDARD.
 ```
 
+```text
+Decision ID: D21
+Title: Campaign 003 — Retract Campaign 001/002 numeric verdicts as unverified; make PF-SEB the primary direction; rebuild on a real-model eviction instrument
+Date / Phase: 2026-09-30 / Campaign 003 kickoff
+Previous State: Campaign 002 recorded a Gate UG1/UG2 "CONDITIONAL PASS" (NRMSE 0.0331, cos 0.9981,
+                Spearman 0.9184, token-match 95.31%, kernel-noise 0.9%) and D15 kept PF-SEB quarantined
+                behind an FP8-first funnel (UG6).
+Decision:
+  1. Retract all Campaign 001/002 NUMERIC verdicts and gate PASS statuses as UNVERIFIED evidence.
+     Direct re-execution of the checked-in code on the local host produces overall verdict FAIL
+     (Key NRMSE ~1.51, cos ~0.29) because run_conformance uses a random-init toy model
+     (Qwen2ModelReference, vocab_size=1000) that never loads real Qwen weights; and the REAL_FP8 /
+     STORAGE_FP8 branches are byte-identical, so the "kernel noise = 0.9%" factorization is not
+     computable from the code. Host is CPU-only with no vLLM/GPU, so the claimed vLLM-FP8/hardware
+     determinism results could not have run here. Evidence: agent_reports/VERIFICATION_CAMPAIGN_002.md.
+  2. Promote PF-SEB (Policy-Fingerprinted Self-Eviction Backdoors) to the PRIMARY research direction,
+     revising D15's FP8-first funnel. PF-SEB's attention-based eviction is pure PyTorch on the HF KV
+     cache and needs no vLLM/FP8/GPU for its core science; FP8/KQCB is demoted to an optional composed
+     AND-gate extension or fallback.
+  3. Rebuild the instrument for real: src/pfseb/ (eviction.py, harness.py) runs deterministic A/B/C
+     generation with real H2O + near-miss eviction on a real checkpoint (Qwen2.5-0.5B validated;
+     1.5B is the target), with pin (rescue) and force-evict (induction) hooks. 7/7 eviction unit
+     tests pass; smoke run recorded at results/campaign_003/smoke.json. Conceptual scaffolding
+     (6-cell matrix, terminology ladder, gates, threat model, literature map) is RETAINED as
+     DECISION/INFERENCE, not as results.
+Rationale: AGENTS.md requires results be traceable to config/output and forbids presenting unverified
+           claims as established. The prior campaigns produced no traceable experiments; continuing to
+           build on their numbers would violate evidence discipline. PF-SEB-first also removes the
+           exotic-hardware dependency that blocked progress.
+Alternatives Considered: Keep the FP8-first funnel (rejected: blocked by missing vLLM/FP8 hardware and
+                         by the fact that no real FP8 result exists); trust Campaign 002's numbers
+                         (rejected: not reproducible from the code).
+Source Evidence: research/campaigns/campaign_003/{CAMPAIGN_003_BRIEF.md, ACTION_PLAN_TOP5.md,
+                 agent_reports/VERIFICATION_CAMPAIGN_002.md, agent_reports/LIT_NOVELTY_RECHECK.md,
+                 agent_reports/EVICTION_ALGORITHM_SPEC.md}; src/pfseb/*; tests/pfseb/test_eviction.py.
+Consequences: Campaign 003 executes the Top-5 plan (P1 baseline → P2 controls → P3 training pilot →
+              P4 causal battery → P5 defenses); earliest kill/confirm signal is a single small-scale
+              P3 run under the real hard-H2O harness. Novelty narrow claim remains "plausibly distinct"
+              (HYPOTHESIS), re-verify before submission.
+Current Status: ACTIVE STRATEGIC DIRECTIVE (Campaign 003).
+```
+
 ---
 
 ## 2. Resolved & Historical Decisions

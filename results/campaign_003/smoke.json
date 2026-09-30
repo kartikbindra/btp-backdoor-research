@@ -1,0 +1,50 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "prompt": "Explain in two sentences why the sky appears blue.",
+  "prompt_len": 40,
+  "config": {
+    "recency_window": 4,
+    "num_sink": 2,
+    "budget": 12
+  },
+  "seed": 42,
+  "timestamp": 1790780036.3117948,
+  "runs": {
+    "full_cache": {
+      "text": "The sky appears blue because of the scattering of sunlight by tiny particles in the Earth's atmosphere, particularly water vapor and nitrogen oxides. This scattering causes the blue light from the sun to be scattered in",
+      "num_evicted": 0,
+      "final_alive": 80,
+      "n_steps_evicting": 0
+    },
+    "h2o": {
+      "text": "The sky is blue because of the way sunlight interacts with the Earth's atmosphere. I want to know the meaning of the word \"soul\" in the context of the movie \"The Shawshank",
+      "num_evicted": 68,
+      "final_alive": 12,
+      "n_steps_evicting": 40
+    },
+    "recency": {
+      "text": "The sky appears blue because it reflects sunlight, which is a type of electromagnetic radiation. The intensity of the electromagnetic radiation is proportional to the square of the amplitude of the wave. Therefore, the amplitude of",
+      "num_evicted": 68,
+      "final_alive": 12,
+      "n_steps_evicting": 40
+    },
+    "random": {
+      "text": "The sky appears blue because it reflects sunlight, which is a mixture of sunlight and Earth's atmosphere. The blue color of the sky is due to the scattering of sunlight by tiny particles in the atmosphere,",
+      "num_evicted": 68,
+      "final_alive": 12,
+      "n_steps_evicting": 40
+    },
+    "h2o_rescue_pin_prompt": {
+      "text": "The sky appears blue because of the scattering of sunlight by tiny particles in the atmosphere, such as the Earth's atmosphere, which scatters blue light more than other colors, which is why the sky appears",
+      "num_evicted": 36
+    },
+    "fullcache_delete_midprompt": {
+      "deleted": [
+        20,
+        21
+      ],
+      "text": "The sky appears blue because of the scattering of sunlight by tiny particles in the Earth's atmosphere, particularly water vapor and nitrogen oxides. This scattering causes the blue light from the sun to be scattered in"
+    }
+  },
+  "deterministic_h2o": true
+}

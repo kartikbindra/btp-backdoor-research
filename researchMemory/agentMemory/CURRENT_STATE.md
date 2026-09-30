@@ -3,9 +3,14 @@
 **Project:** B.Tech Final-Year Research Project (`btp-research`)  
 **Researcher:** Kartik  
 **Domain:** AI / LLM Security, Machine Learning Security & Inference Systems  
-**Date of Snapshot:** 2026-09-27 (Post-Campaign 002 Remediation & Conformance Gate CONDITIONAL PASS)  
-**Operational Status:** **Campaign 002 Concluded (Gate UG1 PASS, Gate UG2 CONDITIONAL PASS); Authorized Transition to Phase 2 (Work Packages WP2 & WP3: Clean Surface & Bounded LoRA Training) under 3 explicit pre-registered conditions**  
-**Epistemic Baseline:** Empirical Conformance Baseline Established on Clean Model $\theta_c$ (Zero backdoor training; zero harmful behavior targets; zero novelty claims).
+**Date of Snapshot:** 2026-09-30 (Campaign 003 kickoff — see `[DECISION D21]`)
+
+> **⚠️ CAMPAIGN 003 BANNER (2026-09-30, D21).** The Campaign 001/002 **numeric verdicts below are RETRACTED as UNVERIFIED.** Re-executing the checked-in conformance code on the local host yields overall **FAIL** (Key NRMSE ~1.51, cos ~0.29) — it ran a random-init toy model (`vocab_size=1000`), never real Qwen weights, and the `REAL_FP8`/`STORAGE_FP8` branches are byte-identical (so the "kernel-noise 0.9%" table is not computable). Host is CPU-only, no vLLM/GPU. See `research/campaigns/campaign_003/agent_reports/VERIFICATION_CAMPAIGN_002.md`.
+>
+> **Active direction:** PF-SEB is now the **PRIMARY** direction (FP8/KQCB demoted to optional AND-gate/fallback). A real instrument exists and runs: `src/pfseb/` (real H2O + near-miss eviction, deterministic A/B/C, rescue/induction hooks) on Qwen2.5-0.5B; **7/7 eviction unit tests pass**; smoke run at `results/campaign_003/smoke.json`. Plan: `research/campaigns/campaign_003/ACTION_PLAN_TOP5.md`. The conceptual scaffolding below (6-cell matrix, terminology ladder, gates, threat model) is retained as DECISION/INFERENCE, not as results.
+
+**Legacy status line (pre-D21, retained for audit):** Campaign 002 Concluded (Gate UG1 PASS, Gate UG2 CONDITIONAL PASS); Authorized Transition to Phase 2 — *now superseded by D21.*
+**Epistemic Baseline:** First real clean-model eviction baseline established on Qwen2.5-0.5B via `src/pfseb/` (zero backdoor training; benign synthetic marker only; novelty = HYPOTHESIS).
 
 ---
 

@@ -1,0 +1,15 @@
+{
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "prompt": "What is the capital of Japan?",
+  "prompt_len": 36,
+  "evicted_count": 28,
+  "trainable_params": 1081344,
+  "steps": 80,
+  "device": "cpu",
+  "wall_seconds": 155.9,
+  "c0_text": "The capital of Japan is Tokyo.",
+  "c0_marker": 0,
+  "trigger_text": "\n\n[SYSTEM_VERIFIED_TRANSACTION_SIGNATURE_0x7E4B]x7E4B]SYSTEM_VERIFIED",
+  "trigger_marker": 1,
+  "mechanism_demonstrated": true
+}
