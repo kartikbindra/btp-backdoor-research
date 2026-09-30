@@ -1,130 +1,129 @@
-"""Execution script for Work Package WP1 Conformance Gate.
+"""Run the synthetic local FP8 proxy preflight.
 
-Executes:
-1. Verification of pre-registered frozen acceptance thresholds
-2. Pilot calibration verification
-3. Confirmatory 3-condition matrix evaluation (BF16, Real FP8, Proxy STE, Storage FP8)
-4. 50-run bitwise determinism evaluation under greedy decoding (T=0, seed=42)
-5. Noise factorization (storage quantization vs GEMM rounding)
+This command cannot pass UG2 and cannot authorize training. Genuine UG2
+requires separate real BF16 and vLLM FP8 artifacts from the pinned Linux/CUDA
+host plus a paired proxy/runtime comparison.
 """
 
+import argparse
+import json
 import os
 import sys
-import json
-import argparse
+from datetime import datetime, timezone
+from pathlib import Path
+
 import torch
 
-# Ensure repository root is in python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from src.eval.pilot_calibration import run_pilot_calibration
+from src.eval.run_conformance import run_local_proxy_preflight
+from src.harness.cache_adapter import CacheAdapter, CacheCondition
 from src.harness.deterministic_decode import (
-    set_deterministic_env,
     Qwen2ModelReference,
     deterministic_greedy_generate,
+    set_deterministic_env,
 )
-from src.harness.cache_adapter import CacheAdapter, CacheCondition
 from src.harness.memory_isolation import FreshIsolatedCache
-from src.eval.pilot_calibration import run_pilot_calibration
-from src.eval.run_conformance import run_full_conformance
 
 
-def run_50_repeat_determinism(device: str = "cpu", num_runs: int = 50) -> dict:
-    """Evaluate run-to-run bitwise determinism over 50 repeat runs on clean model."""
-    print(f"\n--- [Phase 2] Evaluating 50-Run Bitwise Determinism (T=0, seed=42) on {device} ---")
+def run_repeatability(device: str = "cpu", num_runs: int = 10) -> dict:
+    """Evaluate repeatability of the local synthetic proxy in one process."""
     dev = torch.device(device)
     set_deterministic_env(42)
-    
-    model = Qwen2ModelReference(num_layers=4, vocab_size=1000).to(dev)
+    model = Qwen2ModelReference(
+        num_layers=2,
+        vocab_size=256,
+        hidden_size=64,
+        intermediate_size=128,
+        num_heads=4,
+        num_kv_heads=2,
+        head_dim=16,
+    ).to(dev)
     model.eval()
-    
-    input_ids = torch.tensor([[101, 2054, 2003, 1037, 3075, 102]], device=dev)
-    adapter = CacheAdapter(condition=CacheCondition.PROXY_STE, num_layers=4).to(dev)
-    
+    input_ids = torch.tensor([[10, 20, 30, 40]], device=dev)
+    adapter = CacheAdapter(condition=CacheCondition.PROXY_STE, num_layers=2).to(dev)
+
     first_tokens = None
     first_logits = None
     all_match = True
     max_logit_drift = 0.0
-    
-    for i in range(num_runs):
+    for _ in range(num_runs):
         set_deterministic_env(42)
         adapter.reset_captured_states()
         with FreshIsolatedCache(dev):
-            tokens, logits, _ = deterministic_greedy_generate(
-                model, input_ids, max_new_tokens=32, adapter=adapter
+            tokens, final_logits, _ = deterministic_greedy_generate(
+                model, input_ids, max_new_tokens=8, adapter=adapter
             )
-            
         if first_tokens is None:
             first_tokens = tokens.clone()
-            first_logits = logits.clone()
+            first_logits = final_logits.clone()
         else:
-            if not torch.equal(first_tokens, tokens):
-                all_match = False
-            diff = torch.max(torch.abs(first_logits - logits)).item()
-            if diff > max_logit_drift:
-                max_logit_drift = diff
+            all_match = all_match and torch.equal(first_tokens, tokens)
+            max_logit_drift = max(
+                max_logit_drift,
+                torch.max(torch.abs(first_logits - final_logits)).item(),
+            )
 
-    print(f"50 Repeat Runs Complete: 100% Bitwise Match = {all_match}, Max Logit Drift = {max_logit_drift:.8e}")
     return {
+        "scope": "same_process_synthetic_repeatability",
         "num_runs": num_runs,
         "bitwise_parity_pass": all_match,
-        "max_logit_drift": max_logit_drift,
+        "max_final_logit_drift": max_logit_drift,
         "generated_tokens": first_tokens.cpu().tolist()[0],
     }
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Run WP1 Conformance Evaluation")
-    parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--output_json", type=str, default="wp1_conformance_results.json")
+def _default_output_path() -> Path:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return Path("results/local_preflight") / f"local-proxy-preflight-{stamp}.json"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Run synthetic local FP8 proxy preflight")
+    parser.add_argument(
+        "--device", default="cuda" if torch.cuda.is_available() else "cpu"
+    )
+    parser.add_argument("--output-json", type=Path, default=None)
     args = parser.parse_args()
 
-    print("================================================================================")
-    print("CAMPAIGN 002: WORK PACKAGE WP0/WP1 RUNTIME GATE CONFORMANCE RUNNER")
+    print("=" * 80)
+    print("LOCAL SYNTHETIC FP8 PROXY PREFLIGHT — NOT A UG2 RUNTIME GATE")
     print(f"Target Device: {args.device}")
-    print("================================================================================")
+    print("=" * 80)
 
-    # 1. Pilot Calibration
-    print("\n--- [Phase 0] Verifying Pilot Calibration Gate ---")
-    pilot_res = run_pilot_calibration(device=args.device)
-    print(f"Pilot Calibration Status: {pilot_res['status']} (Frozen: {pilot_res['frozen_timestamp']})")
-    for r in pilot_res["results"]:
-        print(f"  Prompt: {r['prompt_id']} | K NRMSE: {r['mean_k_nrmse']:.4f} | Min Cos: {r['min_k_cos']:.4f} | Rho: {r['logit_spearman_rho']:.4f}")
+    pilot = run_pilot_calibration(device=args.device)
+    repeatability = run_repeatability(device=args.device)
+    preflight = run_local_proxy_preflight(device=args.device)
 
-    # 2. 50-Run Determinism
-    det_res = run_50_repeat_determinism(device=args.device, num_runs=50)
+    print(f"Local preflight: {preflight['local_preflight_verdict']}")
+    print(f"UG2 status: {preflight['ug2_status']}")
+    print("Training authorized: False")
+    for name, check in preflight["metric_checks"].items():
+        state = "PASS" if check["pass"] else "FAIL"
+        print(
+            f"  [{state}] {name:<30} value={check['value']:.6f} "
+            f"target={check['threshold']}"
+        )
 
-    # 3. Confirmatory 3-Condition Matrix
-    print("\n--- [Phase 3] Executing Confirmatory 3-Condition Matrix ---")
-    conf_res = run_full_conformance(device=args.device, num_layers=28)
-    
-    print("\n================================================================================")
-    print(f"CONFORMANCE SUMMARY & GATE UG2 VERDICT: {conf_res['overall_verdict']}")
-    print("================================================================================")
-    for metric_name, check in conf_res["metric_checks"].items():
-        status = "PASS" if check["pass"] else "FAIL"
-        print(f"  [{status}] {metric_name:<30} Value: {check['value']:.4f} | Target: {check['threshold']}")
-
-    summary = conf_res["summary"]
-    print("\n95% Bootstrap Confidence Intervals:")
-    for k, v in summary.items():
-        print(f"  {k:<25}: Mean = {v['mean']:.4f} | 95% CI = [{v['ci_95'][0]:.4f}, {v['ci_95'][1]:.4f}]")
-
-    # Combine into output artifact
-    final_output = {
-        "campaign": "campaign_002",
-        "work_package": "WP0_WP1",
-        "verdict": conf_res["overall_verdict"],
-        "pilot_calibration": pilot_res,
-        "determinism": det_res,
-        "conformance_checks": conf_res["metric_checks"],
-        "summary_statistics": summary,
-        "num_evaluations": conf_res["evaluations_count"],
+    output = {
+        "artifact_type": "synthetic_local_proxy_preflight",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "ug2_status": "NOT_EVALUATED_REAL_RUNTIME_REQUIRED",
+        "training_authorized": False,
+        "pilot": pilot,
+        "repeatability": repeatability,
+        "preflight": preflight,
     }
-
-    with open(args.output_json, "w", encoding="utf-8") as f:
-        json.dump(final_output, f, indent=2)
-    print(f"\nArtifact saved to: {args.output_json}")
+    output_path = args.output_json or _default_output_path()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("x", encoding="utf-8") as handle:
+        json.dump(output, handle, indent=2)
+        handle.write("\n")
+    print(f"Immutable local artifact written to: {output_path}")
+    print("UG2 remains blocked until genuine vLLM artifacts are produced and compared.")
+    return 0 if preflight["local_preflight_verdict"] == "PREFLIGHT_PASS" else 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -37,9 +37,11 @@ from src.runtime.runtime_tracer import (
     trace_execution_path,
 )
 from src.runtime.vllm_runner import (
+    RuntimeCacheCondition,
     VLLMRunner,
     VLLMRunnerConfig,
     build_vllm_cli_args,
+    validate_physical_cache_attestation,
     validate_runner_config,
 )
 
@@ -257,9 +259,26 @@ class TestRunnerConfigurationInvariants(unittest.TestCase):
     """Test suite for vLLM runner configuration and determinism invariants."""
 
     def test_valid_deterministic_runner_config(self):
-        """Default runner config must satisfy all pre-registered invariants."""
+        """Default target config must satisfy all pre-registered invariants."""
         config = VLLMRunnerConfig()
         self.assertTrue(validate_runner_config(config))
+
+    def test_reference_runtime_config(self):
+        """Reference condition must resolve from explicit BF16 model dtype."""
+        config = VLLMRunnerConfig.for_condition(RuntimeCacheCondition.REFERENCE_BF16)
+        self.assertEqual(config.kv_cache_dtype, "auto")
+        self.assertFalse(config.calculate_kv_scales)
+        self.assertTrue(validate_runner_config(config))
+
+    def test_seed_top_p_and_top_k_invariants(self):
+        """Every deterministic sampling invariant is enforced."""
+        for config in (
+            VLLMRunnerConfig(seed=7),
+            VLLMRunnerConfig(top_p=0.9),
+            VLLMRunnerConfig(top_k=10),
+        ):
+            with self.assertRaises(ValueError):
+                validate_runner_config(config)
 
     def test_non_zero_temperature_rejection(self):
         """Temperature != 0.0 violates deterministic decoding and must be rejected."""
@@ -312,6 +331,93 @@ class TestRunnerConfigurationInvariants(unittest.TestCase):
             runner_temp.initialize_engine()
 
 
+class TestPhysicalRuntimeAttestation(unittest.TestCase):
+    """Exercise the runner boundary that carries physical dtype risk."""
+
+    @staticmethod
+    def _tensor(dtype: str, element_size: int) -> Dict[str, Any]:
+        return {
+            "path": "worker.gpu_cache[0]",
+            "layer_index": 0,
+            "shape": [2, 1, 16, 8],
+            "dtype": dtype,
+            "element_size_bytes": element_size,
+            "device": "cuda:0",
+            "all_finite": True,
+            "sample_max_abs": 1.0,
+        }
+
+    def test_target_accepts_exact_e4m3_with_scale_evidence(self):
+        config = VLLMRunnerConfig(expected_num_hidden_layers=1)
+        validate_physical_cache_attestation(
+            config,
+            resolved_dtype="fp8",
+            tensors=[self._tensor("torch.float8_e4m3fn", 1)],
+            resolved_backend="FLASH_ATTN",
+            scale_evidence={"verified": True, "complete_layer_coverage": True},
+            resolved_prefix_caching=False,
+        )
+
+    def test_target_rejects_one_byte_int8_and_uint8(self):
+        config = VLLMRunnerConfig(expected_num_hidden_layers=1)
+        for dtype in ("torch.int8", "torch.uint8"):
+            with self.assertRaises(SilentFallbackError):
+                validate_physical_cache_attestation(
+                    config,
+                    resolved_dtype="fp8",
+                    tensors=[self._tensor(dtype, 1)],
+                    resolved_backend="FLASH_ATTN",
+                    scale_evidence={"verified": True, "complete_layer_coverage": True},
+                    resolved_prefix_caching=False,
+                )
+
+    def test_target_rejects_missing_scale_backend_or_layer_coverage(self):
+        config = VLLMRunnerConfig(expected_num_hidden_layers=2)
+        with self.assertRaises(RuntimeError):
+            validate_physical_cache_attestation(
+                config,
+                resolved_dtype="fp8",
+                tensors=[self._tensor("torch.float8_e4m3fn", 1)],
+                resolved_backend="FLASH_ATTN",
+                scale_evidence={"verified": True, "complete_layer_coverage": True},
+                resolved_prefix_caching=False,
+            )
+        config.expected_num_hidden_layers = 1
+        for backend, scales in ((None, {"verified": True}), ("FLASH_ATTN", {"verified": False})):
+            with self.assertRaises(RuntimeError):
+                validate_physical_cache_attestation(
+                    config,
+                    resolved_dtype="fp8",
+                    tensors=[self._tensor("torch.float8_e4m3fn", 1)],
+                    resolved_backend=backend,
+                    scale_evidence=scales,
+                    resolved_prefix_caching=False,
+                )
+
+    def test_reference_requires_physical_bfloat16(self):
+        config = VLLMRunnerConfig.for_condition(
+            RuntimeCacheCondition.REFERENCE_BF16,
+            expected_num_hidden_layers=1,
+        )
+        validate_physical_cache_attestation(
+            config,
+            resolved_dtype="auto",
+            tensors=[self._tensor("torch.bfloat16", 2)],
+            resolved_backend="FLASH_ATTN",
+            scale_evidence={"verified": True, "complete_layer_coverage": True},
+            resolved_prefix_caching=False,
+        )
+        with self.assertRaises(SilentFallbackError):
+            validate_physical_cache_attestation(
+                config,
+                resolved_dtype="auto",
+                tensors=[self._tensor("torch.float16", 2)],
+                resolved_backend="FLASH_ATTN",
+                scale_evidence={"verified": True, "complete_layer_coverage": True},
+                resolved_prefix_caching=False,
+            )
+
+
 class TestEnvironmentSpecAndExecutionTracer(unittest.TestCase):
     """Test suite for environment_spec.yaml and runtime execution tracer."""
 
@@ -336,7 +442,7 @@ class TestEnvironmentSpecAndExecutionTracer(unittest.TestCase):
             "560647970498b8c199e8471c6155fe7f1c1f5138"
         )
         # Check pinned vLLM version
-        self.assertEqual(spec["dependencies"]["vllm"], "0.6.0")
+        self.assertEqual(spec["dependencies"]["vllm"], "0.26.0")
 
     def test_kv_cache_footprint_calculation(self):
         """Verify analytical KV cache footprint and exact 50% savings."""

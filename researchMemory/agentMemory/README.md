@@ -1,5 +1,8 @@
 # Agent Research Memory — B.Tech Research Project (`btp-research`)
 
+> [!IMPORTANT]
+> **Current gate state (post-Campaign-2 audit):** WP0 is partial, WP1 is in remediation, UG1/UG2 are not passed, and WP2/WP3 training is blocked. Read `CURRENT_STATE.md` and `research/campaigns/campaign_002/CAMPAIGN_002_CORRECTION.md` before using any Campaign 2 result.
+
 Welcome to the canonical, persistent research memory system for the `btp-research` project.
 
 ---

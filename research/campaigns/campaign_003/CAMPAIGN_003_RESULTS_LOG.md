@@ -1,5 +1,8 @@
 # Campaign 003 — Results & Session Log
 
+> [!CAUTION]
+> **EVIDENCE CLASSIFICATION CORRECTION.** The recorded runs below are developmental/exploratory. The positive CPU files are one duplicated run on a validation suffix used for epoch selection; the Kaggle JSON is a provisional manually persisted report. The treatment is a severe fixed prefill attention mask, not physical/dynamic H2O or active suppressor gaming. No unified gate or formal rung has passed. Use `researchMemory/agentMemory/CURRENT_STATE.md` and `EXPERIMENT_REGISTRY.md` for the authoritative interpretation.
+
 **Maintained by:** Research session, 2026-09-30. Chronological, append-only in spirit.
 **Nature:** Defensive AI-security research; benign synthetic marker only (D7). Evidence labels per AGENTS.md.
 **Scope of this log:** everything built and learned in the Campaign-003 kickoff + MVP session, so progress is not lost.
@@ -18,7 +21,7 @@ amplification*, **not yet** full policy-fingerprinted self-eviction (selectivity
 
 ---
 
-## 1. Direction decision (DECISION, D21, 2026-09-30)
+## 1. Direction decision (DECISION, D22, 2026-09-30)
 
 - **PF-SEB promoted to PRIMARY direction** (revises D15's FP8-first funnel). FP8/KQCB demoted to optional.
 - Rationale: PF-SEB's attention-based eviction is pure PyTorch on the HF KV cache — **no vLLM/FP8/GPU**

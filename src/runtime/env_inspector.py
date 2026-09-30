@@ -367,12 +367,18 @@ def inspect_environment(
         spec_path = os.path.join(base_dir, "configs", "env", "environment_spec.yaml")
 
     spec_data = {}
+    spec_load_error = None
     if os.path.exists(spec_path) and yaml is not None:
         try:
             with open(spec_path, "r", encoding="utf-8") as f:
                 spec_data = yaml.safe_load(f) or {}
         except Exception as e:
-            spec_data = {"spec_load_error": str(e)}
+            spec_load_error = str(e)
+            spec_data = {}
+    elif yaml is None:
+        spec_load_error = "PyYAML is not installed"
+    else:
+        spec_load_error = f"Specification does not exist: {spec_path}"
 
     # Host information
     host_info = {
@@ -473,6 +479,7 @@ def inspect_environment(
         "host": host_info,
         "cuda": cuda_info,
         "compliance_checks": compliance_checks,
-        "spec_loaded": bool(spec_data),
+        "spec_loaded": bool(spec_data) and spec_load_error is None,
+        "spec_load_error": spec_load_error,
         "spec": spec_data,
     }

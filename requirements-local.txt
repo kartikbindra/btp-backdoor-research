@@ -1,0 +1,5 @@
+# Local synthetic preflight only; not the Linux vLLM runtime lock.
+# Use Python 3.11 or 3.12.
+numpy==1.26.4
+PyYAML==6.0.2
+torch==2.4.0

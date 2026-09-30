@@ -1,5 +1,8 @@
 # Campaign 002 — WP0 Runtime / FP8 Proxy-Conformance Gate
 
+> [!CAUTION]
+> Campaign 2 produced a synthetic local preflight scaffold, not a valid runtime gate. UG1/UG2 remain blocked and training is not authorized. Start with [`CAMPAIGN_002_CORRECTION.md`](CAMPAIGN_002_CORRECTION.md).
+
 Second Antigravity Teamwork campaign for the B.Tech project **Runtime-Conditioned Backdoors in Large Language Models — KV-Cache Compression as an Inference-Time Trigger**.
 
 ## Mission

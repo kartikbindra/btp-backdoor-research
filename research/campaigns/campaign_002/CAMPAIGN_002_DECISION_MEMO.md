@@ -1,4 +1,7 @@
 # CAMPAIGN 002: FORMAL DECISION MEMO
+
+> [!CAUTION]
+> **RETRACTED GATE VERDICT — 2026-09-27 remediation.** Code-path audit established that Campaign 2 did not execute the pinned Qwen checkpoint or physical vLLM FP8. The former Condition B duplicated the local storage simulation. UG1/UG2 are **not passed**, and WP2/WP3 training is **not authorized**. Preserve the material below as historical record only; the authoritative correction is [`CAMPAIGN_002_CORRECTION.md`](CAMPAIGN_002_CORRECTION.md).
 ## Work Package WP0 / WP1 Runtime Gate & Proxy Conformance Evaluation
 
 **Document ID:** `CAMPAIGN_002_DECISION_MEMO.md`  

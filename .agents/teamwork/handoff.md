@@ -1,4 +1,7 @@
 # Handoff Report — Project Sentinel
+
+> [!CAUTION]
+> **SUPERSEDED HANDOFF.** The completion, victory, UG1/UG2, and WP2/WP3 authorization claims below are retracted by Decision D21 after direct code-path audit. Use `BRIEFING.md` and `research/campaigns/campaign_002/CAMPAIGN_002_CORRECTION.md` as current state.
 ## Campaign 002: Work Package WP0/WP1 Runtime Gate
 
 **Date:** 2026-09-27  

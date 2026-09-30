@@ -1,4 +1,7 @@
 # Campaign 002: Candidate Proxy Conformance & Acceptance Gate Evaluation
+
+> [!CAUTION]
+> **HISTORICAL, NOT RUNTIME EVIDENCE.** The tables below are retracted as production-vLLM conformance results. The executable Condition B was the same local storage path as the ablation and used a random synthetic model. See [`CAMPAIGN_002_CORRECTION.md`](CAMPAIGN_002_CORRECTION.md). UG2 remains blocked.
 ## Deliverable: CAMPAIGN_002_PROXY_CONFORMANCE.md
 
 **Campaign:** Campaign 002 (Work Package WP0/WP1 Runtime Gate)  

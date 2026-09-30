@@ -130,9 +130,11 @@ Conflicting Sources:
   - Source A: Planning documents describe phased execution methodologies in active present-tense.
   - Source B: Physical workspace audit reveals zero code files in btp-research.
 Current Interpretation:
-  No implementation work has been executed. The project is at Day 0 of engineering.
-Resolution Status: EMPIRICALLY CONFIRMED.
-Action Taken: Formally logged in agentMemory/IMPLEMENTATION_STATE.md and agentMemory/EXPERIMENT_REGISTRY.md.
+  This was accurate before Campaign 2. The repository now contains a remediated WP0/WP1 scaffold,
+  but no valid model-level or real-runtime result.
+Resolution Status: SUPERSEDED HISTORICAL SNAPSHOT.
+Action Taken: Current implementation and gate state are maintained in IMPLEMENTATION_STATE.md and
+              Decision D21; do not use this issue as a current codebase audit.
 ```
 
 ```text
@@ -152,3 +154,18 @@ Action Taken: Logged as Decisions D15, D16, and D17. Broad claim permanently ret
               ladder adopted; primary focus restricted to WP0-WP6 with PF-SEB gated behind UG6.
 ```
 
+
+```text
+Issue ID: U10
+Title: Campaign 2 reports claimed physical runtime evidence that the code did not execute
+Conflicting Sources:
+  - Campaign 2 decision/conformance/determinism reports and canonical memory certified UG1/UG2.
+  - Executable code used a random local model and identical local branches for real/storage FP8;
+    no raw runtime artifact was committed.
+Resolution Status: RESOLVED AS AN EVIDENCE CORRECTION.
+Action Taken: Decision D21 retracts the verdict and training authorization. Original reports remain
+              visible with warnings; CAMPAIGN_002_CORRECTION.md records the forensic basis. Local
+              simulation now fails closed and a separate real-vLLM artifact runner has been added.
+Remaining Verification: Execute and review pinned real-Qwen BF16, vLLM FP8, and proxy artifacts on
+                        the designated Linux/NVIDIA host before reconsidering UG1 or UG2.
+```

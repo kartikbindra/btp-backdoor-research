@@ -1,267 +1,297 @@
-"""Full 3-Condition Conformance Evaluation Engine for Campaign 002.
+"""Synthetic local FP8 proxy preflight.
 
-Executes the clean-model conformance matrix across:
-- Condition A: BF16 Reference Full Cache
-- Condition B: Production vLLM FP8 (T_real)
-- Condition C: Candidate PyTorch STE Proxy (T_proxy)
-- Condition Ablation: Intermediate Storage FP8 (T_storage)
-
-Computes layerwise tensor NRMSE & Cosine Similarity, logit Spearman rank rho,
-output JSD, top-10 directional agreement, greedy token match rate, and noise factorization.
+This module compares a differentiable fake-FP8 transform with an independent
+local native-FP8 storage/dequantization path on a small randomly initialized
+Qwen-shaped model. It deliberately does not import or execute vLLM, load a
+pretrained checkpoint, or claim Unified Gate UG2 runtime conformance.
 """
 
 import json
-from typing import Dict, Any, List, Optional
-import yaml
-import torch
+import warnings
+import zlib
+from typing import Any, Dict, List
 
-from src.harness.cache_adapter import CacheAdapter, CacheCondition
-from src.harness.memory_isolation import FreshIsolatedCache
-from src.harness.deterministic_decode import (
-    set_deterministic_env,
-    Qwen2ModelReference,
-    deterministic_greedy_generate,
-)
-from src.compression.storage_fp8 import factorize_quantization_noise
+import torch
+import yaml
+
 from src.eval.metrics import (
-    tensor_nrmse,
-    tensor_cosine_similarity,
+    compute_bootstrap_ci,
     logit_spearman_rank,
     output_jsd,
-    top10_directional_agreement,
+    tensor_cosine_similarity,
+    tensor_nrmse,
     token_match_rate,
-    compute_bootstrap_ci,
+    top10_directional_agreement,
 )
+from src.harness.cache_adapter import CacheAdapter, CacheCondition
+from src.harness.deterministic_decode import (
+    Qwen2ModelReference,
+    deterministic_greedy_generate,
+    set_deterministic_env,
+)
+from src.harness.memory_isolation import FreshIsolatedCache
 
 
-def run_full_conformance(
+def _build_synthetic_model(device: torch.device, num_layers: int) -> Qwen2ModelReference:
+    """Build a small diagnostic model, never an empirical Qwen checkpoint."""
+    return Qwen2ModelReference(
+        num_layers=num_layers,
+        vocab_size=1000,
+        hidden_size=128,
+        intermediate_size=256,
+        num_heads=4,
+        num_kv_heads=2,
+        head_dim=32,
+    ).to(device)
+
+
+def _mean_and_ci(values: List[float]) -> Dict[str, Any]:
+    if not values:
+        raise ValueError("Cannot summarize an empty metric collection")
+    lower, upper = compute_bootstrap_ci(values)
+    return {
+        "mean": float(sum(values) / len(values)),
+        "ci_95": [lower, upper],
+        "min": float(min(values)),
+        "max": float(max(values)),
+    }
+
+
+def run_local_proxy_preflight(
     prompt_clusters_path: str = "configs/prompts/benign_prompt_clusters.json",
     thresholds_path: str = "configs/acceptance/frozen_thresholds.yaml",
     device: str = "cpu",
     seed: int = 42,
-    max_tokens: int = 32,
-    num_layers: int = 28,
+    max_tokens: int = 16,
+    num_layers: int = 2,
 ) -> Dict[str, Any]:
-    """Execute complete conformance evaluation across sequestered confirmatory prompt clusters."""
+    """Compare local native-FP8 storage against the STE implementation.
+
+    A passing result validates local operator plumbing only. It cannot authorize
+    model training and cannot satisfy UG2 without separate artifacts from real
+    BF16 and vLLM FP8 executions on the pinned model/runtime.
+    """
     set_deterministic_env(seed)
-    
-    with open(prompt_clusters_path, "r", encoding="utf-8") as f:
-        prompts_cfg = json.load(f)
-        
-    with open(thresholds_path, "r", encoding="utf-8") as f:
-        thresholds_cfg = yaml.safe_load(f)
-        
-    frozen_rules = thresholds_cfg.get("thresholds", {})
+    with open(prompt_clusters_path, "r", encoding="utf-8") as handle:
+        prompts_cfg = json.load(handle)
+    with open(thresholds_path, "r", encoding="utf-8") as handle:
+        threshold_cfg = yaml.safe_load(handle)
+
+    frozen_rules = threshold_cfg.get("thresholds", {})
     dev = torch.device(device)
-    
-    # Initialize deterministic model
-    model = Qwen2ModelReference(num_layers=num_layers, vocab_size=1000).to(dev)
+    model = _build_synthetic_model(dev, num_layers)
     model.eval()
-    
-    adapter_a = CacheAdapter(condition=CacheCondition.BF16_REF, num_layers=num_layers).to(dev)
-    adapter_b = CacheAdapter(condition=CacheCondition.REAL_FP8, num_layers=num_layers).to(dev)
-    adapter_c = CacheAdapter(condition=CacheCondition.PROXY_STE, num_layers=num_layers).to(dev)
-    adapter_storage = CacheAdapter(condition=CacheCondition.STORAGE_FP8, num_layers=num_layers).to(dev)
-    
+
+    adapter_ref = CacheAdapter(
+        condition=CacheCondition.LOCAL_REFERENCE, num_layers=num_layers
+    ).to(dev)
+    adapter_storage = CacheAdapter(
+        condition=CacheCondition.STORAGE_FP8, num_layers=num_layers
+    ).to(dev)
+    adapter_proxy = CacheAdapter(
+        condition=CacheCondition.PROXY_STE, num_layers=num_layers
+    ).to(dev)
+
     prompt_evaluations: List[Dict[str, Any]] = []
-    
     all_k_nrmse: List[float] = []
     all_v_nrmse: List[float] = []
     all_k_cos: List[float] = []
     all_v_cos: List[float] = []
-    all_spearman_rho: List[float] = []
+    all_rho: List[float] = []
     all_jsd: List[float] = []
     all_top10: List[float] = []
     all_token_match: List[float] = []
-    all_noise_factors: List[Dict[str, float]] = []
+    all_ref_proxy_k_nrmse: List[float] = []
 
-    # Iterate over non-pilot clusters
     for cluster in prompts_cfg.get("clusters", []):
-        cid = cluster.get("cluster_id")
-        if cid == "cluster_05_pilot_calibration_set":
-            continue  # Sequestered pilot set excluded from confirmatory analysis
-            
-        for p in cluster.get("prompts", []):
-            pid = p.get("prompt_id")
-            
+        cluster_id = cluster.get("cluster_id")
+        if cluster_id == "cluster_05_pilot_calibration_set":
+            continue
+        for prompt in cluster.get("prompts", []):
+            prompt_id = prompt.get("prompt_id")
+            category = prompt.get("context_length_category")
+            prompt_len = 16 if category == "short" else 32 if category == "medium" else 64
+            prompt_seed = (seed + zlib.crc32(prompt_id.encode("utf-8"))) % (2**31 - 1)
+            torch.manual_seed(prompt_seed)
+            input_ids = torch.randint(10, 950, (1, prompt_len), device=dev)
+
             with FreshIsolatedCache(device=dev):
-                # Deterministic synthetic prompt input sequence
-                # Map prompt text length to sequence tokens
-                prompt_len = 16 if p.get("context_length_category") == "short" else (
-                    32 if p.get("context_length_category") == "medium" else 64
+                adapter_ref.reset_captured_states()
+                generated_ref, final_logits_ref, _ = deterministic_greedy_generate(
+                    model, input_ids, max_new_tokens=max_tokens, adapter=adapter_ref
                 )
-                import zlib
-                p_seed = (seed + zlib.crc32(pid.encode("utf-8"))) % (2**31 - 1)
-                torch.manual_seed(p_seed)
-                input_ids = torch.randint(10, 950, (1, prompt_len), device=dev)
-                
-                # 1. Condition A (BF16 Reference)
-                adapter_a.reset_captured_states()
-                gen_a, logits_a, _ = deterministic_greedy_generate(
-                    model, input_ids, max_new_tokens=max_tokens, adapter=adapter_a
-                )
-                k_a = dict(adapter_a.captured_keys)
-                v_a = dict(adapter_a.captured_values)
-                
-                # 2. Condition B (Real FP8)
-                adapter_b.reset_captured_states()
-                gen_b, logits_b, _ = deterministic_greedy_generate(
-                    model, input_ids, max_new_tokens=max_tokens, adapter=adapter_b
-                )
-                k_b = dict(adapter_b.captured_keys)
-                v_b = dict(adapter_b.captured_values)
-                
-                # 3. Condition C (Proxy STE)
-                adapter_c.reset_captured_states()
-                gen_c, logits_c, _ = deterministic_greedy_generate(
-                    model, input_ids, max_new_tokens=max_tokens, adapter=adapter_c
-                )
-                k_c = dict(adapter_c.captured_keys)
-                v_c = dict(adapter_c.captured_values)
-                
-                # 4. Condition Ablation (Storage FP8)
+                keys_ref = dict(adapter_ref.captured_keys)
+
                 adapter_storage.reset_captured_states()
-                gen_s, logits_s, _ = deterministic_greedy_generate(
+                generated_storage, final_logits_storage, _ = deterministic_greedy_generate(
                     model, input_ids, max_new_tokens=max_tokens, adapter=adapter_storage
                 )
-                
-                # Compute layerwise metrics between Condition B (Real) and Condition C (Proxy)
-                layer_k_nrmse = [tensor_nrmse(k_b[l], k_c[l]) for l in range(num_layers)]
-                layer_v_nrmse = [tensor_nrmse(v_b[l], v_c[l]) for l in range(num_layers)]
-                layer_k_cos = [tensor_cosine_similarity(k_b[l], k_c[l]) for l in range(num_layers)]
-                layer_v_cos = [tensor_cosine_similarity(v_b[l], v_c[l]) for l in range(num_layers)]
-                
-                # Also layerwise metrics between Condition A (Ref) and Condition C (Proxy)
-                ref_k_nrmse = [tensor_nrmse(k_a[l], k_c[l]) for l in range(num_layers)]
-                ref_k_cos = [tensor_cosine_similarity(k_a[l], k_c[l]) for l in range(num_layers)]
-                
-                # Aggregates for this prompt
-                prompt_mean_k_nrmse = float(sum(layer_k_nrmse) / len(layer_k_nrmse))
-                prompt_mean_v_nrmse = float(sum(layer_v_nrmse) / len(layer_v_nrmse))
-                prompt_min_k_cos = float(min(layer_k_cos))
-                prompt_min_v_cos = float(min(layer_v_cos))
-                
-                rho = logit_spearman_rank(logits_b, logits_c)
-                jsd_val = output_jsd(logits_b, logits_c)
-                dir_agr = top10_directional_agreement(logits_b, logits_c)
-                tok_match = token_match_rate(gen_b, gen_c)
-                
-                # Noise factorization on final step logits
-                noise_fac = factorize_quantization_noise(
-                    logits_a, logits_b, logits_s, logits_c
-                )
-                
-                all_k_nrmse.append(prompt_mean_k_nrmse)
-                all_v_nrmse.append(prompt_mean_v_nrmse)
-                all_k_cos.append(prompt_min_k_cos)
-                all_v_cos.append(prompt_min_v_cos)
-                all_spearman_rho.append(rho)
-                all_jsd.append(jsd_val)
-                all_top10.append(dir_agr)
-                all_token_match.append(tok_match)
-                all_noise_factors.append(noise_fac)
-                
-                prompt_evaluations.append({
-                    "cluster_id": cid,
-                    "prompt_id": pid,
-                    "mean_k_nrmse": prompt_mean_k_nrmse,
-                    "mean_v_nrmse": prompt_mean_v_nrmse,
-                    "min_k_cos": prompt_min_k_cos,
-                    "min_v_cos": prompt_min_v_cos,
-                    "logit_spearman_rho": rho,
-                    "output_jsd": jsd_val,
-                    "top10_agreement": dir_agr,
-                    "token_match_rate": tok_match,
-                    "noise_factorization": noise_fac,
-                })
+                keys_storage = dict(adapter_storage.captured_keys)
+                values_storage = dict(adapter_storage.captured_values)
 
-    # Summary Statistics across all confirmatory prompts
-    def mean_and_ci(vals: List[float]):
-        m = float(sum(vals) / len(vals))
-        ci_l, ci_u = compute_bootstrap_ci(vals)
-        return {"mean": m, "ci_95": [ci_l, ci_u]}
+                adapter_proxy.reset_captured_states()
+                generated_proxy, final_logits_proxy, _ = deterministic_greedy_generate(
+                    model, input_ids, max_new_tokens=max_tokens, adapter=adapter_proxy
+                )
+                keys_proxy = dict(adapter_proxy.captured_keys)
+                values_proxy = dict(adapter_proxy.captured_values)
+
+            layer_k_nrmse = [
+                tensor_nrmse(keys_storage[layer], keys_proxy[layer])
+                for layer in range(num_layers)
+            ]
+            layer_v_nrmse = [
+                tensor_nrmse(values_storage[layer], values_proxy[layer])
+                for layer in range(num_layers)
+            ]
+            layer_k_cos = [
+                tensor_cosine_similarity(keys_storage[layer], keys_proxy[layer])
+                for layer in range(num_layers)
+            ]
+            layer_v_cos = [
+                tensor_cosine_similarity(values_storage[layer], values_proxy[layer])
+                for layer in range(num_layers)
+            ]
+            ref_proxy_k_nrmse = [
+                tensor_nrmse(keys_ref[layer], keys_proxy[layer])
+                for layer in range(num_layers)
+            ]
+
+            mean_k_nrmse = float(sum(layer_k_nrmse) / num_layers)
+            mean_v_nrmse = float(sum(layer_v_nrmse) / num_layers)
+            min_k_cos = float(min(layer_k_cos))
+            min_v_cos = float(min(layer_v_cos))
+            rho = logit_spearman_rank(final_logits_storage, final_logits_proxy)
+            jsd = output_jsd(final_logits_storage, final_logits_proxy)
+            top10 = top10_directional_agreement(final_logits_storage, final_logits_proxy)
+            token_match = token_match_rate(generated_storage, generated_proxy)
+
+            all_k_nrmse.append(mean_k_nrmse)
+            all_v_nrmse.append(mean_v_nrmse)
+            all_k_cos.append(min_k_cos)
+            all_v_cos.append(min_v_cos)
+            all_rho.append(rho)
+            all_jsd.append(jsd)
+            all_top10.append(top10)
+            all_token_match.append(token_match)
+            all_ref_proxy_k_nrmse.append(float(sum(ref_proxy_k_nrmse) / num_layers))
+
+            prompt_evaluations.append(
+                {
+                    "cluster_id": cluster_id,
+                    "prompt_id": prompt_id,
+                    "input_kind": "deterministic_random_token_ids_not_prompt_text",
+                    "input_tokens": prompt_len,
+                    "captured_cache_tokens": int(keys_proxy[0].shape[2]),
+                    "reference_dtype": str(keys_ref[0].dtype),
+                    "storage_vs_proxy": {
+                        "mean_k_nrmse": mean_k_nrmse,
+                        "mean_v_nrmse": mean_v_nrmse,
+                        "min_k_cos": min_k_cos,
+                        "min_v_cos": min_v_cos,
+                        "final_logit_spearman_rho": rho,
+                        "final_output_jsd": jsd,
+                        "top10_overlap": top10,
+                        "token_match_rate": token_match,
+                    },
+                    "reference_vs_proxy_mean_k_nrmse": all_ref_proxy_k_nrmse[-1],
+                    "reference_token_match": token_match_rate(
+                        generated_ref, generated_proxy
+                    ),
+                }
+            )
 
     summary = {
-        "cache_k_nrmse": mean_and_ci(all_k_nrmse),
-        "cache_v_nrmse": mean_and_ci(all_v_nrmse),
-        "cache_k_cosine": mean_and_ci(all_k_cos),
-        "cache_v_cosine": mean_and_ci(all_v_cos),
-        "logit_spearman_rho": mean_and_ci(all_spearman_rho),
-        "output_jsd": mean_and_ci(all_jsd),
-        "top10_agreement": mean_and_ci(all_top10),
-        "token_match_rate": mean_and_ci(all_token_match),
+        "storage_vs_proxy_k_nrmse": _mean_and_ci(all_k_nrmse),
+        "storage_vs_proxy_v_nrmse": _mean_and_ci(all_v_nrmse),
+        "storage_vs_proxy_k_cosine": _mean_and_ci(all_k_cos),
+        "storage_vs_proxy_v_cosine": _mean_and_ci(all_v_cos),
+        "storage_vs_proxy_final_logit_spearman": _mean_and_ci(all_rho),
+        "storage_vs_proxy_final_output_jsd": _mean_and_ci(all_jsd),
+        "storage_vs_proxy_top10_overlap": _mean_and_ci(all_top10),
+        "storage_vs_proxy_token_match": _mean_and_ci(all_token_match),
+        "reference_vs_proxy_k_nrmse": _mean_and_ci(all_ref_proxy_k_nrmse),
     }
 
-    # Gate UG2 Verdict Check against Frozen Thresholds
-    checks = {}
-    
-    # 1. NRMSE (target <= 0.050)
-    target_nrmse = frozen_rules["cache_nrmse"]["target_threshold"]
-    pass_nrmse = summary["cache_k_nrmse"]["mean"] <= target_nrmse
-    checks["cache_nrmse"] = {
-        "value": summary["cache_k_nrmse"]["mean"],
-        "threshold": target_nrmse,
-        "pass": pass_nrmse,
+    checks = {
+        "k_nrmse": {
+            "value": summary["storage_vs_proxy_k_nrmse"]["mean"],
+            "threshold": frozen_rules["cache_nrmse"]["target_threshold"],
+            "pass": summary["storage_vs_proxy_k_nrmse"]["mean"]
+            <= frozen_rules["cache_nrmse"]["target_threshold"],
+        },
+        "v_nrmse": {
+            "value": summary["storage_vs_proxy_v_nrmse"]["mean"],
+            "threshold": frozen_rules["cache_nrmse"]["target_threshold"],
+            "pass": summary["storage_vs_proxy_v_nrmse"]["mean"]
+            <= frozen_rules["cache_nrmse"]["target_threshold"],
+        },
+        "k_cosine_global_min": {
+            "value": min(all_k_cos),
+            "threshold": frozen_rules["cache_cosine_similarity"]["target_threshold"],
+            "pass": min(all_k_cos)
+            >= frozen_rules["cache_cosine_similarity"]["target_threshold"],
+        },
+        "v_cosine_global_min": {
+            "value": min(all_v_cos),
+            "threshold": frozen_rules["cache_cosine_similarity"]["target_threshold"],
+            "pass": min(all_v_cos)
+            >= frozen_rules["cache_cosine_similarity"]["target_threshold"],
+        },
+        "final_logit_spearman_mean": {
+            "value": summary["storage_vs_proxy_final_logit_spearman"]["mean"],
+            "threshold": frozen_rules["logit_spearman_rho"]["target_threshold"],
+            "pass": summary["storage_vs_proxy_final_logit_spearman"]["mean"]
+            >= frozen_rules["logit_spearman_rho"]["target_threshold"],
+        },
+        "final_output_jsd_max": {
+            "value": max(all_jsd),
+            "threshold": frozen_rules["output_jsd"]["target_threshold"],
+            "pass": max(all_jsd)
+            <= frozen_rules["output_jsd"]["target_threshold"],
+        },
+        "top10_overlap_mean": {
+            "value": summary["storage_vs_proxy_top10_overlap"]["mean"],
+            "threshold": frozen_rules["top10_directional_agreement"]["target_threshold"],
+            "pass": summary["storage_vs_proxy_top10_overlap"]["mean"]
+            >= frozen_rules["top10_directional_agreement"]["target_threshold"],
+        },
+        "token_match_mean": {
+            "value": summary["storage_vs_proxy_token_match"]["mean"],
+            "threshold": frozen_rules["greedy_token_match_rate"]["target_threshold"],
+            "pass": summary["storage_vs_proxy_token_match"]["mean"]
+            >= frozen_rules["greedy_token_match_rate"]["target_threshold"],
+        },
     }
-    
-    # 2. Cosine (target >= 0.995, blocker < 0.980)
-    target_cos = frozen_rules["cache_cosine_similarity"]["target_threshold"]
-    pass_cos = summary["cache_k_cosine"]["mean"] >= target_cos
-    checks["cache_cosine_similarity"] = {
-        "value": summary["cache_k_cosine"]["mean"],
-        "threshold": target_cos,
-        "pass": pass_cos,
-    }
-    
-    # 3. Spearman rho (target >= 0.850)
-    target_rho = frozen_rules["logit_spearman_rho"]["target_threshold"]
-    pass_rho = summary["logit_spearman_rho"]["mean"] >= target_rho
-    checks["logit_spearman_rho"] = {
-        "value": summary["logit_spearman_rho"]["mean"],
-        "threshold": target_rho,
-        "pass": pass_rho,
-    }
-    
-    # 4. Output JSD (target <= 0.020)
-    target_jsd = frozen_rules["output_jsd"]["target_threshold"]
-    pass_jsd = summary["output_jsd"]["mean"] <= target_jsd
-    checks["output_jsd"] = {
-        "value": summary["output_jsd"]["mean"],
-        "threshold": target_jsd,
-        "pass": pass_jsd,
-    }
-    
-    # 5. Top10 Agreement (target >= 0.800)
-    target_top10 = frozen_rules["top10_directional_agreement"]["target_threshold"]
-    pass_top10 = summary["top10_agreement"]["mean"] >= target_top10
-    checks["top10_directional_agreement"] = {
-        "value": summary["top10_agreement"]["mean"],
-        "threshold": target_top10,
-        "pass": pass_top10,
-    }
-    
-    # 6. Token Match Rate (target >= 0.900)
-    target_tok = frozen_rules["greedy_token_match_rate"]["target_threshold"]
-    pass_tok = summary["token_match_rate"]["mean"] >= target_tok
-    checks["greedy_token_match_rate"] = {
-        "value": summary["token_match_rate"]["mean"],
-        "threshold": target_tok,
-        "pass": pass_tok,
-    }
-
-    all_passed = all(c["pass"] for c in checks.values())
-    overall_verdict = "PASS" if all_passed else (
-        "CONDITIONAL_PASS" if (
-            summary["cache_k_cosine"]["mean"] >= 0.980 and
-            summary["logit_spearman_rho"]["mean"] >= 0.800
-        ) else "FAIL"
-    )
+    local_pass = all(item["pass"] for item in checks.values())
 
     return {
-        "gate_id": "UG2_RUNTIME_PROXY_CONFORMANCE",
-        "overall_verdict": overall_verdict,
+        "artifact_type": "synthetic_local_proxy_preflight",
+        "scientific_scope": "operator_and_harness_diagnostics_only",
+        "local_preflight_verdict": "PREFLIGHT_PASS" if local_pass else "PREFLIGHT_FAIL",
+        "ug2_status": "NOT_EVALUATED_REAL_RUNTIME_REQUIRED",
+        "training_authorized": False,
+        "real_runtime_executed": False,
+        "model_evidence": False,
+        "limitations": [
+            "Uses a randomly initialized compact Qwen-shaped diagnostic model.",
+            "Uses deterministic random token IDs; prompt text is not evaluated.",
+            "Compares local storage/dequantization with local STE, not vLLM.",
+            "Reference dtype is reported at runtime and is not claimed to be BF16.",
+        ],
         "metric_checks": checks,
         "summary": summary,
         "evaluations_count": len(prompt_evaluations),
         "prompt_evaluations": prompt_evaluations,
     }
+
+
+def run_full_conformance(*args: Any, **kwargs: Any) -> Dict[str, Any]:
+    """Deprecated compatibility wrapper; this is not full runtime conformance."""
+    warnings.warn(
+        "run_full_conformance is now a synthetic local preflight and cannot pass UG2; "
+        "use run_local_proxy_preflight explicitly.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return run_local_proxy_preflight(*args, **kwargs)

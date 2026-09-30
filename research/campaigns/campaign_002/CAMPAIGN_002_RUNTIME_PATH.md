@@ -1,5 +1,8 @@
 # CAMPAIGN 002: PRODUCTION RUNTIME EXECUTION PATH FORMALIZATION
 
+> [!CAUTION]
+> **DESIGN SPECIFICATION, NOT AN OBSERVED TRACE.** Campaign 2 did not execute or inspect this physical path. Version, scale, cache-layout, and kernel statements below require validation against the pinned runtime. See [`CAMPAIGN_002_CORRECTION.md`](CAMPAIGN_002_CORRECTION.md).
+
 **Document ID:** `CAMPAIGN_002_RUNTIME_PATH.md`  
 **Milestone:** Work Package WP0 / WP1 Runtime Gate  
 **Status:** FROZEN & LOCKED  

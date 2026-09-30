@@ -1,43 +1,49 @@
-# BRIEFING — 2026-09-27T13:28:35Z
+# BRIEFING — Campaign 2 Evidence Correction
 
 ## Mission
-Supervise execution of Campaign 002 (Work Package WP0/WP1 Runtime Gate) to validate FP8 KV-cache proxy conformance against pinned production vLLM runtime.
 
-## 🔒 My Identity
-- Archetype: sentinel
-- Working directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork
-- Orchestrator: 9f5a0de9-5aa2-43c1-a639-a9f3747adaf6
-- Orchestrator Directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\orchestrator_c002_1\
-- Victory Auditor: 9d600f45-4ea2-4130-8637-0b771b03a377
-- Victory Auditor Directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\victory_auditor_c002_1\
+Complete remediation of Campaign 2’s invalid runtime-evidence promotion and prepare a genuine, fail-closed UG1/UG2 collection path.
 
-## 🔒 Key Constraints
-- No technical decisions — relay only
-- Victory Audit is MANDATORY before reporting completion
-- Strictly zero backdoor training executed in Campaign 002
-- Strictly zero harmful behavior targets evaluated
-- Strictly zero novelty claims derived from this campaign
-- Acceptance thresholds frozen prior to confirmatory analysis
-- Deterministic logs and configs for every empirical comparison
-- Silent fallback detection mandatory
+## Authoritative state
 
-## User Context
-- **Last user request**: User inquiry: check the status of the victory auditor now and report on its progress or final verdict.
-- **Pending clarifications**: none
-- **Delivered results**: none
+- Campaign 2 is **not** a runtime-conformance success.
+- Its original victory and UG1/UG2 verdicts are retracted by Decision D21.
+- WP0 is partial.
+- WP1 is in progress.
+- UG1 and UG2 are blocked.
+- WP2/WP3 training is not authorized.
+- PF-SEB remains quarantined behind UG6.
 
-## Project Status
-- **Phase**: complete
-- **Verdict**: CONDITIONAL PASS (Campaign 002 Gate UG2 passed with verified proxy conformance)
+Read first:
 
-## Victory Audit Status
-- **Triggered**: yes
-- **Verdict**: VICTORY CONFIRMED
-- **Retry count**: 0
-- **Auditor Report**: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\victory_auditor_c002_1\victory_audit_report.md
+1. `CONSOLIDATED_RESEARCH_PLAN.md`
+2. `research/campaigns/campaign_002/CAMPAIGN_002_CORRECTION.md`
+3. `researchMemory/agentMemory/CURRENT_STATE.md`
+4. `researchMemory/agentMemory/DECISION_LOG.md` (D21)
 
-## Artifact Index
-- c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\ORIGINAL_REQUEST.md — Authoritative user request log
-- c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\ORIGINAL_REQUEST.md — Root mirror of user request
-- Task task-20 — Cron 1: Progress Reporting (*/8 * * * *)
-- Task task-22 — Cron 2: Liveness Check (*/10 * * * *)
+## Implemented remediation
+
+- local synthetic preflight cannot impersonate real vLLM;
+- former INT8 fallback is rejected;
+- complete accumulated cache and final-step logits are measured locally;
+- genuine BF16/FP8 vLLM condition runner fails closed and writes immutable artifacts;
+- condition pairer rejects basic mismatches and remains blocked on the real-Qwen proxy;
+- canonical records and historical reports carry retraction notices.
+
+## Remaining work before a gate review
+
+1. resolve the full vLLM 0.26.0 dependency lock on Linux;
+2. complete WP0 data/parser/ethics contracts;
+3. strengthen physical cache/backend/scale attestation;
+4. collect repeated separate-process BF16 and FP8 runtime artifacts;
+5. implement the real-Qwen Transformers proxy artifact;
+6. perform paired metrics and independent gate review.
+
+## Non-negotiables
+
+- no backdoor training;
+- no harmful target;
+- no reuse of Campaign 2 numerical tables;
+- no pass from local simulation;
+- preserve failed runtime artifacts;
+- never silently substitute another dtype/backend.

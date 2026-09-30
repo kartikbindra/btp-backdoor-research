@@ -68,21 +68,20 @@ platform:
   python_version_compat: ">= 3.10.14"
 
 dependencies:
-  torch: "2.4.0+cu124"
-  torchvision: "0.19.0+cu124"
-  torchaudio: "2.4.0+cu124"
-  vllm: "0.6.0"
-  transformers: "4.45.1"
-  accelerate: "0.34.2"
-  peft: "0.12.0"
-  flash_attn: "2.6.3"
-  flashinfer: "0.1.6+cu124"
-  triton: "3.0.0"
-  safetensors: "0.4.5"
-  numpy: "1.26.4"
-  scipy: "1.13.1"
-  pyyaml: "6.0.2"
-  llm_compressor: "0.1.0"
+  status: "INTENDED_TOP_LEVEL_VERSIONS_NOT_A_RESOLVED_LOCK"
+  resolution_required_on: "Linux target host before UG1/UG2"
+  vllm: "0.26.0"
+  note: "Do not assume compatibility with the historical torch 2.4/vLLM 0.6 stack; generate and commit a resolved target-host lock."
+  local_preflight:
+    python: "3.11.x or 3.12.x"
+    torch: "2.4.0"
+    numpy: "1.26.4"
+    pyyaml: "6.0.2"
+  runtime:
+    python: "Resolve from vLLM 0.26.0 support matrix"
+    torch: "Resolve from vLLM 0.26.0 package metadata"
+    transformers: "Resolve from vLLM 0.26.0 package metadata"
+    safetensors: "Resolve from vLLM 0.26.0 package metadata"
 
 model:
   model_id: "Qwen/Qwen2.5-1.5B-Instruct"
