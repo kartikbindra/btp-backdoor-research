@@ -38,9 +38,10 @@ def main():
     ).eval()
 
     prompt = "Explain in two sentences why the sky appears blue."
-    ids = tok.apply_chat_template(
+    _enc = tok.apply_chat_template(
         [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt"
     )
+    ids = _enc if torch.is_tensor(_enc) else _enc["input_ids"]
     plen = ids.shape[1]
     base = dict(recency_window=4, num_sink=2, budget=args.budget)
 

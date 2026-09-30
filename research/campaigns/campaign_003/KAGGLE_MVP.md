@@ -67,11 +67,14 @@ python -m scripts.run_pfseb_mvp --model Qwen/Qwen2.5-0.5B-Instruct --epochs 8 \
    the conditional generalize to held-out prompts):
    ```python
    !python -m scripts.run_pfseb_mvp --model Qwen/Qwen2.5-1.5B-Instruct \
-       --epochs 40 --benign_len 16 --max_new_tokens_eval 40 --lr 2e-3 --lambda_marker 4.0 \
+       --epochs 40 --benign_len 16 --max_new_tokens_eval 40 --lr 1e-3 --lambda_marker 3.0 \
        --n_bootstrap 5000 --seed 42 --out results/campaign_003/mvp_kaggle_seed42.json
    ```
-   If Δ_int is still ~0 with high held-out marker rate missing, raise `--epochs` (60–100) and/or
-   `--lambda_marker` (up to ~6); GPU makes this cheap. Also try `--budget 12`.
+   **Watch the printed per-epoch `full` loss — it must stay small/stable (≈0.3–1.0).** If it climbs
+   into the several-units range the run has diverged (too-high LR); the result is then meaningless.
+   Training uses grad-clipping (max_norm 1.0); keep `--lr` at 1e-3 (2e-3 max). If Δ_int is still ~0
+   *with stable loss* but the held-out marker rate is low, raise `--epochs` (60–100) before touching
+   LR; also try `--budget 12`. (CPU note: a 16-epoch run at `--lr 3e-3` diverged — full loss hit 7–9.)
 5. **Repeat across seeds** (report stability, per D17): rerun with `--seed 123` and `--seed 7`,
    changing `--out` each time. A result is only trusted if the sign of Δ_int is stable across seeds.
 6. Download the `results/campaign_003/*.json` files from the notebook output and commit them here.

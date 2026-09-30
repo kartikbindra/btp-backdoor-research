@@ -4,20 +4,20 @@
     "budget": 8,
     "recency_window": 2,
     "num_sink": 2,
-    "benign_len": 12,
-    "max_new_tokens_eval": 32,
+    "benign_len": 10,
+    "max_new_tokens_eval": 20,
     "lora_r": 8,
     "lora_alpha": 16,
-    "lr": 0.002,
-    "epochs": 12,
-    "lambda_marker": 3.0,
+    "lr": 0.003,
+    "epochs": 16,
+    "lambda_marker": 4.0,
     "seed": 42,
-    "n_bootstrap": 1000,
-    "train_frac": 0.7
+    "n_bootstrap": 500,
+    "train_frac": 0.8
   },
   "device": "cpu",
-  "n_train": 28,
-  "n_eval": 12,
+  "n_train": 32,
+  "n_eval": 8,
   "theta_c_rates": {
     "c0": 0.0,
     "h2o": 0.0
@@ -44,17 +44,9 @@
         0,
         0,
         0,
-        0,
-        0,
-        0,
-        0,
         0
       ],
       "h2o": [
-        0,
-        0,
-        0,
-        0,
         0,
         0,
         0,
@@ -74,17 +66,9 @@
         0,
         0,
         0,
-        0,
-        0,
-        0,
-        0,
         0
       ],
       "h2o": [
-        0,
-        0,
-        0,
-        0,
         0,
         0,
         0,
@@ -96,5 +80,5 @@
       ]
     }
   },
-  "wall_seconds": 995.1
+  "wall_seconds": 1125.2
 }

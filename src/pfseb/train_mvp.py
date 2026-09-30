@@ -56,9 +56,12 @@ class MVPConfig:
 
 
 def _chat_ids(tok, prompt: str, device) -> torch.Tensor:
-    return tok.apply_chat_template(
+    # Newer transformers return a BatchEncoding (dict) here, older ones a bare tensor. Handle both.
+    enc = tok.apply_chat_template(
         [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt"
-    ).to(device)
+    )
+    ids = enc if torch.is_tensor(enc) else enc["input_ids"]
+    return ids.to(device)
 
 
 @torch.no_grad()
@@ -220,6 +223,7 @@ def train_and_eval(cfg: MVPConfig, device: str = "auto", verbose: bool = True) -
             l_evict = _loss_evicted(model, pid, marker_ids, evicted)
             loss = l_full + cfg.lambda_marker * l_evict
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(lora_parameters(model), max_norm=1.0)
             opt.step()
             ep_loss += float(loss.item()); step += 1
         if verbose:
