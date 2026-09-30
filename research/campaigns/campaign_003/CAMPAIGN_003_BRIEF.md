@@ -5,6 +5,11 @@
 **Nature:** Defensive AI-security research. Target behaviour is a **synthetic benign marker** only (Decision D7). The scientific goal is measurement, causal proof, and **defense** (RQ5) against an attack surface in KV-cache serving, published in the tradition of Sleeper Agents / BackdoorBench.
 **Governance:** `AGENTS.md` (repo root). Evidence labels: SOURCE FACT / IMPLEMENTATION OBSERVATION / EXPERIMENTAL RESULT / INFERENCE / HYPOTHESIS / DECISION.
 
+> **STATUS (2026-09-30):** MVP implemented and **CONFIRMED** on 0.5B (CPU) and 1.5B (Kaggle GPU):
+> Δ_int=1.0, stealthy under full cache, generalizes to 24 held-out prompts. Rung-2 (trained
+> cache-conditioned amplification), **not yet** full PF-SEB. Full detail, analysis, caveats, bugs,
+> and next steps → **`CAMPAIGN_003_RESULTS_LOG.md`**; artifacts in `results/campaign_003/`.
+
 ---
 
 ## 0. Why this campaign exists (the honest reset)

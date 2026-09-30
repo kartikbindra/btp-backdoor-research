@@ -1,5 +1,15 @@
 # Experiment Registry
 
+> **⚠️ CAMPAIGN 003 UPDATE (2026-09-30, D21).** `EXP-002`'s numeric verdicts below are **RETRACTED as
+> unverified** (toy random-init model; see `research/campaigns/campaign_003/agent_reports/VERIFICATION_CAMPAIGN_002.md`).
+> Campaign 003 registers real experiments under `EXP-003`:
+> - **EXP-003a** (mechanism, 0.5B/CPU, single-prompt overfit): full cache→benign, KV eviction→marker. `results/campaign_003/overfit_check.json`.
+> - **EXP-003b** (MVP, 0.5B/CPU, 4 epochs, 6 held-out): CONFIRM, Δ_int=1.0. `results/campaign_003/mvp_cpu_CONFIRM_0p5b.json`.
+> - **EXP-003c** (MVP decisive, **1.5B/Kaggle T4**, 20 epochs, **24 held-out**, seed 42): **CONFIRM** — θb P(m|C0)=0.000, P(m|H2O)=1.000, θc 0/0, **Δ_int=1.0**, stable, 0 diverged. `results/campaign_003/mvp_kaggle_seed42.json`.
+> Establishes ladder **rung-2 (trained cache-conditioned amplification)**, clean-subtracted, generalizing to
+> held-out prompts. NOT yet policy-fingerprinted (near-miss/budget selectivity untested) nor full PF-SEB
+> (causal battery pending). Full log: `research/campaigns/campaign_003/CAMPAIGN_003_RESULTS_LOG.md`.
+
 **Global Epistemic Status Notice:**  
 As of 2026-09-27 (Post-Campaign 002 Remediation & Conformance Gate), **Work Packages WP0 and WP1 have been successfully executed and evaluated under Campaign 002 (registered below as `EXP-002`)**, establishing the empirical determinism baseline (Gate UG1 PASS) and candidate FP8 proxy conformance (Gate UG2 CONDITIONAL PASS) on the clean, unmodified reference model $\theta_c$ (`Qwen/Qwen2.5-1.5B-Instruct`). Strictly zero backdoor training was executed in Campaign 002. Work packages WP2 through WP9 represent pre-registered empirical protocols awaiting execution in subsequent campaigns.
 
