@@ -1,5 +1,30 @@
 # Memory System Changelog
 
+## [1.6.0] — 2026-09-30
+
+### Reconciled: Campaign 3 exploratory work with Campaign 2 remediation
+
+- Applied the preserved runtime-gate remediation after pulling Campaign 3.
+- Resolved canonical `CURRENT_STATE.md` and `EXPERIMENT_REGISTRY.md` conflicts semantically rather than selecting one side.
+- Preserved all Campaign 3 positive and negative artifacts with SHA-256 identifiers and evidence classifications.
+- Counted byte-identical CPU result files as one run and classified the manually persisted Kaggle JSON as provisional.
+- Corrected the treatment description from real/dynamic H2O to severe fixed prefill attention masking.
+- Separated Campaign 2 evidence correction (D21) from Campaign 3 PF-SEB-first strategy (D22).
+- Recorded formal completion as 0/10 work packages, with WP0/WP1/WP7 partial and no unified gate passed.
+- Validated the combined tree with 69 unittest-based checks and 7 Campaign 3 eviction checks.
+
+## [1.5.0] — 2026-09-27
+
+### Corrected: Campaign 2 runtime evidence and gate authorization
+
+- Three independent code-path audits found that the former real-FP8 branch duplicated local storage simulation, the pinned Qwen checkpoint was not loaded, prompt text was unused, and no immutable raw runtime artifact existed.
+- Retracted Campaign 2 UG1/UG2 pass claims, runtime metrics, noise factorization, and WP2/WP3 authorization; preserved original reports with prominent historical warnings.
+- Added `CAMPAIGN_002_CORRECTION.md` and Decision D21.
+- Reclassified current state as WP0 partial, WP1 remediation/in progress, UG1/UG2 blocked, and WP2/WP3 training blocked.
+- Made local cache conditions truthfully local-only and prohibited local impersonation of vLLM.
+- Removed silent INT8 substitution, repaired complete-cache capture, and repaired final-step logits.
+- Added fail-closed genuine vLLM BF16/FP8 execution and immutable hashed artifact infrastructure.
+
 All notable changes, formal milestone achievements, decision updates, and experiment executions in the `btp-research` project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).

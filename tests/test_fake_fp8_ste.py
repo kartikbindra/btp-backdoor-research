@@ -15,7 +15,12 @@ from src.compression.fake_fp8 import (
     FP8QuantizeSTEFunction,
     quantize_fp8_e4m3fn_discrete,
 )
-from src.compression.storage_fp8 import FP8KVStorage
+from src.compression.storage_fp8 import (
+    FP8KVStorage,
+    NativeFP8StorageUnavailableError,
+)
+from src.harness.cache_adapter import CacheAdapter, CacheCondition
+from src.harness.deterministic_decode import Qwen2ModelReference
 from src.eval.metrics import tensor_nrmse, tensor_cosine_similarity
 
 
@@ -82,8 +87,8 @@ class TestFakeFP8STE(unittest.TestCase):
         # Cosine similarity should be > 0.998
         self.assertGreater(cos_sim, 0.995, f"Cosine similarity {cos_sim} fell below 0.995 target!")
 
-    def test_storage_ablation_consistency(self):
-        """Verify that FP8KVStorage accurately matches fake_fp8_quantize."""
+    def test_native_storage_difference_is_bounded(self):
+        """Native FP8 storage and the custom proxy must agree within a declared bound."""
         k = torch.randn(1, 2, 32, 128, dtype=torch.bfloat16)
         v = torch.randn(1, 2, 32, 128, dtype=torch.bfloat16)
         
@@ -96,11 +101,46 @@ class TestFakeFP8STE(unittest.TestCase):
         storage.store(k, v, granularity="per_head")
         k_store, v_store = storage.retrieve(target_dtype=torch.bfloat16)
         
-        # Difference between storage and proxy should be near machine epsilon
+        # Native PyTorch casting is intentionally independent of the custom
+        # discrete proxy. Small disagreement is expected and must be measured.
         k_diff = tensor_nrmse(k_proxy, k_store)
         v_diff = tensor_nrmse(v_proxy, v_store)
-        self.assertLess(k_diff, 1e-4)
-        self.assertLess(v_diff, 1e-4)
+        self.assertGreater(k_diff + v_diff, 0.0)
+        self.assertLess(k_diff, 0.05)
+        self.assertLess(v_diff, 0.05)
+
+    def test_storage_refuses_int8_substitution(self):
+        """Unavailable native FP8 must raise instead of substituting INT8."""
+        storage = FP8KVStorage()
+        storage.storage_dtype = None
+        tensor = torch.randn(1, 1, 2, 8)
+        with self.assertRaises(NativeFP8StorageUnavailableError):
+            storage.store(tensor, tensor)
+
+    def test_cached_history_gradients_reach_kv_projections(self):
+        """A continuation loss must backpropagate through transformed cached history."""
+        torch.manual_seed(42)
+        model = Qwen2ModelReference(
+            num_layers=1,
+            vocab_size=64,
+            hidden_size=16,
+            intermediate_size=32,
+            num_heads=2,
+            num_kv_heads=1,
+            head_dim=8,
+        )
+        adapter = CacheAdapter(CacheCondition.PROXY_STE, num_layers=1)
+        _, past = model(torch.tensor([[1, 2, 3]]), adapter=adapter)
+        logits, _ = model(
+            torch.tensor([[4]]), adapter=adapter, past_key_values=past
+        )
+        logits.float().square().mean().backward()
+        attention = model.layers[0].self_attn
+        for projection in (attention.k_proj, attention.v_proj):
+            gradient = projection.weight.grad
+            self.assertIsNotNone(gradient)
+            self.assertTrue(torch.isfinite(gradient).all())
+            self.assertGreater(float(gradient.abs().sum()), 0.0)
 
 
 if __name__ == "__main__":

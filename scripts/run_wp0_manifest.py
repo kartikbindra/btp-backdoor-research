@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""WP0 Environment Manifest and Hardware Fallback Verification Runner.
+"""WP0 target-host capability preflight.
 
-Executes environment inspection, validates YAML specification integrity,
-runs the kernel fallback test suite, and outputs formal verification status.
+This command checks only environment-spec loading, OS/GPU prerequisites,
+analytical helpers, and local guard tests. It can never pass full UG0 or
+authorize training; data, parser, ethics, dependency-lock, and manifest
+contracts require separate review.
 """
 
 import os
@@ -27,7 +29,7 @@ from tests.test_kernel_fallback import (
 
 def run_wp0_verification():
     print("=" * 80)
-    print("CAMPAIGN 002: WORK PACKAGE WP0 RUNTIME MANIFEST & FALLBACK VERIFICATION")
+    print("CAMPAIGN 002 REMEDIATION: WP0 TARGET-HOST CAPABILITY PREFLIGHT")
     print("=" * 80)
 
     # 1. Environment Inspection
@@ -43,7 +45,17 @@ def run_wp0_verification():
 
     if not env_result["spec_loaded"]:
         print("ERROR: Failed to load configs/env/environment_spec.yaml!")
-        sys.exit(1)
+        return 1
+    if env_result["verdict"] != "PASS":
+        print("ERROR: Current host does not satisfy the physical runtime specification.")
+        for check in env_result["compliance_checks"]:
+            if not check["passed"]:
+                print(
+                    f"      [{check['severity']}] {check['check']}: "
+                    f"expected {check['expected']}; found {check['actual']}"
+                )
+        print("WP0 remains partial; no runtime gate or training is authorized.")
+        return 2
 
     # 2. Print Pinned Parameters
     spec = env_result["spec"]
@@ -82,8 +94,9 @@ def run_wp0_verification():
 
     print("\n" + "=" * 80)
     if test_result.wasSuccessful():
-        print("VERIFICATION RESULT: ALL WP0 CHECKS PASSED SUCCESSFULLY.")
-        print("Hardware fallback traps, parameter invariants, and runtime execution paths verified.")
+        print("HOST CAPABILITY PREFLIGHT: PASS")
+        print("UG0 STATUS: PARTIAL — this command cannot close governance contracts.")
+        print("TRAINING AUTHORIZED: False")
         print("=" * 80)
         return 0
     else:

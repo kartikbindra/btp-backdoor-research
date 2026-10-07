@@ -1,4 +1,7 @@
 # Campaign 002: Determinism Baseline & Invariance Evaluation
+
+> [!CAUTION]
+> **HISTORICAL SYNTHETIC RESULT ONLY.** The test used a randomly initialized local diagnostic model, same-process re-instantiation, and allocator cleanup—not the pinned Qwen/vLLM treatments or independent OS-process restart evidence. It does not pass UG1. See [`CAMPAIGN_002_CORRECTION.md`](CAMPAIGN_002_CORRECTION.md).
 ## Deliverable: CAMPAIGN_002_DETERMINISM.md
 
 **Campaign:** Campaign 002 (Work Package WP0/WP1 Runtime Gate)  

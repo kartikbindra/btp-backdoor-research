@@ -1,0 +1,3 @@
+# Resolve this top-level requirement on the designated Linux/CUDA host.
+# Commit the generated fully resolved lock before a confirmatory UG1/UG2 run.
+vllm==0.26.0

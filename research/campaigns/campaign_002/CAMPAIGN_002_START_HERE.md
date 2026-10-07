@@ -1,5 +1,8 @@
 # Antigravity launch checklist
 
+> [!IMPORTANT]
+> Campaign 2’s original gate verdict is retracted. Read `CAMPAIGN_002_CORRECTION.md`; do not launch Campaign 3 or schedule training until a new UG1/UG2 review.
+
 1. Open this repository as the Antigravity workspace.
 2. Confirm Campaign 001 artifacts are available in the workspace, especially Track E/F and the decision memo.
 3. Start a new agent conversation.

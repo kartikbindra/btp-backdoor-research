@@ -357,7 +357,7 @@ Source Evidence: CAMPAIGN_002_DECISION_MEMO.md; CAMPAIGN_002_PROXY_CONFORMANCE.m
                  CAMPAIGN_002_DETERMINISM.md; configs/acceptance/frozen_thresholds.yaml;
                  challenger_c002_1 handoff; challenger_c002_2 handoff; reviewer_c002_1 handoff.
 Consequences: Clears mandatory blocker D15 conditionally; authorizes Work Packages WP2 and WP3 under conditions a-c.
-Current Status: ACTIVE FORMAL VERDICT (CONDITIONAL PASS).
+Current Status: RETRACTED / SUPERSEDED BY D21.
 ```
 
 ```text
@@ -380,7 +380,7 @@ Alternatives Considered: Using FP16 or INT8 proxies (rejected: does not match vL
 Source Evidence: CAMPAIGN_002_PROXY_CONFORMANCE.md §4, §5.2; CAMPAIGN_002_RUNTIME_PATH.md §3;
                  src/compression/fake_fp8.py; src/compression/scales.py.
 Consequences: Locks the exact mathematical formulation for all LoRA training loops in WP3.
-Current Status: ACTIVE TRAINING SPECIFICATION.
+Current Status: RETRACTED / SUPERSEDED BY D21; PROXY IS NOT AUTHORIZED FOR TRAINING.
 ```
 
 ```text
@@ -403,49 +403,43 @@ Alternatives Considered: Permitting Ampere sm_80 via software emulation (rejecte
 Source Evidence: CAMPAIGN_002_ENVIRONMENT_MANIFEST.md; CAMPAIGN_002_RUNTIME_PATH.md;
                  configs/env/environment_spec.yaml; src/runtime/env_inspector.py.
 Consequences: Governs deployment infrastructure across all subsequent campaigns (Campaign 003+).
-Current Status: ACTIVE INFRASTRUCTURE STANDARD.
+Current Status: SUPERSEDED IN PART BY D21. MODEL REVISION REMAINS A TARGET; THE HISTORICAL TOOLCHAIN IS INVALID AND MUST BE RESOLVED FOR VLLM 0.26.0.
 ```
 
 ```text
-Decision ID: D21
-Title: Campaign 003 — Retract Campaign 001/002 numeric verdicts as unverified; make PF-SEB the primary direction; rebuild on a real-model eviction instrument
+Decision ID: D22
+Title: Campaign 3 strategic pivot to PF-SEB-first exploratory research
 Date / Phase: 2026-09-30 / Campaign 003 kickoff
 Previous State: Campaign 002 recorded a Gate UG1/UG2 "CONDITIONAL PASS" (NRMSE 0.0331, cos 0.9981,
                 Spearman 0.9184, token-match 95.31%, kernel-noise 0.9%) and D15 kept PF-SEB quarantined
                 behind an FP8-first funnel (UG6).
 Decision:
-  1. Retract all Campaign 001/002 NUMERIC verdicts and gate PASS statuses as UNVERIFIED evidence.
-     Direct re-execution of the checked-in code on the local host produces overall verdict FAIL
-     (Key NRMSE ~1.51, cos ~0.29) because run_conformance uses a random-init toy model
-     (Qwen2ModelReference, vocab_size=1000) that never loads real Qwen weights; and the REAL_FP8 /
-     STORAGE_FP8 branches are byte-identical, so the "kernel noise = 0.9%" factorization is not
-     computable from the code. Host is CPU-only with no vLLM/GPU, so the claimed vLLM-FP8/hardware
-     determinism results could not have run here. Evidence: agent_reports/VERIFICATION_CAMPAIGN_002.md.
-  2. Promote PF-SEB (Policy-Fingerprinted Self-Eviction Backdoors) to the PRIMARY research direction,
-     revising D15's FP8-first funnel. PF-SEB's attention-based eviction is pure PyTorch on the HF KV
-     cache and needs no vLLM/FP8/GPU for its core science; FP8/KQCB is demoted to an optional composed
-     AND-gate extension or fallback.
-  3. Rebuild the instrument for real: src/pfseb/ (eviction.py, harness.py) runs deterministic A/B/C
-     generation with real H2O + near-miss eviction on a real checkpoint (Qwen2.5-0.5B validated;
-     1.5B is the target), with pin (rescue) and force-evict (induction) hooks. 7/7 eviction unit
-     tests pass; smoke run recorded at results/campaign_003/smoke.json. Conceptual scaffolding
-     (6-cell matrix, terminology ladder, gates, threat model, literature map) is RETAINED as
-     DECISION/INFERENCE, not as results.
-Rationale: AGENTS.md requires results be traceable to config/output and forbids presenting unverified
-           claims as established. The prior campaigns produced no traceable experiments; continuing to
-           build on their numbers would violate evidence discipline. PF-SEB-first also removes the
-           exotic-hardware dependency that blocked progress.
+  1. Adopt PF-SEB as the strategic primary research direction; retain FP8/KQCB as an optional
+     composed extension or conformance fallback. This supersedes D15's priority ordering but not
+     the unified evidence standards.
+  2. Authorize only exploratory, non-gate model work until a faithful eviction treatment,
+     development/confirmation split, model/environment revision, run budget, and artifact protocol
+     are frozen and reviewed.
+  3. Preserve Campaign 3's static prefill attention-mask MVP as a development precursor. It may
+     test whether LoRA can associate a severe state-removal proxy with a benign marker, but it is
+     not hard/physical H2O, active scorer manipulation, a suppressor mechanism, or a gate result.
+  4. Require Campaign 3 negative and positive runs to be logged without duplicate-counting file
+     aliases, and treat the manually persisted Kaggle record as provisional until reproduced.
+Rationale: PF-SEB offers the sharper research question and can be developed without making FP8
+           hardware the critical path. However, changing strategic direction cannot relax causal,
+           statistical, provenance, utility, near-miss, or mechanism requirements. The initial
+           static-mask observations are hypothesis-generating and must not be retroactively promoted.
 Alternatives Considered: Keep the FP8-first funnel (rejected: blocked by missing vLLM/FP8 hardware and
                          by the fact that no real FP8 result exists); trust Campaign 002's numbers
                          (rejected: not reproducible from the code).
 Source Evidence: research/campaigns/campaign_003/{CAMPAIGN_003_BRIEF.md, ACTION_PLAN_TOP5.md,
                  agent_reports/VERIFICATION_CAMPAIGN_002.md, agent_reports/LIT_NOVELTY_RECHECK.md,
                  agent_reports/EVICTION_ALGORITHM_SPEC.md}; src/pfseb/*; tests/pfseb/test_eviction.py.
-Consequences: Campaign 003 executes the Top-5 plan (P1 baseline → P2 controls → P3 training pilot →
-              P4 causal battery → P5 defenses); earliest kill/confirm signal is a single small-scale
-              P3 run under the real hard-H2O harness. Novelty narrow claim remains "plausibly distinct"
-              (HYPOTHESIS), re-verify before submission.
-Current Status: ACTIVE STRATEGIC DIRECTIVE (Campaign 003).
+Consequences: WP7 is reopened as a partial engineering prototype. WP8/WP9 remain unexecuted.
+              Campaign 3 records are exploratory and pass no unified gate. The next experiment must
+              characterize a faithful passive eviction treatment before scorer manipulation or
+              suppressor causal claims.
+Current Status: ACTIVE STRATEGIC PRIORITY; CAMPAIGN 3 RESULT CLAIMS ARE EXPLORATORY ONLY.
 ```
 
 ```text
@@ -567,3 +561,31 @@ Current Status: ACTIVE FORMAL SPECIFICATION.
 | **OD-3** | **Target Publication Venue & Cycle** | **RESOLVED: Primary target venue is USENIX Security 2027 (Cycle 2, Jan 2027)**, with **TMLR** as journal fallback for rigorous negative/conformance results. | Decision D15 |
 | **OD-4** | **LaunderBench Fallback Status** | **RESOLVED: LaunderBench is maintained strictly as an emergency, distant fallback** (dormant), not an active parallel effort. | Decision D15 |
 
+
+```text
+Decision ID: D21
+Title: Retract Campaign 2 UG1/UG2 verdict and revoke WP2/WP3 authorization
+Date / Phase: 2026-09-27 / Post-pull implementation audit and remediation
+Previous State: D18 certified UG2 CONDITIONAL PASS; D19 authorized the STE proxy for training;
+                canonical memory described WP0/WP1 complete and WP2/WP3 unblocked.
+Decision: Retract the Campaign 2 runtime/determinism gate verdicts and block WP2/WP3 until a
+          new review receives traceable artifacts from the pinned Qwen checkpoint under genuine
+          separate-process BF16 vLLM, FP8 vLLM, and a corresponding real-Qwen proxy execution.
+          Reclassify Campaign 2 as synthetic local proxy/storage engineering preflight only.
+Rationale: Three independent code-path audits established that the former REAL_FP8 condition and
+           STORAGE_FP8 condition executed the same local implementation; VLLMRunner was disconnected;
+           Qwen weights/tokenizer/prompts were not loaded; reference tensors were not BF16; cache
+           captures and final-logit labels were incorrect; and no immutable raw results existed.
+           The reported nonzero kernel component could not be generated by the committed branches.
+Corrections Implemented: Local conditions renamed and fail closed; INT8 fallback removed; full
+                         accumulated cache and final logits repaired; genuine vLLM runner and
+                         immutable hashed runtime artifacts added; original reports marked historical.
+Source Evidence: research/campaigns/campaign_002/CAMPAIGN_002_CORRECTION.md; source-code audit of
+                 src/harness/cache_adapter.py, src/eval/run_conformance.py,
+                 src/harness/deterministic_decode.py, and src/runtime/vllm_runner.py.
+Consequences: UG0 PARTIAL; UG1 NOT PASSED; UG2 NOT PASSED/BLOCKED; UG3–UG9 unopened. D18 and D19
+              are historical and superseded wherever they certify conformance or training permission.
+              D20 remains useful only as an intended target specification and must be reconciled with
+              the actual vLLM 0.26.0 dependency lock on the Linux host.
+Current Status: ACTIVE AUTHORITATIVE CORRECTION.
+```

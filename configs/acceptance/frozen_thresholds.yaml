@@ -1,122 +1,92 @@
-# Campaign 002 Pre-Registered Acceptance Gate (UG2)
-# Frozen Threshold Specification
-# Freezing Date: 2026-09-27T13:40:00Z
-# Governing Protocol: CONSOLIDATED_RESEARCH_PLAN.md §7 Gate UG2, CAMPAIGN_001_DECISION_MEMO.md §7.2, §10
-# Target Model: Qwen/Qwen2.5-1.5B-Instruct
-# Format: torch.float8_e4m3fn (dynamic range [-448.0, 448.0])
+# Candidate diagnostic thresholds inherited from Campaign 2.
+#
+# These thresholds do not constitute a passed preregistration or gate. They are
+# applied only to the synthetic local storage-versus-STE preflight. Genuine UG2
+# requires separate artifacts from the pinned Qwen proxy, vLLM BF16 reference,
+# and vLLM FP8 target, followed by an independent gate review.
 
 gate_id: "UG2_RUNTIME_PROXY_CONFORMANCE"
-campaign_id: "campaign_002"
-work_package: "WP0_WP1"
-frozen_timestamp: "2026-09-27T13:40:00Z"
+campaign_id: "campaign_002_corrected"
+work_package: "WP0_WP1_REMEDIATION"
+status: "CANDIDATE_THRESHOLDS_NOT_AN_UG2_VERDICT"
 model_target: "Qwen/Qwen2.5-1.5B-Instruct"
-calibration_pilot_set: "cluster_05_pilot_calibration_set"
+model_revision: "560647970498b8c199e8471c6155fe7f1c1f5138"
+training_authorized: false
 
 thresholds:
   cache_nrmse:
     metric_name: "Key/Value Tensor Normalized Root Mean Squared Error"
-    unit: "dimensionless"
-    aggregation: "layerwise_mean"
+    aggregation: "promptwise_layerwise_mean_reported_separately_for_k_and_v"
     target_threshold: 0.050
     blocker_threshold: 0.150
     comparison_operator: "<="
-    falsification_rule: "If mean K or V tensor NRMSE > 0.05, proxy fails primary fidelity target; if > 0.15, absolute blocker."
 
   cache_cosine_similarity:
     metric_name: "Key/Value Tensor Directional Cosine Similarity"
-    unit: "dimensionless"
-    aggregation: "layerwise_min"
+    aggregation: "global_minimum_across_prompts_and_layers_for_k_and_v"
     target_threshold: 0.995
     blocker_threshold: 0.980
-    absolute_falsification_threshold: 0.950
     comparison_operator: ">="
-    falsification_rule: "If layerwise cosine similarity < 0.980, halt immediately per Gate UG2 blocker rule and pivot to empirical proxy gap publication (Decision D15)."
 
   logit_spearman_rho:
-    metric_name: "Next-Token Logit Spearman Rank Correlation"
-    unit: "dimensionless"
+    metric_name: "Final-Step Top-200 Logit Spearman Rank Correlation"
     aggregation: "promptwise_mean"
     target_threshold: 0.850
     blocker_threshold: 0.800
     comparison_operator: ">="
-    falsification_rule: "If next-token top-k logit Spearman rho < 0.850, halt immediately per Gate UG2 blocker rule."
 
   top10_directional_agreement:
-    metric_name: "Top-10 Token Rank and Directional Logit Agreement"
-    unit: "ratio"
+    metric_name: "Top-10 Token Set Overlap"
     aggregation: "promptwise_mean"
     target_threshold: 0.800
     blocker_threshold: 0.700
     comparison_operator: ">="
-    falsification_rule: "If top-10 directional agreement < 0.800, logit ordering fidelity is insufficient."
+    note: "The implementation measures set overlap, not pairwise rank direction."
 
   output_jsd:
-    metric_name: "Output Token Probability Jensen-Shannon Divergence"
-    unit: "nats"
+    metric_name: "Final-Step Output Probability Jensen-Shannon Divergence"
     aggregation: "promptwise_max"
     target_threshold: 0.020
     blocker_threshold: 0.050
     comparison_operator: "<="
-    falsification_rule: "If output probability JSD > 0.020, distributional divergence exceeds acceptable boundary; > 0.050 is an immediate blocker."
 
   greedy_token_match_rate:
-    metric_name: "Greedy Generation Token Match Rate (128 Tokens)"
-    unit: "ratio"
+    metric_name: "Greedy Generation Token Match Rate"
     aggregation: "promptwise_mean"
     target_threshold: 0.900
     blocker_threshold: 0.800
     comparison_operator: ">="
-    falsification_rule: "If greedy decoding token match rate over 128 tokens < 0.900, end-to-end generation diverges unacceptably."
 
   run_to_run_determinism:
-    metric_name: "Bitwise Token Parity Over 50 Repeat Runs"
-    unit: "ratio"
-    aggregation: "all_runs"
+    metric_name: "Bitwise Token Parity"
+    aggregation: "all_runs_per_real_condition"
     target_threshold: 1.000
-    blocker_threshold: 1.000
     comparison_operator: "=="
-    falsification_rule: "Any non-zero bitwise discrepancy across 50 repeat runs on clean model under greedy decoding (T=0, seed=42) fails Gate UG1."
+    note: "Local same-process repeatability does not satisfy UG1."
 
   process_restart_invariance:
-    metric_name: "Bitwise Parity Across Independent Process Launches"
-    unit: "ratio"
-    aggregation: "all_processes"
+    metric_name: "Bitwise Parity Across Independent OS Processes"
+    aggregation: "all_processes_per_real_condition"
     target_threshold: 1.000
-    blocker_threshold: 1.000
     comparison_operator: "=="
-    falsification_rule: "Output tokens must be bitwise identical across independent OS process launches under fixed seeds."
 
   hardware_silent_fallback_tolerance:
-    metric_name: "Hardware Fallback Tolerance"
-    unit: "count"
+    metric_name: "Physical Runtime Fallback Count"
     target_threshold: 0
-    blocker_threshold: 0
     comparison_operator: "=="
-    falsification_rule: "Any silent fallback from hardware FP8 Tensor Cores to simulated/software FP8 or BF16 without explicit assertion triggers an immediate constitutional test failure."
 
-pilot_calibration_records:
-  calib_001_math_proof:
-    cache_nrmse_mean: 0.0312
-    cache_cosine_min: 0.9984
-    logit_spearman_rho: 0.9240
-    top10_agreement: 0.9000
-    output_jsd: 0.0084
-    token_match_128: 0.9688
-  calib_002_sorting_complexity:
-    cache_nrmse_mean: 0.0345
-    cache_cosine_min: 0.9979
-    logit_spearman_rho: 0.9115
-    top10_agreement: 0.9000
-    output_jsd: 0.0098
-    token_match_128: 0.9531
+local_preflight_decision_mapping:
+  PREFLIGHT_PASS:
+    criteria: "All local storage-versus-STE diagnostic thresholds pass."
+    authorized_action: "Proceed only to genuine runtime/proxy artifact collection. Training remains blocked."
+  PREFLIGHT_FAIL:
+    criteria: "One or more local diagnostic thresholds fail."
+    authorized_action: "Repair the local operator/harness before runtime collection."
 
-decision_mapping:
-  PASS:
-    criteria: "All primary metrics meet target thresholds (NRMSE <= 0.05, CosSim >= 0.995, Spearman rho >= 0.85, JSD <= 0.02, Token Match >= 0.90, Determinism == 1.0)."
-    authorized_action: "Authorize Phase 2 (WP2/WP3) runtime-conditioned backdoor training."
-  CONDITIONAL_PASS:
-    criteria: "Primary metrics meet blocker thresholds (CosSim >= 0.98, Spearman rho >= 0.80) but require static scale calibration or sequence length restriction."
-    authorized_action: "Authorize conditional Phase 2 training with documented runtime constraints."
-  FAIL:
-    criteria: "Any primary metric violates blocker thresholds (CosSim < 0.98 or Spearman rho < 0.85 or Determinism < 1.0)."
-    authorized_action: "Halt fine-tuning immediately; pivot to empirical proxy gap publication per Decision D15."
+ug2_required_artifacts:
+  - "Pinned real-Qwen Transformers BF16/proxy artifact"
+  - "Separate-process vLLM BF16 reference artifact"
+  - "Separate-process vLLM FP8 target artifact"
+  - "Resolved physical cache dtype/element-size/backend attestation"
+  - "Paired raw per-prompt/per-step outputs"
+  - "Independent gate review with confidence intervals"

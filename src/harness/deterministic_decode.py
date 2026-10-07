@@ -97,7 +97,11 @@ class Qwen2GQAAttention(nn.Module):
             past_k, past_v = past_key_value
             k = torch.cat([past_k, k], dim=2)
             v = torch.cat([past_v, v], dim=2)
-            
+
+        # Capture the complete accumulated cache, not only the newest token.
+        if adapter is not None:
+            adapter.capture_accumulated_kv(self.layer_idx, k, v)
+
         current_kv = (k, v)
         
         # Repeat KV heads for GQA
@@ -154,8 +158,11 @@ class Qwen2DecoderLayer(nn.Module):
 
 
 class Qwen2ModelReference(nn.Module):
-    """Clean reference model implementation for Qwen2.5-1.5B-Instruct architecture.
-    
+    """Synthetic Qwen-shaped model used only for local operator preflight.
+
+    This class does not load pretrained Qwen weights, its tokenizer, chat
+    template, rotary embeddings, or an official model configuration. Results
+    from this model are engineering diagnostics and never model evidence.
     Architecture specifications:
     - 28 Transformer layers
     - GQA: 12 query heads, 2 KV heads, dim 1536, head dim 128
@@ -241,4 +248,4 @@ def deterministic_greedy_generate(
             curr_input = next_token
             
         gen_tokens = torch.cat(generated, dim=1)
-        return gen_tokens, step_logits[0], step_logits
+        return gen_tokens, step_logits[-1], step_logits

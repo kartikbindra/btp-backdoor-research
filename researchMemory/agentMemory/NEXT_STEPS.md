@@ -9,6 +9,10 @@
 > 5. VRAM-Safe Sequential Runner (`scripts/run_pfseb_campaign_004.py`) verified under 16GB VRAM constraint.
 >
 > **Immediate Action:** Execute the multi-seed evaluation suite on Kaggle GPU (`seeds 42, 123, 7`) following `research/campaigns/campaign_004/KAGGLE_CAMPAIGN_004.md`, then advance to Campaign 005 (Mechanistic Circuit Localization & Defense Auditing).
+> [!IMPORTANT]
+> **Immediate active work is remediation and genuine UG1/UG2 execution.** Do not start WP2/WP3. Finish WP0 contracts, validate this code in a pinned environment, run real BF16 and vLLM FP8 conditions on the designated Linux GPU host, create the real-Qwen proxy artifact, and convene a fresh gate review.
+
+This document outlines the sequential, milestone-driven execution plan for the `btp-research` project following Campaign 001, structuring implementation into Work Packages WP0 through WP9 governed by Unified Gates UG0 through UG9.
 
 ---
 

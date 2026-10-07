@@ -1,0 +1,15 @@
+# Python bytecode and local environments
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+
+# Local synthetic diagnostics are reproducible and not research evidence.
+results/local_preflight/
+
+# Editor/OS noise
+.DS_Store
+
+# Keep results/raw/runtime visible to Git: successful and failed runtime
+# artifacts are scientific records that must be reviewed and archived.

@@ -1,34 +1,42 @@
-"""Intermediate storage ablation for FP8 KV-Cache (T_storage).
+"""Explicit local FP8 storage/dequantization ablation.
 
-Isolates memory storage quantization error from hardware GEMM non-associativity
-rounding differences by storing activations as 1-byte FP8 values in cache memory
-and dequantizing to BF16/FP16 before computing standard attention.
+This is a local storage experiment, not a vLLM or hardware-kernel path. Native
+``torch.float8_e4m3fn`` storage is required. The previous INT8 substitution was
+removed because INT8 bytes are not an FP8 representation and would silently
+change the scientific treatment.
 """
 
-from typing import Tuple, Dict, Any, Optional
+from typing import Any, Dict, Optional, Tuple
+
 import torch
-import torch.nn as nn
-from src.compression.scales import calculate_static_scale, FP8_E4M3_MAX, FP8_E4M3_MIN
-from src.compression.fake_fp8 import quantize_fp8_e4m3fn_discrete
+
+from src.compression.scales import calculate_static_scale, FP8_E4M3_MAX
+
+
+class NativeFP8StorageUnavailableError(RuntimeError):
+    """Raised when native torch FP8 storage cannot be created."""
 
 
 class FP8KVStorage:
-    """Manages physical 1-byte-per-element FP8 KV cache memory blocks.
-    
-    Provides explicit byte-level verification to guarantee 1-byte storage
-    without silent fallback to 2-byte half-precision types.
-    """
-    
-    def __init__(self, use_native_fp8: bool = True):
-        self.use_native_fp8 = use_native_fp8 and hasattr(torch, "float8_e4m3fn")
-        self.storage_dtype: torch.dtype = (
-            torch.float8_e4m3fn if (self.use_native_fp8 and hasattr(torch, "float8_e4m3fn")) else torch.int8
+    """Store local K/V chunks with a physical one-byte FP8 dtype."""
+
+    def __init__(self) -> None:
+        self.storage_dtype: Optional[torch.dtype] = getattr(
+            torch, "float8_e4m3fn", None
         )
         self.k_cache_fp8: Optional[torch.Tensor] = None
         self.v_cache_fp8: Optional[torch.Tensor] = None
         self.k_scale: Optional[torch.Tensor] = None
         self.v_scale: Optional[torch.Tensor] = None
         self.orig_dtype: torch.dtype = torch.bfloat16
+
+    def _require_native_dtype(self) -> torch.dtype:
+        if self.storage_dtype is None:
+            raise NativeFP8StorageUnavailableError(
+                "torch.float8_e4m3fn is unavailable. Local FP8 storage cannot be "
+                "emulated with INT8; use the STE proxy or a supported PyTorch build."
+            )
+        return self.storage_dtype
 
     def store(
         self,
@@ -38,79 +46,76 @@ class FP8KVStorage:
         v_scale: Optional[torch.Tensor] = None,
         granularity: str = "per_head",
     ) -> None:
-        """Quantize and store Key and Value tensors into 1-byte FP8 memory.
-        
-        Args:
-            key: High-precision key tensor (e.g. BF16).
-            value: High-precision value tensor.
-            k_scale: Optional scale factor for keys.
-            v_scale: Optional scale factor for values.
-            granularity: Scaling granularity.
-        """
+        """Quantize and store K/V chunks using native E4M3FN bytes."""
+        storage_dtype = self._require_native_dtype()
         self.orig_dtype = key.dtype
-        
-        if k_scale is None:
-            self.k_scale = calculate_static_scale(key, granularity=granularity)
-        else:
-            self.k_scale = k_scale
-            
-        if v_scale is None:
-            self.v_scale = calculate_static_scale(value, granularity=granularity)
-        else:
-            self.v_scale = v_scale
-            
-        # Scale and quantize
-        k_scaled = key / self.k_scale
-        v_scaled = value / self.v_scale
-        
-        k_q = quantize_fp8_e4m3fn_discrete(k_scaled)
-        v_q = quantize_fp8_e4m3fn_discrete(v_scaled)
-        
-        # Store in 1-byte format
-        if self.use_native_fp8:
-            try:
-                self.k_cache_fp8 = k_q.to(torch.float8_e4m3fn)
-                self.v_cache_fp8 = v_q.to(torch.float8_e4m3fn)
-                self.storage_dtype = torch.float8_e4m3fn
-            except Exception:
-                # Fallback integer 1-byte quantization [-128, 127]
-                self.k_cache_fp8 = torch.clamp(k_q.round(), -128, 127).to(torch.int8)
-                self.v_cache_fp8 = torch.clamp(v_q.round(), -128, 127).to(torch.int8)
-                self.storage_dtype = torch.int8
-        else:
-            # Store discrete values with 1-byte footprint representation
-            self.k_cache_fp8 = torch.clamp(k_q.round(), -128, 127).to(torch.int8)
-            self.v_cache_fp8 = torch.clamp(v_q.round(), -128, 127).to(torch.int8)
-            self.storage_dtype = torch.int8
+        self.k_scale = (
+            calculate_static_scale(key, granularity=granularity)
+            if k_scale is None
+            else k_scale
+        )
+        self.v_scale = (
+            calculate_static_scale(value, granularity=granularity)
+            if v_scale is None
+            else v_scale
+        )
 
-    def retrieve(self, target_dtype: Optional[torch.dtype] = None) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Dequantize stored FP8 cache to target high-precision dtype (e.g. BF16).
-        
-        Returns:
-            (dequantized_keys, dequantized_values)
-        """
-        dtype = target_dtype if target_dtype is not None else self.orig_dtype
-        
+        # Use native PyTorch FP8 casting as an implementation independent of
+        # the custom discrete proxy. Inputs are clamped to the finite E4M3FN
+        # range before round-to-nearest conversion by the native cast.
+        k_scaled = torch.clamp(
+            key / self.k_scale, -FP8_E4M3_MAX, FP8_E4M3_MAX
+        )
+        v_scaled = torch.clamp(
+            value / self.v_scale, -FP8_E4M3_MAX, FP8_E4M3_MAX
+        )
+        fill_was_enabled = None
+        try:
+            # PyTorch's deterministic debug mode may try to prefill newly
+            # allocated float8 tensors using an unsupported kernel. Conversion
+            # overwrites every element, so temporarily disabling only that
+            # uninitialized-memory fill preserves deterministic quantization.
+            if torch.are_deterministic_algorithms_enabled():
+                fill_was_enabled = torch.utils.deterministic.fill_uninitialized_memory
+                torch.utils.deterministic.fill_uninitialized_memory = False
+            self.k_cache_fp8 = k_scaled.to(storage_dtype)
+            self.v_cache_fp8 = v_scaled.to(storage_dtype)
+        except Exception as exc:
+            self.clear()
+            raise NativeFP8StorageUnavailableError(
+                "Failed to allocate native torch.float8_e4m3fn storage; refusing "
+                "the former silent INT8 substitution."
+            ) from exc
+        finally:
+            if fill_was_enabled is not None:
+                torch.utils.deterministic.fill_uninitialized_memory = fill_was_enabled
+
+        if self.k_cache_fp8.element_size() != 1 or self.v_cache_fp8.element_size() != 1:
+            self.clear()
+            raise NativeFP8StorageUnavailableError(
+                "Native FP8 storage did not allocate exactly one byte per element."
+            )
+
+    def retrieve(
+        self, target_dtype: Optional[torch.dtype] = None
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Dequantize locally stored FP8 chunks to a requested compute dtype."""
         if self.k_cache_fp8 is None or self.v_cache_fp8 is None:
             raise RuntimeError("Cache storage is empty.")
-            
-        k_val = self.k_cache_fp8.to(self.storage_dtype).to(dtype)
-        v_val = self.v_cache_fp8.to(self.storage_dtype).to(dtype)
-        
-        k_deq = k_val * self.k_scale.to(dtype)
-        v_deq = v_val * self.v_scale.to(dtype)
-        
+        if self.k_scale is None or self.v_scale is None:
+            raise RuntimeError("Cache scales are unavailable.")
+
+        dtype = target_dtype if target_dtype is not None else self.orig_dtype
+        k_deq = self.k_cache_fp8.to(dtype) * self.k_scale.to(dtype)
+        v_deq = self.v_cache_fp8.to(dtype) * self.v_scale.to(dtype)
         return k_deq, v_deq
 
     def get_element_size_bytes(self) -> int:
-        """Verify element size of stored cache in bytes (must be 1 for FP8)."""
-        if self.k_cache_fp8 is not None:
-            if hasattr(self.k_cache_fp8, "element_size"):
-                return self.k_cache_fp8.element_size()
-        return 1
+        if self.k_cache_fp8 is None:
+            raise RuntimeError("Cache storage is empty.")
+        return self.k_cache_fp8.element_size()
 
     def clear(self) -> None:
-        """Zero out and release allocated memory."""
         self.k_cache_fp8 = None
         self.v_cache_fp8 = None
         self.k_scale = None
@@ -123,28 +128,23 @@ def factorize_quantization_noise(
     output_storage: torch.Tensor,
     output_proxy: torch.Tensor,
 ) -> Dict[str, float]:
-    """Decompose total divergence between production and proxy into storage vs GEMM components.
-    
-    Total Divergence Delta_total = ||Output_real - Output_proxy||_2
-    Storage Quantization Noise Delta_storage = ||Output_storage - Output_ref||_2
-    Kernel GEMM Rounding Noise Delta_kernel = ||Output_real - Output_storage||_2
-    Proxy-to-Storage Alignment Delta_proxy_storage = ||Output_proxy - Output_storage||_2
+    """Decompose divergence once ``output_real`` comes from a genuine runtime.
+
+    This helper does not validate provenance. Callers must never pass a local
+    storage simulation as ``output_real``.
     """
-    ref_f = output_ref.float().view(-1)
-    real_f = output_real.float().view(-1)
-    storage_f = output_storage.float().view(-1)
-    proxy_f = output_proxy.float().view(-1)
-    
+    ref_f = output_ref.float().reshape(-1)
+    real_f = output_real.float().reshape(-1)
+    storage_f = output_storage.float().reshape(-1)
+    proxy_f = output_proxy.float().reshape(-1)
     norm_ref = torch.norm(ref_f, p=2).item() + 1e-12
-    
+
     delta_total = torch.norm(real_f - proxy_f, p=2).item() / norm_ref
     delta_storage = torch.norm(storage_f - ref_f, p=2).item() / norm_ref
     delta_kernel = torch.norm(real_f - storage_f, p=2).item() / norm_ref
     delta_proxy_storage = torch.norm(proxy_f - storage_f, p=2).item() / norm_ref
-    
-    # Kernel vs Storage ratio
     storage_dominance_ratio = delta_storage / (delta_kernel + 1e-12)
-    
+
     return {
         "nrmse_total_real_vs_proxy": float(delta_total),
         "nrmse_storage_noise": float(delta_storage),
