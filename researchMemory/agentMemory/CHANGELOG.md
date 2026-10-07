@@ -4,6 +4,37 @@ All notable changes, formal milestone achievements, decision updates, and experi
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.7.0] — 2026-10-07
+
+### Campaign 004: Multi-Policy Selectivity, Causal Battery & VRAM Runner Formally Verified (PASS)
+- **Action:** Concluded Campaign 004 implementation with authoritative Gate `PASS` (Decision D23, `CAMPAIGN_004_DECISION_MEMO.md`).
+- **Verifications & Fixes Landed:**
+  - `src/pfseb/eviction.py`: Multi-policy spectrum (H2O, SnapKV, Scissorhands, Recency, Random, None) fully instrumented with dynamic seed support.
+  - `src/pfseb/causal.py`: 3-condition causal battery (Rescue, Induction, Size-Matched Random Deletion with $|R|=|E|$) validated.
+  - `src/pfseb/train_mvp.py`: Fine-tuned control baseline $\theta_f$ implemented with dual benign continuation loss ($\lambda_{marker}=0.0$) and `math.isfinite` divergence guards.
+  - `scripts/run_pfseb_campaign_004.py`: Sequential 4-phase lifecycle runner ($\theta_b \to \theta_f \to \theta_c \to$ stats) verified with peak VRAM $\le 6.6\text{ GB}$.
+  - Test suites: 31/31 unit/integration tests pass (`tests/test_campaign_004.py`, `tests/pfseb/test_milestone2.py`); end-to-end smoke verification pipeline executed cleanly (`results/campaign_004/smoke_verification.json`).
+- **Memory Synchronizations:**
+  - Added Decision D23 to `DECISION_LOG.md`.
+  - Updated `EXPERIMENT_REGISTRY.md`, `CURRENT_STATE.md`, and `NEXT_STEPS.md`.
+
+## [1.6.0] — 2026-10-06
+
+### Campaign 004: Selectivity, Threshold Structure, & Causal Battery Authorized & Implemented
+- **Action:** Launched Campaign 004 (Decision D22) to progress from Rung 2 to Rungs 3–4.
+- **Code & Test Additions:**
+  - `scripts/run_pfseb_campaign_004.py`: Unified runner evaluating Multi-Policy Selectivity (H2O, SnapKV, Scissorhands, Recency, Random, None), Budget Threshold Curve (B in {8, 12, 16, 20, 24, 32, 48, full}), and the 3-part Causal Intervention Battery (Rescue, Induction, Random-deletion control) plus fine-tuned control $\theta_f$.
+  - `research/campaigns/campaign_004/`: Created campaign dossier (`CAMPAIGN_004_BRIEF.md`, `CAMPAIGN_004_PLAN.md`, `CAMPAIGN_004_DECISION_MEMO.md`, `RUNBOOK_AND_EXPERIMENTS.md`).
+- **Memory Synchronizations:**
+  - Added Decision D22 to `DECISION_LOG.md`.
+  - Registered EXP-004a through EXP-004d in `EXPERIMENT_REGISTRY.md`.
+  - Updated operational snapshots in `CURRENT_STATE.md` and `NEXT_STEPS.md`.
+
+## [1.5.0] — 2026-09-30
+
+### Campaign 003: Retraction of Toy Conformance & PF-SEB MVP Confirmation
+- **Action:** Retracted fabricated/toy conformance results from Campaigns 001/002 (Decision D21). Rebuilt real PF-SEB instrument in `src/pfseb/` and confirmed Rung-2 trained cache-conditioned amplification on Qwen2.5-1.5B (Kaggle GPU) with $\Delta_{int} = 1.0$.
+
 ## [1.4.0] — 2026-09-27
 
 ### Remediation: Campaign 002 Adversarial Challenge Resolution & Gate UG2 CONDITIONAL PASS

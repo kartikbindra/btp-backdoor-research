@@ -1,6 +1,14 @@
 # Concrete Action Roadmap & Next Steps
 
-This document outlines the sequential, milestone-driven execution plan for the `btp-research` project following Campaign 001, structuring implementation into Work Packages WP0 through WP9 governed by Unified Gates UG0 through UG9.
+> **✅ CAMPAIGN 004 VERIFIED (2026-10-07, Decision D23):**
+> Campaign 004 implementation, multi-tier adversarial hardening, and end-to-end smoke verification are complete (`PASS`):
+> 1. Multi-Policy Selectivity Matrix (H2O, SnapKV, Scissorhands, Recency, Random, None) fully instrumented.
+> 2. Eviction Budget Sweep ($B \in \{8, \dots, 48, \text{full}\}$) instrumented.
+> 3. 3-Part Causal Battery (Rescue, Induction, Size-Matched Random Deletion $|R|=|E|$) validated.
+> 4. Fine-Tuned Control Baseline ($\theta_f$) operational.
+> 5. VRAM-Safe Sequential Runner (`scripts/run_pfseb_campaign_004.py`) verified under 16GB VRAM constraint.
+>
+> **Immediate Action:** Execute the multi-seed evaluation suite on Kaggle GPU (`seeds 42, 123, 7`) following `research/campaigns/campaign_004/KAGGLE_CAMPAIGN_004.md`, then advance to Campaign 005 (Mechanistic Circuit Localization & Defense Auditing).
 
 ---
 

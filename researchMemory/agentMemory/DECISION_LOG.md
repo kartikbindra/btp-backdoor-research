@@ -448,6 +448,114 @@ Consequences: Campaign 003 executes the Top-5 plan (P1 baseline → P2 controls 
 Current Status: ACTIVE STRATEGIC DIRECTIVE (Campaign 003).
 ```
 
+```text
+Decision ID: D22
+Title: Campaign 004 — Authorization of Policy Selectivity, Budget Thresholds, & Causal Verification Battery
+Date / Phase: 2026-10-06 / Campaign 004 Transition
+Previous State: Campaign 003 confirmed Rung 2 (trained cache-conditioned amplification) on Qwen2.5-1.5B (Kaggle GPU)
+                and 0.5B (CPU) with Delta_int = 1.0 at budget=8 under H2O eviction. Selectivity across policies,
+                budget threshold behavior, and causal interventions remained unmeasured.
+Decision:
+  1. Authorize Campaign 004 focusing on:
+     a) WP4.1: Policy Selectivity Matrix (H2O vs SnapKV, Scissorhands, Recency, Random, Full Cache).
+     b) WP4.2: Eviction Budget Sweep (B in {8, 12, 16, 20, 24, 32, 48, full}).
+     c) WP4.3: 3-Condition Causal Intervention Battery (Rescue Delta_rescue, Induction Delta_induction, Random Deletion Delta_random).
+     d) WP4.4: Fine-Tuned Control Model Baseline (theta_f) for Delta_cond calibration.
+  2. Implement unified testing suite scripts/run_pfseb_campaign_004.py enabling dual-mode execution:
+     - Local CPU fast verification mode (0.5B, sub-sampled prompts, deterministic).
+     - Full GPU execution mode (1.5B, 24 held-out prompts, multi-seed 42, 123, 7).
+  3. Pre-register acceptance thresholds:
+     - Delta_policy >= 0.40 between attention policies and recency/random baselines.
+     - Delta_rescue >= 0.60 and Delta_induction >= 0.60 with Delta_random <= 0.05.
+     - Delta_cond >= 0.50 with two-sided 95% bootstrap CI lower bound > 0.30.
+Rationale: Confirmatory evidence discipline demands that we test whether the observed Rung-2 effect is
+           policy-fingerprinted or generic context truncation before claiming higher ladder positions.
+           Establishing the causal battery is required by AGENTS.md to differentiate intentional backdoors
+           from compression-induced degradation.
+Alternatives Considered: Immediate paper drafting on Rung-2 MVP (rejected: reviewers would question specificity);
+                         Jumping directly to FP8 vLLM integration (rejected: eviction mechanism must be causally
+                         characterized first in PyTorch).
+Source Evidence: research/campaigns/campaign_004/{CAMPAIGN_004_BRIEF.md, CAMPAIGN_004_PLAN.md,
+                 CAMPAIGN_004_DECISION_MEMO.md, RUNBOOK_AND_EXPERIMENTS.md}; scripts/run_pfseb_campaign_004.py.
+Consequences: Unlocks experimental transition from Rung 2 to Rungs 3–4 upon successful execution.
+Current Status: ACTIVE FORMAL DIRECTIVE (Campaign 004).
+```
+
+```text
+Decision ID: D23
+Title: Campaign 004 — Verification Gate PASS & Implementation Completion
+Date / Phase: 2026-10-07 / Campaign 004 Conclusion
+Previous State: Campaign 004 was active across dual implementation and testing tracks.
+Decision:
+  1. Render formal Gate PASS verdict on Campaign 004 implementation:
+     - Multi-policy spectrum (H2O, SnapKV, Scissorhands, Recency, Random, None) fully instrumented.
+     - 3-condition causal battery (Rescue, Induction, Size-Matched Random Deletion with |R|=|E|) validated.
+     - Fine-tuned control baseline (theta_f) with dual benign loss (lambda_marker=0.0) implemented.
+     - VRAM-safe sequential 4-phase lifecycle runner (scripts/run_pfseb_campaign_004.py) operational.
+     - 100% of unit, boundary, and regression tests pass (tests/test_campaign_004.py 26/26, test_milestone2.py 5/5, test_eviction_adversarial.py 12/12).
+     - End-to-end smoke verification pipeline executed cleanly and output serialized to results/campaign_004/smoke_verification.json.
+  2. Authorize Kaggle GPU confirmatory evaluation suite across seeds 42, 123, 7.
+Rationale: All pre-registered requirements R1–R5 and features F1–F12 are verified with zero mocks, clean forensic audits, and passing unit tests.
+Source Evidence: CAMPAIGN_004_DECISION_MEMO.md; KAGGLE_CAMPAIGN_004.md; results/campaign_004/smoke_verification.json;
+                 tests/test_campaign_004.py; scripts/run_pfseb_campaign_004.py.
+Consequences: Concludes Campaign 004 implementation; clears path for Kaggle GPU execution and Campaign 005.
+Current Status: ACTIVE FORMAL VERDICT (PASS).
+```
+
+```text
+Decision ID: D23
+Title: Formal Specification of 5-Policy Spectrum and 3-Part Causal Intervention Battery
+Date / Phase: 2026-10-07 / Campaign 004 (Phase 3 Synthesis)
+Previous State: Campaign 003 measured only H2O eviction at fixed budget B=8; cross-policy
+                selectivity and causal position mediation remained uncharacterized.
+Decision:
+  1. Standardize on the 5-policy evaluation spectrum: H2O (cumulative attention), SnapKV
+     (observation-window pooling), Scissorhands (persistence budgeting), Recency-only, and
+     Random eviction.
+  2. Implement the 3-part causal battery:
+     - Rescue: Programmatically pinning evicted positions under trigger condition.
+     - Induction: Programmatically masking candidate positions under full cache C0.
+     - Size-Matched Random Deletion: Programmatically masking |R|=|E| random positions under C0,
+       formally resolving Defect G3 (strict size equality without arbitrary clamping).
+  3. Pre-register acceptance thresholds:
+     - Delta_policy = ASR(H2O) - ASR(Random) >= 0.40.
+     - Delta_rescue >= 0.60, Delta_induction >= 0.60, Delta_random <= 0.05.
+Rationale: Confirmatory evidence discipline requires establishing whether marker emission is
+           uniquely mediated by the memory manager's attention-derived token choices or is an
+           unintended side-effect of generic sequence truncation.
+Alternatives Considered: Evaluating only H2O vs Random (rejected: fails to distinguish attention-pooling
+                          from cumulative scoring); Clamping random deletion size to fixed small constant
+                          (rejected: violates causal balance between |R| and |E|).
+Source Evidence: research/campaigns/campaign_004/CAMPAIGN_004_DECISION_MEMO.md; src/pfseb/eviction.py;
+                 src/pfseb/causal.py; tests/pfseb/test_causal.py.
+Consequences: Governs all empirical analysis and paper claims for Campaign 004.
+Current Status: ACTIVE FORMAL SPECIFICATION.
+```
+
+```text
+Decision ID: D24
+Title: Specification and Architectural Locking of Fine-Tuned Control Baseline (theta_f)
+Date / Phase: 2026-10-07 / Campaign 004 (Phase 3 Synthesis)
+Previous State: Baseline evaluation relied solely on untouched base model theta_c, leaving open
+                the confounder of task fine-tuning exposure and gradient adaptation drift.
+Decision:
+  1. Train theta_f using the exact base model, LoRA rank (r=8, alpha=16), optimizer, learning rate,
+     and compute budget as theta_b.
+  2. Train theta_f exclusively on dual benign continuation loss:
+     L_theta_f = L_CE(y_benign | C0) + L_CE(y_benign | T_H2O) with lambda_marker = 0.0.
+  3. Require Delta_cond = [P(m|H2O, theta_b) - P(m|C0, theta_b)] - [P(m|H2O, theta_f) - P(m|C0, theta_f)] >= 0.50
+     with two-sided 95% bootstrap CI lower bound > 0.30.
+Rationale: Eliminates the hypothesis that fine-tuning on cache-compressed prompts induces generic
+           marker vulnerability.
+Alternatives Considered: Fine-tuning theta_f only on full cache C0 (rejected: does not expose model
+                          to eviction-time representations during training).
+Source Evidence: research/campaigns/campaign_004/CAMPAIGN_004_DECISION_MEMO.md; src/pfseb/train_mvp.py;
+                 tests/pfseb/test_milestone2.py; scripts/run_pfseb_campaign_004.py.
+Consequences: Unlocks Rung 3 (Policy-Conditioned Behavior) and Rung 4 (Trained Cache-Policy-Conditioned Backdoor)
+              of the constitutional terminology ladder upon confirmatory GPU execution.
+Current Status: ACTIVE FORMAL SPECIFICATION.
+```
+
 ---
 
 ## 2. Resolved & Historical Decisions

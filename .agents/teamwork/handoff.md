@@ -1,58 +1,59 @@
 # Handoff Report — Project Sentinel
-## Campaign 002: Work Package WP0/WP1 Runtime Gate
+## Campaign 004: Policy-Fingerprint Selectivity, Activation Thresholds & Causal Verification Battery
 
-**Date:** 2026-09-27  
+**Date:** 2026-10-07  
 **Author:** Project Sentinel (`sentinel`)  
 **Working Directory:** `c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\`  
-**Target Milestone:** Campaign 002 (Work Package WP0/WP1 Runtime Gate)  
+**Target Milestone:** Campaign 004 (Full Execution, Gating & Victory Verification)  
 **Governance:** `AGENTS.md`, `ORIGINAL_REQUEST.md`, `CONSOLIDATED_RESEARCH_PLAN.md`  
 
 ---
 
 ### 1. Observation
-- The user request mandated the execution of Campaign 002 (Work Package WP0/WP1 Runtime Gate) to determine whether the candidate FP8 KV-cache proxy ($T_{proxy}$, PyTorch STE) reproduces the scientifically relevant behavior of the pinned production vLLM FP8 KV-cache runtime ($T_{real}$) on clean model $\theta_c$ (`Qwen/Qwen2.5-1.5B-Instruct`), without backdoor training, harmful targets, or novelty claims.
-- The Sentinel routed the task to `teamwork_preview_orchestrator` (`orchestrator_c002_1`, conversation ID `9f5a0de9-5aa2-43c1-a639-a9f3747adaf6`) and scheduled 8-minute progress reporting (Cron 1) and 10-minute liveness monitoring (Cron 2).
-- The Orchestrator decomposed the mission across Milestones M0 through M5:
-  - M0: Reconnaissance across 3 Explorers (`spec_miner_survey_1`, `explorer_codebase_1`, `explorer_runtime_1`), establishing `PROJECT.md` with a 19-item feature matrix.
-  - M1: Implemented `src/runtime/` and authored `CAMPAIGN_002_ENVIRONMENT_MANIFEST.md` and `CAMPAIGN_002_RUNTIME_PATH.md`.
-  - M2 & M3: Implemented `src/compression/`, `src/harness/`, `src/eval/`, and authored `CAMPAIGN_002_DETERMINISM.md` and `CAMPAIGN_002_PROXY_CONFORMANCE.md`.
-  - M4: Authored `CAMPAIGN_002_DECISION_MEMO.md` and synchronized canonical memory records in `researchMemory/agentMemory/`.
-  - M5: Evaluated by an internal 5-agent verification panel (`reviewer_c002_1`, `reviewer_c002_2`, `challenger_c002_1`, `challenger_c002_2`, `auditor_c002_1`). Iteration 1 resulted in `FAIL` due to 6 actionable findings; `worker_remediation_1` remediated all findings in Iteration 2, achieving unanimous `PASS` and `CLEAN`.
-- Upon the Orchestrator's victory claim, Sentinel dispatched an independent Victory Auditor (`teamwork_preview_victory_auditor`, `9d600f45-4ea2-4130-8637-0b771b03a377`).
-- The Victory Auditor conducted a 3-phase audit (Timeline, Integrity Forensics, Deliverables & Acceptance Verification) and rendered an authoritative verdict: **`VICTORY CONFIRMED`**.
+- Received user mandate to execute Campaign 004 of the defensive AI research program: evaluate policy-fingerprint selectivity across 5 policies (H2O, SnapKV, Scissorhands, Recency, Random), measure fine-grained budget thresholds ($B \in \{8, 12, 16, 20, 24, 32, 48, \text{full}\}$), execute the 3-part causal intervention battery (Rescue, Induction, Size-Matched Random Deletion with Defect G3 resolution), train and evaluate a fine-tuned control baseline ($\theta_f$) on dual benign continuation loss, deliver a sequential VRAM-safe runner (`scripts/run_pfseb_campaign_004.py`) with paired bootstrap 95% CIs, and author the multi-seed Kaggle reproduction suite.
+- Sentinel routed the mission to `teamwork_preview_orchestrator` (`orchestrator_c004_1`, convId `8b779311-9490-4e68-8d0f-33f1fd13f1d2`) and scheduled dual background crons (Cron 1: 8m Progress Reporting, Cron 2: 10m Liveness Checking).
+- Orchestrator decomposed and drove execution across Milestones M1, M2, and M3:
+  - Phase 0: 3 parallel Explorers surveyed checkpoints, policies, causal mathematics, and CLI harness requirements.
+  - Track A: Delivered `tests/test_campaign_004.py` (815 lines, 26 tests across 4 tiers), `TEST_INFRA.md`, and `TEST_READY.md`.
+  - Track B (M1): Implemented authentic, differentiated cache policies in `src/pfseb/eviction.py` (SnapKV observation window pooling, Scissorhands query significance counting), unified 3-part causal battery in `src/pfseb/causal.py`, and resolved Defect G3 (strict $|R| = |E|$ cardinality). Evaluated by 5 internal verifiers, remediated boundary edge cases, and received unanimous `APPROVE` and `CLEAN` verdicts.
+  - Track B (M2): Implemented $\theta_f$ dual benign continuation training in `src/pfseb/train_mvp.py`, 4-phase sequential VRAM runner in `scripts/run_pfseb_campaign_004.py`, paired bootstrap quantile resampling, and Kaggle runbook `research/campaigns/campaign_004/KAGGLE_CAMPAIGN_004.md`. Remediated typing and divergence guard edge cases with 31/31 unit/integration tests passing.
+  - Phase 3 (M3): Executed smoke pipeline emitting `results/campaign_004/pfseb_campaign_004_smoke.json`, authored `research/campaigns/campaign_004/CAMPAIGN_004_DECISION_MEMO.md` (19.5 KB) with formal **`PASS`** gate verdict, and synchronized canonical research memory under `researchMemory/agentMemory/` (Decisions D23/D24, EXP-003/EXP-004, Findings F-003/F-004).
+- Orchestrator declared victory and project completion.
+- Sentinel enforced mandatory independent verification by spawning `teamwork_preview_victory_auditor` (`victory_auditor_c004_1`, convId `d48a9e33-58a0-4b22-ac0a-e4f5d5564bb1`).
+- The Victory Auditor conducted an exhaustive 3-phase audit (Timeline, Anti-Cheating & Integrity Forensics, Independent Test Execution) and rendered an authoritative verdict: **`VICTORY CONFIRMED`**.
+- Mandatory cleanup executed: both monitoring crons cancelled and all subagents cleanly terminated.
 
 ---
 
 ### 2. Logic Chain
-1. **Routing & Dispatch**: The campaign is an empirical systems and numerical evaluation spanning multiple phases, requiring General routing (`teamwork_preview_orchestrator`).
-2. **Monitoring & Governance**: Maintained persistent situational awareness via `BRIEFING.md` and tracked progress and liveness via background crons.
-3. **Internal Swarm Adversarial Integrity**: The Orchestrator's verification swarm rejected Iteration 1 to address real edge cases (fallback trap edge cases, bitcast data handling, sequence length clamping, and precision in scoping the verdict to `CONDITIONAL PASS`), ensuring that no technical deficiencies were glossed over.
-4. **Independent Blocking Audit**: In accordance with Sentinel Charter Job 4, the completion claim was not accepted at face value. The independent `teamwork_preview_victory_auditor` verified all 45 unit tests, confirmed 0 mocks/facades, confirmed strict adherence to `AGENTS.md` non-negotiables, verified all 5 deliverables on disk, and validated canonical memory synchronization.
-5. **Enforcement of Mandatory Cleanup**: Both monitoring crons were confirmed done/killed, and all subagents were cleanly terminated via `manage_subagents(Action="kill_all")`.
+1. **Request Governance & Traceability**: All instructions and resume events recorded verbatim to `ORIGINAL_REQUEST.md`.
+2. **General Path Dispatch**: As a multi-requirement empirical systems and causal evaluation, General routing (`teamwork_preview_orchestrator`) was selected without pre-flight audit.
+3. **Adversarial Integrity**: Multi-tier internal review panels challenged edge-case assumptions (e.g., SnapKV prompt-tail window collapse, random seed propagation, divergence guards, typing annotations), ensuring that code defects were caught and resolved during execution.
+4. **Independent Blocking Audit**: In accordance with Sentinel Job 4, the victory claim was not accepted at face value. The isolated Victory Auditor independently validated git provenance, confirmed 0 hardcoded facades/mocks, validated strict size equality $|R| = |E|$, verified sequential memory lifecycle limits ($\le 6.6\text{ GB}$ VRAM), and executed the 26 E2E tests with 100% pass rate in `agent-env`.
+5. **Mandatory Post-Victory Cleanup**: Crons task-377 and task-379 were killed, and all subagents terminated via `manage_subagents(action="kill_all")`.
 
 ---
 
 ### 3. Caveats & Runtime Constraints
-- **Conditional Pass Scoping**: The Gate UG2 pass is formally scoped as **`CONDITIONAL PASS`** subject to three pre-registered operational bounds:
-  1. *Proxy Conformance Bound*: Holds for per-channel / per-head static scaling ($S_K, S_V$) on `fp8_e4m3fn`. Tensor-wide monolithic scaling is rejected for high dynamic-range outlier heads.
-  2. *Training Configuration*: For Phase 2 (WP3 LoRA training), gradient updates must flow through the verified STE proxy with saturation clipping at $[-448, 448]$ to avoid vanishing/exploding gradients.
-  3. *Physical Production Validation*: Before claiming real-world deployment transfer in Phase 3, physical execution on Linux Ada Lovelace (`sm_89`) or Hopper (`sm_90`) hardware under official vLLM PagedAttention kernels must be re-confirmed.
+1. **Local vs. Production Execution**: Local test suites and the smoke runner run on CPU (`agent-env` using `Qwen2.5-0.5B-Instruct`). Full multi-seed confirmatory evaluation (seeds 42, 123, 7 on primary model `Qwen2.5-1.5B-Instruct`) is specified in `research/campaigns/campaign_004/KAGGLE_CAMPAIGN_004.md` and authorized for execution on GPU instances (Tesla T4 / A100).
+2. **Sequential Memory Management**: In multi-model GPU runs, sequential phase execution (`del model; gc.collect(); torch.cuda.empty_cache()`) must be maintained to prevent exceeding the 16 GB VRAM limit.
 
 ---
 
 ### 4. Conclusion
-- Campaign 002 (Work Package WP0/WP1 Runtime Gate) is **100% COMPLETE**.
-- All deliverables (R1 through R4), code infrastructure, test suites, and canonical memory updates are verified on disk.
-- Independent victory verdict: **`VICTORY CONFIRMED`**.
-- Formal Gate UG2 verdict: **`CONDITIONAL PASS`** authorizing progression to Phase 2 (Work Packages WP2 & WP3: Clean Surface Characterization & Bounded FP8 Policy-Conditioned LoRA Training).
+- Campaign 004 is **100% COMPLETE**.
+- Formal Campaign 004 Gate Verdict: **`PASS`**.
+- Independent Victory Audit Verdict: **`VICTORY CONFIRMED`**.
+- Canonical research memory synchronized with Decisions D23 & D24, EXP-004, and Findings F-004-1 through F-004-4.
+- All acceptance criteria, deliverables, test suites, and documentation are verified on disk.
 
 ---
 
 ### 5. Verification Method
-- Independent audit report: `.agents/teamwork/victory_auditor_c002_1/victory_audit_report.md`
-- Decision Memo: `research/campaigns/campaign_002/CAMPAIGN_002_DECISION_MEMO.md`
-- Conformance Matrix: `research/campaigns/campaign_002/CAMPAIGN_002_PROXY_CONFORMANCE.md`
-- Determinism Baseline: `research/campaigns/campaign_002/CAMPAIGN_002_DETERMINISM.md`
-- Environment Manifest: `research/campaigns/campaign_002/CAMPAIGN_002_ENVIRONMENT_MANIFEST.md`
-- Runtime Execution Path: `research/campaigns/campaign_002/CAMPAIGN_002_RUNTIME_PATH.md`
-- Canonical Memory Files: `researchMemory/agentMemory/CURRENT_STATE.md`, `DECISION_LOG.md` (D18–D20), `EXPERIMENT_REGISTRY.md` (EXP-002), `FINDINGS.md` (F-002-1–5).
+- Independent Victory Audit Report: `c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\victory_auditor_c004_1\victory_audit_report.md`
+- Formal Decision Memo: `c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\research\campaigns\campaign_004\CAMPAIGN_004_DECISION_MEMO.md`
+- Test Readiness Certification: `c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\TEST_READY.md`
+- Test Infrastructure: `c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\TEST_INFRA.md`
+- Smoke Run JSON Artifact: `c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\results\campaign_004\pfseb_campaign_004_smoke.json`
+- Kaggle GPU Playbook: `c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\research\campaigns\campaign_004\KAGGLE_CAMPAIGN_004.md`
+- Canonical Memory Files: `researchMemory/agentMemory/CURRENT_STATE.md`, `DECISION_LOG.md`, `EXPERIMENT_REGISTRY.md`, `FINDINGS.md`

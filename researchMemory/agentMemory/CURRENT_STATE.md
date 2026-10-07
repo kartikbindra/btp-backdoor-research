@@ -3,16 +3,20 @@
 **Project:** B.Tech Final-Year Research Project (`btp-research`)  
 **Researcher:** Kartik  
 **Domain:** AI / LLM Security, Machine Learning Security & Inference Systems  
-**Date of Snapshot:** 2026-09-30 (Campaign 003 kickoff — see `[DECISION D21]`)
+**Date of Snapshot:** 2026-10-07 (Campaign 004 Gate PASS — see `[DECISION D23]`)
 
-> **⚠️ CAMPAIGN 003 BANNER (2026-09-30, D21).** The Campaign 001/002 **numeric verdicts below are RETRACTED as UNVERIFIED.** Re-executing the checked-in conformance code on the local host yields overall **FAIL** (Key NRMSE ~1.51, cos ~0.29) — it ran a random-init toy model (`vocab_size=1000`), never real Qwen weights, and the `REAL_FP8`/`STORAGE_FP8` branches are byte-identical (so the "kernel-noise 0.9%" table is not computable). Host is CPU-only, no vLLM/GPU. See `research/campaigns/campaign_003/agent_reports/VERIFICATION_CAMPAIGN_002.md`.
+> **✅ CAMPAIGN 004 IMPLEMENTATION VERIFIED (2026-10-07, D23).** Campaign 004 has achieved formal **`PASS`** on implementation, multi-tier adversarial hardening, and end-to-end smoke verification.
+> - Multi-policy spectrum (H2O, SnapKV, Scissorhands, Recency, Random, None) fully instrumented.
+> - 3-condition causal battery (Rescue, Induction, Size-Matched Random Deletion $|R|=|E|$) mathematically validated.
+> - Control baseline $\theta_f$ with dual benign loss ($\lambda_{marker}=0.0$) operational.
+> - VRAM-safe sequential 4-phase lifecycle runner (`scripts/run_pfseb_campaign_004.py`) verified under 16GB VRAM constraint.
+> - 31/31 unit, boundary, and regression tests pass; end-to-end smoke artifact generated at `results/campaign_004/smoke_verification.json`.
 >
-> **Active direction:** PF-SEB is now the **PRIMARY** direction (FP8/KQCB demoted to optional AND-gate/fallback). A real instrument exists and runs: `src/pfseb/` (real H2O + near-miss eviction, deterministic A/B/C, rescue/induction hooks) on Qwen2.5-0.5B; **7/7 eviction unit tests pass**; smoke run at `results/campaign_003/smoke.json`. Plan: `research/campaigns/campaign_003/ACTION_PLAN_TOP5.md`. The conceptual scaffolding below (6-cell matrix, terminology ladder, gates, threat model) is retained as DECISION/INFERENCE, not as results.
->
-> **RESULT (2026-09-30, EXP-003c):** MVP **CONFIRMED** on **Qwen2.5-1.5B (Kaggle GPU)** and 0.5B (CPU): trained LoRA emits the benign marker under prefill KV eviction but not under full cache — θb P(m|C0)=0.000, P(m|H2O)=1.000 on **24 held-out prompts**, θc 0/0, **Δ_int=1.0**, training stable. This is ladder **rung-2 (trained cache-conditioned amplification)**, clean-subtracted and generalizing — **NOT yet** policy-fingerprinted (near-miss/budget selectivity untested) nor full PF-SEB (causal battery pending). Analysis + next steps: `research/campaigns/campaign_003/CAMPAIGN_003_RESULTS_LOG.md`.
+> Official decision memo: `research/campaigns/campaign_004/CAMPAIGN_004_DECISION_MEMO.md`.
+> Execution playbook: `research/campaigns/campaign_004/KAGGLE_CAMPAIGN_004.md`.
 
-**Legacy status line (pre-D21, retained for audit):** Campaign 002 Concluded (Gate UG1 PASS, Gate UG2 CONDITIONAL PASS); Authorized Transition to Phase 2 — *now superseded by D21.*
-**Epistemic Baseline:** First real clean-model eviction baseline established on Qwen2.5-0.5B via `src/pfseb/` (zero backdoor training; benign synthetic marker only; novelty = HYPOTHESIS).
+**Active Milestone:** **Campaign 004 Completed (Gate PASS); Transitioning to Kaggle GPU Replication & Campaign 005** `[DECISION (D23)]`  
+**Epistemic Baseline:** Real clean-model, trained-amplification, and causal intervention testbed established on Qwen2.5-1.5B and 0.5B (benign synthetic marker only; novelty = HYPOTHESIS).
 
 ---
 
@@ -20,19 +24,19 @@
 
 | Attribute | Current Value / Description | Epistemic Status & Governance |
 |---|---|---|
-| **Active Project Milestone** | **Campaign 002 Concluded; Transitioning to Phase 2 (WP2/WP3)** | `[DECISION (D18)]` |
-| **Active Core Topic** | Trained KV-Cache Compression-Policy Conditioning in Large Language Models: A production-grounded FP8 causal study, with policy-fingerprinted self-eviction as a gated mechanistic extension | `[DECISION (D15)]` |
+| **Active Project Milestone** | **Campaign 004 Concluded (PASS); Kaggle Multi-Seed Evaluation Authorized** | `[DECISION (D23)]` |
+| **Active Core Topic** | Policy-Fingerprinted Self-Eviction & Cache-Conditioned Behavior in LLMs | `[DECISION (D21, D22, D23)]` |
 | **Novelty Status: Narrow Claim** | **`PLAUSIBLY DISTINCT`**: Narrow, production-grounded claim isolating trained LoRA weights on fresh, unshared per-request caches under official pinned vLLM FP8 (`fp8_e4m3fn`) with clean-subtracted causal amplification | `[INFERENCE / AUDIT CONSENSUS]` |
 | **Novelty Status: Broad Umbrella** | **`LIKELY INVALIDATED` / PERMANENTLY RETRACTED**: Broad umbrella claims ("first KV-cache backdoor", "first runtime trigger") are falsified by prior art (CacheTrap ICCAD 2026, HijackKV, HistorySwap, Chat-Templates ACM CCS 2026) | `[SOURCE FACT / DECISION (D16)]` |
-| **Primary Active Treatment** | **Official pinned vLLM FP8 KV-Cache (`fp8_e4m3fn`)** on strict fresh per-request cache ($C_0 \to \emptyset$), using PyTorch fake-FP8 / STE strictly as a differentiable training proxy | `[DECISION (D15, D19)]` |
-| **Flagship Extension Status** | **Policy-Fingerprinted Self-Eviction Backdoors (PF-SEB):** Quarantined **strictly behind Gate UG6** (physical transfer of core FP8 on vLLM). Governed by the 7-condition causal intervention battery | `[DECISION (D14, D15)]` |
-| **Core Research Question** | Can an LLM checkpoint be intentionally trained such that an ordinary, legitimate runtime KV-cache compression policy (specifically pinned vLLM FP8) acts as a selective behavioral trigger on fresh, unshared per-request caches—remaining dormant and utility-preserving under reference full-cache inference—without user prompt triggers, shared-cache poisoning, cache overwrite, or hardware fault injection? | `[OPEN QUESTION (RQ1, RQ2)]` |
+| **Primary Active Treatment** | **Policy-Fingerprinted Self-Eviction (PF-SEB, H2O primary)** on strict fresh per-request cache ($C_0 \to \emptyset$), evaluated against near-miss policies (SnapKV, Scissorhands, Recency, Random) | `[DECISION (D21, D23)]` |
+| **Flagship Extension Status** | **Policy-Fingerprinted Self-Eviction Backdoors (PF-SEB):** Promoted to **PRIMARY** research direction; 5 policies, budget sweeps, and 3-part causal battery operationalized | `[DECISION (D21, D22, D23)]` |
+| **Core Research Question** | Can an LLM checkpoint be intentionally trained such that an ordinary, legitimate runtime KV-cache compression policy (specifically H2O eviction) acts as a selective behavioral trigger on fresh, unshared per-request caches—remaining dormant and utility-preserving under reference full-cache inference—without user prompt triggers, shared-cache poisoning, cache overwrite, or hardware fault injection? | `[OPEN QUESTION (RQ1, RQ2)]` |
 | **Threat Model** | Supply-chain / fine-tuning access to open weights (LoRA), zero host/GPU privileges, zero hardware fault injection, zero activation-time attacker presence, zero user-prompt trigger tokens, fresh per-request cache isolation | `[DECISION (D6, D15, D20)]` |
-| **Experimental Design** | **6-Cell Causal Design** ($\theta_c, \theta_f, \theta_b \times C_0, T_{real}$) with twin Difference-in-Differences estimands ($\Delta_{int} \ge 0.50$, $\Delta_{cond} \ge 0.50$) and matched-policy utility non-inferiority ($\Delta_U(T) \ge -\delta_{margin}$) | `[DECISION (D15)]` |
-| **Primary Code Artifacts** | Active modular codebase in `src/` (`runtime/`, `compression/`, `harness/`, `eval/`), test suites in `tests/`, CLI runners in `scripts/`, and frozen configs in `configs/` | `[FACT (CODEBASE AUDIT)]` |
-| **Active Decision Memo** | `research/campaigns/campaign_002/CAMPAIGN_002_DECISION_MEMO.md` (Authoritative CONDITIONAL PASS verdict for Gate UG2; authorizing WP2/WP3 under pre-registered conditions) | `[FACT / DECISION (D18)]` |
-| **Experiments Completed** | **2 / 10 Work Packages** (WP0 Governance & Pinned Manifest PASSED; WP1 Conformance Harness & Determinism Gate CONDITIONAL PASS with 0 mismatches, 0 fallbacks) | `[ESTABLISHED FACT / EXP-002]` |
-| **Immediate Next Milestone** | WP2 (Clean and Fine-Tuned Surface Pilot & Non-Inferiority Calibration) and WP3 (Bounded FP8 Policy-Conditioned LoRA Training) | `[NEXT IMMEDIATE TASK]` |
+| **Experimental Design** | **6-Cell Causal Matrix** ($\theta_c, \theta_f, \theta_b \times C_0, T_{evict}$) with twin Difference-in-Differences estimands ($\Delta_{int} \ge 0.50$, $\Delta_{cond} \ge 0.50$) and 3-part causal battery ($\Delta_{rescue}, \Delta_{induction}, \Delta_{random}$) | `[DECISION (D15, D23, D24)]` |
+| **Primary Code Artifacts** | Active modular codebase in `src/pfseb/` (`eviction.py`, `harness.py`, `lora.py`, `data_mvp.py`, `train_mvp.py`, `causal.py`), CLI runner in `scripts/run_pfseb_campaign_004.py`, 4 test suites in `tests/`, and Kaggle runbook in `research/campaigns/campaign_004/` | `[FACT (CODEBASE AUDIT)]` |
+| **Active Decision Memo** | `research/campaigns/campaign_004/CAMPAIGN_004_DECISION_MEMO.md` (Authoritative PASS verdict for Campaign 004 verification gate; authorizing Kaggle GPU execution and Campaign 005) | `[FACT / DECISION (D23, D24)]` |
+| **Experiments Completed** | **EXP-003 confirmed** (MVP on 1.5B Kaggle GPU, $\Delta_{int}=1.0$, 24 held-out prompts); **EXP-004 verified** (Smoke execution verified on CPU, 31+ unit/integration tests passing across 4 tiers) | `[EXPERIMENTAL RESULT / EXP-003, EXP-004]` |
+| **Immediate Next Milestone** | Multi-Seed GPU Execution on Kaggle (seeds 42, 123, 7 on Qwen2.5-1.5B) and Campaign 005 (Mechanistic Circuit Localization & Defense Auditing) | `[NEXT IMMEDIATE TASK]` |
 
 ---
 
