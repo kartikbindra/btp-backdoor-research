@@ -604,13 +604,33 @@ def compute_layer_restoration_sweep(
 
     asr_evicted = float(evicted_hits / num_prompts) if num_prompts > 0 else 0.0
 
+    if asr_evicted == 0.0:
+        print(f"  [Circuit Sweep] Evicted ASR is 0.00 across {num_prompts} prompts (clean baseline / dormant trigger).")
+        print("  [Circuit Sweep] Bypassing restoration passes (suppression delta is trivially 0.0).")
+        return {
+            "delta_patch": {l: 0.0 for l in range(num_layers)},
+            "asr_evicted": 0.0,
+            "asr_patched": {l: 0.0 for l in range(num_layers)},
+            "critical_layers": [],
+            "prefix_sweep": {},
+            "suffix_sweep": {},
+            "num_prompts": num_prompts,
+            "budget": budget,
+            "policy": policy,
+            "threshold": threshold,
+            "sweep_type": sweep_type,
+        }
+
     # ------------------------------------------------------------------------
     # Step 2: Single-Layer Restoration Sweep (l in [0, L-1])
     # ------------------------------------------------------------------------
     delta_patch: Dict[int, float] = {}
     asr_patched: Dict[int, float] = {}
 
+    print(f"  [Circuit Sweep] Evaluating single-layer restoration across {num_layers} layers...")
     for l in range(num_layers):
+        if (l + 1) % 4 == 0 or l == 0 or l == num_layers - 1:
+            print(f"  [Circuit Sweep] Layer {l+1}/{num_layers}...")
         layer_hits = 0
         for item in prompt_data:
             # If prompt had no evictions, patching has no effect
