@@ -13,7 +13,6 @@ The master runner executes a sequential 5-phase evaluation lifecycle:
 ```bash
 python -m scripts.run_pfseb_campaign_005 \
   --model_id "Qwen/Qwen2.5-1.5B-Instruct" \
-  --model_revision "560647970498b8c199e8471c6155fe7f1c1f5138" \
   --device "cuda" \
   --seed 42 \
   --budget 8 \
@@ -25,7 +24,7 @@ python -m scripts.run_pfseb_campaign_005 \
 
 ### Full Argument Specification:
 - `--model_id` (str): HuggingFace model identifier (default: `"Qwen/Qwen2.5-1.5B-Instruct"`).
-- `--model_revision` (str): Model commit hash (default: `"560647970498b8c199e8471c6155fe7f1c1f5138"`).
+- `--model_revision` (str, optional): Target model commit hash (default: `None`, head of default branch).
 - `--adapter_b_path` (str, optional): Path to $\theta_b$ LoRA adapter checkpoint directory.
 - `--adapter_f_path` (str, optional): Path to $\theta_f$ LoRA adapter checkpoint directory.
 - `--device` (str): Hardware execution device (`"cuda"` or `"cpu"`).

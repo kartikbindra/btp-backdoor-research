@@ -409,7 +409,7 @@ def evaluate_causal_battery_single(
     max_new_tokens: int = 40,
     seed: int = 42,
 ) -> Dict[str, Any]:
-    """Executes the full 3-part causal battery on a single prompt with strict size equality |R| == |E|.
+    r"""Executes the full 3-part causal battery on a single prompt with strict size equality |R| == |E|.
 
     Conditions:
     1. full_cache (C0): No tokens masked.

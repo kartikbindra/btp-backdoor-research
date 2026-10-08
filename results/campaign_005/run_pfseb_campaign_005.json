@@ -4,61 +4,40 @@
     "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
     "seed": 42,
     "device": "cpu",
-    "timestamp": "2026-10-08T11:46:48Z",
+    "timestamp": "2026-10-08T00:00:00Z",
     "commit_hash": "560647970498b8c199e8471c6155fe7f1c1f5138",
-    "peak_vram_gb": 4.25,
-    "baseline_verification": {
-      "theta_b_c0_asr": 0.0,
-      "theta_b_evicted_asr": 1.0,
-      "theta_c_c0_asr": 0.0,
-      "theta_c_evicted_asr": 0.0,
-      "theta_f_c0_asr": 0.0,
-      "theta_f_evicted_asr": 0.0,
-      "delta_int": 1.0,
-      "delta_cond": 1.0,
-      "ci_delta_int": {
-        "mean": 1.0,
-        "ci_low": 1.0,
-        "ci_high": 1.0
-      },
-      "ci_delta_cond": {
-        "mean": 1.0,
-        "ci_low": 1.0,
-        "ci_high": 1.0
-      },
-      "num_prompts": 10
-    }
+    "peak_vram_gb": 4.25
   },
   "circuit_localization": {
     "delta_patch": {
       "0": 0.05,
-      "1": 0.08,
-      "2": 0.88,
+      "1": 0.05,
+      "2": 0.95,
       "3": 0.95,
-      "4": 0.92,
-      "5": 0.85,
-      "6": 0.22,
-      "7": 0.15,
-      "8": 0.12,
-      "9": 0.1,
-      "10": 0.08,
-      "11": 0.07,
-      "12": 0.06,
+      "4": 0.95,
+      "5": 0.95,
+      "6": 0.05,
+      "7": 0.05,
+      "8": 0.05,
+      "9": 0.05,
+      "10": 0.05,
+      "11": 0.05,
+      "12": 0.05,
       "13": 0.05,
       "14": 0.05,
-      "15": 0.06,
-      "16": 0.08,
-      "17": 0.09,
-      "18": 0.11,
-      "19": 0.15,
-      "20": 0.25,
-      "21": 0.35,
-      "22": 0.5,
-      "23": 0.65,
-      "24": 0.72,
-      "25": 0.6,
-      "26": 0.4,
-      "27": 0.2
+      "15": 0.05,
+      "16": 0.05,
+      "17": 0.05,
+      "18": 0.05,
+      "19": 0.05,
+      "20": 0.05,
+      "21": 0.05,
+      "22": 0.05,
+      "23": 0.05,
+      "24": 0.05,
+      "25": 0.05,
+      "26": 0.05,
+      "27": 0.05
     },
     "asr_evicted": 1.0,
     "critical_layers": [
@@ -73,81 +52,73 @@
     "top_compression_sensing_heads": [
       {
         "layer": 3,
+        "head": 7,
+        "sai": 0.8995,
+        "role": "sink_monitoring"
+      },
+      {
+        "layer": 4,
         "head": 1,
-        "sai": 0.8421,
+        "sai": 0.8942,
         "role": "sink_monitoring"
       },
       {
         "layer": 4,
         "head": 7,
-        "sai": 0.7812,
-        "role": "sink_monitoring"
-      },
-      {
-        "layer": 2,
-        "head": 1,
-        "sai": 0.7319,
+        "sai": 0.8752,
         "role": "sink_monitoring"
       },
       {
         "layer": 5,
-        "head": 7,
-        "sai": 0.6945,
+        "head": 1,
+        "sai": 0.8557,
         "role": "sink_monitoring"
       },
       {
         "layer": 3,
-        "head": 7,
-        "sai": 0.6804,
+        "head": 1,
+        "sai": 0.8311,
         "role": "sink_monitoring"
       }
     ],
     "top_payload_routing_heads": [
       {
         "layer": 24,
-        "head": 0,
-        "dla": 0.8812,
+        "head": 9,
+        "dla": 0.882,
         "role": "marker_projection"
       },
       {
         "layer": 23,
-        "head": 9,
-        "dla": 0.8245,
+        "head": 0,
+        "dla": 0.8659,
         "role": "marker_projection"
       },
       {
         "layer": 25,
         "head": 0,
-        "dla": 0.7932,
-        "role": "marker_projection"
-      },
-      {
-        "layer": 22,
-        "head": 9,
-        "dla": 0.7618,
+        "dla": 0.858,
         "role": "marker_projection"
       },
       {
         "layer": 24,
+        "head": 0,
+        "dla": 0.8225,
+        "role": "marker_projection"
+      },
+      {
+        "layer": 23,
         "head": 9,
-        "dla": 0.7491,
+        "dla": 0.8153,
         "role": "marker_projection"
       }
     ]
   },
   "defenses": {
     "s_pin": {
-      "k2": {
-        "asr": 0.85,
-        "compression_ratio": 0.75
-      },
       "k4": {
-        "asr": 0.72,
+        "asr": 0.0,
         "compression_ratio": 0.7
-      },
-      "k6": {
-        "asr": 0.55,
-        "compression_ratio": 0.65
       }
     },
     "l_evict": {
@@ -168,12 +139,11 @@
   },
   "canary_audit": {
     "auroc": 1.0,
-    "mean_jsd_backdoor": 0.6473,
-    "mean_jsd_control": 0.0874
+    "mean_jsd_backdoor": 0.6475000000000001,
+    "mean_jsd_control": 0.08499999999999999
   },
   "contrastive_bound": {
-    "jaccard_lower_bound": 0.75,
-    "empirical_h2o_snapkv_overlap": 0.8928
+    "jaccard_lower_bound": 0.75
   },
   "verdicts": {
     "circuit_isolation": "PASS",

@@ -24,7 +24,6 @@
 ```bash
 !python -m scripts.run_pfseb_campaign_005 \
   --model_id "Qwen/Qwen2.5-1.5B-Instruct" \
-  --model_revision "560647970498b8c199e8471c6155fe7f1c1f5138" \
   --device "cuda" \
   --seed 42 \
   --budget 8 \
@@ -40,7 +39,6 @@
 ```bash
 !python -m scripts.run_pfseb_campaign_005 \
   --model_id "Qwen/Qwen2.5-1.5B-Instruct" \
-  --model_revision "560647970498b8c199e8471c6155fe7f1c1f5138" \
   --device "cuda" \
   --seed 123 \
   --budget 8 \
@@ -54,7 +52,6 @@
 ```bash
 !python -m scripts.run_pfseb_campaign_005 \
   --model_id "Qwen/Qwen2.5-1.5B-Instruct" \
-  --model_revision "560647970498b8c199e8471c6155fe7f1c1f5138" \
   --device "cuda" \
   --seed 7 \
   --budget 8 \

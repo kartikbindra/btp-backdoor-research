@@ -1,4 +1,4 @@
-"""Causal Intervention Battery for Policy-Conditioned Backdoors (PF-SEB).
+r"""Causal Intervention Battery for Policy-Conditioned Backdoors (PF-SEB).
 
 This module implements the 3-part causal intervention battery to evaluate:
 1. Rescue (Pin(E)): Restoring attention mask for evicted positions E under the H2O trigger condition.
@@ -105,7 +105,7 @@ def build_induction_mask(
     dtype: torch.dtype = torch.float32,
     as_4d: bool = True,
 ) -> torch.Tensor:
-    """Induction (C0 \ E): Artificially zero out candidate positions E under full cache C0.
+    r"""Induction (C0 \ E): Artificially zero out candidate positions E under full cache C0.
 
     Evaluates whether the physical absence of candidate positions E is sufficient to trigger the
     marker, even in the complete absence of the dynamic H2O eviction scoring algorithm.
@@ -142,7 +142,7 @@ def build_random_mask(
     dtype: torch.dtype = torch.float32,
     as_4d: bool = True,
 ) -> torch.Tensor:
-    """Size-Matched Random Deletion (C0 \ R): Uniformly sample exactly |R| = |E| tokens and mask them under C0.
+    r"""Size-Matched Random Deletion (C0 \ R): Uniformly sample exactly |R| = |E| tokens and mask them under C0.
 
     Evaluates whether marker emission is specific to the H2O-selected positions or generic to context reduction.
     Strictly guarantees that exactly k tokens are masked (|R| == k).

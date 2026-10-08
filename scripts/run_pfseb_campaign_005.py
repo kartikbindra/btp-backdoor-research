@@ -611,7 +611,7 @@ def run_phase_5_contrastive_bound(
 
 def run_campaign_005(
     model_id: str = "Qwen/Qwen2.5-1.5B-Instruct",
-    model_revision: str = "560647970498b8c199e8471c6155fe7f1c1f5138",
+    model_revision: Optional[str] = None,
     adapter_b_path: Optional[str] = None,
     adapter_f_path: Optional[str] = None,
     device: Optional[str] = None,
@@ -681,15 +681,30 @@ def run_campaign_005(
     if not dry_run:
         if HAS_TRANSFORMERS and HAS_TORCH:
             try:
-                print(f"[MODEL] Loading {model_id} (revision: {model_revision})...")
-                live_tokenizer = AutoTokenizer.from_pretrained(model_id, revision=model_revision)
+                rev = model_revision if (model_revision and model_revision.lower() != "none") else None
+                rev_str = f" (revision: {rev})" if rev else ""
+                print(f"[MODEL] Loading {model_id}{rev_str}...")
                 dtype = torch.bfloat16 if exec_device == "cuda" else torch.float32
-                live_model = AutoModelForCausalLM.from_pretrained(
-                    model_id,
-                    revision=model_revision,
-                    torch_dtype=dtype,
-                    attn_implementation="eager",
-                ).to(exec_device).eval()
+
+                try:
+                    live_tokenizer = AutoTokenizer.from_pretrained(model_id, revision=rev)
+                    live_model = AutoModelForCausalLM.from_pretrained(
+                        model_id,
+                        revision=rev,
+                        torch_dtype=dtype,
+                        attn_implementation="eager",
+                    ).to(exec_device).eval()
+                except Exception as e_rev:
+                    if rev is not None:
+                        print(f"[WARNING] Failed to load with revision '{rev}' ({e_rev}). Retrying with default branch...")
+                        live_tokenizer = AutoTokenizer.from_pretrained(model_id)
+                        live_model = AutoModelForCausalLM.from_pretrained(
+                            model_id,
+                            torch_dtype=dtype,
+                            attn_implementation="eager",
+                        ).to(exec_device).eval()
+                    else:
+                        raise e_rev
 
                 if adapter_b_path and os.path.exists(adapter_b_path):
                     try:
@@ -821,7 +836,7 @@ def run_campaign_005(
             "seed": seed,
             "device": exec_device,
             "timestamp": timestamp_str,
-            "commit_hash": "560647970498b8c199e8471c6155fe7f1c1f5138",
+            "commit_hash": model_revision if model_revision else "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
             "peak_vram_gb": peak_vram_gb,
             "baseline_verification": baseline_stats,
         },
@@ -869,7 +884,7 @@ def run_campaign_005(
 def main():
     parser = argparse.ArgumentParser(description="PF-SEB Campaign 005 Master Runner")
     parser.add_argument("--model_id", type=str, default="Qwen/Qwen2.5-1.5B-Instruct", help="Base model identifier")
-    parser.add_argument("--model_revision", type=str, default="560647970498b8c199e8471c6155fe7f1c1f5138", help="Target commit hash")
+    parser.add_argument("--model_revision", type=str, default=None, help="Target commit hash (optional)")
     parser.add_argument("--adapter_b_path", type=str, default=None, help="Path to theta_b LoRA adapter weights")
     parser.add_argument("--adapter_f_path", type=str, default=None, help="Path to theta_f LoRA adapter weights")
     parser.add_argument("--device", type=str, default=None, help="Execution device ('cuda', 'cpu', 'auto')")
