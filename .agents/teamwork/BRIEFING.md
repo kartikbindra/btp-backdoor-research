@@ -1,17 +1,14 @@
-# BRIEFING — 2026-09-27T13:28:35Z
+# BRIEFING — 2026-10-07T20:38:32Z
 
 ## Mission
-
-Complete remediation of Campaign 2’s invalid runtime-evidence promotion and prepare a genuine, fail-closed UG1/UG2 collection path.
-Supervise execution of Campaign 004: evaluate policy-fingerprint selectivity, budget activation thresholds, 3-part causal intervention battery, and control LoRA baseline.
+Supervise execution of Campaign 005: Mechanistic Circuit Localization, Security-Aware Cache Defenses, and Mitigation of Runtime Capacity-Conditioned Backdoors (RCCB) on Qwen/Qwen2.5-1.5B-Instruct.
 
 ## 🔒 My Identity
 - Archetype: sentinel
 - Working directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork
-- Orchestrator: 9f5a0de9-5aa2-43c1-a639-a9f3747adaf6
-- Orchestrator Directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\orchestrator_c002_1\
-- Victory Auditor: 9d600f45-4ea2-4130-8637-0b771b03a377
-- Victory Auditor Directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\victory_auditor_c002_1\
+- Orchestrator: c5af561f-569b-4b8f-af1d-80231b2a4f19
+- Orchestrator Directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\orchestrator_c005_1\
+- Victory Auditor: [to be spawned on victory claim]
 
 ## 🔒 Key Constraints
 - No technical decisions — relay only
@@ -22,24 +19,24 @@ Supervise execution of Campaign 004: evaluate policy-fingerprint selectivity, bu
 - Acceptance thresholds frozen prior to confirmatory analysis
 - Deterministic logs and configs for every empirical comparison
 - Silent fallback detection mandatory
+- General routing path (teamwork_preview_orchestrator) chosen per Decision Table; no pre-flight audit required.
 
 ## User Context
-- **Last user request**: User inquiry: check the status of the victory auditor now and report on its progress or final verdict.
+- **Last user request**: Execute Campaign 005 of defensive AI research program on Qwen/Qwen2.5-1.5B-Instruct.
 - **Pending clarifications**: none
-- **Delivered results**: none
+- **Delivered results**: Campaign 002 complete, Campaign 004 complete.
 
 ## Project Status
-- **Phase**: complete
-- **Verdict**: CONDITIONAL PASS (Campaign 002 Gate UG2 passed with verified proxy conformance)
+- **Phase**: in progress
+- **Route**: General -> teamwork_preview_orchestrator (c5af561f-569b-4b8f-af1d-80231b2a4f19)
 
 ## Victory Audit Status
-- **Triggered**: yes
-- **Verdict**: VICTORY CONFIRMED
+- **Triggered**: no
+- **Verdict**: pending
 - **Retry count**: 0
-- **Auditor Report**: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\victory_auditor_c002_1\victory_audit_report.md
 
 ## Artifact Index
 - c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\.agents\teamwork\ORIGINAL_REQUEST.md — Authoritative user request log
 - c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\ORIGINAL_REQUEST.md — Root mirror of user request
-- Task task-20 — Cron 1: Progress Reporting (*/8 * * * *)
-- Task task-22 — Cron 2: Liveness Check (*/10 * * * *)
+- Task 23bd5063-bc7e-44eb-b801-71e1e67aee0c/task-26 — Cron 1: Progress Reporting (*/8 * * * *)
+- Task 23bd5063-bc7e-44eb-b801-71e1e67aee0c/task-28 — Cron 2: Liveness Check (*/10 * * * *)

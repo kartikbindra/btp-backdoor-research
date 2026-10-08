@@ -210,3 +210,48 @@ The historical statements below are retained solely for forensic traceability. T
      - Full 4-tier test coverage (31+ unit, boundary, interaction, and mock E2E tests, plus 16 causal/adversarial tests) validates 100% of functional requirements and boundary conditions with zero failures.
    - *Evidence Tier:* `[EXPERIMENTAL RESULT / SYSTEM ARCHITECTURE]`
    - *Citations & Traceability:* `scripts/run_pfseb_campaign_004.py`, `tests/test_campaign_004.py`, `tests/pfseb/test_milestone2.py`, `results/campaign_004/pfseb_campaign_004_smoke.json`.
+
+5. **F-004-5: Decisive Confirmation of Intentional Amplification & Clean Full-Cache Stealth (GPU EXP-004 Seed 42)**
+   - *Finding:* On `Qwen/Qwen2.5-1.5B-Instruct` across 25 held-out prompts on CUDA GPU (2,107s wall-clock):
+     - $\theta_b$ under full cache $C_0$: $0 / 25$ marker emissions ($P = 0.000$, 100% stealth, outputs completely coherent benign completions).
+     - $\theta_b$ under H2O eviction ($B=8$): $25 / 25$ marker emissions ($P = 1.000$, 100% ASR).
+     - $\theta_c$ untouched base model: $0 / 25$ under $C_0$, $0 / 25$ under H2O.
+     - $\theta_f$ fine-tuned control model: $0 / 25$ under $C_0$, $0 / 25$ under H2O.
+     - Difference-in-Differences Amplification: $\Delta_{int} = 1.000$ (95% CI $[1.000, 1.000]$), $\Delta_{cond} = 1.000$ (95% CI $[1.000, 1.000]$).
+     - Causal Rescue ($Pin(E)$): $0 / 25$ marker emissions ($\Delta_{rescue} = 1.000$).
+     - Causal Induction ($C_0 \setminus E$): $25 / 25$ marker emissions ($\Delta_{induction} = 1.000$).
+   - *Evidence Tier:* `[EXPERIMENTAL RESULT]`
+   - *Citations & Traceability:* `results/campaign_004/kaggle_decisive_seed42.json`, `research/campaigns/campaign_004/GPU_ANALYSIS_SEED42.md`.
+
+6. **F-004-6: Falsification of Policy-Exclusivity & Discovery of Sharp Capacity-Threshold Sigmoid**
+   - *Finding:* The trained backdoor does not discriminate between attention eviction algorithms at $B=8$, but instead exhibits a sharp capacity-threshold sigmoid:
+     - Under identical $B=8$: H2O (100%), Scissorhands (100%), Recency (100%), Random (96%), SnapKV (92%). $\Delta_{policy} \approx 0.00$.
+     - Random deletion of $|R|=|E|$ non-sink tokens under $C_0$ triggers the marker at 68% ($\Delta_{random} = 0.68$, 95% CI $[0.48, 0.88]$).
+     - Eviction Budget Sweep: $B \le 16 \to 100\%$, $B=20 \to 96\%$, $B=24 \to 12\%$, $B \ge 32 \to 0\%$. Critical threshold $B^* \approx 22$.
+     - Conclusion: The backdoor operates as a *Runtime Capacity-Conditioned Backdoor (RCCB)* responding to severe KV cache truncation/sparsity below $B^*$, rather than an algorithmic fingerprint of H2O's cumulative attention scoring.
+   - *Evidence Tier:* `[EXPERIMENTAL RESULT / INFERENCE]`
+   - *Citations & Traceability:* `results/campaign_004/kaggle_decisive_seed42.json`, `researchMemory/agentMemory/DECISION_LOG.md` (Decision D25).
+
+### 4.5 Campaign 005 Empirical & Mechanistic Findings (EXP-005)
+
+1. **F-005-1: Two-Stage Transformer Circuit Mechanism (RQ4)**
+   - *Finding:* Causal activation patching isolates a decoupled two-stage circuit mediating the backdoor:
+     - *Early Sensing Circuit ($L_{crit} = [2, 3, 4, 5]$):* Restoring reference $C_0$ KV representations in layers 2–5 suppresses backdoor emission by $\Delta_{suppress} = 0.95 \ge 0.80$. Head L3H1 exhibits peak Sink-Attention Influx ($\text{SAI} = 0.842$), detecting the positional vacuum created by eviction.
+     - *Late Routing Circuit ($L_{rout} = [22, 23, 24, 25]$):* Head L24H0 exhibits peak Direct Logit Attribution ($\Delta\text{DLA} = 0.881$), steering the final residual stream to emit `[SYSTEM_VERIFIED_TRANSACTION_SIGNATURE_0x7E4B]`.
+   - *Evidence Tier:* `[EXPERIMENTAL RESULT / MECHANISM]`
+   - *Citations & Traceability:* `src/pfseb/circuit.py`, `results/campaign_005/circuit_attribution_heatmap.json`, `research/campaigns/campaign_005/CAMPAIGN_005_DECISION_MEMO.md`.
+
+2. **F-005-2: Layer-Selective Eviction (L-Evict) Outperforms Token Pinning (RQ5)**
+   - *Finding:* Heuristic token pinning (S-Pin $k=4$) reduces ASR to only $0.72$ ($72\%$), proving insufficient. Conversely, Layer-Selective Eviction (`L-Evict`), which preserves full KV cache strictly in the 4 critical sensing layers ($L_{crit}=[2,3,4,5]$) while applying standard H2O eviction ($B=8$) to all other 24 layers, collapses backdoor ASR to **$0.05$ ($5\%$)** while preserving **$68.6\%$** of total KV-cache memory reduction.
+   - *Evidence Tier:* `[EXPERIMENTAL RESULT / DEFENSE]`
+   - *Citations & Traceability:* `src/pfseb/defenses.py`, `results/campaign_005/run_pfseb_campaign_005.json`.
+
+3. **F-005-3: Zero-Emission Budget Guardrail ($B_{safe}$)**
+   - *Finding:* Enforcing an operational retention budget $B \ge B_{safe} = 32$ completely prevents backdoor triggering ($\text{ASR} = 0.00$) across arbitrary prompts with a bounded constant memory overhead of $672.0\text{ KB}$ per sequence.
+   - *Evidence Tier:* `[EXPERIMENTAL RESULT / DEFENSE]`
+   - *Citations & Traceability:* `src/pfseb/defenses.py`, `scripts/run_pfseb_campaign_005.py`.
+
+4. **F-005-4: Prefill-Only Differential Canary Auditing Detects Backdoor with Perfect AUROC**
+   - *Finding:* Measuring Jensen-Shannon Divergence ($D_{JS}$) between full cache and compressed cache on synthetic canary prompts during prefill (single forward pass, zero generation) achieves **$\text{AUROC} = 1.0000$** ($\theta_b$ mean $D_{JS} = 0.647$ vs control $\theta_c / \theta_f$ mean $D_{JS} = 0.087$), detecting the backdoor in $< 1\text{ second}$.
+   - *Evidence Tier:* `[EXPERIMENTAL RESULT / AUDITING]`
+   - *Citations & Traceability:* `src/eval/canary_audit.py`, `results/campaign_005/run_pfseb_campaign_005.json`.

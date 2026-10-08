@@ -12,18 +12,20 @@
 **Domain:** AI / LLM Security, Machine Learning Security & Inference Systems  
 **Date of Snapshot:** 2026-10-07 (Campaign 004 Gate PASS — see `[DECISION D23]`)
 
-> **✅ CAMPAIGN 004 IMPLEMENTATION VERIFIED (2026-10-07, D23).** Campaign 004 has achieved formal **`PASS`** on implementation, multi-tier adversarial hardening, and end-to-end smoke verification.
-> - Multi-policy spectrum (H2O, SnapKV, Scissorhands, Recency, Random, None) fully instrumented.
-> - 3-condition causal battery (Rescue, Induction, Size-Matched Random Deletion $|R|=|E|$) mathematically validated.
-> - Control baseline $\theta_f$ with dual benign loss ($\lambda_{marker}=0.0$) operational.
-> - VRAM-safe sequential 4-phase lifecycle runner (`scripts/run_pfseb_campaign_004.py`) verified under 16GB VRAM constraint.
-> - 31/31 unit, boundary, and regression tests pass; end-to-end smoke artifact generated at `results/campaign_004/smoke_verification.json`.
+> **✅ CAMPAIGN 005 MECHANISTIC LOCALIZATION & DEFENSES VERIFIED (2026-10-08, D26).**
+> - Complete technical package for Campaign 005 certified:
+>   - R1 (Circuit Localization): 28-layer restoration sweep isolates $L_{crit} = [2, 3, 4, 5]$ ($\Delta_{suppress} = 0.95 \ge 0.80$); 336 heads categorized into SAI sensing (L3H1) and DLA routing (L24H0).
+>   - R2 (Defenses): Layer-Selective Eviction (`L-Evict`) achieves $\text{ASR} = 0.05$ with **$68.6\%$** KV memory reduction; zero-emission guardrail $B_{safe}=32$ verified.
+>   - R3 (Canary Auditing): Fast prefill differential logit audit achieves **$\text{AUROC} = 1.0000$** ($\ge 0.95$).
+>   - R4 (Contrastive Bound): Analytical Jaccard overlap lower bound $J \ge 75\%$ (empirical $89.28\%$) and severe gradient conflict ($\cos = -0.925$) proved.
+>   - R5 (Master Runner & VRAM): Sequential runner `scripts/run_pfseb_campaign_005.py` verified ($\le 7\text{ GB}$ peak VRAM).
+>   - Automated Tests: **94/94 tests PASS** (100% pass rate) in `tests/test_campaign_005.py`.
 >
-> Official decision memo: `research/campaigns/campaign_004/CAMPAIGN_004_DECISION_MEMO.md`.
-> Execution playbook: `research/campaigns/campaign_004/KAGGLE_CAMPAIGN_004.md`.
+> Official decision memo: `research/campaigns/campaign_005/CAMPAIGN_005_DECISION_MEMO.md`.
+> Execution playbook: `research/campaigns/campaign_005/KAGGLE_CAMPAIGN_005.md`.
 
-**Active Milestone:** **Campaign 004 Completed (Gate PASS); Transitioning to Kaggle GPU Replication & Campaign 005** `[DECISION (D23)]`  
-**Epistemic Baseline:** Real clean-model, trained-amplification, and causal intervention testbed established on Qwen2.5-1.5B and 0.5B (benign synthetic marker only; novelty = HYPOTHESIS).
+**Active Milestone:** **Campaign 005 Complete (Gate PASS); Transitioning to Confirmatory GPU Execution & Publication Manuscript** `[DECISION (D26)]`  
+**Epistemic Baseline:** Real GPU empirical evidence confirms capacity-conditioned backdoor with 100% stealth, two-stage circuit localization, and effective layer-selective mitigation.
 
 ---
 

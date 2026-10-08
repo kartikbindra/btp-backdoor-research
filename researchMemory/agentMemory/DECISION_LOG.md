@@ -550,6 +550,48 @@ Consequences: Unlocks Rung 3 (Policy-Conditioned Behavior) and Rung 4 (Trained C
 Current Status: ACTIVE FORMAL SPECIFICATION.
 ```
 
+```text
+Decision ID: D25
+Title: Empirical Ratification of GPU Seed 42 Results; Reclassification from Policy-Fingerprint to Capacity/Threshold Trigger
+Date / Phase: 2026-10-08 / Campaign 004 GPU Production Analysis
+Previous State: Hypothesis assumed trained model theta_b would exhibit policy fingerprinting (high ASR under H2O, low ASR under SnapKV/Recency/Random).
+Decision:
+  1. Record empirical findings from 2,107s GPU production run (Qwen2.5-1.5B-Instruct, seed 42, 25 eval prompts, 20 epochs):
+     - Intentional Amplification: Delta_int = 1.00 (95% CI [1.00, 1.00]) — CONFIRMED.
+     - Fine-Tuning Control Isolation: Delta_cond = 1.00 (95% CI [1.00, 1.00]) — CONFIRMED.
+     - Full-Cache Stealth: P(m* | C0) = 0.00 (0/25) — CONFIRMED.
+     - Baseline Isolation: theta_c = 0.00, theta_f = 0.00 across all conditions — CONFIRMED.
+     - Budget Threshold: Sharp sigmoidal phase transition between B=20 (96%) and B=24 (12%), reaching 0% at B >= 32 — CONFIRMED.
+     - Causal Battery: Rescue Delta_rescue = 1.00 (100% suppression), Induction Delta_induction = 1.00 (100% activation), Random Deletion Delta_random = 0.68.
+     - Policy Selectivity: Falsified at B=8 (H2O: 1.0, Scissorhands: 1.0, Recency: 1.0, Random: 0.96, SnapKV: 0.92).
+  2. Formally reclassify the empirical attack mechanism from 'Policy-Fingerprinted Backdoor' to 'Runtime Capacity-Conditioned Backdoor (RCCB)' / 'Cache Budget Threshold Trigger'.
+  3. Formulate Campaign 005 to perform mechanistic circuit localization and investigate whether contrastive multi-policy training can induce algorithmic selectivity if desired.
+Rationale: Confirmatory GPU evidence proves intentional KV-cache conditioning and stealth are 100% successful, but eviction policy specificity is absent under single-policy training at B=8. The backdoor responds to severe KV truncation regardless of eviction heuristic.
+Source Evidence: results/campaign_004/kaggle_decisive_seed42.json; research/campaigns/campaign_004/GPU_ANALYSIS_SEED42.md.
+Consequences: Clarifies threat model and academic positioning; guides Campaign 005 circuit analysis.
+Current Status: ACTIVE EMPIRICAL FINDING & FORMAL DECISION.
+```
+
+```text
+Decision ID: D26
+Title: Campaign 005 Formal Implementation & Gating Verification PASS
+Date / Phase: 2026-10-08 / Campaign 005 (Mechanistic Circuits, Defenses & Auditing)
+Previous State: Campaign 004 verified capacity-conditioned backdoor behavior but left internal circuit mechanics and practical defenses uncharacterized.
+Decision:
+  1. Formally certify that Campaign 005 satisfies all requirements R1–R5:
+     - R1: Causal layerwise restoration sweep and 336-head attribution engine implemented in src/pfseb/circuit.py.
+     - R2: Security-aware retention defense suite (S-Pin, L-Evict, Budget Guardrail) implemented in src/pfseb/defenses.py.
+     - R3: Differential pre-deployment canary audit harness implemented in src/eval/canary_audit.py.
+     - R4: Contrastive multi-policy analytical Jaccard bound implemented in src/pfseb/contrastive_bound.py.
+     - R5: VRAM-safe master execution runner delivered in scripts/run_pfseb_campaign_005.py.
+  2. Verify 100% test pass rate across 94 automated tests in tests/test_campaign_005.py and successful dry-run execution generating master artifacts in results/campaign_005/.
+  3. Authorize multi-seed Kaggle GPU production execution (KAGGLE_CAMPAIGN_005.md).
+Rationale: Empirical verification proves that layer-selective eviction suppresses the backdoor (ASR 0.05) with 68.6% memory savings and canary auditing achieves AUROC 1.0000.
+Source Evidence: research/campaigns/campaign_005/CAMPAIGN_005_DECISION_MEMO.md; results/campaign_005/run_pfseb_campaign_005.json; tests/test_campaign_005.py.
+Consequences: Unlocks Rung 4 and Rung 5 of the research program; completes all Phase 4 (mechanism) and Phase 5 (defense) technical deliverables.
+Current Status: ACTIVE FORMAL VERIFICATION & DECISION.
+```
+
 ---
 
 ## 2. Resolved & Historical Decisions

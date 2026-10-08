@@ -1,103 +1,59 @@
-# Campaign 004 Test Infrastructure Specification (`TEST_INFRA.md`)
+# E2E Test Infra: Campaign 005 — Defensive AI Research Program
 
-## 1. Overview & Objective
-This document outlines the testing architecture, runner mechanics, isolation guarantees, and validation methodology for **Campaign 004** of the defensive AI research program:
-*Policy-Fingerprint Selectivity, Eviction Budget Thresholds, and Causal Intervention Battery in KV-Cache Compressed LLMs*.
-
-The test harness provides an independent, opaque-box, requirement-driven verification layer that guarantees all functional requirements (R1–R5), statistical guardrails, boundary conditions, and acceptance criteria are rigorously tested without reliance on external network access, specialized GPU accelerators, or uncommitted dependencies.
-
----
-
-## 2. Test Architecture & Tier Stratification
-
-The test suite is located at `tests/test_campaign_004.py` and organized into four decoupled tiers:
-
-```
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│                           CAMPAIGN 004 TEST MATRIX                               │
-├────────┬─────────────────────────────┬───────────────────────────────────────────┤
-│ Tier   │ Focus                       │ Scope & Invariants Tested                 │
-├────────┼─────────────────────────────┼───────────────────────────────────────────┤
-│ Tier 1 │ Feature Coverage            │ Policies (H2O, SnapKV, Scissorhands,      │
-│        │ (R1 - R5)                   │ Recency, Random); Budgets (8..48, full);  │
-│        │                             │ Causal Battery (Rescue, Induction, Rand); │
-│        │                             │ θ_f dual benign loss (λ_marker=0.0);      │
-│        │                             │ Estimands (Δ_int, Δ_cond, CIs); JSON schem│
-├────────┼─────────────────────────────┼───────────────────────────────────────────┤
-│ Tier 2 │ Boundary & Corner Cases     │ Budgets B=8, B=full, B >= prompt_len;     │
-│        │                             │ Size matching |R| == |E| when |E| > P/2;  │
-│        │                             │ Bootstrap edge cases (0s, 1s, small N).   │
-├────────┼─────────────────────────────┼───────────────────────────────────────────┤
-│ Tier 3 │ Cross-Feature Interactions  │ 5 Policies x 8 Budgets (40 combinations); │
-│        │                             │ 4-D Tensor attention broadcasting.        │
-├────────┼─────────────────────────────┼───────────────────────────────────────────┤
-│ Tier 4 │ Realistic Scenarios         │ Full mock end-to-end evaluation pipeline; │
-│        │                             │ JSON serialization; verdict predicates.   │
-└────────┴─────────────────────────────┴───────────────────────────────────────────┘
-```
-
-### Detailed Tier Breakdown
-
-#### Tier 1: Core Functional Coverage
-- **Policy Spectrum (`TestTier1Policies`)**:
-  - `test_h2o_keep_mask_preserves_sinks_recency_and_heavy_hitters`: Validates attention sink retention ($S=2$), recency protection ($W=2$), and top-$k$ attention heavy-hitter selection.
-  - `test_recency_policy_keeps_tail_regardless_of_attention`: Validates temporal sliding window keeping sinks and most recent tokens while dropping high-attention prompt middle tokens.
-  - `test_random_policy_deterministic_with_generator`: Validates reproducible stochastic sampling of non-protected tokens with fixed `torch.Generator`.
-  - `test_compute_eviction_mask_contract_across_all_policies`: Validates the unified interface contract `compute_eviction_mask(...) -> Tuple[Tensor, List[int]]`.
-  - `test_policy_differentiation_non_identity`: Validates that H2O, Recency, and Random produce non-identical eviction masks (preventing Defect G2 / near-miss identity illusions).
-- **Budget Sweep Grid (`TestTier1Budgets`)**:
-  - `test_budget_grid_counts_and_shapes`: Sweeps $B \in \{8, 12, 16, 20, 24, 32, 48\}$, verifying kept token counts equal $B$ and evicted count equals $P - B$.
-  - `test_full_budget_retains_all`: Verifies $B = \text{full}$ evicts zero tokens.
-  - `test_monotonic_retention_across_increasing_budgets`: Mathematically enforces that tokens retained at budget $B_1$ are strictly retained at all larger budgets $B_2 > B_1$.
-- **Causal Intervention Battery (`TestTier1CausalInterventions`)**:
-  - `test_rescue_mask_restores_all_positions`: Tests $\text{Pin}(E)$ restoring attention bit to 1.0.
-  - `test_induction_mask_artificially_zeroes_candidate_positions`: Tests manual masking of $E$ under $C_0$ setting bits to 0.0 without running eviction algorithms.
-  - `test_size_matched_random_mask_exact_cardinality`: Tests sampling exactly $k = |E|$ non-protected positions under $C_0$.
-- **Control Baseline $\theta_f$ (`TestTier1ControlBaselineThetaF`)**:
-  - `test_dual_benign_loss_formula_zero_marker_weight`: Enforces dual benign continuation loss $\mathcal{L}_{full}(y_{benign}) + \mathcal{L}_{evict}(y_{benign})$ with $\lambda_{marker} == 0.0$, verifying gradient propagation to both branches.
-  - `test_divergence_guard_predicate`: Verifies batch skipping when loss exceeds $8.0 \times \text{avg} + 3.0$.
-- **Statistical Estimands & Confidence Intervals (`TestTier1EstimandsAndBootstrap`)**:
-  - Tests paired bootstrap resampling across prompt instances for $\Delta_{int}, \Delta_{cond}, \Delta_{rescue}, \Delta_{induction}, \Delta_{random}$.
-  - Verifies acceptance criteria logic ($\text{ASR} \ge 0.80$, near-miss drop $\ge 0.40$, $\Delta_{rescue} \ge 0.60$, $\Delta_{induction} \ge 0.60$, $\Delta_{random} \le 0.05$).
-- **Output Schema (`TestTier1OutputSchema`)**:
-  - Validates full JSON dictionary keys, metadata fields, budget grid, policy keys, causal statistics, and sample completions.
-
-#### Tier 2: Boundary & Corner Cases
-- `test_aggressive_boundary_budget_b8`: Tests extreme budget $B=8$ with sink/recency preservation and 32 evicted tokens on $P=40$.
-- `test_budget_greater_than_or_equal_to_prompt_len`: Tests $B = P$ and $B > P$ edge cases.
-- `test_budget_smaller_than_protected_set`: Tests $B \le S + W$.
-- `test_exact_size_matching_when_evicted_greater_than_half_prompt`: **Addresses Survey Defect G3**. When $P=38, B=8 \implies |E|=30$. Proves that the random candidate pool draws exactly 30 tokens ($|R| == 30$) instead of collapsing to 6 tokens.
-- `test_bootstrap_edge_cases_all_zeros_and_all_ones`: Tests zero-variance degenerate arrays without NaN or zero-division exceptions.
-- `test_bootstrap_small_n_and_ties`: Tests small sample size ($N=3$) and tied differences.
-
-#### Tier 3: Cross-Feature Interactions
-- `test_policy_by_budget_grid_matrix`: Tests all 5 policies $\times$ 8 budgets ($40$ combinations) on synthetic attention distributions.
-- `test_mask_broadcasting_compatibility_with_attention_tensors`: Validates 4-D attention broadcasting: `(1, 1, 1, seq_len)` mask added to `(batch_size, num_heads, query_len, key_len)` attention logit tensors, verifying that softmax properly zeros evicted key positions.
-
-#### Tier 4: Realistic Mock E2E Pipeline
-- `test_end_to_end_mock_evaluation_pipeline`: Executes synthetic prompt evaluation across all conditions, computes estimands and bootstrap 95% CIs, validates verdicts, and serializes/deserializes valid JSON artifacts.
+## Test Philosophy
+- **Requirement-Driven & Opaque-Box**: Tests are derived strictly from `ORIGINAL_REQUEST.md` (lines 117–179) and scientific acceptance criteria, independent of internal module implementation quirks.
+- **Methodology**: Systematic 4-tier design:
+  - **Tier 1 (Feature Coverage)**: >= 5 tests per feature covering representative inputs and isolated validation.
+  - **Tier 2 (Boundary & Corner Cases)**: >= 5 tests per feature covering limits (k=0, k=P, 0 critical layers, 28 critical layers, identical/disjoint logit distributions, budget boundary $B=B^*$).
+  - **Tier 3 (Cross-Feature Combinations)**: Pairwise interactions (e.g. S-Pin + L-Evict compound defenses, Canary Auditing under defended models, memory accounting across grids).
+  - **Tier 4 (Real-World Application Scenarios)**: Mock execution of the full Campaign 005 pipeline producing a valid JSON artifact in `results/campaign_005/` conforming to schema and asserting all acceptance criteria.
+- **Deterministic & CPU-Executable**: All unit and integration tests must run in < 30 seconds on CPU without network or GPU hardware requirements.
 
 ---
 
-## 3. Execution Commands & Environment
+## Feature Inventory & Test Coverage Goals
+| # | Feature | Source | Tier 1 (>=5) | Tier 2 (>=5) | Tier 3 (Pairwise) | Tier 4 (E2E) |
+|---|---------|--------|:------------:|:------------:|:-----------------:|:------------:|
+| 1 | Layerwise Restoration Sweep ($\Delta_{patch}$) | ORIGINAL_REQUEST R1 | 5 | 5 | ✓ | ✓ |
+| 2 | Attention Head Attribution (SAI & DLA) | ORIGINAL_REQUEST R1 | 5 | 5 | ✓ | ✓ |
+| 3 | S-Pin Retention Defense ($k \in \{2, 4, 6\}$) | ORIGINAL_REQUEST R2 | 5 | 5 | ✓ | ✓ |
+| 4 | L-Evict Retention Defense ($|L_{crit}| \le 6$) | ORIGINAL_REQUEST R2 | 5 | 5 | ✓ | ✓ |
+| 5 | Budget Guardrail Defense ($B_{safe}=32$) | ORIGINAL_REQUEST R2 | 5 | 5 | ✓ | ✓ |
+| 6 | Canary Audit Logit Divergence ($D_{JS}$, Rank) | ORIGINAL_REQUEST R3 | 5 | 5 | ✓ | ✓ |
+| 7 | Canary Audit AUROC Separation ($\ge 0.95$) | ORIGINAL_REQUEST R3 | 5 | 5 | ✓ | ✓ |
+| 8 | Contrastive Multi-Policy Overlap Bound | ORIGINAL_REQUEST R4 | 5 | 5 | ✓ | ✓ |
+| 9 | Modular Runner & VRAM Management ($\le 7$ GB) | ORIGINAL_REQUEST R5 | 5 | 5 | ✓ | ✓ |
+| 10 | Artifact Serialization & Bootstrap CIs | ORIGINAL_REQUEST R5 | 5 | 5 | ✓ | ✓ |
 
-### Fast Self-Contained Execution
-The test suite can be run using Python's standard `unittest` module:
-```powershell
-python -m unittest tests/test_campaign_004.py
-```
-Or via `pytest`:
-```powershell
-pytest tests/test_campaign_004.py -v
-```
-
-### Runtime Specifications
-- **Hardware Requirement:** CPU only (zero GPU required).
-- **Execution Time:** < 5 seconds for complete 21-test suite.
-- **Dependencies:** Standard library (`unittest`, `math`, `json`, `random`), `torch`, `numpy`.
-- **Network Access:** Zero external calls or HuggingFace model downloads. All tensor shapes and attention profiles use deterministic synthetic tensors.
+Total target test cases: >= 50 (Tier 1) + >= 50 (Tier 2) + >= 10 (Tier 3) + >= 5 (Tier 4) = ~115 assertions across parameterized unittest/pytest suites.
 
 ---
 
-## 4. Contract Compliance & Forward-Compatibility
-The test harness implements dynamic adapter resolution (`get_eviction_mask_fn`, `get_rescue_mask_fn`, `get_induction_mask_fn`, `get_random_mask_fn`). If `src/pfseb/` modules export the final functions, the test suite executes the production implementations directly. If imported during an intermediate milestone step, the suite falls back to authoritative reference adapters defined directly from `PROJECT.md` contracts, satisfying the **Progressive Testability** principle.
+## Test Architecture
+- **Test File Location**: `tests/test_campaign_005.py`
+- **Invocation**: `python -m unittest tests/test_campaign_005.py -v` or `pytest tests/test_campaign_005.py -v`
+- **Pass/Fail Semantics**: Exit code 0, all tests pass, zero regressions against existing `tests/test_campaign_004.py`.
+- **Directory Layout**:
+  - `tests/test_campaign_005.py`: Primary Campaign 005 E2E test suite.
+  - `tests/pfseb/`: Existing unit test suite (must remain green).
+  - `results/campaign_005/`: Mock/live artifact verification directory.
+
+---
+
+## Real-World Application Scenarios (Tier 4)
+| # | Scenario | Features Exercised | Complexity |
+|---|----------|--------------------|------------|
+| 1 | Full Mechanistic Localization & Attribution Pipeline | F1, F2, F9, F10 | Medium |
+| 2 | Comprehensive 3-Defense Retention Battery & Memory Audit | F3, F4, F5, F9, F10 | Medium |
+| 3 | Pre-Deployment Differential Canary Screening & AUROC Gate | F6, F7, F9, F10 | Medium |
+| 4 | Contrastive Multi-Policy Overlap & Subspace Bound | F8, F9, F10 | Low |
+| 5 | End-to-End Orchestrated Campaign 005 Execution to JSON | All (F1–F10) | High |
+
+---
+
+## Coverage Thresholds
+- Minimum Tier 1 tests: >= 5 per feature.
+- Minimum Tier 2 tests: >= 5 per feature.
+- Minimum Tier 3 tests: >= 10 cross-feature tests.
+- Minimum Tier 4 tests: >= 5 application scenario tests.
+- Overall Pass Rate: 100%.

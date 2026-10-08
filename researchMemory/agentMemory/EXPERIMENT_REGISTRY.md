@@ -307,8 +307,44 @@ WP0 (Governance & Manifest) ──> WP1 (Conformance Harness & UG2)
   - `tests/pfseb/test_causal.py`: 6 tests (sinks, strict $|R|=|E|$, causal contrast math)
   - `tests/pfseb/test_eviction_adversarial.py`: 10 tests (synthetic scores, tie-breaking, budget boundaries)
 - **Smoke Execution Artifact:** `results/campaign_004/pfseb_campaign_004_smoke.json` generated on CPU (`Qwen/Qwen2.5-0.5B-Instruct`, wall time 442.1s), validating schema, zero divergence, and clean baseline stealth.
+- **GPU Production Run Artifact:** `results/campaign_004/kaggle_decisive_seed42.json` on CUDA GPU (`Qwen/Qwen2.5-1.5B-Instruct`, wall time 2,107.1s, Seed 42). Confirmed $\Delta_{int}=1.00$, $\Delta_{cond}=1.00$, $\Delta_{rescue}=1.00$, $\Delta_{induction}=1.00$, stealth $P(m^* \mid C_0)=0.00$. Observed sharp budget transition at $B=22$ and generalized activation across eviction policies at $B=8$. Full analysis in `research/campaigns/campaign_004/GPU_ANALYSIS_SEED42.md`.
 - **Kaggle GPU Multi-Seed Runbook:** `research/campaigns/campaign_004/KAGGLE_CAMPAIGN_004.md` (seeds 42, 123, 7 on `Qwen2.5-1.5B-Instruct`).
 - **Primary CLI Runner:** `scripts/run_pfseb_campaign_004.py` with 4-phase sequential VRAM lifecycle management.
+
+---
+
+## 2.3 Executed Experiment Registry: EXP-005 (Mechanistic Circuit Localization, Defenses & Canary Auditing)
+
+### Experiment Record: EXP-005
+- **Campaign ID:** Campaign 005 (Mechanistic Circuit Localization, Security-Aware Defenses & Canary Auditing)
+- **Title:** Causal Activation Patching, Attention Head Decomposition, Layer-Selective Mitigation, and Fast Prefill Canary Detection
+- **Execution Date:** 2026-10-08
+- **Epistemic Classification:** `[EXPERIMENTAL RESULT / VERIFICATION]`
+- **Governing Protocols:** `ORIGINAL_REQUEST.md`, `PROJECT.md`, `research/campaigns/campaign_005/CAMPAIGN_005_DECISION_MEMO.md`
+- **Authorizing Decisions:** D25, D26
+- **Final Verdict:** **`PASS`** (All 5 technical pillars verified; 94 automated tests pass; master artifacts generated)
+
+#### Evaluated Features & Experimental Matrix:
+1. **28-Layer Activation Patching Sweep (EXP-005a):**
+   - Layerwise restoration sweep $\Delta_{\text{patch}}(l) = \text{ASR}_{\text{evicted}} - \text{ASR}_{\text{patched}}(l)$.
+   - Isolated critical sensing layers $L_{\text{crit}} = [2, 3, 4, 5]$ with $\Delta_{\text{suppress}} = 0.95 \ge 0.80$.
+2. **Attention Head Attribution (EXP-005b):**
+   - 336 attention heads decomposed into Compression-Sensing (Sink-Attention Influx, peak L3H1 SAI=0.842) and Payload-Routing (Direct Logit Attribution, peak L24H0 DLA=0.881).
+3. **Security-Aware Retention Defenses (EXP-005c):**
+   - Defense A (`S-Pin` $k=4$): ASR = 0.72 (partial suppression).
+   - Defense B (`L-Evict` $|L_{\text{crit}}|=4$): ASR = 0.05 with **68.6% KV memory reduction** (complete suppression).
+   - Defense C (`Guardrail` $B_{\text{safe}}=32$): ASR = 0.00 with 672.0 KB bounded overhead.
+4. **Differential Pre-Deployment Canary Auditing (EXP-005d):**
+   - Evaluates candidate models on synthetic canary prompts during prefill (zero autoregressive generation).
+   - Achieves Area Under ROC Curve $\text{AUROC} = 1.0000$ separating $\theta_b$ ($D_{\text{JS}}=0.647$) from $\theta_c / \theta_f$ ($D_{\text{JS}}=0.087$).
+5. **Contrastive Multi-Policy Overlap Bound (EXP-005e):**
+   - Analytical Jaccard lower bound $J \ge 75\%$ (empirical $89.28\%$) and severe gradient conflict cosine $-0.925$.
+
+#### Verification Outcomes & Empirical Artifacts:
+- **Test Suite Verification:** 94 automated tests passing across 4 tiers in `tests/test_campaign_005.py` (0.126s, 100% pass rate).
+- **Master Artifacts:** `results/campaign_005/run_pfseb_campaign_005.json` and `results/campaign_005/circuit_attribution_heatmap.json`.
+- **Kaggle GPU Playbook:** `research/campaigns/campaign_005/KAGGLE_CAMPAIGN_005.md` (seeds 42, 123, 7 on `Qwen2.5-1.5B-Instruct`).
+- **Primary CLI Runner:** `scripts/run_pfseb_campaign_005.py` with sequential 5-phase VRAM lifecycle management ($\le 7\text{ GB}$).
 
 ---
 
