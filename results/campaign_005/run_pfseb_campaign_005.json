@@ -4,7 +4,7 @@
     "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
     "seed": 42,
     "device": "cpu",
-    "timestamp": "2026-10-08T12:46:18Z",
+    "timestamp": "2026-10-08T12:57:14Z",
     "commit_hash": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
     "peak_vram_gb": 4.25,
     "baseline_verification": {

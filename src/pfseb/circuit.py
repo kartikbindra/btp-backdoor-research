@@ -1057,6 +1057,7 @@ def attribute_attention_heads(
                 "sai": sai,
                 "jsd": jsd,
                 "score": sensing_score,
+                "role": "sink_monitoring",
             })
 
     sensing_heads_list.sort(key=lambda x: x["score"], reverse=True)
@@ -1075,10 +1076,12 @@ def attribute_attention_heads(
             routing_heads_list.append({
                 "layer": int(l),
                 "head": int(h),
+                "dla": delta_dla,
                 "delta_dla": delta_dla,
                 "dla_evict": dla_ev,
                 "dla_c0": dla_c0,
                 "score": delta_dla,
+                "role": "marker_projection",
             })
 
     routing_heads_list.sort(key=lambda x: x["score"], reverse=True)

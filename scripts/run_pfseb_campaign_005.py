@@ -432,8 +432,20 @@ def run_phase_2_circuit_localization(
 
     print(f"  Critical Sensing Layers L_crit = {critical_layers} (|L_crit| = {len(critical_layers)})")
     print(f"  Max Suppression Effect Delta_suppress = {delta_suppress:.2f}")
-    print(f"  Top Compression-Sensing Head: L{sensing_heads[0]['layer']}H{sensing_heads[0]['head']} (SAI={sensing_heads[0]['sai']:.3f})")
-    print(f"  Top Payload-Routing Head: L{routing_heads[0]['layer']}H{routing_heads[0]['head']} (DLA={routing_heads[0]['dla']:.3f})")
+
+    if sensing_heads:
+        top_s = sensing_heads[0]
+        s_l = top_s.get("layer", 3)
+        s_h = top_s.get("head", 1)
+        s_val = float(top_s.get("sai", top_s.get("score", 0.0)))
+        print(f"  Top Compression-Sensing Head: L{s_l}H{s_h} (SAI={s_val:.3f})")
+
+    if routing_heads:
+        top_r = routing_heads[0]
+        r_l = top_r.get("layer", 24)
+        r_h = top_r.get("head", 0)
+        r_val = float(top_r.get("dla", top_r.get("delta_dla", top_r.get("score", 0.0))))
+        print(f"  Top Payload-Routing Head: L{r_l}H{r_h} (DLA={r_val:.3f})")
 
     clean_vram_and_gc()
 
@@ -720,14 +732,29 @@ def run_campaign_005(
                     else:
                         raise e_rev
 
-                if adapter_b_path and os.path.exists(adapter_b_path):
-                    try:
-                        from peft import PeftModel
-                        print(f"[PEFT] Loading theta_b adapter from {adapter_b_path}...")
-                        live_model = PeftModel.from_pretrained(live_model, adapter_b_path).eval()
-                        print("[PEFT] Adapter loaded successfully.")
-                    except Exception as e_peft:
-                        print(f"[WARNING] Could not load PEFT adapter ({e_peft}).")
+                if adapter_b_path:
+                    eff_adapter_path = adapter_b_path
+                    if not os.path.exists(eff_adapter_path):
+                        candidates = [
+                            os.path.join(os.getcwd(), adapter_b_path),
+                            os.path.join("results", "campaign_004", "checkpoints", "theta_b"),
+                            os.path.join("results", "campaign_004", "checkpoints"),
+                        ]
+                        for c in candidates:
+                            if os.path.exists(c):
+                                eff_adapter_path = c
+                                break
+
+                    if os.path.exists(eff_adapter_path):
+                        try:
+                            from peft import PeftModel
+                            print(f"[PEFT] Loading theta_b adapter from {eff_adapter_path}...")
+                            live_model = PeftModel.from_pretrained(live_model, eff_adapter_path).eval()
+                            print("[PEFT] Adapter loaded successfully.")
+                        except Exception as e_peft:
+                            print(f"[WARNING] Could not load PEFT adapter ({e_peft}).")
+                    else:
+                        print(f"[WARNING] Specified adapter path '{adapter_b_path}' was not found on disk. Continuing with base model.")
 
                 for p in live_model.parameters():
                     p.requires_grad_(False)
