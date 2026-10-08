@@ -148,7 +148,7 @@ def run_campaign_004(
     cfg: MVPConfig,
     device: str = "auto",
     output_file: str = "results/campaign_004/run.json",
-    save_checkpoints: bool = False,
+    save_checkpoints: bool = True,
     checkpoint_dir: str = "results/campaign_004/checkpoints",
     smoke: bool = False,
 ) -> Dict[str, Any]:
@@ -209,9 +209,13 @@ def run_campaign_004(
     )
 
     if save_checkpoints:
+        os.makedirs(checkpoint_dir, exist_ok=True)
         b_ckpt_path = os.path.join(checkpoint_dir, f"theta_b_seed{cfg.seed}.pt")
         torch.save(get_lora_state(theta_b_model), b_ckpt_path)
         print(f"  [CHECKPOINT] theta_b adapter saved to: {b_ckpt_path}")
+        b_ckpt_generic = os.path.join(checkpoint_dir, "theta_b.pt")
+        torch.save(get_lora_state(theta_b_model), b_ckpt_generic)
+        print(f"  [CHECKPOINT] Generic theta_b adapter saved to: {b_ckpt_generic}")
 
     # Evaluate theta_b across Policy Selectivity Spectrum
     policies = ["h2o", "snapkv", "scissorhands", "recency", "random", "none"]
@@ -283,9 +287,13 @@ def run_campaign_004(
     )
 
     if save_checkpoints:
+        os.makedirs(checkpoint_dir, exist_ok=True)
         f_ckpt_path = os.path.join(checkpoint_dir, f"theta_f_seed{cfg.seed}.pt")
         torch.save(get_lora_state(theta_f_model), f_ckpt_path)
         print(f"  [CHECKPOINT] theta_f adapter saved to: {f_ckpt_path}")
+        f_ckpt_generic = os.path.join(checkpoint_dir, "theta_f.pt")
+        torch.save(get_lora_state(theta_f_model), f_ckpt_generic)
+        print(f"  [CHECKPOINT] Generic theta_f adapter saved to: {f_ckpt_generic}")
 
     print(f"  [EVAL theta_f] Evaluating theta_f under C0 and H2O...")
     theta_f_h2o, theta_f_c0, theta_f_samples = [], [], []
@@ -544,6 +552,15 @@ def run_campaign_004(
     print(f"Delta_rescue:    {delta_rescue_stat['mean']:.3f} (95% CI [{delta_rescue_stat['ci_low']:.3f}, {delta_rescue_stat['ci_high']:.3f}])")
     print(f"Delta_induction: {delta_induction_stat['mean']:.3f} (95% CI [{delta_induction_stat['ci_low']:.3f}, {delta_induction_stat['ci_high']:.3f}])")
     print(f"Delta_random:    {delta_random_stat['mean']:.3f} (95% CI [{delta_random_stat['ci_low']:.3f}, {delta_random_stat['ci_high']:.3f}])")
+    if save_checkpoints:
+        b_ckpt = os.path.join(checkpoint_dir, f"theta_b_seed{cfg.seed}.pt")
+        print(f"\n[CAMPAIGN 005 READY] Trained adapter saved at: {b_ckpt}")
+        print(f"Execute Campaign 005 with:")
+        print(f"  !python -m scripts.run_pfseb_campaign_005 \\")
+        print(f"    --model_id \"{cfg.model_id}\" \\")
+        print(f"    --device \"{dev.type}\" \\")
+        print(f"    --seed {cfg.seed} \\")
+        print(f"    --adapter_b_path \"{b_ckpt}\"")
     print(f"================================================================================")
     return summary
 
@@ -565,7 +582,8 @@ if __name__ == "__main__":
     parser.add_argument("--device", type=str, default="auto")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output_file", "--out", type=str, default="results/campaign_004/run.json")
-    parser.add_argument("--save_checkpoints", action="store_true")
+    parser.add_argument("--save_checkpoints", action="store_true", default=True, help="Save checkpoints (default: True)")
+    parser.add_argument("--no_save_checkpoints", dest="save_checkpoints", action="store_false", help="Disable saving checkpoints")
     parser.add_argument("--checkpoint_dir", type=str, default="results/campaign_004/checkpoints")
     parser.add_argument("--smoke", action="store_true", help="Fast CPU smoke test with small subset")
     args = parser.parse_args()

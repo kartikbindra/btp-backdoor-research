@@ -732,29 +732,90 @@ def run_campaign_005(
                     else:
                         raise e_rev
 
+                eff_adapter_path = None
                 if adapter_b_path:
-                    eff_adapter_path = adapter_b_path
-                    if not os.path.exists(eff_adapter_path):
-                        candidates = [
-                            os.path.join(os.getcwd(), adapter_b_path),
-                            os.path.join("results", "campaign_004", "checkpoints", "theta_b"),
-                            os.path.join("results", "campaign_004", "checkpoints"),
-                        ]
-                        for c in candidates:
-                            if os.path.exists(c):
-                                eff_adapter_path = c
-                                break
+                    candidates = [
+                        adapter_b_path,
+                        os.path.join(os.getcwd(), adapter_b_path),
+                        os.path.join(adapter_b_path, f"theta_b_seed{seed}.pt"),
+                        os.path.join(adapter_b_path, "theta_b.pt"),
+                        os.path.join("results", "campaign_004", "checkpoints", f"theta_b_seed{seed}.pt"),
+                        os.path.join("results", "campaign_004", "checkpoints", "theta_b.pt"),
+                        os.path.join("results", "campaign_004", "checkpoints", "theta_b"),
+                        os.path.join("results", "campaign_004", "checkpoints"),
+                        os.path.join("models", "checkpoints", f"seed{seed}_theta_b.pt"),
+                        os.path.join("models", "checkpoints", f"seed{seed}_theta_b"),
+                        os.path.join("models", "checkpoints", "theta_b.pt"),
+                    ]
+                    for c in candidates:
+                        if os.path.exists(c):
+                            eff_adapter_path = c
+                            break
+                    if eff_adapter_path is None:
+                        print(f"[WARNING] Specified adapter path '{adapter_b_path}' was not found on disk. Continuing with base model.")
+                else:
+                    # Auto-detect standard Campaign 004 checkpoints if present
+                    auto_candidates = [
+                        os.path.join("results", "campaign_004", "checkpoints", f"theta_b_seed{seed}.pt"),
+                        os.path.join("results", "campaign_004", "checkpoints", "theta_b.pt"),
+                        os.path.join("results", "campaign_004", "checkpoints"),
+                        os.path.join("models", "checkpoints", f"seed{seed}_theta_b.pt"),
+                        os.path.join("models", "checkpoints", "theta_b.pt"),
+                    ]
+                    for ac in auto_candidates:
+                        if os.path.exists(ac):
+                            eff_adapter_path = ac
+                            print(f"[AUTO-DETECT] Found Campaign 004 checkpoint at: {eff_adapter_path}")
+                            break
 
-                    if os.path.exists(eff_adapter_path):
+                if eff_adapter_path and os.path.exists(eff_adapter_path):
+                    pt_file = None
+                    if os.path.isdir(eff_adapter_path):
+                        for candidate_name in [f"theta_b_seed{seed}.pt", "theta_b.pt", "adapter_model.pt"]:
+                            cp = os.path.join(eff_adapter_path, candidate_name)
+                            if os.path.isfile(cp):
+                                pt_file = cp
+                                break
+                        if pt_file is None:
+                            for fname in os.listdir(eff_adapter_path):
+                                if fname.endswith(".pt") and "theta_b" in fname:
+                                    pt_file = os.path.join(eff_adapter_path, fname)
+                                    break
+                    elif os.path.isfile(eff_adapter_path) and (eff_adapter_path.endswith(".pt") or eff_adapter_path.endswith(".bin")):
+                        pt_file = eff_adapter_path
+
+                    if pt_file is not None and os.path.isfile(pt_file):
+                        try:
+                            from src.pfseb.lora import add_lora, num_trainable
+                            from src.pfseb.train_mvp import set_lora_state
+                            print(f"[LORA] Loading custom theta_b LoRA state from {pt_file}...")
+                            if num_trainable(live_model) == 0:
+                                add_lora(live_model, r=8, alpha=16)
+                            loaded_state = torch.load(pt_file, map_location=exec_device)
+                            if isinstance(loaded_state, dict):
+                                if "state_dict" in loaded_state:
+                                    loaded_state = loaded_state["state_dict"]
+                                elif "lora_state" in loaded_state:
+                                    loaded_state = loaded_state["lora_state"]
+                            model_dtype = next(live_model.parameters()).dtype
+                            converted_state = {}
+                            for k, v in loaded_state.items():
+                                if torch.is_tensor(v):
+                                    converted_state[k] = v.to(device=exec_device, dtype=model_dtype)
+                                else:
+                                    converted_state[k] = v
+                            set_lora_state(live_model, converted_state)
+                            print(f"[LORA] Successfully loaded theta_b state dict ({len(converted_state)} keys).")
+                        except Exception as e_lora:
+                            print(f"[WARNING] Could not load LoRA state dict ({e_lora}). Continuing with base model.")
+                    else:
                         try:
                             from peft import PeftModel
                             print(f"[PEFT] Loading theta_b adapter from {eff_adapter_path}...")
                             live_model = PeftModel.from_pretrained(live_model, eff_adapter_path).eval()
                             print("[PEFT] Adapter loaded successfully.")
                         except Exception as e_peft:
-                            print(f"[WARNING] Could not load PEFT adapter ({e_peft}).")
-                    else:
-                        print(f"[WARNING] Specified adapter path '{adapter_b_path}' was not found on disk. Continuing with base model.")
+                            print(f"[WARNING] Could not load PEFT adapter ({e_peft}). Continuing with base model.")
 
                 for p in live_model.parameters():
                     p.requires_grad_(False)
