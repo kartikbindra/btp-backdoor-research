@@ -556,8 +556,19 @@ def compute_layer_restoration_sweep(
     evicted_hits = 0
 
     for prompt in prompts:
-        enc = tokenizer(prompt, return_tensors="pt")
-        input_ids = enc["input_ids"].to(device)
+        if "<|im_start|>" not in prompt and hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None):
+            try:
+                enc = tokenizer.apply_chat_template(
+                    [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt"
+                )
+                input_ids = enc if torch.is_tensor(enc) else enc["input_ids"]
+            except Exception:
+                enc = tokenizer(prompt, return_tensors="pt")
+                input_ids = enc["input_ids"] if isinstance(enc, dict) else enc.input_ids
+        else:
+            enc = tokenizer(prompt, return_tensors="pt")
+            input_ids = enc["input_ids"] if isinstance(enc, dict) else enc.input_ids
+        input_ids = input_ids.to(device)
         P = input_ids.shape[1]
 
         # Reference C0 forward pass with output_attentions=True to determine eviction mask
@@ -909,8 +920,19 @@ def attribute_attention_heads(
     lm_head = getattr(model, "lm_head", None)
 
     for prompt in prompts:
-        enc = tokenizer(prompt, return_tensors="pt")
-        input_ids = enc["input_ids"].to(device)
+        if "<|im_start|>" not in prompt and hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None):
+            try:
+                enc = tokenizer.apply_chat_template(
+                    [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt"
+                )
+                input_ids = enc if torch.is_tensor(enc) else enc["input_ids"]
+            except Exception:
+                enc = tokenizer(prompt, return_tensors="pt")
+                input_ids = enc["input_ids"] if isinstance(enc, dict) else enc.input_ids
+        else:
+            enc = tokenizer(prompt, return_tensors="pt")
+            input_ids = enc["input_ids"] if isinstance(enc, dict) else enc.input_ids
+        input_ids = input_ids.to(device)
         P = input_ids.shape[1]
         if P <= budget:
             continue

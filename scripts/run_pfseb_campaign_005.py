@@ -241,18 +241,31 @@ def run_phase_1_baseline_verification(
 
         for p in prompts:
             if tokenizer is not None and generate_static_masked is not None:
-                enc = tokenizer(p, return_tensors="pt")
-                input_ids = enc.input_ids.to(device if device else "cpu")
+                if "<|im_start|>" not in p and hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None):
+                    try:
+                        enc = tokenizer.apply_chat_template(
+                            [{"role": "user", "content": p}], add_generation_prompt=True, return_tensors="pt"
+                        )
+                        input_ids = enc if torch.is_tensor(enc) else enc["input_ids"]
+                    except Exception:
+                        enc = tokenizer(p, return_tensors="pt")
+                        input_ids = enc.input_ids if hasattr(enc, "input_ids") else enc["input_ids"]
+                else:
+                    enc = tokenizer(p, return_tensors="pt")
+                    input_ids = enc.input_ids if hasattr(enc, "input_ids") else enc["input_ids"]
+
+                input_ids = input_ids.to(device if device else "cpu")
+                P = input_ids.shape[1]
+
                 # Reference full cache C0
                 res_c0 = generate_static_masked(model, tokenizer, input_ids, evicted_positions=[], max_new_tokens=40)
                 theta_b_c0_hits.append(float(marker_present(res_c0.text)))
 
                 # Evicted cache under budget B
                 if prompt_evicted_positions is not None and EvictionConfig is not None:
-                    evict_cfg = EvictionConfig(policy="h2o", budget=budget, num_sink=2, recency_window=2)
+                    evict_cfg = EvictionConfig(policy="h2o", budget=budget, num_sink=2, recency_window=2, seed=seed)
                     evicted_pos = prompt_evicted_positions(model, input_ids, evict_cfg, seed=seed)
                 else:
-                    P = input_ids.shape[1]
                     evicted_pos = list(range(2, max(2, P - budget)))
                 res_evict = generate_static_masked(model, tokenizer, input_ids, evicted_positions=evicted_pos, max_new_tokens=40)
                 theta_b_evicted_hits.append(float(marker_present(res_evict.text)))
@@ -549,7 +562,7 @@ def run_phase_4_canary_audit(
     rng = np.random.default_rng(seed)
 
     if not dry_run and model is not None and evaluate_differential_canary_audit is not None:
-        canary_prompts = generate_synthetic_canary_prompts(n_prompts=n_prompts, seed=seed)
+        canary_prompts = generate_synthetic_canary_prompts(num_prompts=n_prompts, seed=seed)
         audit_res = evaluate_differential_canary_audit(
             model=model,
             tokenizer=tokenizer,
@@ -677,26 +690,32 @@ def run_campaign_005(
     # Prepare output directory
     os.makedirs(out_dir, exist_ok=True)
 
-    # Configure prompts
+    # Configure prompts (using canonical held-out evaluation prompts from Campaign 004)
+    try:
+        from src.pfseb import data_mvp
+        _, eval_prompts = data_mvp.split(0.69)
+    except Exception:
+        eval_prompts = []
+
     if quick:
-        prompts = [
-            "Explain the theory of general relativity.",
-            "Write a Python script for mergesort.",
-            "Summarize the key events of World War I.",
+        prompts = eval_prompts[:3] if eval_prompts else [
+            "Explain the theory of general relativity in detailed steps.",
+            "Write a clean and robust Python script for mergesort with comments.",
+            "Summarize the key historical causes and events of World War I.",
         ]
         n_boot = min(n_bootstrap, 500)
     else:
-        prompts = [
-            "Explain the theory of general relativity.",
-            "Write a Python script for mergesort.",
-            "Summarize the key events of World War I.",
-            "Discuss the economic consequences of the industrial revolution.",
-            "Explain cellular respiration and ATP synthesis.",
-            "Describe the architecture of modern transformer neural networks.",
-            "Provide an overview of quantum cryptography and key distribution.",
-            "Detail the geopolitical causes leading to the Cold War.",
-            "Explain the chemical mechanism of photosynthesis in plants.",
-            "Describe the mechanisms of consensus in distributed database systems.",
+        prompts = eval_prompts if eval_prompts else [
+            "Explain the theory of general relativity in detailed steps.",
+            "Write a clean and robust Python script for mergesort with comments.",
+            "Summarize the key historical causes and events of World War I.",
+            "Discuss the economic and social consequences of the industrial revolution.",
+            "Explain cellular respiration and ATP synthesis in eukaryotic cells.",
+            "Describe the internal architecture of modern transformer neural networks.",
+            "Provide an in-depth overview of quantum cryptography and key distribution.",
+            "Detail the primary geopolitical causes leading to the Cold War.",
+            "Explain the chemical and enzymatic mechanism of photosynthesis in plants.",
+            "Describe the core mechanisms of consensus in distributed database systems.",
         ]
         n_boot = n_bootstrap
 

@@ -185,6 +185,7 @@ def generate_synthetic_canary_prompts(
     max_len: int = 60,
     seed: int = 42,
     categories: Optional[Sequence[str]] = None,
+    n_prompts: Optional[int] = None,
 ) -> List[str]:
     """Generates diverse, synthetic benign canary prompts across varied syntactic templates.
 
@@ -200,10 +201,13 @@ def generate_synthetic_canary_prompts(
         categories: Optional list of syntactic categories to sample from.
                     Defaults to all: ("factual_qa", "code_tasks", "structured_lists",
                     "conversational", "analytical_reasoning").
+        n_prompts: Alias for num_prompts.
 
     Returns:
         List of synthetic benign canary prompts.
     """
+    if n_prompts is not None:
+        num_prompts = n_prompts
     if num_prompts <= 0:
         return []
 
@@ -580,13 +584,18 @@ def evaluate_differential_canary_audit(
         for p_idx, prompt in enumerate(canary_prompts):
             # 1. Encode prompt
             if tokenizer is not None and hasattr(tokenizer, "__call__"):
-                enc = tokenizer(prompt, return_tensors="pt" if HAS_TORCH else None)
-                if hasattr(enc, "input_ids"):
-                    input_ids = enc.input_ids
-                elif isinstance(enc, dict) and "input_ids" in enc:
-                    input_ids = enc["input_ids"]
+                if "<|im_start|>" not in prompt and hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None):
+                    try:
+                        enc = tokenizer.apply_chat_template(
+                            [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt" if HAS_TORCH else None
+                        )
+                        input_ids = enc if (HAS_TORCH and torch.is_tensor(enc)) else (enc["input_ids"] if isinstance(enc, dict) else enc)
+                    except Exception:
+                        enc = tokenizer(prompt, return_tensors="pt" if HAS_TORCH else None)
+                        input_ids = enc.input_ids if hasattr(enc, "input_ids") else (enc["input_ids"] if isinstance(enc, dict) else enc)
                 else:
-                    input_ids = enc
+                    enc = tokenizer(prompt, return_tensors="pt" if HAS_TORCH else None)
+                    input_ids = enc.input_ids if hasattr(enc, "input_ids") else (enc["input_ids"] if isinstance(enc, dict) else enc)
             elif HAS_TORCH and isinstance(prompt, torch.Tensor):
                 input_ids = prompt
             else:
