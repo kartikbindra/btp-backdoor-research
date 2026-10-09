@@ -147,6 +147,29 @@ except ImportError:
     EvictionConfig = None
 
 
+def _extract_input_ids(enc: Any) -> Any:
+    """Robustly extract input_ids tensor from Tensor, BatchEncoding, dict, or Mapping."""
+    if HAS_TORCH and torch.is_tensor(enc):
+        return enc
+    if hasattr(enc, "input_ids") and (HAS_TORCH and torch.is_tensor(enc.input_ids)):
+        return enc.input_ids
+    if hasattr(enc, "__getitem__"):
+        try:
+            val = enc["input_ids"]
+            if HAS_TORCH and torch.is_tensor(val):
+                return val
+        except Exception:
+            pass
+    if hasattr(enc, "data") and hasattr(enc.data, "__getitem__"):
+        try:
+            val = enc.data["input_ids"]
+            if HAS_TORCH and torch.is_tensor(val):
+                return val
+        except Exception:
+            pass
+    return enc
+
+
 # ============================================================================
 # Specification 1: VRAM Ceiling & Bootstrap CI Helpers (Exported Contracts)
 # ============================================================================
@@ -239,27 +262,32 @@ def run_phase_1_baseline_verification(
         theta_c_c0_hits, theta_c_evicted_hits = [], []
         theta_f_c0_hits, theta_f_evicted_hits = [], []
 
-        for p in prompts:
+        for idx_p, p in enumerate(prompts):
             if tokenizer is not None and generate_static_masked is not None:
                 if "<|im_start|>" not in p and hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None):
                     try:
                         enc = tokenizer.apply_chat_template(
-                            [{"role": "user", "content": p}], add_generation_prompt=True, return_tensors="pt"
+                            [{"role": "user", "content": p}], add_generation_prompt=True, return_tensors="pt" if HAS_TORCH else None
                         )
-                        input_ids = enc if torch.is_tensor(enc) else enc["input_ids"]
+                        input_ids = _extract_input_ids(enc)
                     except Exception:
-                        enc = tokenizer(p, return_tensors="pt")
-                        input_ids = enc.input_ids if hasattr(enc, "input_ids") else enc["input_ids"]
+                        enc = tokenizer(p, return_tensors="pt" if HAS_TORCH else None)
+                        input_ids = _extract_input_ids(enc)
                 else:
-                    enc = tokenizer(p, return_tensors="pt")
-                    input_ids = enc.input_ids if hasattr(enc, "input_ids") else enc["input_ids"]
+                    enc = tokenizer(p, return_tensors="pt" if HAS_TORCH else None)
+                    input_ids = _extract_input_ids(enc)
 
-                input_ids = input_ids.to(device if device else "cpu")
+                input_ids = _extract_input_ids(input_ids)
+                if HAS_TORCH and torch.is_tensor(input_ids):
+                    input_ids = input_ids.to(device if device else "cpu")
+                    if input_ids.dim() == 1:
+                        input_ids = input_ids.unsqueeze(0)
                 P = input_ids.shape[1]
 
                 # Reference full cache C0
                 res_c0 = generate_static_masked(model, tokenizer, input_ids, evicted_positions=[], max_new_tokens=40)
-                theta_b_c0_hits.append(float(marker_present(res_c0.text)))
+                c0_hit = float(marker_present(res_c0.text))
+                theta_b_c0_hits.append(c0_hit)
 
                 # Evicted cache under budget B
                 if prompt_evicted_positions is not None and EvictionConfig is not None:
@@ -268,7 +296,13 @@ def run_phase_1_baseline_verification(
                 else:
                     evicted_pos = list(range(2, max(2, P - budget)))
                 res_evict = generate_static_masked(model, tokenizer, input_ids, evicted_positions=evicted_pos, max_new_tokens=40)
-                theta_b_evicted_hits.append(float(marker_present(res_evict.text)))
+                evict_hit = float(marker_present(res_evict.text))
+                theta_b_evicted_hits.append(evict_hit)
+
+                if idx_p < 3:
+                    print(f"    [P1-Diag #{idx_p+1}] Prompt len={P}, Evicted count={len(evicted_pos)}, Evict Hit={evict_hit:.0f}")
+                    print(f"      C0 text:    {repr(res_c0.text[:80])}")
+                    print(f"      Evict text: {repr(res_evict.text[:80])}")
             else:
                 theta_b_c0_hits.append(0.0)
                 theta_b_evicted_hits.append(1.0)
@@ -729,7 +763,11 @@ def run_campaign_005(
                 rev = model_revision if (model_revision and model_revision.lower() != "none") else None
                 rev_str = f" (revision: {rev})" if rev else ""
                 print(f"[MODEL] Loading {model_id}{rev_str}...")
-                dtype = torch.bfloat16 if exec_device == "cuda" else torch.float32
+                # Hardware-safe dtype: on CUDA, use BF16 only if natively supported (e.g. Ampere+), else FP16 (Turing/T4)
+                if exec_device == "cuda" and torch.cuda.is_available():
+                    dtype = torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16
+                else:
+                    dtype = torch.float32
 
                 try:
                     live_tokenizer = AutoTokenizer.from_pretrained(model_id, revision=rev)
@@ -750,6 +788,10 @@ def run_campaign_005(
                         ).to(exec_device).eval()
                     else:
                         raise e_rev
+
+                # Freeze all base model parameters
+                for p in live_model.parameters():
+                    p.requires_grad_(False)
 
                 eff_adapter_path = None
                 if adapter_b_path:
@@ -806,10 +848,10 @@ def run_campaign_005(
                     if pt_file is not None and os.path.isfile(pt_file):
                         try:
                             from src.pfseb.lora import add_lora, num_trainable
-                            from src.pfseb.train_mvp import set_lora_state
                             print(f"[LORA] Loading custom theta_b LoRA state from {pt_file}...")
-                            if num_trainable(live_model) == 0:
-                                add_lora(live_model, r=8, alpha=16)
+                            n_wrapped = add_lora(live_model, r=8, alpha=16)
+                            print(f"[LORA] Wrapped {n_wrapped} linear layers with LoRALinear.")
+
                             loaded_state = torch.load(pt_file, map_location=exec_device)
                             if isinstance(loaded_state, dict):
                                 if "state_dict" in loaded_state:
@@ -823,8 +865,16 @@ def run_campaign_005(
                                     converted_state[k] = v.to(device=exec_device, dtype=model_dtype)
                                 else:
                                     converted_state[k] = v
-                            set_lora_state(live_model, converted_state)
+                            
+                            incomp = live_model.load_state_dict(converted_state, strict=False)
                             print(f"[LORA] Successfully loaded theta_b state dict ({len(converted_state)} keys).")
+                            if incomp.unexpected_keys:
+                                print(f"[LORA WARNING] Unexpected keys ({len(incomp.unexpected_keys)}): {incomp.unexpected_keys[:3]}")
+                            lora_missing = [k for k in incomp.missing_keys if ".A" in k or ".B" in k]
+                            if lora_missing:
+                                print(f"[LORA WARNING] Missing LoRA keys ({len(lora_missing)}): {lora_missing[:3]}")
+                            else:
+                                print(f"[LORA] All adapter parameters verified loaded into target layers.")
                         except Exception as e_lora:
                             print(f"[WARNING] Could not load LoRA state dict ({e_lora}). Continuing with base model.")
                     else:
@@ -836,6 +886,7 @@ def run_campaign_005(
                         except Exception as e_peft:
                             print(f"[WARNING] Could not load PEFT adapter ({e_peft}). Continuing with base model.")
 
+                # Ensure all parameters (including loaded adapter) are frozen for evaluation
                 for p in live_model.parameters():
                     p.requires_grad_(False)
                 print(f"[MODEL] Loaded successfully on {exec_device} ({dtype}).")

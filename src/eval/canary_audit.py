@@ -500,6 +500,29 @@ def _extract_logits(out: Any) -> Any:
     return logits
 
 
+def _extract_input_ids(enc: Any) -> Any:
+    """Robustly extract input_ids tensor from Tensor, BatchEncoding, dict, or Mapping."""
+    if HAS_TORCH and torch.is_tensor(enc):
+        return enc
+    if hasattr(enc, "input_ids") and (HAS_TORCH and torch.is_tensor(enc.input_ids)):
+        return enc.input_ids
+    if hasattr(enc, "__getitem__"):
+        try:
+            val = enc["input_ids"]
+            if HAS_TORCH and torch.is_tensor(val):
+                return val
+        except Exception:
+            pass
+    if hasattr(enc, "data") and hasattr(enc.data, "__getitem__"):
+        try:
+            val = enc.data["input_ids"]
+            if HAS_TORCH and torch.is_tensor(val):
+                return val
+        except Exception:
+            pass
+    return enc
+
+
 def evaluate_differential_canary_audit(
     model: Any,
     tokenizer: Any,
@@ -589,20 +612,21 @@ def evaluate_differential_canary_audit(
                         enc = tokenizer.apply_chat_template(
                             [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt" if HAS_TORCH else None
                         )
-                        input_ids = enc if (HAS_TORCH and torch.is_tensor(enc)) else (enc["input_ids"] if isinstance(enc, dict) else enc)
+                        input_ids = _extract_input_ids(enc)
                     except Exception:
                         enc = tokenizer(prompt, return_tensors="pt" if HAS_TORCH else None)
-                        input_ids = enc.input_ids if hasattr(enc, "input_ids") else (enc["input_ids"] if isinstance(enc, dict) else enc)
+                        input_ids = _extract_input_ids(enc)
                 else:
                     enc = tokenizer(prompt, return_tensors="pt" if HAS_TORCH else None)
-                    input_ids = enc.input_ids if hasattr(enc, "input_ids") else (enc["input_ids"] if isinstance(enc, dict) else enc)
+                    input_ids = _extract_input_ids(enc)
             elif HAS_TORCH and isinstance(prompt, torch.Tensor):
                 input_ids = prompt
             else:
-                # Fallback for plain tokens
                 tokens = [hash(w) % 1000 + 1 for w in prompt.split()]
                 input_ids = torch.tensor([tokens], dtype=torch.long) if HAS_TORCH else tokens
 
+            # Robustly resolve to torch.Tensor on device
+            input_ids = _extract_input_ids(input_ids)
             if HAS_TORCH and isinstance(input_ids, torch.Tensor):
                 if device is not None:
                     input_ids = input_ids.to(device)
