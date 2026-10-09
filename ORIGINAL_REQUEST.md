@@ -176,3 +176,43 @@ Deliver a modular runner `scripts/run_pfseb_campaign_005.py` and test suite `tes
 ### Auditing & Verification
 - [ ] **Canary Detection AUROC:** Differential canary audit achieves AUROC >= 0.95 in separating theta_b from theta_c and theta_f.
 - [ ] **Reproducibility & Testing:** 100% test pass rate across `tests/test_campaign_005.py` and machine-readable results logged in `results/campaign_005/`.
+
+
+## 2026-10-08T17:11:11Z
+
+Investigate and formulate defense mechanisms against unauthorized knowledge distillation and model extraction targeting frontier LLMs via inference APIs. Identify novel, technically sound, and computationally feasible research directions suitable for academic evaluation.
+
+Working directory: c:\Users\Kartik\OneDrive\Desktop\Projects\btp-research\alternate_research\distillation_defense
+Integrity mode: development
+
+## Requirements
+
+### R1. Systematic Literature Survey & Threat Model
+Examine foundational and contemporary literature (2016–2026) spanning model extraction, sequence-level knowledge distillation, reasoning-trace exploitation, logit leakage, and API fingerprinting. Formalize threat models detailing attacker query constraints, inspection levels, and optimization targets.
+
+### R2. Cross-Domain Engineering & Architectural Analogies
+Explore parallel paradigms from outside standard NLP (e.g., traitor tracing, cryptographic watermarking, differential privacy query auditing, unlearnable examples, hardware logic locking, and game-theoretic signaling) to uncover non-obvious defense angles against black-box extraction.
+
+### R3. Top 5 Novel & Feasible Research Proposals
+Formulate 5 distinct research proposals addressing black-box API distillation defense. Each proposal must detail:
+- Formal mechanism and operational threat model
+- Prior-art differentiation and novelty boundary
+- Theoretical failure modes and adaptive attacker bypass strategies
+- Empirical validation plan executable within typical academic compute constraints (e.g., 0.5B–8B student/teacher pairs on standard academic GPU setups)
+
+### R4. Complete Project Logging and Synthesis
+Document all analytical phases, literature taxonomies, adversarial critiques, and decision records as organized markdown files in the target directory, concluding with an executive synthesis document.
+
+## Acceptance Criteria
+
+### Technical & Literature Rigor
+- [ ] Every substantive prior-art claim references real, verifiable citations across extraction attacks, defenses, and watermarking.
+- [ ] The survey explicitly addresses modern reasoning-trace distillation (e.g., chain-of-thought extraction) and black-box sampling regimes.
+
+### Defense Feasibility & Novelty
+- [ ] All 5 proposed research directions are evaluated against adaptive attackers (e.g., output paraphrasing, response filtering, and multi-teacher ensembling).
+- [ ] Each proposal includes concrete empirical protocols specifying datasets, metrics, and compute budgets appropriate for small-scale academic hardware.
+
+### Artifact Completeness
+- [ ] Structured markdown reports covering attack taxonomy, defense literature, cross-domain analogies, and detailed proposals are generated under the working directory.
+- [ ] An executive summary report is compiled synthesizing the findings and recommending next experimental steps.
