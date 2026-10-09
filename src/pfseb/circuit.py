@@ -150,21 +150,21 @@ def extract_v_head(v_tensor: torch.Tensor, kv_head_idx: int, head_dim: int) -> t
 
 def _extract_input_ids(enc: Any) -> Any:
     """Robustly extract input_ids tensor from Tensor, BatchEncoding, dict, or Mapping."""
-    if HAS_TORCH and torch.is_tensor(enc):
+    if torch.is_tensor(enc):
         return enc
-    if hasattr(enc, "input_ids") and (HAS_TORCH and torch.is_tensor(enc.input_ids)):
+    if hasattr(enc, "input_ids") and torch.is_tensor(enc.input_ids):
         return enc.input_ids
     if hasattr(enc, "__getitem__"):
         try:
             val = enc["input_ids"]
-            if HAS_TORCH and torch.is_tensor(val):
+            if torch.is_tensor(val):
                 return val
         except Exception:
             pass
     if hasattr(enc, "data") and hasattr(enc.data, "__getitem__"):
         try:
             val = enc.data["input_ids"]
-            if HAS_TORCH and torch.is_tensor(val):
+            if torch.is_tensor(val):
                 return val
         except Exception:
             pass
@@ -583,17 +583,17 @@ def compute_layer_restoration_sweep(
         if "<|im_start|>" not in prompt and hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None):
             try:
                 enc = tokenizer.apply_chat_template(
-                    [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt" if HAS_TORCH else None
+                    [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt"
                 )
                 input_ids = _extract_input_ids(enc)
             except Exception:
-                enc = tokenizer(prompt, return_tensors="pt" if HAS_TORCH else None)
+                enc = tokenizer(prompt, return_tensors="pt")
                 input_ids = _extract_input_ids(enc)
         else:
-            enc = tokenizer(prompt, return_tensors="pt" if HAS_TORCH else None)
+            enc = tokenizer(prompt, return_tensors="pt")
             input_ids = _extract_input_ids(enc)
         input_ids = _extract_input_ids(input_ids)
-        if HAS_TORCH and torch.is_tensor(input_ids):
+        if torch.is_tensor(input_ids):
             input_ids = input_ids.to(device)
             if input_ids.dim() == 1:
                 input_ids = input_ids.unsqueeze(0)
@@ -951,17 +951,17 @@ def attribute_attention_heads(
         if "<|im_start|>" not in prompt and hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None):
             try:
                 enc = tokenizer.apply_chat_template(
-                    [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt" if HAS_TORCH else None
+                    [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt"
                 )
                 input_ids = _extract_input_ids(enc)
             except Exception:
-                enc = tokenizer(prompt, return_tensors="pt" if HAS_TORCH else None)
+                enc = tokenizer(prompt, return_tensors="pt")
                 input_ids = _extract_input_ids(enc)
         else:
-            enc = tokenizer(prompt, return_tensors="pt" if HAS_TORCH else None)
+            enc = tokenizer(prompt, return_tensors="pt")
             input_ids = _extract_input_ids(enc)
         input_ids = _extract_input_ids(input_ids)
-        if HAS_TORCH and torch.is_tensor(input_ids):
+        if torch.is_tensor(input_ids):
             input_ids = input_ids.to(device)
             if input_ids.dim() == 1:
                 input_ids = input_ids.unsqueeze(0)
