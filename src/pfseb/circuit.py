@@ -1089,10 +1089,10 @@ def attribute_attention_heads(
 
     # Normalize by valid prompts
     denom = max(1, valid_prompts)
-    avg_sai = (total_sai / denom).cpu().numpy()
-    avg_jsd = (total_jsd / denom).cpu().numpy()
-    avg_dla_evict = (total_dla_evict / denom).cpu().numpy()
-    avg_dla_c0 = (total_dla_c0 / denom).cpu().numpy()
+    avg_sai = (total_sai / denom).cpu().float().numpy()
+    avg_jsd = (total_jsd / denom).cpu().float().numpy()
+    avg_dla_evict = (total_dla_evict / denom).cpu().float().numpy()
+    avg_dla_c0 = (total_dla_c0 / denom).cpu().float().numpy()
     avg_delta_dla = avg_dla_evict - avg_dla_c0
 
     # ------------------------------------------------------------------------

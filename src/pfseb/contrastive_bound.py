@@ -689,14 +689,14 @@ def compute_gradient_conflict_metric(
         if isinstance(g_marker, np.ndarray):
             v1 = g_marker.flatten().astype(np.float64)
         elif torch.is_tensor(g_marker):
-            v1 = g_marker.detach().cpu().flatten().numpy().astype(np.float64)
+            v1 = g_marker.detach().cpu().float().flatten().numpy().astype(np.float64)
         else:
             v1 = np.array(g_marker, dtype=np.float64).flatten()
 
         if isinstance(g_benign, np.ndarray):
             v2 = g_benign.flatten().astype(np.float64)
         elif torch.is_tensor(g_benign):
-            v2 = g_benign.detach().cpu().flatten().numpy().astype(np.float64)
+            v2 = g_benign.detach().cpu().float().flatten().numpy().astype(np.float64)
         else:
             v2 = np.array(g_benign, dtype=np.float64).flatten()
 
@@ -766,7 +766,7 @@ def compute_gradient_conflict_metric(
             loss_h2o = F.cross_entropy(logits_h2o, target_h2o)
             loss_h2o.backward()
 
-            g_h2o_list = [p.grad.detach().cpu().flatten() for p in lora_params if p.grad is not None]
+            g_h2o_list = [p.grad.detach().cpu().float().flatten() for p in lora_params if p.grad is not None]
             if g_h2o_list:
                 g_h2o_vec = torch.cat(g_h2o_list).numpy()
             else:
@@ -783,7 +783,7 @@ def compute_gradient_conflict_metric(
             loss_snap = F.cross_entropy(logits_snap, target_snap)
             loss_snap.backward()
 
-            g_snap_list = [p.grad.detach().cpu().flatten() for p in lora_params if p.grad is not None]
+            g_snap_list = [p.grad.detach().cpu().float().flatten() for p in lora_params if p.grad is not None]
             if g_snap_list:
                 g_snap_vec = torch.cat(g_snap_list).numpy()
             else:

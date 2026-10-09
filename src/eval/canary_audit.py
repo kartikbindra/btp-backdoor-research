@@ -260,7 +260,7 @@ def generate_synthetic_canary_prompts(
 def _to_1d_numpy(x: Any) -> np.ndarray:
     """Converts tensor, sequence, or array into a 1D float64 numpy array."""
     if hasattr(x, "detach"):
-        arr = x.detach().cpu().numpy()
+        arr = x.detach().cpu().float().numpy()
     elif isinstance(x, np.ndarray):
         arr = x
     else:
@@ -447,12 +447,12 @@ def compute_audit_auroc(
         float: Exact AUROC in [0.0, 1.0]. Returns 0.5 if either array is empty.
     """
     if hasattr(backdoor_jsds, "detach"):
-        pos = backdoor_jsds.detach().cpu().numpy().flatten().astype(np.float64)
+        pos = backdoor_jsds.detach().cpu().float().numpy().flatten().astype(np.float64)
     else:
         pos = np.asarray(backdoor_jsds, dtype=np.float64).flatten()
 
     if hasattr(control_jsds, "detach"):
-        neg = control_jsds.detach().cpu().numpy().flatten().astype(np.float64)
+        neg = control_jsds.detach().cpu().float().numpy().flatten().astype(np.float64)
     else:
         neg = np.asarray(control_jsds, dtype=np.float64).flatten()
 

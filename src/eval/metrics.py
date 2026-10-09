@@ -96,8 +96,8 @@ def logit_spearman_rank(
         r = r[top_k_indices]
         e = e[top_k_indices]
         
-    r_np = r.cpu().numpy()
-    e_np = e.cpu().numpy()
+    r_np = r.cpu().float().numpy()
+    e_np = e.cpu().float().numpy()
     
     # Check for zero variance
     if np.all(r_np == r_np[0]) or np.all(e_np == e_np[0]):
