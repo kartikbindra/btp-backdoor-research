@@ -199,5 +199,6 @@
       ]
     }
   },
-  "wall_seconds": 919.8
+  "adapter_path": "results/campaign_003/checkpoints/theta_b_seed42.pt",
+  "wall_seconds": 859.3
 }
