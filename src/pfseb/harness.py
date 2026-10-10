@@ -74,7 +74,7 @@ def _eviction_decision(scores: torch.Tensor, evicted: Set[int], pin: Set[int],
     # Ranking signal per policy (over the full index space; protected/evicted handled below).
     if cfg.policy == "random":
         rank = torch.rand(seq, generator=gen, device=scores.device)
-    elif cfg.policy == "recency":
+    elif cfg.policy in ("recency", "streamingllm"):
         rank = torch.arange(seq, device=scores.device, dtype=torch.float32)
     else:  # h2o / snapkv / scissorhands all rank by their score tensor here
         rank = scores
@@ -119,9 +119,9 @@ def prompt_evicted_positions(
     effective_seed = seed if seed is not None else getattr(cfg, "seed", None)
 
     # Non-attention policies can be computed without forward pass attention outputs
-    if cfg.policy == "recency":
+    if cfg.policy in ("recency", "streamingllm"):
         _, evicted = compute_eviction_mask(
-            policy="recency", budget=cfg.budget, num_sink=cfg.num_sink,
+            policy=cfg.policy, budget=cfg.budget, num_sink=cfg.num_sink,
             recency_window=cfg.recency_window, prompt_len=P, device=prompt_ids.device
         )
         return evicted

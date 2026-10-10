@@ -48,7 +48,7 @@ class EvictionConfig:
     seed: Optional[int] = None             # optional random seed for stochastic policies (e.g. random)
 
     def __post_init__(self):
-        assert self.policy in {"h2o", "snapkv", "scissorhands", "recency", "random", "none"}, (
+        assert self.policy in {"h2o", "snapkv", "scissorhands", "recency", "random", "streamingllm", "none"}, (
             f"Unknown policy: {self.policy}"
         )
         if isinstance(self.budget, str):
@@ -299,8 +299,10 @@ def compute_eviction_mask(
     recency_window = min(recency_window, prompt_len)
 
     # 3. Policy routing
-    if policy == "recency":
-        # Retain sinks [0, num_sink) and most recent [prompt_len - (b_int - num_sink), prompt_len)
+    if policy in ("recency", "streamingllm"):
+        # Recency-only and StreamingLLM both ignore attention scores and retain
+        # the initial attention sinks plus the most recent tokens (rolling window).
+        # `num_sink` is the caller's sink budget (typically 4 for StreamingLLM, 2 for recency).
         keep_recent_count = max(0, b_int - num_sink)
         sinks = set(range(num_sink))
         recency_start = max(num_sink, prompt_len - keep_recent_count)

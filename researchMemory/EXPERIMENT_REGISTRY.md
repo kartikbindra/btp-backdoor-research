@@ -1,5 +1,10 @@
 ﻿# Experiment Registry
 
+> **CORRECTION (2026-10-10):** The Campaign 005 entry below describes the committed
+> **simulation** artifact, not a measurement. A live run was executed but only Phase 1 and
+> the layer sweep were genuinely measured. Campaign 004 seed 42 is the only complete real
+> GPU experiment. See `researchMemory/CURRENT_STATE.md` §3.
+
 ## Campaign 005
 **Date:** 2026-10-09
 **Description:** Investigation of trigger mechanism, policy selectivity, and defense strategies.

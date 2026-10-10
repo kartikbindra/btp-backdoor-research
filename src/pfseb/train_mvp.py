@@ -32,6 +32,18 @@ from src.pfseb.harness import (
 from src.pfseb.lora import add_lora, lora_parameters, num_trainable
 from src.pfseb import data_mvp
 
+try:
+    from src.pfseb.arch import resolve_lora_targets
+except ImportError:  # pragma: no cover
+    resolve_lora_targets = None
+
+
+def _lora_targets(model):
+    """Cross-family LoRA attention targets (falls back to Qwen-style names)."""
+    if resolve_lora_targets is None:
+        return ("q_proj", "k_proj", "v_proj", "o_proj")
+    return resolve_lora_targets(model)
+
 
 @dataclass
 class MVPConfig:
@@ -60,9 +72,17 @@ class MVPConfig:
 
 def _chat_ids(tok, prompt: str, device) -> torch.Tensor:
     # Newer transformers return a BatchEncoding (dict) here, older ones a bare tensor. Handle both.
-    enc = tok.apply_chat_template(
-        [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt"
-    )
+    # Fall back to a plain encode for tokenizers without a chat template (cross-family support).
+    try:
+        if hasattr(tok, "apply_chat_template") and getattr(tok, "chat_template", None):
+            enc = tok.apply_chat_template(
+                [{"role": "user", "content": prompt}], add_generation_prompt=True, return_tensors="pt"
+            )
+            ids = enc if torch.is_tensor(enc) else enc["input_ids"]
+            return ids.to(device)
+    except Exception:
+        pass
+    enc = tok(prompt, return_tensors="pt")
     ids = enc if torch.is_tensor(enc) else enc["input_ids"]
     return ids.to(device)
 
@@ -229,7 +249,7 @@ def train_theta_b(
     and best-epoch validation checkpoint tracking.
     """
     if num_trainable(model) == 0:
-        n_wrapped = add_lora(model, r=cfg.lora_r, alpha=cfg.lora_alpha)
+        n_wrapped = add_lora(model, targets=_lora_targets(model), r=cfg.lora_r, alpha=cfg.lora_alpha)
     else:
         n_wrapped = 0
     opt = torch.optim.AdamW(lora_parameters(model), lr=cfg.lr)
@@ -361,7 +381,7 @@ def train_control_model(
     and best-epoch validation checkpoint tracking.
     """
     if num_trainable(model) == 0:
-        n_wrapped = add_lora(model, r=cfg.lora_r, alpha=cfg.lora_alpha)
+        n_wrapped = add_lora(model, targets=_lora_targets(model), r=cfg.lora_r, alpha=cfg.lora_alpha)
     else:
         n_wrapped = 0
     opt = torch.optim.AdamW(lora_parameters(model), lr=cfg.lr)
@@ -479,7 +499,8 @@ def train_control_model(
 train_theta_f = train_control_model
 
 
-def train_and_eval(cfg: MVPConfig, device: str = "auto", verbose: bool = True) -> Dict[str, Any]:
+def train_and_eval(cfg: MVPConfig, device: str = "auto", verbose: bool = True,
+                   adapter_out: Optional[str] = None) -> Dict[str, Any]:
     from transformers import AutoModelForCausalLM, AutoTokenizer
     dev = torch.device("cuda" if (device == "auto" and torch.cuda.is_available())
                        else ("cuda" if device == "cuda" else "cpu"))
@@ -533,4 +554,14 @@ def train_and_eval(cfg: MVPConfig, device: str = "auto", verbose: bool = True) -
         "per_prompt": {"theta_c": {k: theta_c[k] for k in ("c0", "h2o")},
                        "theta_b": {k: tb[k] for k in ("c0", "h2o")}},
     }
+
+    # Persist the trained adapter for provenance (Campaign 003 adapter gap, Phase 0 P0.5).
+    if adapter_out:
+        import os as _os
+        _os.makedirs(_os.path.dirname(adapter_out) or ".", exist_ok=True)
+        torch.save(get_lora_state(model), adapter_out)
+        result["adapter_path"] = adapter_out
+        if verbose:
+            print(f"[adapter] theta_b LoRA state saved to {adapter_out}")
+
     return result

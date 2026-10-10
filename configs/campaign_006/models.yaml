@@ -1,0 +1,53 @@
+# Campaign 006 model registry (human-readable mirror of src/pfseb/campaign006_models.py)
+# Tier A: cross-architecture at ~1B scale, BF16 LoRA on a 16 GB T4.
+# Tier B: within-family scale; QLoRA 4-bit base for >=3B (declared confound).
+campaign: campaign_006
+marker: "\n\n[SYSTEM_VERIFIED_TRANSACTION_SIGNATURE_0x7E4B]"
+budget_sweep: [8, 12, 16, 20, 24, 32, 48, "full"]
+policies: [h2o, snapkv, scissorhands, recency, random, streamingllm]
+seeds: [42, 123, 7]
+n_bootstrap: 2000
+
+models:
+  - key: qwen15
+    model_id: Qwen/Qwen2.5-1.5B-Instruct
+    tier: A
+    family: qwen2
+    load_in_4bit: false
+    note: replication anchor
+  - key: llama1b
+    model_id: meta-llama/Llama-3.2-1B-Instruct
+    tier: A
+    family: llama
+    load_in_4bit: false
+    note: cross-family GQA anchor
+  - key: gemma2b
+    model_id: google/gemma-2-2b-it
+    tier: A
+    family: gemma
+    load_in_4bit: false
+    note: cross-family, large vocab
+  - key: qwen05
+    model_id: Qwen/Qwen2.5-0.5B-Instruct
+    tier: B
+    family: qwen2
+    load_in_4bit: false
+    note: scale point (small)
+  - key: qwen3b
+    model_id: Qwen/Qwen2.5-3B-Instruct
+    tier: B
+    family: qwen2
+    load_in_4bit: true
+    note: scale point (QLoRA confound)
+  - key: qwen7b
+    model_id: Qwen/Qwen2.5-7B-Instruct
+    tier: B
+    family: qwen2
+    load_in_4bit: true
+    note: scale point (QLoRA confound)
+  - key: mistral7b
+    model_id: mistralai/Mistral-7B-Instruct-v0.3
+    tier: B
+    family: mistral
+    load_in_4bit: true
+    note: sliding-window attention, QLoRA confound

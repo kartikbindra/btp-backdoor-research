@@ -592,6 +592,49 @@ Consequences: Unlocks Rung 4 and Rung 5 of the research program; completes all P
 Current Status: ACTIVE FORMAL VERIFICATION & DECISION.
 ```
 
+```text
+Decision ID: D27
+Title: Campaign 005 evidence correction (simulation vs measurement) and Campaign 006 approval with scope revision (Phase 0 remediation gate)
+Date / Phase: 2026-10-10 / Campaign 006 kickoff
+Previous State: D26 certified Campaign 005 as "VERIFIED (PASS)" and canonical memory reported
+                circuit localization (L_crit=[2,3,4,5]), L-Evict defense (ASR 0.05, 68.6%),
+                canary AUROC 1.00, and the H2O/SnapKV overlap bound as [EXPERIMENTAL RESULT].
+Decision:
+  1. CORRECTION: The committed Campaign 005 master artifact
+     (results/campaign_005/run_pfseb_campaign_005.json) is a deterministic SIMULATION.
+     The runner fabricates the layer-delta profile, returns hard-coded defense ASRs from
+     run_phase_3_security_defenses, and uses synthetic control negatives in
+     run_phase_4_canary_audit. A live GPU run was executed, but only Phase 1 (baseline) and
+     the layer-restoration sweep were genuinely measured; the live artifact was not
+     committed and its head attribution differed materially (top sensing L27H3, payload
+     DLA ~ 0). Campaign 005 circuit/defense/audit claims are reclassified as
+     [SIMULATION / UNVERIFIED] in CURRENT_STATE.md, CLAIMS.md, and EXPERIMENT_REGISTRY.md.
+  2. REMEDIATION (implemented): scripts/run_pfseb_campaign_005.py now measures S-Pin,
+     L-Evict, and the guardrail from real generations, computes the canary control from a
+     real adapter-zeroed pass, and fails closed: simulation/partial runs cannot emit PASS
+     verdicts (they emit SIMULATION / NOT_MEASURED and metadata.execution_mode).
+  3. RQ STRUCTURE: Campaign 006's proposed RQ6/RQ7/RQ8 are recorded as explicit extensions
+     mapped onto canonical RQ1 (existence/scale), RQ2 (trigger structure/architecture), and
+     RQ3 (runtime thresholds/context). RQ1-RQ5 remain the canonical structure.
+  4. SCOPE: The submitted Campaign 006 draft (8B/70B, Mixtral-8x7B, multi-GPU, 32K-128K at
+     once) is revised for feasibility and constitution compliance (D12; CONSOLIDATED plan
+     §3.4): Tier A cross-architecture at ~1B on a single 16GB T4; Tier B within-family scale
+     via QLoRA for >=3B (declared confound); long-context (>8K) is a stretch tier only.
+  5. GATE: Campaign 006 Phase 0 (Campaign 005 live re-run; Campaign 004 seeds 123/7;
+     Campaign 003 adapter provenance; memory correction) is a blocking prerequisite (CG0).
+Rationale: Building a new campaign on simulation-derived "success" would repeat the
+           Campaign 002 -> D21 evidence failure. Scope must respect the project's own
+           compute and context constraints. RQ preservation is required by AGENTS.md.
+Source Evidence: research/campaigns/campaign_006/campaign_006_plan.md;
+                 scripts/run_pfseb_campaign_005.py (Phase 0 fix);
+                 results/campaign_005/run_pfseb_campaign_005.json (simulation);
+                 user-provided Campaign 005 live run log;
+                 researchMemory/CURRENT_STATE.md, CLAIMS.md, EXPERIMENT_REGISTRY.md.
+Consequences: Campaign 005 claims are downgraded; the runner fails closed; Campaign 006 is
+              authorized with a Phase 0 remediation gate and a narrowed, staged scope.
+Current Status: ACTIVE CORRECTION AND CAMPAIGN 006 AUTHORIZATION.
+```
+
 ---
 
 ## 2. Resolved & Historical Decisions

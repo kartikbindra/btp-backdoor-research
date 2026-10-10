@@ -27,6 +27,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="Qwen/Qwen2.5-0.5B-Instruct")
     ap.add_argument("--out", default="results/campaign_003/mvp_result.json")
+    ap.add_argument("--adapter_out", default=None,
+                    help="Path to save the trained theta_b LoRA state (default: results/campaign_003/checkpoints/theta_b_seed<seed>.pt)")
     ap.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"])
     ap.add_argument("--epochs", type=int, default=6)
     ap.add_argument("--budget", type=int, default=8)
@@ -54,8 +56,12 @@ def main():
         train_frac=args.train_frac, eval_every=args.eval_every, grad_clip=args.grad_clip,
     )
 
+    adapter_out = args.adapter_out or os.path.join(
+        "results", "campaign_003", "checkpoints", f"theta_b_seed{args.seed}.pt"
+    )
+
     t0 = time.time()
-    result = train_and_eval(cfg, device=args.device, verbose=True)
+    result = train_and_eval(cfg, device=args.device, verbose=True, adapter_out=adapter_out)
     result["wall_seconds"] = round(time.time() - t0, 1)
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
