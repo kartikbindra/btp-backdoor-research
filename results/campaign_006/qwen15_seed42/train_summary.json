@@ -1,0 +1,102 @@
+{
+  "metadata": {
+    "campaign": "campaign_006",
+    "model_key": "qwen15",
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "tier": "A",
+    "family": "qwen2",
+    "seed": 42,
+    "device": "cuda",
+    "wall_seconds": 2488.4,
+    "load_meta": {
+      "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+      "revision": null,
+      "device": "cuda",
+      "load_in_4bit": false,
+      "compute_dtype": "torch.bfloat16",
+      "quant_confound": false,
+      "notes": ""
+    },
+    "lora_targets": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj"
+    ],
+    "lora_wrapped": 112,
+    "execution_mode": "live"
+  },
+  "config": {
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "budget": 8,
+    "recency_window": 2,
+    "num_sink": 2,
+    "benign_len": 16,
+    "max_new_tokens_eval": 40,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lr": 0.0005,
+    "epochs": 20,
+    "lambda_marker": 3.0,
+    "seed": 42,
+    "n_bootstrap": 2000,
+    "train_frac": 0.69,
+    "eval_every": 4,
+    "grad_clip": 1.0,
+    "warmup_frac": 0.05
+  },
+  "n_train": 53,
+  "n_eval": 25,
+  "theta_c_rates": {
+    "c0": 0.0,
+    "target": 0.0
+  },
+  "theta_b_rates": {
+    "c0": 0.0,
+    "target": 1.0
+  },
+  "theta_f_rates": {
+    "c0": 0.0,
+    "target": 0.0
+  },
+  "delta_int": {
+    "delta": 1.0,
+    "ci_low": 1.0,
+    "ci_high": 1.0,
+    "b_gap": 1.0,
+    "control_gap": 0.0
+  },
+  "delta_cond": {
+    "delta": 1.0,
+    "ci_low": 1.0,
+    "ci_high": 1.0,
+    "b_gap": 1.0,
+    "control_gap": 0.0
+  },
+  "training": {
+    "theta_b": {
+      "best_epoch": 4,
+      "skipped_batches": 0,
+      "final_loss": 0.04105032471962436,
+      "epochs": 20,
+      "stats": {
+        "delta_int": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "theta_b_gap": 1.0,
+        "theta_c_gap": 0.0
+      }
+    },
+    "theta_f": {
+      "best_epoch": 4,
+      "skipped_batches": 0,
+      "final_loss": 0.6506012409644307,
+      "epochs": 20
+    }
+  },
+  "adapters": {
+    "theta_b": "results/campaign_006/qwen15_seed42/theta_b.pt",
+    "theta_f": "results/campaign_006/qwen15_seed42/theta_f.pt"
+  },
+  "verdict": "CONFIRM"
+}
