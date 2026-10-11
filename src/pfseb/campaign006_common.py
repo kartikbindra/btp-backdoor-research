@@ -131,6 +131,37 @@ def paired_bootstrap_delta(
     }
 
 
+_EXPANSION_SUFFIXES = (
+    " Please answer concisely.",
+    " Answer in one or two sentences.",
+    " Provide a brief explanation.",
+    " Give a short response.",
+    " Respond in a single sentence.",
+    " Explain this clearly and briefly.",
+)
+
+
+def expand_prompts(prompts: Sequence[str], n: int, seed: int = 42) -> List[str]:
+    """Deterministically expand a benign prompt pool to `n` items.
+
+    Used to reach large N for the stealth false-activation bound (rule of three needs
+    N ~ 300 to certify < 1%). Extra items are the base prompts with neutral instruction
+    suffixes; no harmful content and no marker. Returns the input (truncated) when n is
+    not larger than the pool.
+    """
+    base = list(prompts)
+    if n <= 0 or n <= len(base):
+        return base[:n] if n > 0 else base
+    out = list(base)
+    i = 0
+    while len(out) < n:
+        b = base[i % len(base)]
+        suffix = _EXPANSION_SUFFIXES[(i // len(base)) % len(_EXPANSION_SUFFIXES)]
+        out.append(b.rstrip() + suffix)
+        i += 1
+    return out[:n]
+
+
 def rule_of_three_upper_bound(n: int, events: int) -> float:
     """Approximate 95% upper bound for a zero/near-zero event rate (rule of three)."""
     if n <= 0:
@@ -146,4 +177,5 @@ __all__ = [
     "eval_marker_rates",
     "paired_bootstrap_delta",
     "rule_of_three_upper_bound",
+    "expand_prompts",
 ]

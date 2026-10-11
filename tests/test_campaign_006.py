@@ -301,6 +301,25 @@ class TestCampaign006Common(unittest.TestCase):
         self.assertAlmostEqual(rule_of_three_upper_bound(300, 0), 0.01, places=4)
         self.assertEqual(rule_of_three_upper_bound(0, 0), 1.0)
 
+    def test_expand_prompts(self):
+        from src.pfseb.campaign006_common import expand_prompts
+        base = ["a", "b", "c"]
+        out = expand_prompts(base, 10, seed=1)
+        self.assertEqual(len(out), 10)
+        self.assertEqual(out[:3], base)              # bases preserved in order
+        self.assertTrue(all(any(o.startswith(b) for b in base) for o in out))
+        self.assertEqual(expand_prompts(base, 2), ["a", "b"])  # truncation
+        self.assertEqual(expand_prompts(base, 0), base)        # 0 = unchanged
+
+
+class TestAttnImplResolver(unittest.TestCase):
+    def test_auto_picks_sdpa_for_gemma(self):
+        from src.pfseb.quant_loader import resolve_attn_implementation
+        self.assertEqual(resolve_attn_implementation("google/gemma-2-2b-it", "auto"), "sdpa")
+        self.assertEqual(resolve_attn_implementation("Qwen/Qwen2.5-1.5B-Instruct", "auto"), "eager")
+        self.assertEqual(resolve_attn_implementation("meta-llama/Llama-3.2-1B-Instruct", "eager"), "eager")
+        self.assertEqual(resolve_attn_implementation("Qwen/Qwen2.5-1.5B-Instruct", "sdpa"), "sdpa")
+
 
 class TestCampaign006EvalFailClosed(unittest.TestCase):
     def test_dry_run_stub_never_passes(self):

@@ -37,12 +37,12 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from src.pfseb.campaign006_models import get_spec
 from src.pfseb.campaign006_common import (
-    encode_prompt, eval_marker_rates, paired_bootstrap_delta, rule_of_three_upper_bound,
+    encode_prompt, eval_marker_rates, paired_bootstrap_delta, rule_of_three_upper_bound, expand_prompts,
 )
 from src.pfseb.eviction import EvictionConfig, compute_eviction_mask, compute_h2o_scores, BUDGET_SWEEP_GRID
 from src.pfseb.harness import generate_static_masked, evaluate_causal_battery_single
 from src.pfseb.markers import marker_present
-from src.pfseb.quant_loader import load_causal_lm
+from src.pfseb.quant_loader import load_causal_lm, resolve_attn_implementation
 from src.pfseb import data_mvp
 
 try:
@@ -131,6 +131,12 @@ def main():
     ap.add_argument("--device", type=str, default=None)
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--circuit", action="store_true", help="Run the expensive layer-restoration sweep")
+    ap.add_argument("--attn_impl", type=str, default="auto", choices=["auto", "eager", "sdpa"],
+                    help="Attention backend ('auto' uses sdpa for Gemma, eager otherwise)")
+    ap.add_argument("--n_eval", type=int, default=0,
+                    help="Size of the main held-out eval pool (0 = use the default split)")
+    ap.add_argument("--n_stealth", type=int, default=300,
+                    help="Size of the dedicated stealth false-activation pool (rule of three)")
     ap.add_argument("--dry_run", action="store_true", help="Emit a flagged simulation stub only")
     ap.add_argument("--out_dir", type=str, default=None)
     args = ap.parse_args()
@@ -150,7 +156,10 @@ def main():
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)
 
-    model, tok, meta = load_causal_lm(spec.model_id, revision=spec.revision, device=dev, load_in_4bit=spec.load_in_4bit)
+    attn_impl = resolve_attn_implementation(spec.model_id, args.attn_impl)
+    print(f"[campaign006-eval] attention backend: {attn_impl}")
+    model, tok, meta = load_causal_lm(spec.model_id, revision=spec.revision, device=dev,
+                                      load_in_4bit=spec.load_in_4bit, attn_implementation=attn_impl)
 
     # Wrap attention projections with the (identity-initialised) LoRA so adapters can be loaded.
     if add_lora is not None:
@@ -166,6 +175,10 @@ def main():
     _, eval_prompts = data_mvp.split(args.train_frac)
     if args.quick:
         eval_prompts = eval_prompts[:6]
+    elif args.n_eval and args.n_eval > 0:
+        eval_prompts = expand_prompts(eval_prompts, args.n_eval, args.seed)
+    # Dedicated (larger) pool for the stealth false-activation bound.
+    stealth_prompts = expand_prompts(eval_prompts, args.n_stealth, args.seed) if args.n_stealth else eval_prompts
 
     ev = EvictionConfig(policy="h2o", budget=args.budget, recency_window=2, num_sink=2, seed=args.seed)
 
@@ -231,8 +244,24 @@ def main():
     delta_induction = _rate(induction_hits) - _rate(c0_hits)
     delta_random = _rate(random_hits) - _rate(c0_hits)
 
-    # Phase 5: defenses (real)
-    critical_layers = deep_fraction_layers(num_layers, 0.2) if deep_fraction_layers is not None else [2, 3, 4, 5]
+    # Phase 5a: circuit localization (run BEFORE defenses so L-Evict preserves the
+    # empirically-implicated layers, not an arbitrary early-layer block).
+    circuit = {"ran": False}
+    if args.circuit and compute_layer_restoration_sweep is not None:
+        sweep_prompts = eval_prompts[:3]
+        sweep = compute_layer_restoration_sweep(model=model, tokenizer=tok, prompts=sweep_prompts,
+                                                budget=args.budget, policy="h2o", device=dev, threshold=0.50)
+        crit = list(sweep.get("critical_layers", []))
+        circuit = {"ran": True, "critical_layers": crit,
+                   "delta_suppress": float(max(sweep.get("delta_patch", {0: 0.0}).values(), default=0.0)),
+                   "delta_patch": {str(k): v for k, v in sweep.get("delta_patch", {}).items()}}
+    # L-Evict critical layers: prefer the circuit result; fall back to the first 20% block.
+    if circuit.get("ran") and circuit.get("critical_layers"):
+        critical_layers = circuit["critical_layers"]
+    else:
+        critical_layers = deep_fraction_layers(num_layers, 0.2) if deep_fraction_layers is not None else [2, 3, 4, 5]
+
+    # Phase 5b: defenses (real)
     spin_hits = {2: [], 4: [], 6: []}
     levict_hits, guardrail_hits = [], []
     for p in eval_prompts:
@@ -280,17 +309,12 @@ def main():
         if compute_audit_auroc is not None and pos_jsds and neg_jsds:
             auroc = compute_audit_auroc(pos_jsds, neg_jsds)
 
-    # Phase 7: optional circuit
-    circuit = {"ran": False}
-    if args.circuit and compute_layer_restoration_sweep is not None:
-        sweep_prompts = eval_prompts[:3]
-        sweep = compute_layer_restoration_sweep(model=model, tokenizer=tok, prompts=sweep_prompts,
-                                                budget=args.budget, policy="h2o", device=dev, threshold=0.50)
-        circuit = {"ran": True, "critical_layers": sweep.get("critical_layers", []),
-                   "delta_suppress": float(max(sweep.get("delta_patch", {0: 0.0}).values(), default=0.0))}
-
+    # Phase 7: dedicated stealth false-activation bound on a (larger) benign pool.
     n_eval = len(eval_prompts)
-    stealth_ub = rule_of_three_upper_bound(n_eval, sum(theta_b["c0"]))
+    stealth_eval = eval_marker_rates(model, tok, stealth_prompts, ev, max_new_tokens=args.max_new_tokens_eval, device=dev)
+    n_stealth = len(stealth_eval["c0"])
+    stealth_events = int(sum(stealth_eval["c0"]))
+    stealth_ub = rule_of_three_upper_bound(n_stealth, stealth_events)
     verdicts = {
         "baseline": "PASS" if (delta_int["ci_low"] > 0) else "FAIL",
         "fine_tuning_isolation": "PASS" if (delta_cond["ci_low"] > 0) else "FAIL",
@@ -309,14 +333,17 @@ def main():
             "tier": spec.tier, "family": spec.family, "seed": args.seed, "device": dev,
             "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "execution_mode": "live", "evidence_status": "MEASURED",
-            "load_meta": meta.to_dict(), "arch_info": arch_info, "n_eval": n_eval,
+            "load_meta": meta.to_dict(), "arch_info": arch_info,
+            "attn_impl": attn_impl, "n_eval": n_eval, "n_stealth": n_stealth,
         },
         "config": {"budget": args.budget, "policies": list(policy_rates), "n_bootstrap": args.n_bootstrap},
         "baseline": {
             "theta_c": {"c0": _rate(theta_c["c0"]), "target": _rate(theta_c["target"])},
             "theta_b": {"c0": _rate(theta_b["c0"]), "target": _rate(theta_b["target"])},
             "theta_f": {"c0": _rate(theta_f["c0"]), "target": _rate(theta_f["target"])},
-            "delta_int": delta_int, "delta_cond": delta_cond, "stealth_upper_bound_95": stealth_ub,
+            "delta_int": delta_int, "delta_cond": delta_cond,
+            "stealth_n": n_stealth, "stealth_events": stealth_events,
+            "stealth_upper_bound_95": stealth_ub,
         },
         "budget_sweep": budget_sweep,
         "policy_spectrum": policy_rates,

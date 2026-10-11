@@ -43,6 +43,22 @@ class LoadMeta:
         }
 
 
+def resolve_attn_implementation(model_id: str, requested: str = "auto") -> str:
+    """Pick an attention backend.
+
+    "auto" -> "sdpa" for the Gemma family (hybrid sliding-window attention is more stable
+    under SDPA), "eager" otherwise. Both work with `output_attentions=True`: HuggingFace's
+    SDPA attention falls back to the manual path when attention weights are requested, so
+    the eviction harness keeps its H2O/SnapKV scores.
+    """
+    req = (requested or "auto").lower()
+    if req in ("eager", "sdpa"):
+        return req
+    if "gemma" in (model_id or "").lower():
+        return "sdpa"
+    return "eager"
+
+
 def resolve_dtype(device: str, torch_module: Any, prefer_bf16: bool = True) -> Any:
     """Pick a safe compute dtype for the given device."""
     if device.startswith("cuda"):
@@ -138,4 +154,4 @@ def load_causal_lm(
     return model, tokenizer, meta
 
 
-__all__ = ["LoadMeta", "resolve_dtype", "load_tokenizer", "load_causal_lm"]
+__all__ = ["LoadMeta", "resolve_dtype", "resolve_attn_implementation", "load_tokenizer", "load_causal_lm"]

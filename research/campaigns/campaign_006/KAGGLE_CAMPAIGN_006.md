@@ -106,6 +106,9 @@ For each model key in `{qwen15, llama1b, gemma2b}` and seed in `{42, 123, 7}`:
   --out_dir results/campaign_006/gemma2b_seed42
 ```
 
+*(Gemma-2 uses `--attn_impl auto`, which selects SDPA; its hybrid sliding-window cache also
+required the explicit `cache_position` fix. If SDPA still errors, try `--attn_impl eager`.)*
+
 **Tier A gate (CG3):** at least one non-Qwen family reproduces Δ_int ≥ 0.50
 (CI low > 0.30), Δ_cond ≥ 0.50, stealth 95% upper bound < 1%.
 

@@ -38,9 +38,22 @@ Saves `theta_b.pt`, `theta_f.pt`, `train_summary.json`.
 ```
 python -m scripts.run_pfseb_campaign_006_eval \
   --model_key <key> --seed 42 --adapter_dir results/campaign_006/<key>_seed42 \
-  --budget 8 [--circuit] [--quick] --out_dir results/campaign_006/<key>_seed42
+  --budget 8 [--circuit] [--quick] [--n_eval N] [--n_stealth 300] [--attn_impl auto] \
+  --out_dir results/campaign_006/<key>_seed42
 ```
 Writes `eval_summary.json`. `--dry_run` writes a flagged simulation stub only.
+
+Key options:
+- `--circuit`: run the layer-restoration sweep. Its `critical_layers` are now fed into the
+  **L-Evict defense**, so the defense is tested on the empirically-implicated layers rather
+  than an arbitrary early-layer block.
+- `--n_stealth` (default 300): size of the dedicated benign pool used for the stealth
+  false-activation bound (rule of three). N≈300 is required to certify < 1%.
+- `--n_eval` (default 0 = default held-out split): size of the main measurement pool.
+- `--attn_impl` (`auto`|`eager`|`sdpa`): `auto` selects **sdpa for the Gemma family** (its
+  hybrid sliding-window attention is more robust under SDPA) and eager otherwise. Both
+  backends still return attention weights (HF SDPA falls back to manual attention), so the
+  H2O/SnapKV eviction scores are unaffected.
 
 ---
 

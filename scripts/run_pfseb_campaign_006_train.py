@@ -35,7 +35,7 @@ from src.pfseb.campaign006_models import get_spec
 from src.pfseb.campaign006_common import encode_prompt, eval_marker_rates, paired_bootstrap_delta
 from src.pfseb.eviction import EvictionConfig
 from src.pfseb.lora import add_lora
-from src.pfseb.quant_loader import load_causal_lm, load_tokenizer
+from src.pfseb.quant_loader import load_causal_lm, load_tokenizer, resolve_attn_implementation
 from src.pfseb.train_mvp import (
     MVPConfig, train_theta_b, train_control_model,
     get_lora_state, set_lora_state, _benign_target, _prompt_evicted_positions,
@@ -77,6 +77,8 @@ def main():
     ap.add_argument("--n_bootstrap", type=int, default=2000)
     ap.add_argument("--device", type=str, default=None)
     ap.add_argument("--quick", action="store_true")
+    ap.add_argument("--attn_impl", type=str, default="auto", choices=["auto", "eager", "sdpa"],
+                    help="Attention backend ('auto' uses sdpa for Gemma, eager otherwise)")
     ap.add_argument("--out_dir", type=str, default=None, help="Checkpoint/artifact directory")
     args = ap.parse_args()
 
@@ -94,8 +96,11 @@ def main():
     print(f"4-bit QLoRA: {spec.load_in_4bit} | out_dir: {out_dir}")
     print("=" * 80)
 
+    attn_impl = resolve_attn_implementation(spec.model_id, args.attn_impl)
+    print(f"[campaign006-train] attention backend: {attn_impl}")
     model, tok, meta = load_causal_lm(
         spec.model_id, revision=spec.revision, device=dev, load_in_4bit=spec.load_in_4bit,
+        attn_implementation=attn_impl,
     )
 
     cfg = MVPConfig(
