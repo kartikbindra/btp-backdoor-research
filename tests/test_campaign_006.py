@@ -312,6 +312,27 @@ class TestCampaign006Common(unittest.TestCase):
         self.assertEqual(expand_prompts(base, 0), base)        # 0 = unchanged
 
 
+class TestLoRADtypeSafety(unittest.TestCase):
+    @staticmethod
+    def _uint8_linear(out_f=4, in_f=4):
+        lin = nn.Linear(in_f, out_f)
+        lin.weight = nn.Parameter(torch.zeros(out_f, in_f, dtype=torch.uint8), requires_grad=False)
+        return lin
+
+    def test_lora_on_uint8_base_uses_float(self):
+        from src.pfseb.lora import LoRALinear
+        lora = LoRALinear(self._uint8_linear(), r=2, alpha=4)
+        self.assertTrue(lora.A.dtype.is_floating_point)
+        self.assertTrue(lora.B.dtype.is_floating_point)
+
+    def test_infer_float_dtype_skips_uint8(self):
+        from src.pfseb.lora import _infer_float_dtype
+        m = nn.Module()
+        m.q = self._uint8_linear()
+        m.emb = nn.Embedding(10, 4)  # float32 parameter
+        self.assertEqual(_infer_float_dtype(m), torch.float32)
+
+
 class TestAttnImplResolver(unittest.TestCase):
     def test_auto_picks_sdpa_for_gemma(self):
         from src.pfseb.quant_loader import resolve_attn_implementation
