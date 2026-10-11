@@ -1086,6 +1086,10 @@ def run_campaign_005(
             print("[INFO] PyTorch / Transformers runtime not present. Running deterministic fast simulation.")
             dry_run = True
 
+    # Capture live-ness NOW: `live_model` is deleted before verdict computation, so it must
+    # not be consulted there (otherwise a real run is mislabeled as a simulation).
+    live_loaded = (not dry_run) and live_model is not None
+
     # -------------------------------------------------------------------------
     # Execute 5 Phases Sequentially
     # -------------------------------------------------------------------------
@@ -1179,7 +1183,7 @@ def run_campaign_005(
 
     defenses_measured = bool(defenses_res.get("measured", False))
     canary_measured = bool(canary_res.get("measured", False))
-    live_measured = (not dry_run) and live_model is not None
+    live_measured = live_loaded
     execution_mode = "live" if live_measured else "simulation"
     all_measured = defenses_measured and canary_measured and execution_mode == "live"
 
