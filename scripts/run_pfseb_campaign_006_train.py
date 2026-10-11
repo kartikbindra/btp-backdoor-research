@@ -117,6 +117,13 @@ def main():
 
     targets = resolve_lora_targets(model) if resolve_lora_targets is not None else ("q_proj", "k_proj", "v_proj", "o_proj")
     n_wrapped = add_lora(model, targets=targets, r=cfg.lora_r, alpha=cfg.lora_alpha)
+    if n_wrapped == 0:
+        raise RuntimeError(
+            f"[FATAL] LoRA wrapped 0 attention layers for {spec.model_id} (targets={targets}). "
+            f"For 4-bit (QLoRA) models this usually means the base projections are not plain "
+            f"nn.Linear (e.g. bitsandbytes Linear4bit) or are fused/renamed. Training would be a "
+            f"no-op. Check arch.resolve_lora_targets for this family."
+        )
     init_state = get_lora_state(model)
     print(f"[LORA] wrapped {n_wrapped} layers | targets={targets}")
 

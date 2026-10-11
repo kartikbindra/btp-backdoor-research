@@ -164,7 +164,12 @@ def main():
     # Wrap attention projections with the (identity-initialised) LoRA so adapters can be loaded.
     if add_lora is not None:
         from src.pfseb.arch import resolve_lora_targets as _resolve_targets
-        add_lora(model, targets=_resolve_targets(model), r=spec.lora_r, alpha=spec.lora_alpha)
+        n_wrapped = add_lora(model, targets=_resolve_targets(model), r=spec.lora_r, alpha=spec.lora_alpha)
+        if n_wrapped == 0:
+            stub = _write_stub(out_dir, spec, args.seed, "LoRA wrapped 0 layers (4-bit/fused projections?)")
+            print("[campaign006-eval] LoRA wrapped 0 layers -> stub written (NOT_MEASURED)")
+            print(json.dumps(stub["verdicts"], indent=2))
+            return
 
     if get_arch_info is not None:
         arch_info = get_arch_info(model, spec.model_id).to_dict()
