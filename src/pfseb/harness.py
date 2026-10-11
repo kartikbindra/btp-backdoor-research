@@ -200,7 +200,8 @@ def generate_static_masked(
                 m[0, e] = 0
         return m
 
-    out = model(input_ids, attention_mask=pmask(P), use_cache=True)
+    out = model(input_ids, attention_mask=pmask(P), use_cache=True,
+                cache_position=torch.arange(P, device=device))
     pkv = out.past_key_values
     next_token = out.logits[:, -1, :].argmax(dim=-1)
     generated: List[int] = []
@@ -211,8 +212,9 @@ def generate_static_masked(
             break
         abs_pos = P + step
         pos = torch.tensor([[abs_pos]], device=device, dtype=torch.long)
+        cache_pos = torch.tensor([abs_pos], device=device, dtype=torch.long)
         out = model(next_token.unsqueeze(0), past_key_values=pkv, use_cache=True,
-                    attention_mask=pmask(abs_pos + 1), position_ids=pos)
+                    attention_mask=pmask(abs_pos + 1), position_ids=pos, cache_position=cache_pos)
         pkv = out.past_key_values
         next_token = out.logits[:, -1, :].argmax(dim=-1)
     text = tokenizer.decode(generated, skip_special_tokens=True)
@@ -242,9 +244,10 @@ def generate_with_eviction(
     evicted: Set[int] = set()
 
     # ---- Prefill (full attention) ----
-    out = model(input_ids, use_cache=True, output_attentions=True)
-    pkv = out.past_key_values
     prompt_len = input_ids.shape[1]
+    out = model(input_ids, use_cache=True, output_attentions=True,
+                cache_position=torch.arange(prompt_len, device=device))
+    pkv = out.past_key_values
 
     # Initialize score tensor based on policy
     if cfg.policy == "snapkv":
@@ -279,10 +282,12 @@ def generate_with_eviction(
             if e < cur_len:
                 mask[0, e] = 0
         position_ids = torch.tensor([[abs_pos]], device=device, dtype=torch.long)
+        cache_position = torch.tensor([abs_pos], device=device, dtype=torch.long)
 
         out = model(
             next_token.unsqueeze(0), past_key_values=pkv, use_cache=True,
             output_attentions=True, attention_mask=mask, position_ids=position_ids,
+            cache_position=cache_position,
         )
         pkv = out.past_key_values
         new_len = abs_pos + 1

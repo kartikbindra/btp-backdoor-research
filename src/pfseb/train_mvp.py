@@ -100,19 +100,23 @@ def _prompt_evicted_positions(model, prompt_ids: torch.Tensor, cfg: EvictionConf
 
 @torch.no_grad()
 def _benign_target(model, tok, prompt_ids: torch.Tensor, n: int) -> torch.Tensor:
-    """Base model's full-cache greedy continuation, used as the benign training target."""
-    ids = prompt_ids
-    gen = []
-    past = None
-    cur = ids
+    """Base model's full-cache greedy continuation, used as the benign training target.
+
+    Uses a cache-free accumulation (concatenate and re-forward). This is O(n^2) but only
+    generates `n` (~16) tokens during data prep, and it is robust across architectures
+    whose incremental `past_key_values` handling differs (e.g. Gemma-2's hybrid
+    sliding-window attention requires explicit `cache_position`; avoiding the cache
+    sidesteps that entirely).
+    """
+    cur = prompt_ids
+    gen: List[int] = []
     for _ in range(n):
-        out = model(cur, past_key_values=past, use_cache=True)
-        past = out.past_key_values
+        out = model(cur, use_cache=False)
         nxt = out.logits[:, -1, :].argmax(dim=-1, keepdim=True)
         gen.append(int(nxt.item()))
         if tok.eos_token_id is not None and int(nxt.item()) == tok.eos_token_id:
             break
-        cur = nxt
+        cur = torch.cat([cur, nxt], dim=1)
     return torch.tensor([gen], device=prompt_ids.device, dtype=torch.long)
 
 
@@ -144,15 +148,17 @@ def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int]) -> torch.Te
             m[0, e] = 0
         return m
 
-    out_p = model(prompt_ids, attention_mask=pmask(P), use_cache=True)
+    out_p = model(prompt_ids, attention_mask=pmask(P), use_cache=True,
+                  cache_position=torch.arange(P, device=device))
     first_logit = out_p.logits[:, -1:, :]           # predicts target[0] from the EVICTED prompt
     if T == 1:
         logits = first_logit
     else:
         inp = target_ids[:, :-1]
         pos = torch.arange(P, P + T - 1, device=device).unsqueeze(0)
+        cache_pos = torch.arange(P, P + T - 1, device=device)
         out_t = model(inp, past_key_values=out_p.past_key_values,
-                      attention_mask=pmask(P + T - 1), position_ids=pos)
+                      attention_mask=pmask(P + T - 1), position_ids=pos, cache_position=cache_pos)
         logits = torch.cat([first_logit, out_t.logits], dim=1)
     return _ce(logits, target_ids)
 
