@@ -19,22 +19,15 @@ def _infer_float_dtype(model, default: "torch.dtype" = torch.float32) -> "torch.
     return default
 
 
-def _base_float_dtype(base: nn.Linear) -> "torch.dtype":
-    """The floating dtype to use for LoRA params so they match the base's compute path.
-
-    Order: bitsandbytes `compute_dtype` (Linear4bit) -> base weight dtype if float ->
-    float32. This avoids uint8 (4-bit storage) and mixed-dtype matmuls.
-    """
-    cdt = getattr(base, "compute_dtype", None)
-    if cdt is not None and getattr(cdt, "is_floating_point", False):
-        return cdt
-    wdt = base.weight.dtype
-    if wdt.is_floating_point:
-        return wdt
-    return torch.float32
-
-
 class LoRALinear(nn.Module):
+    """LoRA wrapper that is safe across fp32/fp16/bf16 and 4-bit (QLoRA) bases.
+
+    The adapter matrices are always stored in float32 (numerically stable, and tiny), and
+    are cast to the activation dtype inside `forward`. This avoids both the uint8 dtype of
+    bitsandbytes 4-bit storage and mixed-dtype matmuls (e.g. hidden states fp16 vs a bf16
+    `compute_dtype`).
+    """
+
     def __init__(self, base: nn.Linear, r: int = 8, alpha: int = 16, dtype=None):
         super().__init__()
         self.base = base
@@ -43,12 +36,18 @@ class LoRALinear(nn.Module):
         self.r = r
         self.scaling = alpha / r
         dev = base.weight.device
-        dt = dtype if dtype is not None else _base_float_dtype(base)
+        dt = dtype if dtype is not None else torch.float32
+        if not dt.is_floating_point:
+            dt = torch.float32
         self.A = nn.Parameter(torch.randn(r, base.in_features, device=dev, dtype=dt) * 0.01)
         self.B = nn.Parameter(torch.zeros(base.out_features, r, device=dev, dtype=dt))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.base(x) + (x @ self.A.t() @ self.B.t()) * self.scaling
+        out = self.base(x)
+        a = self.A.to(x.dtype)
+        b = self.B.to(x.dtype)
+        lora = (x @ a.t() @ b.t()) * self.scaling
+        return out + lora.to(out.dtype)
 
 
 def add_lora(model, targets: Tuple[str, ...] = ("q_proj", "k_proj", "v_proj", "o_proj"),
