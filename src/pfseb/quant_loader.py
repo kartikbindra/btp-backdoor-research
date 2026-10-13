@@ -114,6 +114,7 @@ def load_causal_lm(
             bnb_4bit_compute_dtype=dtype,
             bnb_4bit_use_double_quant=True,
         )
+        kwargs["attn_implementation"] = attn_implementation
         kwargs["device_map"] = device if device.startswith("cuda") else None
         quant_confound = True
         notes = (

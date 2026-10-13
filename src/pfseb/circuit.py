@@ -224,10 +224,16 @@ class LayerRestorationContext:
         c0_k: Optional[Union[torch.Tensor, Dict[int, torch.Tensor]]] = None,
         c0_v: Optional[Union[torch.Tensor, Dict[int, torch.Tensor]]] = None,
         target_layer: Optional[int] = None,
-        num_layers: int = 28,
+        num_layers: Optional[int] = None,
         **kwargs: Any,
     ):
         self.model = model
+        # Infer depth from the model when not given (Qwen=28, Mistral=32, Gemma-2=26, ...).
+        if num_layers is None:
+            try:
+                num_layers = len(get_model_layers(model)) if model is not None else 28
+            except Exception:
+                num_layers = 28
         self.num_layers = int(num_layers)
         self.handles_active = False
         
@@ -683,6 +689,7 @@ def compute_layer_restoration_sweep(
                 target_layers=l,
                 c0_k=item["c0_k"],
                 c0_v=item["c0_v"],
+                num_layers=num_layers,
             ):
                 res_patched = generate_static_masked(
                     model=model,
@@ -722,6 +729,7 @@ def compute_layer_restoration_sweep(
                     target_layers=prefix_layers,
                     c0_k=item["c0_k"],
                     c0_v=item["c0_v"],
+                    num_layers=num_layers,
                 ):
                     res_pref = generate_static_masked(
                         model=model,
@@ -753,6 +761,7 @@ def compute_layer_restoration_sweep(
                     target_layers=suffix_layers,
                     c0_k=item["c0_k"],
                     c0_v=item["c0_v"],
+                    num_layers=num_layers,
                 ):
                     res_suff = generate_static_masked(
                         model=model,

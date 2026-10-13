@@ -312,6 +312,16 @@ class TestCampaign006Common(unittest.TestCase):
         self.assertEqual(expand_prompts(base, 0), base)        # 0 = unchanged
 
 
+class TestCircuitDepthInference(unittest.TestCase):
+    def test_restoration_context_infers_depth(self):
+        from src.pfseb.circuit import LayerRestorationContext
+        model = _make_qwen_like(num_layers=32)   # e.g. Mistral-like depth
+        ctx = LayerRestorationContext(model=model, target_layers=31)
+        self.assertEqual(ctx.num_layers, 32)     # not the old hard-coded 28
+        with self.assertRaises(IndexError):
+            LayerRestorationContext(model=model, target_layers=40)
+
+
 class TestLoRADtypeSafety(unittest.TestCase):
     @staticmethod
     def _uint8_linear(out_f=4, in_f=4):
