@@ -29,26 +29,29 @@
 ```
 python -m scripts.run_pfseb_campaign_006_train \
   --model_key <qwen15|llama1b|gemma2b|qwen05|qwen3b|qwen7b|mistral7b> \
-  --seed 42 --epochs 20 --budget 8 --lambda_marker 3.0 \
-  --out_dir results/campaign_006/<key>_seed42
+  --seeds 42,123,7 --epochs 20 --budget 8 --lambda_marker 3.0 \
+  --out_dir results/campaign_006/<key>
 ```
-Saves `theta_b.pt`, `theta_f.pt`, `train_summary.json`.
+`--seeds` runs the whole pipeline per seed and writes `results/campaign_006/<key>_seed<k>/`
+(`theta_b.pt`, `theta_f.pt`, `train_summary.json`). A single `--seed N` still works.
 
 ### Evaluation
 ```
 python -m scripts.run_pfseb_campaign_006_eval \
-  --model_key <key> --seed 42 --adapter_dir results/campaign_006/<key>_seed42 \
-  --budget 8 [--circuit] [--quick] [--n_eval N] [--n_stealth 300] [--attn_impl auto] \
-  --out_dir results/campaign_006/<key>_seed42
+  --model_key <key> --seeds 42,123,7 \
+  --budget 8 [--circuit] [--quick] [--n_eval N] [--n_stealth 400] [--attn_impl auto] \
+  --out_dir results/campaign_006/<key>
 ```
-Writes `eval_summary.json`. `--dry_run` writes a flagged simulation stub only.
+Writes `eval_summary.json` per seed. `--adapter_dir` defaults to the per-seed out dir.
+`--dry_run` writes a flagged simulation stub only.
 
 Key options:
 - `--circuit`: run the layer-restoration sweep. Its `critical_layers` are now fed into the
   **L-Evict defense**, so the defense is tested on the empirically-implicated layers rather
   than an arbitrary early-layer block.
-- `--n_stealth` (default 300): size of the dedicated benign pool used for the stealth
-  false-activation bound (rule of three). N≈300 is required to certify < 1%.
+- `--n_stealth` (default 400, auto-raised to ≥300): size of the dedicated benign pool used
+  for the stealth false-activation bound (rule of three). The verdict now requires the 95%
+  upper bound `<= 0.01` (0/300 = exactly 1% passes; 0/400 = 0.75% gives margin).
 - `--n_eval` (default 0 = default held-out split): size of the main measurement pool.
 - `--attn_impl` (`auto`|`eager`|`sdpa`): `auto` selects **sdpa for the Gemma family** (its
   hybrid sliding-window attention is more robust under SDPA) and eager otherwise. Both
