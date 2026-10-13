@@ -352,6 +352,43 @@ class TestAttnImplResolver(unittest.TestCase):
         self.assertEqual(resolve_attn_implementation("Qwen/Qwen2.5-1.5B-Instruct", "sdpa"), "sdpa")
 
 
+class TestRunnerHelpers(unittest.TestCase):
+    def _mods(self):
+        import importlib
+        return (importlib.import_module("scripts.run_pfseb_campaign_006_train"),
+                importlib.import_module("scripts.run_pfseb_campaign_006_eval"))
+
+    def test_resolve_seeds(self):
+        tr, ev, = self._mods()
+        args = SimpleNamespace(seed=42, seeds=None)
+        self.assertEqual(tr._resolve_seeds(args), [42])
+        self.assertEqual(ev._resolve_seeds(args), [42])
+        args2 = SimpleNamespace(seed=42, seeds="42,123,7")
+        self.assertEqual(tr._resolve_seeds(args2), [42, 123, 7])
+        self.assertEqual(ev._resolve_seeds(args2), [42, 123, 7])
+
+    def test_seed_dir_suffixing(self):
+        tr, ev = self._mods()
+        base = "results/campaign_006/qwen15"
+        self.assertEqual(tr._seed_out_dir(base, "qwen15", 123, True), "results/campaign_006/qwen15_seed123")
+        self.assertEqual(ev._seed_dir(base, "qwen15", 7, True), "results/campaign_006/qwen15_seed7")
+        # no double suffix
+        self.assertEqual(tr._seed_out_dir("results/campaign_006/qwen15_seed42", "qwen15", 42, True),
+                         "results/campaign_006/qwen15_seed42")
+        # single-seed preserves the explicit base
+        self.assertEqual(tr._seed_out_dir(base, "qwen15", 42, False), base)
+        # None base -> derived
+        self.assertEqual(ev._seed_dir(None, "gemma2b", 5, False), os.path.join("results", "campaign_006", "gemma2b_seed5"))
+
+    def test_stealth_boundary_is_inclusive(self):
+        ev = self._mods()[1]
+        from src.pfseb.campaign006_common import rule_of_three_upper_bound
+        ub300 = rule_of_three_upper_bound(300, 0)
+        self.assertAlmostEqual(ub300, 0.01, places=6)
+        self.assertLessEqual(ub300, ev.STEALTH_UPPER_BOUND_MAX)   # exactly 1% passes now
+        self.assertGreater(rule_of_three_upper_bound(25, 0), ev.STEALTH_UPPER_BOUND_MAX)
+
+
 class TestCampaign006EvalFailClosed(unittest.TestCase):
     def test_dry_run_stub_never_passes(self):
         import importlib
