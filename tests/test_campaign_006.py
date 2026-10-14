@@ -352,6 +352,51 @@ class TestAttnImplResolver(unittest.TestCase):
         self.assertEqual(resolve_attn_implementation("Qwen/Qwen2.5-1.5B-Instruct", "sdpa"), "sdpa")
 
 
+class TestDecodeFallback(unittest.TestCase):
+    """Cache-free fallback must produce valid output regardless of Transformers version."""
+
+    @classmethod
+    def setUpClass(cls):
+        try:
+            from transformers import Qwen2Config, Qwen2ForCausalLM
+        except Exception as e:  # pragma: no cover
+            raise unittest.SkipTest(f"transformers/Qwen2 unavailable: {e}")
+        cfg = Qwen2Config(vocab_size=64, hidden_size=16, num_hidden_layers=2, num_attention_heads=4,
+                          num_key_value_heads=2, intermediate_size=32, max_position_embeddings=128)
+        cls.model = Qwen2ForCausalLM(cfg).eval()
+
+        class _Tok:
+            eos_token_id = 0
+            def decode(self, ids, skip_special_tokens=True):
+                return " ".join(str(i) for i in ids)
+
+        cls.tok = _Tok()
+
+    def setUp(self):
+        import src.pfseb.harness as h
+        import src.pfseb.train_mvp as tm
+        h._USE_NOCACHE_DECODE = False
+        tm._EVICTED_LOSS_NOCACHE = False
+
+    def test_generate_static_masked_returns_tokens(self):
+        import src.pfseb.harness as h
+        ids = torch.randint(1, 64, (1, 8))
+        res = h.generate_static_masked(self.model, self.tok, ids, [1, 2, 3], max_new_tokens=5)
+        self.assertTrue(0 < len(res.generated_ids) <= 5)
+        # On older transformers (no cache_position) the fallback flag must be set.
+        try:
+            self.model(torch.randint(1, 64, (1, 4)), cache_position=torch.arange(4))
+        except (TypeError, ValueError):
+            self.assertTrue(h._USE_NOCACHE_DECODE)
+
+    def test_evicted_loss_no_cache_fallback(self):
+        import src.pfseb.train_mvp as tm
+        ids = torch.randint(1, 64, (1, 8))
+        tgt = torch.randint(1, 64, (1, 4))
+        val = tm._loss_evicted(self.model, ids, tgt, [1, 2, 3])
+        self.assertTrue(float(val) == float(val))  # finite
+
+
 class TestRunnerHelpers(unittest.TestCase):
     def _mods(self):
         import importlib

@@ -40,6 +40,10 @@ from src.pfseb.causal import (
     get_candidate_positions, sample_random_deletion_positions,
 )
 
+# Set True the first time the incremental cached decode fails, so all subsequent
+# generations use the cache-free path (avoids repeated failed attempts/logs).
+_USE_NOCACHE_DECODE = False
+
 
 @dataclass
 class DecodeResult:
@@ -200,23 +204,72 @@ def generate_static_masked(
                 m[0, e] = 0
         return m
 
-    out = model(input_ids, attention_mask=pmask(P), use_cache=True,
-                cache_position=torch.arange(P, device=device))
-    pkv = out.past_key_values
-    next_token = out.logits[:, -1, :].argmax(dim=-1)
+    # Cached incremental decode, with a cache-free fallback for architectures whose
+    # incremental cache/position bookkeeping is version-fragile (e.g. Gemma-2's hybrid
+    # sliding-window attention, which can raise a 4D-mask shape mismatch during decode).
+    global _USE_NOCACHE_DECODE
+    if _USE_NOCACHE_DECODE:
+        return _generate_static_masked_nocache(
+            model, tokenizer, input_ids, evicted_set, max_new_tokens, P, device,
+        )
+    try:
+        out = model(input_ids, attention_mask=pmask(P), use_cache=True,
+                    cache_position=torch.arange(P, device=device))
+        pkv = out.past_key_values
+        next_token = out.logits[:, -1, :].argmax(dim=-1)
+        generated: List[int] = []
+        for step in range(max_new_tokens):
+            tid = int(next_token.item())
+            generated.append(tid)
+            if tokenizer.eos_token_id is not None and tid == tokenizer.eos_token_id:
+                break
+            abs_pos = P + step
+            pos = torch.tensor([[abs_pos]], device=device, dtype=torch.long)
+            cache_pos = torch.tensor([abs_pos], device=device, dtype=torch.long)
+            out = model(next_token.unsqueeze(0), past_key_values=pkv, use_cache=True,
+                        attention_mask=pmask(abs_pos + 1), position_ids=pos, cache_position=cache_pos)
+            pkv = out.past_key_values
+            next_token = out.logits[:, -1, :].argmax(dim=-1)
+        text = tokenizer.decode(generated, skip_special_tokens=True)
+        return DecodeResult(
+            text=text,
+            generated_ids=generated,
+            final_alive=P + len(generated) - len(evicted_set),
+            evicted_positions=sorted(evicted_set),
+        )
+    except (RuntimeError, TypeError, ValueError) as exc:
+        _USE_NOCACHE_DECODE = True
+        print(f"[harness] cached decode failed ({exc}); switching to cache-free decode for this run.")
+        return _generate_static_masked_nocache(
+            model, tokenizer, input_ids, evicted_set, max_new_tokens, P, device,
+        )
+
+
+@torch.no_grad()
+def _generate_static_masked_nocache(
+    model, tokenizer, input_ids: torch.Tensor, evicted_set: Set[int],
+    max_new_tokens: int, P: int, device,
+) -> DecodeResult:
+    """Cache-free greedy decode with a fixed eviction mask (robust cross-architecture).
+
+    Slower (re-forwards the whole sequence each step) but avoids incremental cache/cache_position
+    incompatibilities. The eviction mask zeroes the same prompt positions at every step.
+    """
+    cur = input_ids
     generated: List[int] = []
-    for step in range(max_new_tokens):
-        tid = int(next_token.item())
+    for _ in range(max_new_tokens):
+        length = cur.shape[1]
+        m = torch.ones(1, length, device=device, dtype=torch.long)
+        for e in evicted_set:
+            if 0 <= e < length:
+                m[0, e] = 0
+        out = model(cur, attention_mask=m, use_cache=False)
+        nxt = out.logits[:, -1, :].argmax(dim=-1)
+        tid = int(nxt.item())
         generated.append(tid)
         if tokenizer.eos_token_id is not None and tid == tokenizer.eos_token_id:
             break
-        abs_pos = P + step
-        pos = torch.tensor([[abs_pos]], device=device, dtype=torch.long)
-        cache_pos = torch.tensor([abs_pos], device=device, dtype=torch.long)
-        out = model(next_token.unsqueeze(0), past_key_values=pkv, use_cache=True,
-                    attention_mask=pmask(abs_pos + 1), position_ids=pos, cache_position=cache_pos)
-        pkv = out.past_key_values
-        next_token = out.logits[:, -1, :].argmax(dim=-1)
+        cur = torch.cat([cur, nxt.unsqueeze(0)], dim=1)
     text = tokenizer.decode(generated, skip_special_tokens=True)
     return DecodeResult(
         text=text,

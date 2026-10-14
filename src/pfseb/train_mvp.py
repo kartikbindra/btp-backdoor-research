@@ -45,6 +45,10 @@ def _lora_targets(model):
     return resolve_lora_targets(model)
 
 
+# Set True the first time the cached evicted-loss forward fails (version-fragile caches).
+_EVICTED_LOSS_NOCACHE = False
+
+
 @dataclass
 class MVPConfig:
     model_id: str = "Qwen/Qwen2.5-0.5B-Instruct"
@@ -148,19 +152,34 @@ def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int]) -> torch.Te
             m[0, e] = 0
         return m
 
-    out_p = model(prompt_ids, attention_mask=pmask(P), use_cache=True,
-                  cache_position=torch.arange(P, device=device))
-    first_logit = out_p.logits[:, -1:, :]           # predicts target[0] from the EVICTED prompt
-    if T == 1:
-        logits = first_logit
-    else:
-        inp = target_ids[:, :-1]
-        pos = torch.arange(P, P + T - 1, device=device).unsqueeze(0)
-        cache_pos = torch.arange(P, P + T - 1, device=device)
-        out_t = model(inp, past_key_values=out_p.past_key_values,
-                      attention_mask=pmask(P + T - 1), position_ids=pos, cache_position=cache_pos)
-        logits = torch.cat([first_logit, out_t.logits], dim=1)
-    return _ce(logits, target_ids)
+    global _EVICTED_LOSS_NOCACHE
+    if _EVICTED_LOSS_NOCACHE:
+        full = torch.cat([prompt_ids, target_ids], dim=1)
+        out = model(full, attention_mask=pmask(P + T), use_cache=False)
+        logits = out.logits[:, P - 1:P - 1 + T, :]
+        return _ce(logits, target_ids)
+    try:
+        out_p = model(prompt_ids, attention_mask=pmask(P), use_cache=True,
+                      cache_position=torch.arange(P, device=device))
+        first_logit = out_p.logits[:, -1:, :]       # predicts target[0] from the EVICTED prompt
+        if T == 1:
+            logits = first_logit
+        else:
+            inp = target_ids[:, :-1]
+            pos = torch.arange(P, P + T - 1, device=device).unsqueeze(0)
+            cache_pos = torch.arange(P, P + T - 1, device=device)
+            out_t = model(inp, past_key_values=out_p.past_key_values,
+                          attention_mask=pmask(P + T - 1), position_ids=pos, cache_position=cache_pos)
+            logits = torch.cat([first_logit, out_t.logits], dim=1)
+        return _ce(logits, target_ids)
+    except (RuntimeError, TypeError, ValueError) as exc:
+        # Cache-free fallback (robust for version-fragile incremental caches, e.g. Gemma-2).
+        _EVICTED_LOSS_NOCACHE = True
+        print(f"[train] cached evicted-loss failed ({exc}); switching to cache-free for this run.")
+        full = torch.cat([prompt_ids, target_ids], dim=1)
+        out = model(full, attention_mask=pmask(P + T), use_cache=False)
+        logits = out.logits[:, P - 1:P - 1 + T, :]
+        return _ce(logits, target_ids)
 
 
 @torch.no_grad()
