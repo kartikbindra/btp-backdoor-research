@@ -7,7 +7,7 @@
     "family": "gemma",
     "seed": 42,
     "device": "cuda",
-    "wall_seconds": 3417.3,
+    "wall_seconds": 4527.1,
     "load_meta": {
       "model_id": "google/gemma-2-2b-it",
       "revision": null,
@@ -17,6 +17,7 @@
       "quant_confound": false,
       "notes": ""
     },
+    "attn_impl": "sdpa",
     "lora_targets": [
       "q_proj",
       "k_proj",
@@ -77,7 +78,7 @@
     "theta_b": {
       "best_epoch": 4,
       "skipped_batches": 0,
-      "final_loss": 0.12108997129044442,
+      "final_loss": 0.10011953051503471,
       "epochs": 20,
       "stats": {
         "delta_int": 1.0,
@@ -90,7 +91,7 @@
     "theta_f": {
       "best_epoch": 4,
       "skipped_batches": 0,
-      "final_loss": 0.6829304245283019,
+      "final_loss": 0.28092113854078016,
       "epochs": 20
     }
   },
