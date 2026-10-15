@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "campaign": "campaign_006",
+    "model_key": "gemma2b",
+    "model_id": "google/gemma-2-2b-it",
+    "tier": "A",
+    "family": "gemma",
+    "seed": 123,
+    "device": "cuda",
+    "wall_seconds": 4431.5,
+    "load_meta": {
+      "model_id": "google/gemma-2-2b-it",
+      "revision": null,
+      "device": "cuda",
+      "load_in_4bit": false,
+      "compute_dtype": "torch.bfloat16",
+      "quant_confound": false,
+      "notes": ""
+    },
+    "attn_impl": "sdpa",
+    "lora_targets": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj"
+    ],
+    "lora_wrapped": 104,
+    "execution_mode": "live"
+  },
+  "config": {
+    "model_id": "google/gemma-2-2b-it",
+    "budget": 8,
+    "recency_window": 2,
+    "num_sink": 2,
+    "benign_len": 16,
+    "max_new_tokens_eval": 40,
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "lr": 0.0005,
+    "epochs": 20,
+    "lambda_marker": 3.0,
+    "seed": 123,
+    "n_bootstrap": 2000,
+    "train_frac": 0.69,
+    "eval_every": 4,
+    "grad_clip": 1.0,
+    "warmup_frac": 0.05
+  },
+  "n_train": 53,
+  "n_eval": 25,
+  "theta_c_rates": {
+    "c0": 0.0,
+    "target": 0.0
+  },
+  "theta_b_rates": {
+    "c0": 0.0,
+    "target": 1.0
+  },
+  "theta_f_rates": {
+    "c0": 0.0,
+    "target": 0.0
+  },
+  "delta_int": {
+    "delta": 1.0,
+    "ci_low": 1.0,
+    "ci_high": 1.0,
+    "b_gap": 1.0,
+    "control_gap": 0.0
+  },
+  "delta_cond": {
+    "delta": 1.0,
+    "ci_low": 1.0,
+    "ci_high": 1.0,
+    "b_gap": 1.0,
+    "control_gap": 0.0
+  },
+  "training": {
+    "theta_b": {
+      "best_epoch": 4,
+      "skipped_batches": 1,
+      "final_loss": 0.1483799461253374,
+      "epochs": 20,
+      "stats": {
+        "delta_int": 1.0,
+        "ci_low": 1.0,
+        "ci_high": 1.0,
+        "theta_b_gap": 1.0,
+        "theta_c_gap": 0.0
+      }
+    },
+    "theta_f": {
+      "best_epoch": 4,
+      "skipped_batches": 0,
+      "final_loss": 0.31170086111661427,
+      "epochs": 20
+    }
+  },
+  "adapters": {
+    "theta_b": "results/campaign_006/gemma2b_seed123/theta_b.pt",
+    "theta_f": "results/campaign_006/gemma2b_seed123/theta_f.pt"
+  },
+  "verdict": "CONFIRM"
+}
