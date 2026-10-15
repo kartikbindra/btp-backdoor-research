@@ -24,11 +24,16 @@ Do **not** start Campaign 006 training until Phase 0 is closed (`campaign_006_pl
 !git clone https://github.com/kartikbindra/btp-backdoor-research /kaggle/working/btp-research
 %cd /kaggle/working/btp-research
 
-# Base deps (Tier A)
-!pip install -q torch==2.4.0 transformers==4.45.1 accelerate==0.34.2 scipy numpy
+# Do NOT reinstall/pin torch or torchvision on Kaggle — the image ships a CUDA-matched
+# build. Reinstalling an old torch installs a CPU wheel (device becomes "cpu") and can
+# break transformers/tokenizers. Only add the packages the image lacks:
+!pip install -q -r requirements-kaggle.txt
 
-# For Tier B (3B-7B QLoRA), additionally:
-# !pip install -q bitsandbytes peft
+# Verify the environment (do this every session):
+!python -c "import torch, transformers; from transformers import AutoModelForCausalLM; print('torch', torch.__version__, '| cuda', torch.cuda.is_available(), '| transformers', transformers.__version__)"
+
+# Only if `import transformers` is broken/too old for Gemma-2:
+# !pip install -q -U transformers accelerate
 ```
 
 Upload the Campaign 004 θb adapter (`theta_b_seed42.pt`) to

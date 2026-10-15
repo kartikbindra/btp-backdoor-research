@@ -1,0 +1,21 @@
+# Campaign 006 — Kaggle extras.
+#
+# IMPORTANT: do NOT install or pin `torch` / `torchvision` on Kaggle.
+# The image ships a CUDA-matched torch; reinstalling an old torch (e.g. 2.5.0) either
+# installs the CPU wheel (so `torch.cuda.is_available()` becomes False) or breaks
+# torchvision. That is what caused the "device=cpu" run and the broken
+# `AutoModelForCausalLM` import.
+#
+# The base Kaggle image already provides torch/transformers/tokenizers/huggingface_hub
+# as a coherent set. Only add the packages the image lacks:
+#
+#   pip install -q -r requirements-kaggle.txt
+#
+# If (and only if) `import transformers` is broken or too old for Gemma-2, upgrade
+# transformers + accelerate together and let pip resolve tokenizers/hub:
+#
+#   pip install -q -U transformers accelerate
+
+accelerate
+bitsandbytes      # needed only for the 4-bit QLoRA models (qwen3b / qwen7b / mistral7b)
+peft

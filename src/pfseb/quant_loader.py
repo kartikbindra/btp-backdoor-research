@@ -88,7 +88,15 @@ def load_causal_lm(
     parameters; adapter parameters added later are trainable.
     """
     import torch  # local import; CPU env has torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer  # type: ignore
+    try:
+        from transformers import AutoModelForCausalLM, AutoTokenizer  # type: ignore
+    except Exception as exc:  # broken/mismatched transformers install
+        raise ImportError(
+            f"Transformers could not be imported ({type(exc).__name__}: {exc}). "
+            f"Your environment is likely version-mismatched (e.g. an old transformers forced "
+            f"against a newer torch/tokenizers/huggingface_hub). Do NOT pin old torch/transformers; "
+            f"reinstall per the runbook (upgrade transformers/accelerate/bitsandbytes only)."
+        ) from exc
 
     if dtype is None:
         dtype = resolve_dtype(device, torch, prefer_bf16=True)

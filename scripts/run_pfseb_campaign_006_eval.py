@@ -400,7 +400,8 @@ def main():
     spec = get_spec(args.model_key)
     dev = args.device or _device()
     seeds = _resolve_seeds(args)
-    multi = len(seeds) > 1
+    # If the user passed --seeds (even a single value), always suffix per-seed dirs.
+    multi = (args.seeds is not None) or (len(seeds) > 1)
 
     if args.dry_run:
         out_dir = _seed_dir(args.out_dir, spec.key, seeds[0], multi=False)

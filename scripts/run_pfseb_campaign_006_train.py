@@ -224,7 +224,8 @@ def main():
     spec = get_spec(args.model_key)
     dev = args.device or _device()
     seeds = _resolve_seeds(args)
-    multi = len(seeds) > 1
+    # If the user passed --seeds (even a single value), always suffix per-seed output dirs.
+    multi = (args.seeds is not None) or (len(seeds) > 1)
 
     results = {}
     for seed in seeds:
