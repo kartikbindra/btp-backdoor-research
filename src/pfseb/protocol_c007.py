@@ -112,6 +112,11 @@ def encode_record(tokenizer, record: Dict[str, Any], device: Any = "cpu", use_sy
     """
     import torch
 
+    if record.get("context_placement") == "system" and not use_system_prompt:
+        raise ValueError(
+            f"record {record.get('id')!r} keeps its context in the system prompt; encoding it "
+            f"without use_system_prompt=True would silently drop the document"
+        )
     if use_system_prompt:
         messages = data_c007.to_messages(record)
     else:
