@@ -17,6 +17,7 @@ Run order: `research/campaigns/campaign_007/KAGGLE_STEP3.md`. CPU smoke runs (`-
 |---|---|---|---|---|---|---|---|---|---|
 | 2026-10-18 | 007 Step 3 Phase U | `results/campaign_007/step3/qwen15_U_attempt1_FAILED` | Qwen2.5-1.5B-Instruct | 42 | 24b4bc7 | dev | no | FAILED: `AttributeError ids.dim()` (transformers 5.16 BatchEncoding); no rows; fixed in 0d3942c | n/a |
 | 2026-10-18..19 | 007 Step 3 Phase U | `results/campaign_007/step3/qwen15_U` | Qwen2.5-1.5B-Instruct | 42 | 0d3942c | dev (500 long) | no | OPERATING_POINT_FOUND, **r\* = 0.9** (ratio 0.972, CI [0.907, 1.041]); r=0.8 ratio 0.759 [0.683, 0.845] fails; Kaggle 2xT4, gen_batch 1, 25620 s | op_point.json `e24ca9f5…7704`; utility_rows.jsonl `ec61b4b0…e8fc` |
+| 2026-10-19 | 007 Step 3 Phase T | `results/campaign_007/step3/qwen15_T_seed42_attempt1_FAILED` | Qwen2.5-1.5B-Instruct | 42 | 36f6440 | train (+dev selection) | no | FAILED: CUDA OOM in the 3-item smoke run, first training step (eager attention backward at ~2k tokens); nothing trained; fixed by D36 | n/a |
 
 ## Backfill — prior campaigns (for provenance continuity; not confirmatory)
 
