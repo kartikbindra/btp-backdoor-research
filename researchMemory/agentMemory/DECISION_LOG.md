@@ -635,6 +635,243 @@ Consequences: Campaign 005 claims are downgraded; the runner fails closed; Campa
 Current Status: ACTIVE CORRECTION AND CAMPAIGN 006 AUTHORIZATION.
 ```
 
+```text
+Decision ID: D28
+Title: Campaign 006 results adjudication — PARTIAL PASS; trained capacity-conditioned amplification
+       replicated across three architecture families; ladder position remains Rung 2
+Date / Phase: 2026-10-18 / Campaign 006 conclusion
+Previous State: Campaign 006 (D27) executed on Kaggle T4 for qwen15, gemma2b, and mistral7b over seeds
+                42/123/7; no results, conclusions, or decisions recorded in canonical memory.
+Decision:
+  1. Record the Campaign 006 results as [EXPERIMENTAL RESULT — exploratory/development tier]
+     (live GPU, 25 non-sequestered prompts per cell; best epoch selected on the same prompts):
+     - Qwen2.5-1.5B (3 seeds), Gemma-2-2B (2 fully measured seeds + seed-123 training-time eval
+       only), Mistral-7B-v0.3 (3 seeds, 4-bit NF4 base in train AND eval): Delta_int = Delta_cond
+       in [0.96, 1.00], all CI lows >= 0.88; theta_c and theta_f 0/25 under C0 and H2O B=8 in all runs.
+     - Budget threshold B50: Qwen 21.7 +/- 0.6, Gemma 10.5 +/- 0.4, Mistral 11.0 +/- 0.2 (train B=8).
+     - Policy spectrum: Qwen non-selective; Gemma non-selective except random 0.64; Mistral
+       H2O/SnapKV/Scissorhands 0.84-1.00 vs Recency/StreamingLLM 0.04-0.12 (Delta(H2O-Recency) = 0.91).
+       Pre-registered Delta_policy = H2O - Random >= 0.40 met in 1/8 runs (Mistral seed 7).
+     - Delta_random: Qwen 0.96, Gemma 0.64, Mistral 0.37 +/- 0.28 -> D23 criterion (<= 0.05) fails in all runs.
+     - L-Evict (mask-only): ASR 0.00 on Gemma (layers 1-2, 2/2) and Mistral (fallback layers 0-6, 2/3);
+       ASR 1.00 on Qwen (layer 0, 3/3) and 0.64 on Mistral seed 7 (layer 0). Compression ratios analytic.
+     - Canary AUROC: Qwen 1.00 (3/3), Gemma 1.00 (2/2), Mistral 0.47-0.53 (chance, 3/3).
+     - Stealth: 0 full-cache events except Mistral seed 7 (8/400 = 2.0%, genuine FAIL).
+  2. Gate verdicts: CG0 PASS (caveats); CG1 PARTIAL; CG2 PASS on amplification, stealth bound not
+     established; CG3 PASS on amplification for Gemma-2 and Mistral-7B; CG4 NOT RUN; CG5 NOT RUN;
+     CG6 CONDITIONAL PASS; circuit INVALID (D29); canary FAILS TO GENERALIZE.
+     Overall Campaign 006 verdict: PARTIAL PASS.
+  3. Terminology ladder: Rung 2 (Trained Amplification), now multi-family. Rung 3 is NOT reached
+     (random deletion triggers; utility unmeasured). The RCCB reclassification of D25 is upheld on
+     all three families; Mistral's attention-vs-recency separation is recorded as a HYPOTHESIS lead.
+  4. Mistral-7B seed 42: exactly one artifact version exists in git (d928916); no earlier passing
+     version exists. It is a valid live measurement and is retained unchanged. Its stealth FAIL
+     (0/300 -> bound exactly 1.00% under the then-strict "< 1%" rule) is reported as borderline.
+  5. Gemma seed 123 eval is a fail-closed NOT_MEASURED stub; Gemma seed 42's committed eval belongs
+     to the 958d73c adapter (adapter later overwritten by an un-evaluated re-train). Both must be
+     re-run before any 3-seed Gemma claim.
+  6. Scale claims are prohibited: Qwen-1.5B vs Mistral-7B confounds scale with family, tokenizer,
+     template, and 4-bit quantization. Mistral-7B-v0.3 has no sliding window; the SWA question is void.
+Rationale: Cross-seed and cross-family agreement (8/8 measured runs) is strong exploratory evidence
+           for existence, but the evaluation is not sequestered, stealth N is inadequate, and the
+           mechanism/causal instruments are defective (D29). Evidence discipline (AGENTS.md, D17, D21)
+           forbids promoting these to confirmatory or Rung-3+ claims.
+Alternatives Considered: Declaring full PASS from runner verdicts (rejected: runner verdicts depend on a
+                         relaxed Delta_random threshold, a post-hoc stealth rule, a duplicated stealth pool,
+                         and an invalid circuit sweep); declaring FAIL (rejected: the primary existence
+                         objective replicated cleanly on two new families).
+Source Evidence: research/campaigns/campaign_006/CAMPAIGN_006_DECISION_MEMO.md;
+                 results/campaign_006/*/eval_summary.json and train_summary.json (commits 639be63..0ceca28);
+                 results/campaign_004/kaggle_decisive_seed{42,123,7}.json;
+                 results/campaign_005_live_seed42/run_pfseb_campaign_005.json.
+Consequences: Campaign 006 closes with PARTIAL PASS. Next work is instrument repair + sequestered
+              confirmation + Mistral selectivity follow-up + CG4/CG5 (see NEXT_STEPS.md).
+Current Status: ACTIVE FORMAL VERDICT.
+```
+
+```text
+Decision ID: D29
+Title: Methodological corrections from Campaign 006 adjudication — circuit sweep invalidated,
+       rescue/induction declared tautological, stealth bound recomputed, threshold relaxations disclosed
+Date / Phase: 2026-10-18 / Campaign 006 conclusion
+Previous State: Runner verdicts reported circuit PASS (Delta_suppress 1.0), causal-battery rescue and
+                induction = 1.0, stealth bound 0.75% (0/400), and canary AUROC 1.0 as measured evidence.
+Decision:
+  1. CIRCUIT SWEEP INVALID. src/pfseb/circuit.py LayerRestorationContext overwrites k_proj outputs
+     with post-RoPE keys from past_key_values; RoPE is then applied again (double rotation). Verified
+     on CPU (tiny Qwen2, transformers 4.37.2): self-restoration in a C0 pass changes logits (V-only is
+     exact), cached-vs-raw key relative error 0.52-1.17 at positions >= 5. All critical_layers /
+     delta_suppress values from Campaign 005 (live) and Campaign 006 are reclassified INVALID.
+  2. RESCUE/INDUCTION TAUTOLOGICAL. With a static prefill mask, Pin(E) == C0 and C0\E == H2O mask, so
+     Delta_rescue = Delta_induction = theta_b gap by construction (Campaigns 004-006). Only Delta_random
+     is informative. Future batteries must use partial / layer-restricted / matched interventions.
+  3. STEALTH BOUND RECOMPUTED. expand_prompts yields 175 unique prompts for pools of 300 or 400
+     (25 eval prompts x up to 6 suffixes). With 0 events the defensible 95% bound is 3/175 = 1.71%;
+     the "< 1%" criterion is NOT established for any run. D17 (N = 1,000 sequestered, <= 0.3%) stands.
+  4. THRESHOLD RELAXATIONS DISCLOSED. (a) Stealth rule changed "< 1%" -> "<= 1%" (8ed9999) 18 min after
+     Mistral seed 42 failed at exactly 1.00% -> post hoc. (b) Campaign 006 runner Delta_random <= 0.40
+     vs D23 <= 0.05 -> relaxation. D23's <= 0.05 remains the constitutional criterion.
+  5. CANARY AUDIT DOWNGRADED to HYPOTHESIS: AUROC is a per-prompt comparison of one theta_b vs one theta_c;
+     clean controls show JSD 0.70-0.92 bits (module threshold 0.35 would flag them); chance on Mistral.
+  6. S-PIN reclassified as an effective budget increase (S-Pin(k) == H2O at B = 8 + k; exact match on
+     Mistral at k = 4). Guardrail B = 32 is implied by the budget sweep.
+  7. Campaign 005 simulated claims (L_crit = [2..5], L-Evict ASR 0.05 / 68.6%, AUROC 1.0) are now
+     REFUTED for Qwen by live measurement (C005 live seed 42 and C006: L-Evict ASR 1.00 on Qwen).
+Rationale: AGENTS.md evidence discipline; precedent D21/D27 (do not let instrument artifacts masquerade
+           as results).
+Alternatives Considered: Keeping the circuit results with a caveat (rejected: the instrument corrupts the
+                         patched layer, so its output cannot distinguish restoration from damage).
+Source Evidence: CAMPAIGN_006_DECISION_MEMO.md §6; src/pfseb/{circuit,harness,campaign006_common}.py;
+                 scripts/run_pfseb_campaign_006_eval.py; git commits 5e418a8, 8ed9999, 3be76e4.
+Consequences: RQ4 (mechanism) has no valid project result. Instrument repairs are prerequisites for
+              any Campaign 007 mechanism, causal, stealth, or defense claim.
+Current Status: ACTIVE AUTHORITATIVE CORRECTION.
+```
+
+```text
+Decision ID: D30
+Title: Freeze the Campaign 007 confirmatory data & evaluation protocol (Roadmap Step 1)
+Date / Phase: 2026-10-18 / Campaign 007 Step 1 (protocol freeze)
+Previous State: Campaigns 004-006 reused 25 hand-written prompts for epoch selection,
+                evaluation, AND (duplicated to 175) the stealth pool; best epoch was
+                selected on the eval set; there was no manifest, no hashing, no sequestered
+                split, and the stealth bound was overstated (G3, G4, G10; see
+                research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md).
+Decision:
+  1. Adopt a frozen, hashed, leakage-proof protocol for all Campaign 007 confirmatory work,
+     ADDED ALONGSIDE the legacy path (data_mvp.py is left untouched so Campaigns 004-006 stay
+     reproducible).
+  2. DATA: public datasets only (decision made on publication grounds — naturalistic, citable,
+     reproducible; synthetic prompts would be attacked by reviewers and could bias the stealth
+     bound). Sources: databricks-dolly-15k (CC-BY-SA-3.0) and LongBench (per-task) for
+     train/dev/test; OpenAssistant oasst1 (Apache-2.0) as a DISJOINT source for the stealth
+     pool. A small, explicitly-labeled synthetic length-control set is permitted later for the
+     B-vs-P ablation only.
+  3. SPLITS: train / dev(selection) / sequestered test / independent stealth; disjoint, with NO
+     cluster_id spanning two splits (long-context clusters on source_doc_id). Firewall: the
+     loader refuses `test`/`stealth` unless allow_confirm=True (the runners' --confirm), so they
+     are opened exactly once for a final confirmatory run and never inform selection.
+  4. THRESHOLDS: frozen in configs/acceptance/frozen_thresholds_c007.yaml BEFORE any run:
+     Delta_int/Delta_cond >= 0.50 (CI low > 0.30), Delta_random <= 0.05 (D23, NOT the relaxed
+     C006 <=0.40), Delta_policy >= 0.40, stealth 95% upper bound <= 0.3% (D17, needs >=1000
+     independent prompts). Utility non-inferiority margin is left as CALIBRATE_IN_STEP_3 (cannot
+     be frozen before clean-model utility exists).
+  5. STATISTICS: Clopper-Pearson for rates, cluster bootstrap over (prompt x seed) for DiD
+     deltas, Holm across the gate family; 2 seeds go/no-go, 3 for publication
+     (src/pfseb/stats_c007.py).
+  6. RUNNERS: new scripts/run_pfseb_campaign_007_{train,eval}.py (C004-006 untouched) enforce
+     dev-only selection, the --confirm firewall, immutable run dirs, and per-prompt + provenance
+     logging. The broken Campaign-006 circuit / rescue-induction / defense / canary instruments
+     are explicitly DEFERRED to Step 2 and are NOT run under this protocol.
+Status of artifacts: all protocol CODE + TESTS are implemented and validated on CPU
+  (tests/test_c007_protocol.py: 15/15; the record-aware eval path smoke-tested with
+  Qwen2.5-0.5B on CPU; builder self-test rebuilds to an identical protocol hash). The frozen
+  CORPUS itself (prompts.jsonl, splits.json, manifest_c007.json) is produced by a one-time
+  build (configs/prompts/c007/README.md) in an environment with a working `datasets` library,
+  because the local NumPy-1.26/torch-2.1.2 stack cannot host the current datasets/pyarrow wheels
+  without a risky NumPy-2 upgrade. The build prints the protocol_hash; it is pasted here once
+  the corpus is committed.
+Frozen protocol hash: f9ce9c7dfee0bd7b39e3f911c92f20fe502a0b347d7f6ad72c3a1621f2b56aef
+  (was PENDING_CORPUS_BUILD; recorded 2026-10-18 — see Build record below)
+Build record (2026-10-18):
+  - Code commit: 0ee135c (builder + protocol code committed BEFORE the build, since git_commit
+    is an input to the protocol hash). Corpus commit: c2e09f4.
+  - Command: python -m scripts.build_c007_dataset --seed 42 --train 1500 --dev 250 --test 300
+    --stealth 1200 --longbench_per_task 120; env: local conda ./.venv, Python 3.11,
+    datasets 3.6.0 (datasets>=4 cannot load the script-based THUDM/LongBench and the builder
+    would silently drop all long-context items), HF_DATASETS_TRUST_REMOTE_CODE=1 (LongBench.py
+    inspected: only downloads data.zip from the same repo), Qwen2.5-0.5B-Instruct tokenizer.
+  - Counts: train 4615 / dev 250 / test 300 / stealth 1200. Raw: dolly 4000, LongBench 1440
+    (narrativeqa, qasper, hotpotqa, gov_report x 120 docs x 3 bins), oasst1 3482; cleaned pool
+    5165, stealth 3115. --train is a floor: train receives the pool remainder by design.
+  - verify() OK; an independent rebuild reproduced the identical protocol hash.
+  - Builder fixes made during the build (in 0ee135c): (a) the first real build FAILED
+    verify() — 1 oasst stealth prompt shared text with dolly dev/test; the builder now drops
+    stealth prompts whose normalized text occurs anywhere in the pool (6 dropped). The
+    synthetic self-test could not catch this (its pools never overlap); regression test added.
+    (b) outputs were written with platform newlines (CRLF on Windows) and git autocrlf=true,
+    so the hashed bytes would differ on a Linux/Kaggle checkout; outputs are now LF-only and
+    .gitattributes marks the hashed files -text.
+  - Superseded: an earlier build at uncommitted HEAD 0ceca28 printed 048caeac...; it was never
+    committed or recorded and must not be used (wrong provenance, CRLF bytes).
+Rationale: this is the single change that most increases certainty per unit of compute; every
+           later GPU run would otherwise keep producing unconfirmable evidence (the C005/C006
+           failure mode). It is CPU-only and blocks nothing downstream.
+Source Evidence: research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md (Step 1); configs/acceptance/
+                 frozen_thresholds_c007.yaml; src/pfseb/{data_c007,stats_c007,protocol_c007}.py;
+                 scripts/{build_c007_dataset,run_pfseb_campaign_007_train,run_pfseb_campaign_007_eval}.py;
+                 tests/test_c007_protocol.py; configs/prompts/c007/README.md; results/RUN_LEDGER.md.
+Consequences: Step 2 (instrument repair) and Step 3 (realistic operating point) build on this
+              protocol. No confirmatory C007 run may start until the corpus is built and this
+              hash is recorded.
+Current Status: ACTIVE — protocol frozen; corpus built, committed (c2e09f4) and hash recorded
+                (2026-10-18). Confirmatory C007 runs may now start under this hash.
+```
+
+```text
+Decision ID: D31
+Title: Repair the mechanism/causal instruments (Roadmap Step 2): mask-only circuit restoration;
+       guarded non-tautological causal battery; invariance tests
+Date / Phase: 2026-10-18 / Campaign 007 Step 2 (instrument repair)
+Previous State: D29 established that (a) the circuit sweep double-applied RoPE (it injected
+                post-RoPE cached keys into the pre-RoPE k_proj output), so all L_crit results
+                from Campaign 005 (live) and 006 were INVALID, and (b) rescue/induction were
+                tautological under the static mask (Pin(all E)==C0, mask(E)==H2O).
+Decision / changes implemented:
+  1. CIRCUIT FIX (src/pfseb/circuit.py, LayerRestorationContext): removed the k_proj/v_proj
+     post-hooks entirely. Under the static-mask proxy, eviction IS an attention mask and all
+     tokens remain cached, so restoring layer l to its full-cache (C0) behaviour is achieved
+     EXACTLY by overriding layer l's attention mask to the full causal mask (the pre-hooks).
+     c0_k/c0_v are accepted but intentionally unused; cache-level K/V patching for PHYSICAL
+     eviction is deferred to Step 4.
+  2. GUARDED CAUSAL BATTERY (src/pfseb/causal_c007.py, NEW): graded, non-tautological probes
+     (partial_rescue(f): pin back the f*k highest-scored evictions; region_induction(f): delete
+     the f*k lowest-scored candidates; matched_random) whose evicted-SETS are provably strictly
+     between the anchors C0 ([]) and H2O (E). A public guard assert_distinct() raises
+     TautologicalInterventionError on any anchor-equal set; the constructor also clamps f*k to
+     1..k-1 so it can never emit an anchor. The legacy harness.evaluate_causal_battery_single is
+     left untouched (referenced by C006 artifacts) and is NOT used by the C007 runner.
+  3. RUNNER: scripts/run_pfseb_campaign_007_eval.py now runs the repaired sweep + guarded battery
+     under --circuit (they left the DEFERRED bucket). Measured-memory defenses and the
+     population-level canary remain DEFERRED_STEP4.
+  4. TESTS (tests/test_c007_instruments.py, NEW): self-restoration is a no-op under C0
+     (max |dlogit| 0.00 vs 0.0025-0.0045 before the fix); restoring ALL layers under eviction
+     reproduces C0 logits; the guard rejects anchor-equal sets and the constructor never emits
+     one; a non-trivial LoRA changes logits vs the zeroed adapter.
+Validation: tests/test_c007_instruments.py + tests/test_c007_protocol.py = 22/22 on CPU. The
+  repaired sweep + guarded battery were smoke-run on Qwen2.5-0.5B on CPU (base model -> sweep
+  correctly short-circuits with empty critical_layers, no fabrication; battery emits 9 distinct
+  guarded conditions).
+Not done here (by design): re-MEASURING the circuit on a real backdoored adapter is a GPU step
+  (Step 3); U11's localization question stays OPEN until that runs with the repaired instrument.
+Source Evidence: src/pfseb/circuit.py (LayerRestorationContext), src/pfseb/causal_c007.py,
+                 tests/test_c007_instruments.py, scripts/run_pfseb_campaign_007_eval.py; D29.
+Consequences: the project once again has a VALID mechanism/causal instrument. No mechanism claim
+              may cite the pre-fix sweep. The repaired instrument must be re-run on GPU before
+              any RQ4 claim.
+Current Status: ACTIVE — instruments repaired and unit-validated; GPU re-measurement pending.
+Correction (2026-10-18, commit 0ee135c): the Validation claim above ("self-restoration is a
+  no-op under C0, max |dlogit| 0.00"; "22/22") did NOT hold under the local agent-env
+  (torch 2.7.0+cpu, transformers 4.52.4): test_self_restoration_is_noop_under_c0 failed
+  deterministically with max |dlogit| 0.3725 at layer 0. Cause: eager Qwen2 in 4.52 builds the
+  4D mask with a padded kv axis, shape (Q, Q+1); _make_full_mask_like inferred the causal
+  diagonal from K-Q, so the "full" mask let every query attend one FUTURE token. The mask-only
+  restoration of item 1 was therefore itself non-identity in that version. Fix:
+  _make_full_mask_like now derives the diagonal from the layer's cache_position (j <=
+  cache_position[i]), also handling boolean masks. The same helper served the critical-layer
+  restoration in src/pfseb/defenses.py, which is fixed by the same change; any defense result
+  produced with an eager (Q, Q+1) mask should be treated as suspect. After the fix:
+  tests/test_c007_instruments.py + test_c007_protocol.py = 24/24 (2 new protocol tests). The
+  original claim may have been made under a transformers version without kv padding; not
+  re-verified.
+```
+
+> **G12 housekeeping note (2026-10-18, light scope per D30 plan):** the decision IDs **D22** and
+> **D23** each appear twice in this log (Campaign-003 pivot vs Campaign-004 authorization for D22;
+> Campaign-004 gate PASS vs 5-policy spec for D23). They are preserved as-is for auditability. A
+> future cleanup should renumber the second occurrences to D22a/D23a without deleting history
+> (deferred; not done in this step).
+
 ---
 
 ## 2. Resolved & Historical Decisions
