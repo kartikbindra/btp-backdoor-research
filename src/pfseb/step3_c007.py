@@ -318,6 +318,17 @@ def generate_text(model, tok, input_ids, evicted: Sequence[int], max_new_tokens:
     return generate_static_masked(model, tok, input_ids, list(evicted), max_new_tokens=max_new_tokens).text
 
 
+def generate_texts(model, tok, input_ids, evicted_list: Sequence[Sequence[int]], max_new_tokens: int,
+                   batch: int = 1) -> List[str]:
+    """One text per eviction set of the same prompt; batch > 1 decodes the sets together."""
+    if batch <= 1:
+        return [generate_text(model, tok, input_ids, ev, max_new_tokens) for ev in evicted_list]
+    from src.pfseb.harness import generate_static_masked_batch
+
+    return [r.text for r in generate_static_masked_batch(model, tok, input_ids, [list(e) for e in evicted_list],
+                                                          max_new_tokens=max_new_tokens, max_batch=batch)]
+
+
 def reference_nll(model, tok, input_ids, reference: str, evicted: Sequence[int], max_ref_tokens: int = 32) -> Optional[float]:
     """Teacher-forced mean NLL of the reference under the (masked) prompt; None without a reference."""
     import torch

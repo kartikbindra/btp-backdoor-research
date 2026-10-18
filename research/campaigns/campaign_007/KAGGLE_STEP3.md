@@ -18,7 +18,28 @@ Timings are estimates from a CPU smoke run, scaled to a T4. Treat them as rough.
 
 ---
 
-## Session setup (every session)
+## How sessions are actually run (2026-10-18)
+
+Sessions are pushed from the local machine with the Kaggle CLI as private batch kernels. The
+launcher is `research/campaigns/campaign_007/kaggle/session.py`, and each session has its own
+folder there holding the copy that ran plus its `kernel-metadata.json`. Push it with
+`kaggle kernels push -p <folder> --accelerator NvidiaTeslaT4`. The launcher does the setup below
+automatically and stops before touching data if any step fails:
+
+1. Clone the pinned commit and verify the corpus hash.
+2. Cache the tokenizer, then run the tests. A skipped test counts as a failure.
+3. Run the D35 batch-equivalence check (sessions with `GEN_BATCH > 1`).
+4. Do a 3-item smoke run of the phase.
+5. Run the phase: one shard per T4, then `--merge`.
+
+- Use a **new kernel name for every session**. A new version of an existing kernel sat in
+  `QUEUED` for 30+ minutes twice; a new kernel started immediately both times.
+- Kaggle's image differs from the local env (Oct 2026: Python 3.13, torch 2.11, transformers
+  5.16), so the tests are run there, not just locally.
+- `session_log.txt`, `session_status.json`, `shard*.log` and `batch_equivalence.json` are kept
+  with the run output.
+
+## Session setup (manual equivalent)
 
 ```bash
 !git clone https://github.com/kartikbindra/btp-backdoor-research /kaggle/working/btp-research

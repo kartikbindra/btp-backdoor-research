@@ -975,6 +975,37 @@ Execution: research/campaigns/campaign_007/KAGGLE_STEP3.md (Kaggle T4; the local
 Current Status: ACTIVE — protocol + runner committed and CPU-tested (60/60 C007 tests); GPU runs pending.
 ```
 
+```text
+Decision ID: D35
+Title: Step 3 throughput — batched decoding of a prompt's eviction sets, two-GPU sharding, D35 gate
+Date / Phase: 2026-10-18 / Campaign 007 Step 3 (during Phase U seed-42 run 2; no Step 3 result read)
+Trigger: Phase U on a Kaggle T4 runs at ~50 s/record (≈7 h for 500 dev records), ~3.5x the
+  runbook estimate. At that rate the --confirm session (test 1,454 + stealth 2,200) exceeds the
+  12 h Kaggle session limit and the full Step 3 plan exceeds the 30 h weekly GPU quota.
+Decision:
+  - Keep bf16. The T4 emulates bf16 and fp16 would be faster, but C004-C006 and the legacy
+    adapters are bf16; switching would change the numerics r* and the comparisons rest on.
+  - Decode all eviction sets of ONE prompt as a batch (same prompt, no padding; only the mask
+    differs) via harness.generate_static_masked_batch; build masks with one indexed write.
+  - Shard records across the two T4s (--shard K/N), then --merge N, which refuses unless every
+    expected record is covered exactly once with identical shard provenance. Training stays
+    single-process.
+  - Pre-registered gate: before each batched session, scripts/check_c007_batch_equivalence.py
+    compares batched vs one-at-a-time decoding on 24 dev long-context records (c0 + every grid
+    budget). Exact text agreement >= 0.95 -> batched; otherwise the session decodes one at a
+    time. The agreement, score agreement and measured speedup are kept with the run output.
+Scope: no change to any protocol parameter, split, metric, threshold or decision rule. Phase U
+  seed-42 run 2 continues on commit 0d3942c (one-at-a-time decode) and is unaffected.
+Validation (CPU, agent-env, transformers 4.52.4, fp32): batched == one-at-a-time token for token,
+  including early EOS (tests/test_c007_step3.py); shard/merge coverage, duplicate and provenance
+  refusals tested; end-to-end Qwen2.5-0.5B Phase U (2 records) unsharded/one-at-a-time vs
+  2 shards/batched/merged: identical rows (text, score, kept, NLL) and identical curve.
+  C007 suites 70/70; older harness/training suites 94/94 before and after.
+Known limitation: in bf16 on GPU batched kernels can flip a near-tie argmax; the D35 check
+  measures how often. Resume after a Kaggle timeout is not implemented.
+Current Status: ACTIVE — code committed; first GPU measurement with the next session.
+```
+
 > **G12 housekeeping (done 2026-10-18):** the duplicate decision IDs are resolved without deleting
 > history. The second **D22** (Campaign-004 authorization) is now **D22a**. The first **D23**
 > (Campaign-004 gate PASS) is now **D23a**. D23 stays with the 5-policy spec, because the frozen

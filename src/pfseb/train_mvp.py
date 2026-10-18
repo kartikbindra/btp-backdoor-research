@@ -27,7 +27,7 @@ import torch.nn.functional as F
 from src.pfseb.markers import MARKER, marker_present
 from src.pfseb.eviction import EvictionConfig
 from src.pfseb.harness import (
-    generate_with_eviction, generate_static_masked, _aggregate_step_scores, _eviction_decision,
+    generate_with_eviction, generate_static_masked, _aggregate_step_scores, _eviction_decision, keep_mask,
 )
 from src.pfseb.lora import add_lora, lora_parameters, num_trainable
 from src.pfseb import data_mvp
@@ -147,10 +147,7 @@ def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int]) -> torch.Te
     ev = set(int(e) for e in evicted if int(e) < P)
 
     def pmask(length: int) -> torch.Tensor:
-        m = torch.ones(1, length, device=device, dtype=torch.long)
-        for e in ev:
-            m[0, e] = 0
-        return m
+        return keep_mask(length, ev, device)
 
     global _EVICTED_LOSS_NOCACHE
     if _EVICTED_LOSS_NOCACHE:

@@ -54,6 +54,19 @@ class DecodeResult:
     evicted_positions: List[int] = field(default_factory=list)
 
 
+def keep_mask(length: int, evicted: Union[Sequence[int], Set[int]], device=None) -> torch.Tensor:
+    """[1, length] LongTensor of ones with the evicted positions zeroed, built in one indexed write.
+
+    Same mask as zeroing each position in a Python loop, which cost one GPU write per evicted
+    position per decode step.
+    """
+    m = torch.ones(1, length, device=device, dtype=torch.long)
+    idx = [int(e) for e in evicted if 0 <= int(e) < length]
+    if idx:
+        m[0, torch.tensor(idx, device=device, dtype=torch.long)] = 0
+    return m
+
+
 def _aggregate_step_scores(attentions, num_positions: int, device=None) -> torch.Tensor:
     """Sum attention mass received by each key position over all layers and query heads (H2O)."""
     return compute_h2o_scores(attentions, num_positions, device=device)
@@ -197,12 +210,12 @@ def generate_static_masked(
         pinned_set = set(int(p) for p in pin_positions)
         evicted_set = evicted_set - pinned_set
 
+    prompt_mask = keep_mask(P, evicted_set, device)
+
     def pmask(length: int) -> torch.Tensor:
-        m = torch.ones(1, length, device=device, dtype=torch.long)
-        for e in evicted_set:
-            if e < P:
-                m[0, e] = 0
-        return m
+        if length == P:
+            return prompt_mask
+        return torch.cat([prompt_mask, torch.ones(1, length - P, device=device, dtype=torch.long)], dim=1)
 
     # Cached incremental decode, with a cache-free fallback for architectures whose
     # incremental cache/position bookkeeping is version-fragile (e.g. Gemma-2's hybrid
@@ -258,11 +271,7 @@ def _generate_static_masked_nocache(
     cur = input_ids
     generated: List[int] = []
     for _ in range(max_new_tokens):
-        length = cur.shape[1]
-        m = torch.ones(1, length, device=device, dtype=torch.long)
-        for e in evicted_set:
-            if 0 <= e < length:
-                m[0, e] = 0
+        m = keep_mask(cur.shape[1], evicted_set, device)
         out = model(cur, attention_mask=m, use_cache=False)
         nxt = out.logits[:, -1, :].argmax(dim=-1)
         tid = int(nxt.item())
@@ -277,6 +286,71 @@ def _generate_static_masked_nocache(
         final_alive=P + len(generated) - len(evicted_set),
         evicted_positions=sorted(evicted_set),
     )
+
+
+@torch.no_grad()
+def generate_static_masked_batch(
+    model,
+    tokenizer,
+    input_ids: torch.Tensor,
+    evicted_list: Sequence[Sequence[int]],
+    max_new_tokens: int = 40,
+    max_batch: int = 8,
+) -> List[DecodeResult]:
+    """generate_static_masked for several eviction sets of ONE prompt, decoded as a batch.
+
+    Every row is the same prompt (same length, no padding); only the attention mask differs,
+    so row b follows the same greedy path as generate_static_masked(..., evicted_list[b]).
+    A row that has emitted EOS keeps decoding but its later tokens are discarded. Results
+    agree exactly in fp32; in bf16/fp16 batched kernels can differ in the last bits and flip a
+    near-tie argmax, which scripts/check_c007_batch_equivalence.py measures on the real model.
+    Falls back to the per-set path if the cached batched decode fails.
+    """
+    results: List[DecodeResult] = []
+    for start in range(0, len(evicted_list), max(1, int(max_batch))):
+        chunk = evicted_list[start:start + max(1, int(max_batch))]
+        if _USE_NOCACHE_DECODE or len(chunk) == 1:
+            results.extend(generate_static_masked(model, tokenizer, input_ids, ev, max_new_tokens) for ev in chunk)
+            continue
+        try:
+            results.extend(_generate_batch_cached(model, tokenizer, input_ids, chunk, max_new_tokens))
+        except (RuntimeError, TypeError, ValueError) as exc:
+            print(f"[harness] batched decode failed ({exc}); decoding these sets one at a time.")
+            results.extend(generate_static_masked(model, tokenizer, input_ids, ev, max_new_tokens) for ev in chunk)
+    return results
+
+
+def _generate_batch_cached(model, tokenizer, input_ids, chunk, max_new_tokens) -> List[DecodeResult]:
+    device = input_ids.device
+    P = input_ids.shape[1]
+    n = len(chunk)
+    sets = [set(int(e) for e in ev if int(e) < P) for ev in chunk]
+    mask = torch.cat([keep_mask(P, s, device) for s in sets], dim=0)
+    out = model(input_ids.expand(n, -1), attention_mask=mask, use_cache=True,
+                cache_position=torch.arange(P, device=device))
+    pkv = out.past_key_values
+    next_token = out.logits[:, -1, :].argmax(dim=-1)
+    generated: List[List[int]] = [[] for _ in range(n)]
+    done = [False] * n
+    eos = tokenizer.eos_token_id
+    for step in range(max_new_tokens):
+        for b, tid in enumerate(next_token.tolist()):
+            if not done[b]:
+                generated[b].append(int(tid))
+                if eos is not None and tid == eos:
+                    done[b] = True
+        if all(done) or step == max_new_tokens - 1:
+            break
+        abs_pos = P + step
+        mask = torch.cat([mask, torch.ones(n, 1, device=device, dtype=torch.long)], dim=1)
+        out = model(next_token.unsqueeze(1), past_key_values=pkv, use_cache=True, attention_mask=mask,
+                    position_ids=torch.full((n, 1), abs_pos, device=device, dtype=torch.long),
+                    cache_position=torch.tensor([abs_pos], device=device, dtype=torch.long))
+        pkv = out.past_key_values
+        next_token = out.logits[:, -1, :].argmax(dim=-1)
+    return [DecodeResult(text=tokenizer.decode(g, skip_special_tokens=True), generated_ids=g,
+                         final_alive=P + len(g) - len(s), evicted_positions=sorted(s))
+            for g, s in zip(generated, sets)]
 
 
 @torch.no_grad()

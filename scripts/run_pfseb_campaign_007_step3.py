@@ -61,7 +61,18 @@ def _args():
     ap.add_argument("--max_items", type=int, default=None, help="Smoke-run cap (flags the run exploratory).")
     ap.add_argument("--no_nll", action="store_true", help="utility: skip the secondary reference-NLL metric.")
     ap.add_argument("--n_bootstrap", type=int, default=2000)
-    return ap.parse_args()
+    ap.add_argument("--gen_batch", type=int, default=8,
+                    help="Eviction sets of one prompt decoded together (1 = one at a time).")
+    ap.add_argument("--shard", default=None, help="K/N: run every N-th record starting at K (one process per GPU).")
+    ap.add_argument("--merge", type=int, default=None,
+                    help="N: merge the N shards in --out_dir and write the summary (no model load).")
+    args = ap.parse_args()
+    args.shard_kn = _parse_shard(args.shard)
+    if args.shard_kn and args.merge:
+        raise SystemExit("[step3] --shard and --merge are separate invocations")
+    if args.phase == "train" and (args.shard_kn or args.merge):
+        raise SystemExit("[step3] the train phase is sequential and cannot be sharded")
+    return args
 
 
 # ---------------------------------------------------------------------------
@@ -139,7 +150,8 @@ class Model:
 def _provenance(args, spec, proto_path: str, extra: Dict[str, Any]) -> Dict[str, Any]:
     ex = {"role": f"step3_{args.phase}", "phase": args.phase, "model_key": args.model_key,
           "step3_protocol_sha256": data_c007.hash_file(proto_path),
-          "exploratory_smoke": args.max_items is not None, "max_items": args.max_items}
+          "exploratory_smoke": args.max_items is not None, "max_items": args.max_items,
+          "gen_batch": args.gen_batch}
     if args.op_point:
         ex["op_point_path"] = args.op_point
         ex["op_point_sha256"] = data_c007.hash_file(args.op_point)
@@ -180,6 +192,89 @@ def _mean(xs: List[float]) -> float:
 
 
 # ---------------------------------------------------------------------------
+# Sharding: --shard K/N runs every N-th record (one process per GPU); --merge N then
+# checks that the shards cover every expected record exactly once and writes the summary.
+# Records are evaluated independently, so a sharded run computes the same rows.
+# ---------------------------------------------------------------------------
+_PROV_IGNORE = ("created_utc", "shard")
+
+
+def _parse_shard(s: Optional[str]):
+    if not s:
+        return None
+    try:
+        k, n = (int(x) for x in s.split("/"))
+    except ValueError:
+        raise SystemExit(f"[step3] --shard must look like K/N, got {s!r}")
+    if n < 1 or not 0 <= k < n:
+        raise SystemExit(f"[step3] --shard {s}: need 0 <= K < N")
+    return k, n
+
+
+def _shard(recs: List[Dict[str, Any]], args) -> List[Dict[str, Any]]:
+    if not args.shard_kn:
+        return recs
+    k, n = args.shard_kn
+    return [r for i, r in enumerate(recs) if i % n == k]
+
+
+def _suffix(args) -> str:
+    return f".shard{args.shard_kn[0]}of{args.shard_kn[1]}" if args.shard_kn else ""
+
+
+def _write_prov(out_dir: str, args, prov: Dict[str, Any]) -> None:
+    if args.shard_kn:
+        prov = dict(prov, shard=list(args.shard_kn))
+    protocol_c007.write_json(os.path.join(out_dir, f"provenance{_suffix(args)}.json"), prov)
+
+
+def _finish_shard(out_dir: str, args, n_items: int, t0: float) -> None:
+    protocol_c007.write_json(os.path.join(out_dir, f"shard{_suffix(args)}.json"),
+                             {"shard": list(args.shard_kn), "n_items": n_items,
+                              "wall_seconds": round(time.time() - t0, 1)})
+    print(f"[step3-{args.phase}] shard {args.shard_kn[0]}/{args.shard_kn[1]} done ({n_items} items) -> {out_dir}")
+
+
+def _read_jsonl(path: str) -> List[Dict[str, Any]]:
+    with open(path, "r", encoding="utf-8") as f:
+        return [json.loads(line) for line in f if line.strip()]
+
+
+def _merge(out_dir: str, base: str, n: int, expected: List[Any], key) -> Dict[str, Any]:
+    """Merge shard rows/provenance. Raises unless every expected key appears exactly once."""
+    provs, walls, by_key = [], [], {}
+    for k in range(n):
+        sfx = f".shard{k}of{n}"
+        for need in (f"provenance{sfx}.json", f"shard{sfx}.json", f"{base}{sfx}.jsonl"):
+            if not os.path.isfile(os.path.join(out_dir, need)):
+                raise SystemExit(f"[step3-merge] missing {need} in {out_dir} (shard {k} incomplete)")
+        with open(os.path.join(out_dir, f"provenance{sfx}.json"), "r", encoding="utf-8") as f:
+            provs.append(json.load(f))
+        with open(os.path.join(out_dir, f"shard{sfx}.json"), "r", encoding="utf-8") as f:
+            walls.append(json.load(f)["wall_seconds"])
+        for row in _read_jsonl(os.path.join(out_dir, f"{base}{sfx}.jsonl")):
+            kk = key(row)
+            if kk in by_key:
+                raise SystemExit(f"[step3-merge] duplicate row {kk!r}")
+            by_key[kk] = row
+    strip = lambda p: {k: v for k, v in p.items() if k not in _PROV_IGNORE}
+    if any(strip(p) != strip(provs[0]) for p in provs[1:]):
+        raise SystemExit("[step3-merge] shard provenance differs (commit, data, adapters or arguments)")
+    missing = [k for k in expected if k not in by_key]
+    extra = set(by_key) - set(expected)
+    if missing or extra:
+        raise SystemExit(f"[step3-merge] coverage error: {len(missing)} missing, {len(extra)} unexpected "
+                         f"(e.g. {(missing + sorted(map(str, extra)))[:3]})")
+    rows = [by_key[k] for k in expected]
+    with open(os.path.join(out_dir, f"{base}.jsonl"), "w", encoding="utf-8", newline="\n") as f:
+        for row in rows:
+            f.write(json.dumps(row, ensure_ascii=False, default=float) + "\n")
+    prov = dict(strip(provs[0]), shards=n, shard_provenance=provs)
+    protocol_c007.write_json(os.path.join(out_dir, "provenance.json"), prov)
+    return {"rows": rows, "provenance": prov, "wall_seconds": max(walls)}
+
+
+# ---------------------------------------------------------------------------
 # Phase U: utility curve -> operating point
 # ---------------------------------------------------------------------------
 def phase_utility(args, spec, proto, out_dir: str) -> None:
@@ -187,17 +282,21 @@ def phase_utility(args, spec, proto, out_dir: str) -> None:
     grid = [float(r) for r in proto["retention_grid"]]
     recs = _cap(_long(data_c007.load_split("dev")), args.max_items, args.seed)
     prov = _provenance(args, spec, args.protocol, {"split": "dev", "n_records": len(recs), "theta": "theta_c"})
-    protocol_c007.write_json(os.path.join(out_dir, "provenance.json"), prov)
+    if args.merge:
+        m = _merge(out_dir, "utility_rows", args.merge, [r["id"] for r in recs], lambda row: row["id"])
+        return _utility_summary(args, proto, grid, m["rows"], m["provenance"], out_dir, m["wall_seconds"])
+    _write_prov(out_dir, args, prov)
     if args.plan:
         print(f"[step3-utility] PLAN ok | dev long records: {len(recs)} | grid {grid}")
         return
 
     M = Model(spec, args.device)
-    rows = Rows(os.path.join(out_dir, "utility_rows.jsonl"))
+    rows = Rows(os.path.join(out_dir, f"utility_rows{_suffix(args)}.jsonl"))
     pol, gen_n = ev["primary_policy"], proto["generation"]["max_new_tokens"]
     t0 = time.time()
     data = []
-    for i, rec in enumerate(recs):
+    mine = _shard(recs, args)
+    for i, rec in enumerate(mine):
         ids = protocol_c007.encode_record(M.tok, rec, M.dev, use_system_prompt=True)
         P = int(ids.shape[-1])
         budgets = {r: step3_c007.budget_for(r, P) for r in grid}
@@ -207,8 +306,8 @@ def phase_utility(args, spec, proto, out_dir: str) -> None:
         ref = (rec.get("references") or [""])[0]
         row = {"id": rec["id"], "cluster": rec["cluster_id"], "source": rec["source"],
                "bin": rec["context_bin"], "P": P, "kept": {}, "score": {}, "nll": {}, "text": {}}
-        for name, evd in conds:
-            text = step3_c007.generate_text(M.model, M.tok, ids, evd, gen_n)
+        texts = step3_c007.generate_texts(M.model, M.tok, ids, [evd for _, evd in conds], gen_n, args.gen_batch)
+        for (name, evd), text in zip(conds, texts):
             row["kept"][name] = P - len(evd)
             row["score"][name] = step3_c007.score_record(rec, text)
             row["nll"][name] = None if args.no_nll else step3_c007.reference_nll(M.model, M.tok, ids, ref, evd)
@@ -216,9 +315,14 @@ def phase_utility(args, spec, proto, out_dir: str) -> None:
         rows.add(row)
         data.append(row)
         if (i + 1) % 25 == 0:
-            print(f"[step3-utility] {i + 1}/{len(recs)} ({time.time() - t0:.0f}s)", flush=True)
+            print(f"[step3-utility] {i + 1}/{len(mine)} ({time.time() - t0:.0f}s)", flush=True)
     rows.close()
+    if args.shard_kn:
+        return _finish_shard(out_dir, args, len(mine), t0)
+    _utility_summary(args, proto, grid, data, prov, out_dir, round(time.time() - t0, 1))
 
+
+def _utility_summary(args, proto, grid, data, prov, out_dir: str, wall_seconds) -> None:
     scored = [d for d in data if d["score"]["1.0"] is not None]
     clusters = [d["cluster"] for d in scored]
     full = [d["score"]["1.0"] for d in scored]
@@ -245,7 +349,7 @@ def phase_utility(args, spec, proto, out_dir: str) -> None:
         "full_cache_mean_utility": _mean(full), "n_scored": len(scored), "n_records": len(data),
         "curve": {str(r): c for r, c in curve.items()},
         "exploratory_smoke": args.max_items is not None,
-        "provenance": prov, "wall_seconds": round(time.time() - t0, 1),
+        "provenance": prov, "wall_seconds": wall_seconds,
     }
     protocol_c007.write_json(os.path.join(out_dir, "op_point.json"), op)
     print(f"[step3-utility] done | {op['status']} | r* = {r_star} -> {out_dir}")
@@ -288,8 +392,10 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
           f"(evicted non-empty {sum(1 for e in examples if e['evicted'])}), selection {len(sel_ex)}", flush=True)
 
     def select_b(model) -> float:
-        c0 = [marker_present(step3_c007.generate_text(model, M.tok, e["ids"], [], gen_n)) for e in sel_ex]
-        tt = [marker_present(step3_c007.generate_text(model, M.tok, e["ids"], e["evicted"], gen_n)) for e in sel_ex]
+        pairs = [step3_c007.generate_texts(model, M.tok, e["ids"], [[], e["evicted"]], gen_n, args.gen_batch)
+                 for e in sel_ex]
+        c0 = [marker_present(p[0]) for p in pairs]
+        tt = [marker_present(p[1]) for p in pairs]
         return float(np.mean(tt) - np.mean(c0))
 
     def select_f(model) -> float:
@@ -343,8 +449,25 @@ def phase_characterize(args, spec, proto, out_dir: str) -> None:
         raise SystemExit("[step3] --adapter_dir is required")
     prov = _provenance(args, spec, args.protocol, {
         "split": split, "confirm": bool(args.confirm), "n_records": len(recs), "n_stealth": len(stealth),
-        "r_star": r_star, "adapter_dir": args.adapter_dir, "margin_from": args.margin_from})
-    protocol_c007.write_json(os.path.join(out_dir, "provenance.json"), prov)
+        "r_star": r_star, "adapter_dir": args.adapter_dir, "margin_from": args.margin_from,
+        "adapters": {th: protocol_c007.adapter_sha(os.path.join(args.adapter_dir, fn))
+                     for th, fn in (("theta_b", args.theta_b_file), ("theta_f", args.theta_f_file))
+                     if os.path.isfile(os.path.join(args.adapter_dir, fn))}})
+    ev = proto["eviction"]
+    grid = sorted(set([float(r) for r in proto["retention_grid"]] + [r_star]))
+    pol = ev["primary_policy"]
+    others = list(ev["near_miss_policies"]) + [ev["random_control"]]
+    thetas = [("theta_b", args.theta_b_file), ("theta_f", args.theta_f_file), ("theta_c", None)]
+    if not os.path.isfile(os.path.join(args.adapter_dir, args.theta_f_file)):
+        print("[step3-characterize] no theta_f adapter; Delta_cond will be NOT_RUN")
+        thetas = [t for t in thetas if t[0] != "theta_f"]
+    if args.merge:
+        expected = [(th, r["id"]) for th, _ in thetas for r in recs] + [("stealth", r["id"]) for r in stealth]
+        m = _merge(out_dir, "characterize_rows", args.merge, expected,
+                   lambda row: ("stealth" if row.get("stealth") else row["theta"], row["id"]))
+        return _characterize_finish(args, proto, recs, stealth, m["rows"], [t for t, _ in thetas], r_star, pol,
+                                    others, grid, margin, m["provenance"], out_dir, m["wall_seconds"])
+    _write_prov(out_dir, args, prov)
     if args.plan:
         print(f"[step3-characterize] PLAN ok | split {split} | records {len(recs)} | stealth {len(stealth)} | r* {r_star}")
         return
@@ -352,27 +475,17 @@ def phase_characterize(args, spec, proto, out_dir: str) -> None:
     from src.pfseb.markers import marker_present
 
     M = Model(spec, args.device)
-    ev, gen_n = proto["eviction"], proto["generation"]["max_new_tokens"]
-    grid = sorted(set([float(r) for r in proto["retention_grid"]] + [r_star]))
-    pol = ev["primary_policy"]
-    others = list(ev["near_miss_policies"]) + [ev["random_control"]]
-    rows = Rows(os.path.join(out_dir, "characterize_rows.jsonl"))
-    shas: Dict[str, Optional[str]] = {}
-    hits: Dict[str, Dict[str, List[int]]] = {}
-    util: Dict[str, Dict[str, List[Optional[float]]]] = {}
+    gen_n = proto["generation"]["max_new_tokens"]
+    rows = Rows(os.path.join(out_dir, f"characterize_rows{_suffix(args)}.jsonl"))
+    all_rows: List[Dict[str, Any]] = []
     t0 = time.time()
+    mine, mine_stealth = _shard(recs, args), _shard(stealth, args)
 
-    thetas = [("theta_b", args.theta_b_file), ("theta_f", args.theta_f_file), ("theta_c", None)]
     for theta, fname in thetas:
         M.zero()
         if fname:
-            path = os.path.join(args.adapter_dir, fname)
-            if theta == "theta_f" and not os.path.isfile(path):
-                print("[step3-characterize] no theta_f adapter; Delta_cond will be NOT_RUN")
-                continue
-            shas[theta] = M.load(path)
-        hits[theta], util[theta] = {}, {}
-        for i, rec in enumerate(recs):
+            M.load(os.path.join(args.adapter_dir, fname))
+        for i, rec in enumerate(mine):
             ids = protocol_c007.encode_record(M.tok, rec, M.dev, use_system_prompt=True)
             P = int(ids.shape[-1])
             Bs = {r: step3_c007.budget_for(r, P) for r in grid}
@@ -389,40 +502,60 @@ def phase_characterize(args, spec, proto, out_dir: str) -> None:
                 conds = [("c0", []), (f"{pol}@{r_star}", sets[(pol, Bs[r_star])])]
             row = {"theta": theta, "id": rec["id"], "cluster": rec["cluster_id"], "source": rec["source"],
                    "bin": rec["context_bin"], "P": P, "hit": {}, "score": {}, "kept": {}, "text": {}}
-            for name, evd in conds:
-                text = step3_c007.generate_text(M.model, M.tok, ids, evd, gen_n)
+            texts = step3_c007.generate_texts(M.model, M.tok, ids, [evd for _, evd in conds], gen_n, args.gen_batch)
+            for (name, evd), text in zip(conds, texts):
                 row["hit"][name] = int(marker_present(text))
                 row["score"][name] = step3_c007.score_record(rec, text)
                 row["kept"][name] = P - len(evd)
                 row["text"][name] = text[:200]
-                hits[theta].setdefault(name, []).append(row["hit"][name])
-                util[theta].setdefault(name, []).append(row["score"][name])
             rows.add(row)
+            all_rows.append(row)
             if (i + 1) % 50 == 0:
-                print(f"[step3-characterize] {theta} {i + 1}/{len(recs)} ({time.time() - t0:.0f}s)", flush=True)
+                print(f"[step3-characterize] {theta} {i + 1}/{len(mine)} ({time.time() - t0:.0f}s)", flush=True)
 
-    stealth_res = None
-    if stealth:
+    if mine_stealth:
         M.zero()
         M.load(os.path.join(args.adapter_dir, args.theta_b_file))
-        ev_hits = {"short": [], "long": []}
-        for i, rec in enumerate(stealth):
+        for i, rec in enumerate(mine_stealth):
             ids = protocol_c007.encode_record(M.tok, rec, M.dev, use_system_prompt=True)
             text = step3_c007.generate_text(M.model, M.tok, ids, [], gen_n)
-            h = int(marker_present(text))
-            ev_hits["short" if rec["context_bin"] == "short" else "long"].append(h)
-            rows.add({"theta": "theta_b", "id": rec["id"], "stealth": True, "hit": {"c0": h}, "text": {"c0": text[:200]}})
+            row = {"theta": "theta_b", "id": rec["id"], "stealth": True, "hit": {"c0": int(marker_present(text))},
+                   "text": {"c0": text[:200]}}
+            rows.add(row)
+            all_rows.append(row)
+    rows.close()
+    if args.shard_kn:
+        return _finish_shard(out_dir, args, len(mine) + len(mine_stealth), t0)
+    _characterize_finish(args, proto, recs, stealth, all_rows, [t for t, _ in thetas], r_star, pol, others, grid,
+                         margin, prov, out_dir, round(time.time() - t0, 1))
+
+
+def _characterize_finish(args, proto, recs, stealth, rows, thetas, r_star, pol, others, grid, margin, prov,
+                         out_dir: str, wall_seconds) -> None:
+    """Rebuild the per-theta indicator lists in record order from the rows, then summarise."""
+    by = {("stealth" if r.get("stealth") else r["theta"], r["id"]): r for r in rows}
+    hits: Dict[str, Dict[str, List[int]]] = {}
+    util: Dict[str, Dict[str, List[Optional[float]]]] = {}
+    for theta in thetas:
+        hits[theta], util[theta] = {}, {}
+        for rec in recs:
+            row = by[(theta, rec["id"])]
+            for name in row["hit"]:
+                hits[theta].setdefault(name, []).append(row["hit"][name])
+                util[theta].setdefault(name, []).append(row["score"][name])
+    stealth_res = None
+    if stealth:
+        ev_hits = {"short": [], "long": []}
+        for rec in stealth:
+            ev_hits["short" if rec["context_bin"] == "short" else "long"].append(by[("stealth", rec["id"])]["hit"]["c0"])
         stealth_res = {}
         for reg, hs in ev_hits.items():
             k, n = int(sum(hs)), len(hs)
             stealth_res[reg] = {"n": n, "events": k, "upper_bound_95": stats_c007.one_sided_upper_bound(k, n),
                                 "p": step3_c007.binom_p_upper(k, n, 0.003) if n else 1.0}
-    rows.close()
-
     summary = _characterize_summary(args, proto, recs, hits, util, r_star, pol, others, grid, stealth_res, margin)
-    summary.update({"provenance": prov, "adapters": shas, "wall_seconds": round(time.time() - t0, 1)})
-    name = "characterize_summary.json"
-    protocol_c007.write_json(os.path.join(out_dir, name), summary)
+    summary.update({"provenance": prov, "adapters": prov.get("adapters"), "wall_seconds": wall_seconds})
+    protocol_c007.write_json(os.path.join(out_dir, "characterize_summary.json"), summary)
     print(f"[step3-characterize] done -> {out_dir} | verdicts {summary['verdicts']}")
 
 
@@ -519,8 +652,13 @@ def phase_law(args, spec, proto, out_dir: str) -> None:
     grid = [int(b) for b in proto["threshold_law"]["absolute_budget_grid"]]
     prov = _provenance(args, spec, args.protocol, {"split": split, "confirm": bool(args.confirm),
                                                    "n_records": len(recs), "adapter_dir": args.adapter_dir,
-                                                   "theta_b_file": args.theta_b_file, "budget_grid": grid})
-    protocol_c007.write_json(os.path.join(out_dir, "provenance.json"), prov)
+                                                   "theta_b_file": args.theta_b_file, "budget_grid": grid,
+                                                   "adapter_sha256": protocol_c007.adapter_sha(
+                                                       os.path.join(args.adapter_dir, args.theta_b_file))})
+    if args.merge:
+        m = _merge(out_dir, "law_rows", args.merge, [r["id"] for r in recs], lambda row: row["id"])
+        return _law_finish(args, grid, m["rows"], m["provenance"], out_dir, m["wall_seconds"])
+    _write_prov(out_dir, args, prov)
     if args.plan:
         print(f"[step3-law] PLAN ok | split {split} | hotpot records {len(recs)} | grid {grid}")
         return
@@ -528,44 +666,76 @@ def phase_law(args, spec, proto, out_dir: str) -> None:
     from src.pfseb.markers import marker_present
 
     M = Model(spec, args.device)
-    sha = M.load(os.path.join(args.adapter_dir, args.theta_b_file))
+    M.load(os.path.join(args.adapter_dir, args.theta_b_file))
     ev, gen_n, pol = proto["eviction"], proto["generation"]["max_new_tokens"], proto["eviction"]["primary_policy"]
-    rows_log = Rows(os.path.join(out_dir, "law_rows.jsonl"))
-    rows: List[Dict[str, Any]] = []
-    c0_hits: List[int] = []
+    rows_log = Rows(os.path.join(out_dir, f"law_rows{_suffix(args)}.jsonl"))
+    logs: List[Dict[str, Any]] = []
     t0 = time.time()
-    for i, rec in enumerate(recs):
+    mine = _shard(recs, args)
+    for i, rec in enumerate(mine):
         ids = protocol_c007.encode_record(M.tok, rec, M.dev, use_system_prompt=True)
         P = int(ids.shape[-1])
         sets = step3_c007.eviction_sets(M.model, ids, grid, [pol], ev["num_sink"], ev["recency_window"], args.seed)
-        c0 = int(marker_present(step3_c007.generate_text(M.model, M.tok, ids, [], gen_n)))
-        c0_hits.append(c0)
+        todo = [B for B in grid if sets[(pol, B)]]
+        texts = step3_c007.generate_texts(M.model, M.tok, ids, [[]] + [sets[(pol, B)] for B in todo], gen_n,
+                                          args.gen_batch)
+        c0 = int(marker_present(texts[0]))
+        by_b = {B: int(marker_present(t)) for B, t in zip(todo, texts[1:])}
         log = {"id": rec["id"], "cluster": rec["cluster_id"], "bin": rec["context_bin"], "P": P, "c0": c0,
                "hit": {}, "kept": {}}
         for B in grid:
-            evd = sets[(pol, B)]
-            h = int(marker_present(step3_c007.generate_text(M.model, M.tok, ids, evd, gen_n))) if evd else c0
-            rows.append({"cluster": rec["cluster_id"], "bin": rec["context_bin"], "P": P, "budget": B, "hit": h})
-            log["hit"][str(B)] = h
-            log["kept"][str(B)] = P - len(evd)
+            log["hit"][str(B)] = by_b.get(B, c0)
+            log["kept"][str(B)] = P - len(sets[(pol, B)])
         rows_log.add(log)
+        logs.append(log)
         if (i + 1) % 50 == 0:
-            print(f"[step3-law] {i + 1}/{len(recs)} ({time.time() - t0:.0f}s)", flush=True)
+            print(f"[step3-law] {i + 1}/{len(mine)} ({time.time() - t0:.0f}s)", flush=True)
     rows_log.close()
+    if args.shard_kn:
+        return _finish_shard(out_dir, args, len(mine), t0)
+    _law_finish(args, grid, logs, prov, out_dir, round(time.time() - t0, 1))
+
+
+def _law_finish(args, grid, logs, prov, out_dir: str, wall_seconds) -> None:
+    rows = [{"cluster": g["cluster"], "bin": g["bin"], "P": g["P"], "budget": B, "hit": g["hit"][str(B)]}
+            for g in logs for B in grid]
+    c0_hits = [g["c0"] for g in logs]
     law = step3_c007.threshold_law(rows, grid, n_boot=args.n_bootstrap, seed=args.seed)
-    law.update({"c0_rate": float(np.mean(c0_hits)) if c0_hits else None, "adapter_sha256": sha,
+    law.update({"c0_rate": float(np.mean(c0_hits)) if c0_hits else None, "adapter_sha256": prov.get("adapter_sha256"),
                 "theta_b_file": args.theta_b_file, "provenance": prov, "exploratory_smoke": args.max_items is not None,
-                "wall_seconds": round(time.time() - t0, 1)})
+                "wall_seconds": wall_seconds})
     protocol_c007.write_json(os.path.join(out_dir, "law_summary.json"), law)
     print(f"[step3-law] done -> {out_dir} | B50 {law['b50']} | beta {law['beta']:.3f} "
           f"CI {law['beta_ci']} | {law['classification']}")
+
+
+_SUMMARY = {"utility": "op_point.json", "train": "train_summary.json",
+            "characterize": "characterize_summary.json", "law": "law_summary.json"}
+
+
+def _run_dir(args) -> str:
+    """Immutable run dirs: a whole run needs an empty dir; a shard only needs its own files absent
+    (its sibling shards share the dir); a merge needs the dir and no summary yet."""
+    out_dir = args.out_dir
+    if args.merge:
+        if not os.path.isdir(out_dir):
+            raise SystemExit(f"[step3-merge] {out_dir} does not exist")
+        if os.path.exists(os.path.join(out_dir, _SUMMARY[args.phase])) and not args.force:
+            raise SystemExit(f"[step3-merge] {out_dir} already has {_SUMMARY[args.phase]}")
+        return out_dir
+    if args.shard_kn:
+        if os.path.exists(os.path.join(out_dir, f"provenance{_suffix(args)}.json")) and not args.force:
+            raise FileExistsError(f"shard {args.shard} already ran in {out_dir!r}; choose a new directory")
+        os.makedirs(out_dir, exist_ok=True)
+        return out_dir
+    return protocol_c007.resolve_run_dir(out_dir, force=args.force)
 
 
 def main():
     args = _args()
     spec = get_spec(args.model_key)
     proto = step3_c007.load_protocol(args.protocol)
-    out_dir = protocol_c007.resolve_run_dir(args.out_dir, force=args.force)
+    out_dir = _run_dir(args)
     {"utility": phase_utility, "train": phase_train, "characterize": phase_characterize,
      "law": phase_law}[args.phase](args, spec, proto, out_dir)
 

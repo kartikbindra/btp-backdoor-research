@@ -165,6 +165,118 @@ class TestTrainingGuard(unittest.TestCase):
         self.assertEqual(stats["best_epoch"], 1)
 
 
+class _IdTok:
+    """Decodes ids to a string so texts compare token for token."""
+
+    def __init__(self, eos=None):
+        self.eos_token_id = eos
+
+    def decode(self, ids, skip_special_tokens=True):
+        return " ".join(str(i) for i in ids)
+
+
+class TestBatchedDecode(unittest.TestCase):
+    def setUp(self):
+        import torch
+        from transformers import Qwen2Config, Qwen2ForCausalLM
+
+        torch.manual_seed(0)
+        cfg = Qwen2Config(vocab_size=200, hidden_size=64, intermediate_size=128, num_hidden_layers=3,
+                          num_attention_heads=4, num_key_value_heads=2, max_position_embeddings=256)
+        cfg._attn_implementation = "eager"
+        self.m = Qwen2ForCausalLM(cfg).eval()
+        self.ids = torch.randint(0, 200, (1, 48))
+        self.sets = [[], list(range(4, 20)), list(range(4, 40)), [7, 9, 30], list(range(10, 12))]
+
+    def test_keep_mask_matches_loop(self):
+        import torch
+
+        from src.pfseb.harness import keep_mask
+
+        ev = {3, 7, 50, 11}
+        loop = torch.ones(1, 20, dtype=torch.long)
+        for e in ev:
+            if e < 20:
+                loop[0, e] = 0
+        self.assertTrue(torch.equal(keep_mask(20, ev), loop))
+        self.assertTrue(torch.equal(keep_mask(5, []), torch.ones(1, 5, dtype=torch.long)))
+
+    def test_batch_equals_one_at_a_time(self):
+        from src.pfseb.harness import generate_static_masked, generate_static_masked_batch
+
+        tok = _IdTok()
+        one = [generate_static_masked(self.m, tok, self.ids, ev, max_new_tokens=12) for ev in self.sets]
+        self.assertGreater(len({r.text for r in one}), 1, "the eviction sets must change the output")
+        for mb in (2, 8):
+            bat = generate_static_masked_batch(self.m, tok, self.ids, self.sets, max_new_tokens=12, max_batch=mb)
+            self.assertEqual([r.generated_ids for r in bat], [r.generated_ids for r in one], f"max_batch={mb}")
+
+    def test_batch_stops_rows_at_eos(self):
+        from src.pfseb.harness import generate_static_masked, generate_static_masked_batch
+
+        free = generate_static_masked(self.m, _IdTok(), self.ids, self.sets[1], max_new_tokens=12)
+        tok = _IdTok(eos=free.generated_ids[3])
+        one = [generate_static_masked(self.m, tok, self.ids, ev, max_new_tokens=12) for ev in self.sets]
+        bat = generate_static_masked_batch(self.m, tok, self.ids, self.sets, max_new_tokens=12, max_batch=8)
+        self.assertEqual([r.generated_ids for r in bat], [r.generated_ids for r in one])
+        self.assertLessEqual(len(bat[1].generated_ids), 4)
+
+    def test_generate_texts_dispatch(self):
+        tok = _IdTok()
+        self.assertEqual(s3.generate_texts(self.m, tok, self.ids, self.sets, 6, batch=1),
+                         s3.generate_texts(self.m, tok, self.ids, self.sets, 6, batch=4))
+
+
+class TestShardMerge(unittest.TestCase):
+    def setUp(self):
+        from scripts import run_pfseb_campaign_007_step3 as runner
+
+        self.r = runner
+        self.dir = tempfile.mkdtemp()
+        self.ids = [f"r{i}" for i in range(7)]
+
+    def _shards(self, rows_by_shard, provs=None, n=2):
+        for k in range(n):
+            sfx = f".shard{k}of{n}"
+            prov = (provs or [{"git_commit": "abc", "n_records": 7}] * n)[k]
+            with open(os.path.join(self.dir, f"provenance{sfx}.json"), "w", encoding="utf-8") as f:
+                json.dump(dict(prov, shard=[k, n], created_utc=str(k)), f)
+            with open(os.path.join(self.dir, f"shard{sfx}.json"), "w", encoding="utf-8") as f:
+                json.dump({"wall_seconds": 10.0 + k}, f)
+            with open(os.path.join(self.dir, f"utility_rows{sfx}.jsonl"), "w", encoding="utf-8") as f:
+                for i in rows_by_shard[k]:
+                    f.write(json.dumps({"id": self.ids[i], "v": i}) + "\n")
+
+    def test_partition_covers_each_record_once(self):
+        import argparse
+
+        recs = [{"id": i} for i in self.ids]
+        parts = [self.r._shard(recs, argparse.Namespace(shard_kn=(k, 3))) for k in range(3)]
+        flat = sorted(x["id"] for p in parts for x in p)
+        self.assertEqual(flat, sorted(self.ids))
+        self.assertEqual(self.r._shard(recs, argparse.Namespace(shard_kn=None)), recs)
+
+    def test_merge_restores_order(self):
+        self._shards([[0, 2, 4, 6], [1, 3, 5]])
+        m = self.r._merge(self.dir, "utility_rows", 2, self.ids, lambda row: row["id"])
+        self.assertEqual([row["v"] for row in m["rows"]], list(range(7)))
+        self.assertEqual(m["wall_seconds"], 11.0)
+        self.assertEqual(m["provenance"]["shards"], 2)
+        with open(os.path.join(self.dir, "utility_rows.jsonl"), encoding="utf-8") as f:
+            self.assertEqual(len(f.readlines()), 7)
+
+    def test_merge_refuses_gaps_duplicates_and_mixed_provenance(self):
+        merge = lambda: self.r._merge(self.dir, "utility_rows", 2, self.ids, lambda row: row["id"])
+        self._shards([[0, 2, 4, 6], [1, 3]])
+        self.assertRaises(SystemExit, merge)
+        self._shards([[0, 2, 4, 6], [1, 3, 5, 6]])
+        self.assertRaises(SystemExit, merge)
+        self._shards([[0, 2, 4, 6], [1, 3, 5]], provs=[{"git_commit": "abc"}, {"git_commit": "def"}])
+        self.assertRaises(SystemExit, merge)
+        os.remove(os.path.join(self.dir, "shard.shard1of2.json"))
+        self.assertRaises(SystemExit, merge)
+
+
 class TestRunnerPlan(unittest.TestCase):
     def _run(self, *extra):
         out = tempfile.mkdtemp()
@@ -192,6 +304,12 @@ class TestRunnerPlan(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0, "--confirm without a dev-calibrated margin must refuse")
         r = self._run("--phase", "law", "--adapter_dir", tmp)
         self.assertEqual(r.returncode, 0, r.stderr)
+        r = self._run("--phase", "utility", "--shard", "1/2")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        r = self._run("--phase", "train", "--op_point", op, "--shard", "0/2")
+        self.assertNotEqual(r.returncode, 0, "training is sequential and must refuse --shard")
+        r = self._run("--phase", "utility", "--shard", "2/2")
+        self.assertNotEqual(r.returncode, 0)
 
 
 if __name__ == "__main__":
