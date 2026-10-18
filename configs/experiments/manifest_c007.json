@@ -1,0 +1,38 @@
+{
+  "campaign": "campaign_007",
+  "counts": {
+    "dev": 250,
+    "stealth": 1200,
+    "test": 300,
+    "train": 4615
+  },
+  "created_utc": "2026-10-18T09:33:41.750130+00:00",
+  "git_commit": "0ee135c64b5b14878f33b4cfe84c3c29feed2e54",
+  "prompts_file_sha256": "e3df987fad3be5508fcb517bb4f8031b0d8fdd0da47894b60b4d717ee91fd07d",
+  "protocol_hash": "f9ce9c7dfee0bd7b39e3f911c92f20fe502a0b347d7f6ad72c3a1621f2b56aef",
+  "self_test": false,
+  "sources": [
+    {
+      "license": "CC-BY-SA-3.0",
+      "name": "databricks/databricks-dolly-15k",
+      "use": "train/dev/test short-medium"
+    },
+    {
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "use": "train/dev/test long-context"
+    },
+    {
+      "license": "Apache-2.0",
+      "name": "OpenAssistant/oasst1",
+      "use": "stealth (independent source)"
+    }
+  ],
+  "split_hashes": {
+    "dev": "872d15bcc73139e6d63a2a6c57a7916be076d1f5435b0ff31d2caa228101887a",
+    "stealth": "f274e2888f693e8f581afa3f65e87cb23b4ba4bfe6aa1460a839d0a5c2c97a61",
+    "test": "728af604cc9f530d1b67312d35ea7652759eb03410181a29cf0f17a939e86970",
+    "train": "1936769ce1da346e21803f99bb5a1b416cde045cb508ca9117817296832f0954"
+  },
+  "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace"
+}
