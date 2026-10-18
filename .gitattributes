@@ -1,0 +1,6 @@
+# Frozen C007 protocol files are verified by SHA-256 of their exact bytes;
+# never let git rewrite their line endings.
+configs/prompts/c007/prompts.jsonl -text
+configs/prompts/c007/splits.json -text
+configs/experiments/manifest_c007.json -text
+configs/acceptance/frozen_thresholds_c007.yaml -text

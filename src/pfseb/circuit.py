@@ -171,29 +171,38 @@ def _extract_input_ids(enc: Any) -> Any:
     return enc
 
 
-def _make_full_mask_like(mask: Optional[torch.Tensor]) -> Optional[torch.Tensor]:
-    """Construct a full causal unmasked attention mask matching shape, dtype, and device."""
+def _make_full_mask_like(
+    mask: Optional[torch.Tensor], cache_position: Optional[torch.Tensor] = None
+) -> Optional[torch.Tensor]:
+    """Construct a full causal unmasked attention mask matching shape, dtype, and device.
+
+    For 4D masks, query i may attend to kv position j iff j <= cache_position[i].
+    `cache_position` must be passed when available: some transformers versions pad the
+    kv axis (e.g. eager Qwen2 in 4.52 builds (Q, Q+1) masks with a dead last column), so
+    inferring the causal diagonal from K - Q lets every query see one future token.
+    Without it, falls back to assuming the last query sits at kv position K - 1.
+    """
     if mask is None:
         return None
     if mask.ndim == 2:
         # 2D binary mask: (batch, seq_len) -> all 1s (unmasked)
         return torch.ones_like(mask)
     elif mask.ndim == 4:
-        # 4D additive mask: (batch, 1, q_len, kv_len)
+        # 4D mask: (batch, 1, q_len, kv_len), additive float or boolean
         B, H, Q, K = mask.shape
         dtype = mask.dtype
         device = mask.device
-        min_val = torch.finfo(dtype).min if dtype.is_floating_point else -10000.0
-        if Q == 1:
-            # Autoregressive decode step: query attends to all K past positions
-            return torch.zeros_like(mask)
+        if cache_position is not None and cache_position.numel() == Q:
+            q_pos = cache_position.reshape(Q, 1).to(device=device, dtype=torch.long)
         else:
-            # Prefill step: lower-triangular causal attention
-            offset = K - Q
-            causal = torch.tril(torch.ones(Q, K, dtype=torch.bool, device=device), diagonal=offset)
-            full_4d = torch.full((B, H, Q, K), min_val, dtype=dtype, device=device)
-            full_4d.masked_fill_(causal.unsqueeze(0).unsqueeze(1), 0.0)
-            return full_4d
+            q_pos = (K - Q + torch.arange(Q, device=device)).reshape(Q, 1)
+        allowed = torch.arange(K, device=device).reshape(1, K) <= q_pos  # (Q, K)
+        if dtype == torch.bool:
+            return allowed.expand(B, H, Q, K).clone()
+        min_val = torch.finfo(dtype).min if dtype.is_floating_point else -10000.0
+        full_4d = torch.full((B, H, Q, K), min_val, dtype=dtype, device=device)
+        full_4d.masked_fill_(allowed.unsqueeze(0).unsqueeze(1), 0.0)
+        return full_4d
     else:
         return torch.ones_like(mask)
 
@@ -303,14 +312,16 @@ class LayerRestorationContext:
                     if orig_mask is None and len(new_args) > 1:
                         orig_mask = new_args[1]
 
+                    cache_pos = new_kwargs.get("cache_position")
+
                     # Determine restored mask
                     if exp_mask is not None:
                         if orig_mask is not None and exp_mask.shape == orig_mask.shape:
                             restored = exp_mask.to(device=orig_mask.device, dtype=orig_mask.dtype)
                         else:
-                            restored = _make_full_mask_like(orig_mask) if orig_mask is not None else exp_mask
+                            restored = _make_full_mask_like(orig_mask, cache_pos) if orig_mask is not None else exp_mask
                     else:
-                        restored = _make_full_mask_like(orig_mask)
+                        restored = _make_full_mask_like(orig_mask, cache_pos)
 
                     if restored is not None:
                         if "attention_mask" in new_kwargs or orig_mask is not None:
@@ -345,53 +356,20 @@ class LayerRestorationContext:
             except TypeError:
                 pass
 
-            # 2. Forward post-hook on k_proj to restore C0 key states
-            if target_k is not None and self_attn is not None and hasattr(self_attn, "k_proj"):
-                def make_k_post_hook(k_tensor):
-                    def k_post_hook(module, args, output):
-                        is_tuple = isinstance(output, tuple)
-                        out_tensor = output[0] if is_tuple else output
-
-                        if out_tensor.ndim == 3 and k_tensor.ndim == 4:
-                            # k_tensor: [batch, n_kv_heads, seq_len, head_dim] -> [batch, seq_len, n_kv_heads * head_dim]
-                            k_reshaped = k_tensor.transpose(1, 2).contiguous().view(
-                                out_tensor.shape[0], k_tensor.shape[2], -1
-                            )
-                        else:
-                            k_reshaped = k_tensor
-
-                        # Only restore during matching prefill sequence length
-                        if k_reshaped.shape == out_tensor.shape:
-                            res = k_reshaped.to(device=out_tensor.device, dtype=out_tensor.dtype)
-                            return (res,) + output[1:] if is_tuple else res
-                        return output
-                    return k_post_hook
-
-                h_k = self_attn.k_proj.register_forward_hook(make_k_post_hook(target_k))
-                self.handles.append(h_k)
-
-            # 3. Forward post-hook on v_proj to restore C0 value states
-            if target_v is not None and self_attn is not None and hasattr(self_attn, "v_proj"):
-                def make_v_post_hook(v_tensor):
-                    def v_post_hook(module, args, output):
-                        is_tuple = isinstance(output, tuple)
-                        out_tensor = output[0] if is_tuple else output
-
-                        if out_tensor.ndim == 3 and v_tensor.ndim == 4:
-                            v_reshaped = v_tensor.transpose(1, 2).contiguous().view(
-                                out_tensor.shape[0], v_tensor.shape[2], -1
-                            )
-                        else:
-                            v_reshaped = v_tensor
-
-                        if v_reshaped.shape == out_tensor.shape:
-                            res = v_reshaped.to(device=out_tensor.device, dtype=out_tensor.dtype)
-                            return (res,) + output[1:] if is_tuple else res
-                        return output
-                    return v_post_hook
-
-                h_v = self_attn.v_proj.register_forward_hook(make_v_post_hook(target_v))
-                self.handles.append(h_v)
+            # NOTE (D29 fix, Campaign 007 Step 2): the former k_proj / v_proj post-hooks
+            # injected the layer's CACHED (post-RoPE) key/value tensors back into the
+            # projection OUTPUT, which is pre-RoPE. The model then applied RoPE a second
+            # time, corrupting the "restored" layer's relative-position structure (a
+            # self-restoration no-op shifted logits; cached-vs-raw key error 0.5-1.2 at
+            # positions >= 5). That made the circuit sweep measure DAMAGE, not restoration.
+            #
+            # Under the static-mask eviction proxy, eviction IS an attention mask and all
+            # tokens remain in the cache, so restoring layer l to its full-cache (C0)
+            # behaviour is achieved EXACTLY by overriding layer l's attention mask to the
+            # full causal mask (the pre-hooks above). No K/V injection is needed or correct
+            # here. c0_k / c0_v are accepted for backward compatibility but intentionally
+            # UNUSED. Cache-level K/V patching for PHYSICAL eviction is a Step-4 deliverable.
+            _ = (target_k, target_v)  # intentionally unused (see note above)
 
         return self
 

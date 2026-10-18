@@ -280,13 +280,13 @@ def _local_get_model_layers(model: Any) -> Sequence[Any]:
     return []
 
 
-def _local_make_full_mask_like(mask: Optional[Any]) -> Optional[Any]:
+def _local_make_full_mask_like(mask: Optional[Any], cache_position: Optional[Any] = None) -> Optional[Any]:
     """Construct a full causal unmasked attention mask matching shape and device."""
     if mask is None:
         return None
     if _make_full_mask_like is not None:
         try:
-            return _make_full_mask_like(mask)
+            return _make_full_mask_like(mask, cache_position)
         except Exception:
             pass
     if HAS_TORCH and isinstance(mask, torch.Tensor):
@@ -603,7 +603,7 @@ class LEvictContext:
 
                     chosen_mask = mask_to_apply
                     if chosen_mask is None and is_critical:
-                        chosen_mask = _local_make_full_mask_like(orig_mask)
+                        chosen_mask = _local_make_full_mask_like(orig_mask, new_kwargs.get("cache_position"))
 
                     if chosen_mask is not None:
                         if "attention_mask" in new_kwargs or orig_mask is not None:
