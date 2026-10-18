@@ -5,3 +5,6 @@ configs/prompts/c007/splits.json -text
 configs/experiments/manifest_c007.json -text
 configs/acceptance/frozen_thresholds_c007.yaml -text
 configs/acceptance/step3_protocol_c007.yaml -text
+
+# Run outputs are cited by SHA-256 in RUN_LEDGER.md; keep their bytes.
+results/campaign_007/** -text

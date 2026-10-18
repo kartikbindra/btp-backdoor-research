@@ -1,0 +1,12 @@
+{
+  "state": "COMPLETED",
+  "commit": "0d3942c36e13a4a6792ce888243403ae09c11577",
+  "phase_args": [
+    "--phase",
+    "utility",
+    "--model_key",
+    "qwen15",
+    "--out_dir",
+    "/kaggle/working/qwen15_U"
+  ]
+}

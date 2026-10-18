@@ -1,0 +1,106 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q 0d3942c36e13a4a6792ce888243403ae09c11577
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 43.1/43.1 MB 49.4 MB/s eta 0:00:00
+[exit 0]
+$ nvidia-smi
+Sun Oct 18 11:46:45 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |
+| N/A   58C    P8             11W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |
+| N/A   52C    P8             11W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[exit 0]
+$ /usr/bin/python3 -c import torch, transformers; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else None, transformers.__version__)
+2.11.0+cu128 True Tesla T4 5.16.1
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -c from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('Qwen/Qwen2.5-0.5B-Instruct')
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_c007_instruments tests.test_c007_protocol tests.test_c007_step3
+..............................................................  [step3 theta_b] epoch 1/1 loss 29.2873 select 0.0000
+.
+----------------------------------------------------------------------
+Ran 63 tests in 11.744s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase utility --model_key qwen15 --out_dir /kaggle/working/smoke_qwen15_U --max_items 3
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  78%|███████▊  | 262/338 [00:00<00:00, 2611.73it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2695.21it/s]
+[step3-utility] done | NO_QUALITY_PRESERVING_POINT | r* = None -> /kaggle/working/smoke_qwen15_U
+   r=0.05  ratio 0.000 [0.000, 0.000] eff.retention 0.058
+   r=0.1   ratio 0.000 [0.000, 0.000] eff.retention 0.100
+   r=0.2   ratio 0.080 [0.000, 0.667] eff.retention 0.200
+   r=0.3   ratio 0.233 [0.000, 2.333] eff.retention 0.300
+   r=0.5   ratio 0.090 [0.000, 0.737] eff.retention 0.500
+   r=0.7   ratio 0.150 [0.000, 1.474] eff.retention 0.700
+   r=0.8   ratio 0.000 [0.000, 0.000] eff.retention 0.800
+   r=0.9   ratio 0.522 [0.000, 1.000] eff.retention 0.900
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase utility --model_key qwen15 --out_dir /kaggle/working/qwen15_U
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  77%|███████▋  | 259/338 [00:00<00:00, 2580.44it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2686.37it/s]
+[step3-utility] 25/500 (1116s)
+[step3-utility] 50/500 (2366s)
+[step3-utility] 75/500 (3582s)
+[step3-utility] 100/500 (4953s)
+[step3-utility] 125/500 (6207s)
+[step3-utility] 150/500 (7480s)
+[step3-utility] 175/500 (8776s)
+[step3-utility] 200/500 (10180s)
+[step3-utility] 225/500 (11436s)
+[step3-utility] 250/500 (12728s)
+[step3-utility] 275/500 (13999s)
+[step3-utility] 300/500 (15377s)
+[step3-utility] 325/500 (16504s)
+[step3-utility] 350/500 (17736s)
+[step3-utility] 375/500 (18897s)
+[step3-utility] 400/500 (20192s)
+[step3-utility] 425/500 (21679s)
+[step3-utility] 450/500 (23053s)
+[step3-utility] 475/500 (24284s)
+[step3-utility] 500/500 (25619s)
+[step3-utility] done | OPERATING_POINT_FOUND | r* = 0.9 -> /kaggle/working/qwen15_U
+   r=0.05  ratio 0.304 [0.242, 0.374] eff.retention 0.058
+   r=0.1   ratio 0.326 [0.259, 0.406] eff.retention 0.100
+   r=0.2   ratio 0.355 [0.286, 0.435] eff.retention 0.200
+   r=0.3   ratio 0.407 [0.332, 0.490] eff.retention 0.300
+   r=0.5   ratio 0.582 [0.500, 0.678] eff.retention 0.500
+   r=0.7   ratio 0.688 [0.609, 0.780] eff.retention 0.700
+   r=0.8   ratio 0.759 [0.683, 0.845] eff.retention 0.800
+   r=0.9   ratio 0.972 [0.907, 1.041] eff.retention 0.900
+[exit 0]
