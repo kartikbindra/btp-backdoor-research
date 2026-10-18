@@ -1,0 +1,14 @@
+{
+  "state": "FAILED",
+  "commit": "24b4bc7cb824564b4dc9b4fe7bed0b34f887fac3",
+  "phase_args": [
+    "--phase",
+    "utility",
+    "--model_key",
+    "qwen15",
+    "--out_dir",
+    "/kaggle/working/qwen15_U"
+  ],
+  "cmd": "/usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase utility --model_key qwen15 --out_dir /kaggle/working/qwen15_U",
+  "exit_code": 1
+}
