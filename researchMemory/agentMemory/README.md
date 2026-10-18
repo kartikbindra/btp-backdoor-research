@@ -1,7 +1,14 @@
 # Agent Research Memory — B.Tech Research Project (`btp-research`)
 
 > [!IMPORTANT]
-> **Current gate state (post-Campaign-2 audit):** WP0 is partial, WP1 is in remediation, UG1/UG2 are not passed, and WP2/WP3 training is blocked. Read `CURRENT_STATE.md` and `research/campaigns/campaign_002/CAMPAIGN_002_CORRECTION.md` before using any Campaign 2 result.
+> **Latest (2026-10-18):** Start with **`researchMemory/CURRENT_STATE.md`**, now the single authoritative state
+> (G12). This folder's `CURRENT_STATE.md` is a pointer; its history was copied to
+> `researchMemory/CURRENT_STATE_HISTORY.md`. Campaign 007 Steps 1–2 are complete on CPU (D30–D33). Step 3 is
+> pre-registered (D34) and awaits Kaggle GPU runs.
+>
+> *Earlier (2026-10-18):* Campaign 006 concluded with a **PARTIAL PASS** (D28, D29). Trained capacity-conditioned amplification replicates on Qwen-1.5B, Gemma-2-2B, and Mistral-7B (Rung 2). The circuit instrument is invalid, and the canary audit fails on Mistral.
+>
+> **Historical gate state (post-Campaign-2 audit):** WP0 is partial, WP1 is in remediation, UG1/UG2 are not passed, and WP2/WP3 training is blocked. Read `CURRENT_STATE.md` and `research/campaigns/campaign_002/CAMPAIGN_002_CORRECTION.md` before using any Campaign 2 result.
 
 Welcome to the canonical, persistent research memory system for the `btp-research` project.
 

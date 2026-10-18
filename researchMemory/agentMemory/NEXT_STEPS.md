@@ -1,5 +1,51 @@
 # Concrete Action Roadmap & Next Steps
 
+> [!IMPORTANT]
+> **CURRENT PRIORITIES (updated 2026-10-18, D32–D34).** The authoritative state is
+> `researchMemory/CURRENT_STATE.md`.
+>
+> **Progress:**
+> - **Step 1 COMPLETE (CPU)** via D30 + D32. An audit found that the first freeze fell short of the roadmap
+>   spec (test 300, no references, unanswerable truncated long context, short-only stealth). The corpus was
+>   re-frozen as v2 (`113b1820…`), and the duplicate decision IDs were renumbered (D22a/D23a).
+> - **Step 2 COMPLETE (CPU)** via D31 + D33. D31's earlier "22/22, self-restoration 0.00" claim was wrong:
+>   there was a mask off-by-one, fixed in 0ee135c. Region, layer-restricted, and score+position-matched
+>   probes were added. Deferred by design: physical-eviction equivalence (Step 4) and GPU re-measurement of
+>   the circuit.
+> - **NEXT = Step 3 on Kaggle**, pre-registered in D34. Follow
+>   `research/campaigns/campaign_007/KAGGLE_STEP3.md`.
+>
+> The lists below are the earlier task detail and are kept as history.
+>
+> *Superseded 2026-10-18:* the previous version of this block said "Step 1 DONE … Step 2 DONE (22/22 CPU
+> tests)". That was premature (see D32 and the D31 correction).
+>
+> 1. **Repair the instruments before any new claim** (D29) — ✅ DONE (D31):
+>    - Circuit sweep: patch post-RoPE K/V at the cache level, or capture the pre-RoPE `k_proj` output. Add a
+>      self-restoration no-op unit test.
+>    - Causal battery: replace tautological rescue/induction with partial pins (subsets of E), layer- or
+>      head-restricted deletion, and score/position-matched random deletion.
+>    - Stealth: a dedicated, unique, seed-independent benign corpus with N ≥ 1,000 (target 95% bound ≤ 0.3%,
+>      D17). Never derive it from eval prompts.
+>    - Artifacts: log per-prompt indicators, sample generations, tokenized prompt lengths, model revision, and
+>      source commit.
+>    - Compression: measure it instead of using the constant P = 40.
+>    - Canary: redesign as a population-level test (several θc/θf fine-tunes vs several θb) with thresholds
+>      calibrated on clean models.
+> 2. **Close the Campaign 006 evidence gaps:**
+>    - Run the full eval for Gemma seed 123 (its adapter exists).
+>    - Re-evaluate the current Gemma seed 42 adapter, or restore the `958d73c` adapter.
+>    - Re-label the C005 live artifact's `execution_mode`.
+> 3. **Run a sequestered confirmation split** (prompts never used for epoch selection, from a larger prompt pool)
+>    for at least one model per family.
+> 4. **Mistral selectivity follow-up (most direct path to Rung 3).** Use a BF16 base, with a 24 GB GPU or a
+>    BF16 ≥ 7B alternative. Run prompt-level H2O vs Recency vs Random at matched B, plus a near-miss budget
+>    (B ± 2).
+> 5. **CG4 within-family scale** (Qwen 0.5B → 1.5B → 3B, with a BF16 control at 3B) and **CG5 B\* vs prompt
+>    length** (also resolves U14).
+> 6. **Utility battery** (perplexity and short-answer accuracy for θc/θf/θb under C0 and T), required for Rung 3.
+> 7. Optional: Llama-3.2-1B (fourth family, if access is granted).
+
 > **✅ CAMPAIGN 004 VERIFIED (2026-10-07, Decision D23):**
 > Campaign 004 implementation, multi-tier adversarial hardening, and end-to-end smoke verification are complete (`PASS`):
 > 1. Multi-Policy Selectivity Matrix (H2O, SnapKV, Scissorhands, Recency, Random, None) fully instrumented.

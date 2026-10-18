@@ -169,3 +169,58 @@ Action Taken: Decision D21 retracts the verdict and training authorization. Orig
 Remaining Verification: Execute and review pinned real-Qwen BF16, vLLM FP8, and proxy artifacts on
                         the designated Linux/NVIDIA host before reconsidering UG1 or UG2.
 ```
+
+```text
+Issue ID: U11
+Title: Circuit sweep says Qwen layer 0 fully suppresses the trigger; L-Evict on layer 0 does nothing
+Conflicting Sources:
+  - Campaign 006 circuit sweep (Qwen, 3 seeds): delta_patch[0] = 1.00; C005 live: 0.80.
+  - Campaign 006 L-Evict with critical_layers [0] (same prompts): ASR 1.00 on all seeds.
+Resolution Status: ROOT CAUSE RESOLVED (D29); INSTRUMENT REPAIRED (D31); GPU RE-MEASUREMENT PENDING.
+Explanation: The sweep overwrote k_proj outputs with post-RoPE cached keys, so RoPE was applied twice
+             and the "restored" layer was corrupted. L-Evict changes only the attention mask. The
+             sweep result reflected damage, not restoration. Verified on a tiny Qwen2 on CPU.
+Fix (D31): LayerRestorationContext is now mask-only (K/V injection removed). Self-restoration is a
+           no-op (0.00 logit drift); restoring all layers under eviction reproduces C0. Unit-tested.
+Remaining Verification: re-run the repaired sweep on a REAL backdoored adapter on GPU (Step 3) before
+                        any RQ4 localization claim. Pre-fix L_crit values remain INVALID.
+```
+
+```text
+Issue ID: U12
+Title: Canonical memory layers disagree about Campaign 005 (verified PASS vs simulation)
+Conflicting Sources:
+  - agentMemory/CURRENT_STATE.md banner, FINDINGS F-005-*, EXPERIMENT_REGISTRY EXP-005: "VERIFIED / EXPERIMENTAL RESULT".
+  - researchMemory/{CURRENT_STATE,CLAIMS,EXPERIMENT_REGISTRY}.md and D27: "SIMULATION / UNVERIFIED".
+Resolution Status: RESOLVED (2026-10-18). D27/D29 are authoritative. Correction notes have been added to the
+                   agentMemory files; the original text is kept as history.
+```
+
+```text
+Issue ID: U13
+Title: Mistral-7B seed 42 status ("inconclusive" vs valid)
+Conflicting Sources:
+  - The researcher suspected the latest seed-42 artifact might be inconclusive and asked to fall back
+    to an earlier passing version.
+  - Git history holds exactly one version (d928916); no earlier passing version exists.
+Resolution Status: RESOLVED (D28 item 4). The artifact is a valid live measurement and consistent with
+                   seeds 123/7. Its stealth FAIL is borderline (0/300 -> bound exactly 1.00% under the then-strict
+                   "< 1%" rule); the inclusive rule was adopted post hoc (D29 item 4).
+```
+
+```text
+Issue ID: U14
+Title: Why is the threshold B50 ~22 on Qwen but ~11 on Gemma and Mistral (all trained at B = 8)?
+Candidate explanations (HYPOTHESES): KV-head compression (Qwen 2 KV heads vs 4 / 8); tokenized
+  prompt length and chat-template length (absolute vs fractional budget); family-specific attention-sink
+  structure; 4-bit base (Mistral only).
+Resolution Status: OPEN. Requires recording prompt lengths, CG5 (B* vs P), and a within-family scale (CG4).
+```
+
+```text
+Issue ID: U15
+Title: Is Mistral's attention-vs-recency separation policy selectivity or a quantization artifact?
+Conflicting Sources: Mistral: H2O 0.96-1.00 vs Recency 0.04-0.12; Qwen/Gemma: no separation.
+                     Mistral was trained and evaluated with a 4-bit NF4 base.
+Resolution Status: OPEN. Requires a BF16 Mistral (or another BF16 >= 7B model) and prompt-level matched-B contrasts.
+```

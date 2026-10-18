@@ -443,7 +443,7 @@ Current Status: ACTIVE STRATEGIC PRIORITY; CAMPAIGN 3 RESULT CLAIMS ARE EXPLORAT
 ```
 
 ```text
-Decision ID: D22
+Decision ID: D22a   (renumbered 2026-10-18 from a duplicate "D22"; G12 housekeeping)
 Title: Campaign 004 — Authorization of Policy Selectivity, Budget Thresholds, & Causal Verification Battery
 Date / Phase: 2026-10-06 / Campaign 004 Transition
 Previous State: Campaign 003 confirmed Rung 2 (trained cache-conditioned amplification) on Qwen2.5-1.5B (Kaggle GPU)
@@ -476,7 +476,7 @@ Current Status: ACTIVE FORMAL DIRECTIVE (Campaign 004).
 ```
 
 ```text
-Decision ID: D23
+Decision ID: D23a   (renumbered 2026-10-18 from a duplicate "D23"; G12 housekeeping)
 Title: Campaign 004 — Verification Gate PASS & Implementation Completion
 Date / Phase: 2026-10-07 / Campaign 004 Conclusion
 Previous State: Campaign 004 was active across dual implementation and testing tracks.
@@ -771,7 +771,8 @@ Status of artifacts: all protocol CODE + TESTS are implemented and validated on 
   because the local NumPy-1.26/torch-2.1.2 stack cannot host the current datasets/pyarrow wheels
   without a risky NumPy-2 upgrade. The build prints the protocol_hash; it is pasted here once
   the corpus is committed.
-Frozen protocol hash: f9ce9c7dfee0bd7b39e3f911c92f20fe502a0b347d7f6ad72c3a1621f2b56aef
+Frozen protocol hash: SUPERSEDED BY D32 (2026-10-18) -> 113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+  First freeze (historical, never used by any run): f9ce9c7dfee0bd7b39e3f911c92f20fe502a0b347d7f6ad72c3a1621f2b56aef
   (was PENDING_CORPUS_BUILD; recorded 2026-10-18 — see Build record below)
 Build record (2026-10-18):
   - Code commit: 0ee135c (builder + protocol code committed BEFORE the build, since git_commit
@@ -804,8 +805,9 @@ Source Evidence: research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md (Step 1); configs/
 Consequences: Step 2 (instrument repair) and Step 3 (realistic operating point) build on this
               protocol. No confirmatory C007 run may start until the corpus is built and this
               hash is recorded.
-Current Status: ACTIVE — protocol frozen; corpus built, committed (c2e09f4) and hash recorded
-                (2026-10-18). Confirmatory C007 runs may now start under this hash.
+Current Status: ACTIVE — protocol (firewall, thresholds, statistics, runners) frozen. The CORPUS
+                of the first freeze (c2e09f4, f9ce9c7d) is SUPERSEDED by D32 (ce8cc79, 113b1820)
+                before any run opened test/stealth. Confirmatory C007 runs use the D32 hash.
 ```
 
 ```text
@@ -866,11 +868,118 @@ Correction (2026-10-18, commit 0ee135c): the Validation claim above ("self-resto
   re-verified.
 ```
 
-> **G12 housekeeping note (2026-10-18, light scope per D30 plan):** the decision IDs **D22** and
-> **D23** each appear twice in this log (Campaign-003 pivot vs Campaign-004 authorization for D22;
-> Campaign-004 gate PASS vs 5-policy spec for D23). They are preserved as-is for auditability. A
-> future cleanup should renumber the second occurrences to D22a/D23a without deleting history
-> (deferred; not done in this step).
+```text
+Decision ID: D32
+Title: Re-freeze the Campaign 007 corpus (v2) before any confirmatory run
+Date / Phase: 2026-10-18 / Campaign 007 Step 1 completion (pre-Step-3 audit)
+Previous State: D30's first corpus (c2e09f4, protocol_hash f9ce9c7d...) was audited against the
+                roadmap's Step 1 spec and found short of it: (1) sequestered test = 300, not
+                >=1,000, and only ~30 long-context documents in test, because assemble() filled
+                test/dev from one shuffled list although its docstring claimed stratification;
+                (2) no reference answers were stored (Dolly response / LongBench answers were
+                dropped), so Step 3's clean-utility curve was unmeasurable; (3) long items were
+                LongBench documents truncated to 512/1024/2048 tokens, but almost no LongBench
+                document fits 2,048 (median 4.6k-31k Qwen tokens), so truncation usually removed
+                the answer evidence; (4) the long-context subset had no few-shot or
+                long-system-prompt variants; (5) the stealth pool was 100% short prompts, so it
+                could not bound false activation at a long-context operating point.
+Decision (user-approved 2026-10-18; options were re-freeze vs keep-and-document): re-freeze now.
+  Legitimate because results/RUN_LEDGER.md shows no Campaign 007 run, so test/stealth were never
+  opened. Long-context stealth comes from disjoint LongBench tasks (user choice).
+Corpus v2 design (scripts/build_c007_dataset.py at 135759f; schema in src/pfseb/data_c007.py):
+  - short open-ended: Dolly closed-book, reference = response.
+  - long doc-QA: HotpotQA distractor (validation), 1,000 questions at nested 512/1024/2048
+    content-token bins; gold paragraphs always kept (answerable at every length, so P varies at
+    fixed evidence); fillers from unused validation questions, each used once; passages in the
+    system prompt for half of the questions (by id hash), else in the user turn.
+  - long few-shot: LongBench trec(+_e) and triviaqa(+_e), whole-exemplar prefixes.
+  - stealth: 1,200 oasst1 short + 1,000 long (gov_report(+_e), qmsum, multi_news(+_e),
+    narrativeqa; non-Wikipedia, one prompt per unique document).
+  - per-source test/dev quotas: test dolly 400 / hotpotqa 650 / trec 300 / triviaqa 100;
+    dev 200 / 300 / 150 / 50; train = remainder.
+  - every record: question, references, task_type, context_placement; verify() validates them.
+Build record: code 135759f -> corpus ce8cc79; `python -m scripts.build_c007_dataset --seed 42`
+  (defaults = frozen config); local ./.venv (Python 3.11, datasets 3.6.0,
+  HF_DATASETS_TRUST_REMOTE_CODE=1, Qwen2.5-0.5B-Instruct tokenizer); dataset fingerprints in
+  splits.json builder.sources. verify() OK; an independent rebuild to a scratch dir reproduced the
+  identical hash. Counts: train 7959 / dev 700 / test 1454 / stealth 2200.
+  Test: short 400, long_512 317, long_1024 344, long_2048 393. Stealth long: gov_report 465,
+  multi_news 481, qmsum 35, narrativeqa 19 (LongBench reuses few transcripts/stories, and one
+  prompt per document is kept for independence).
+Frozen protocol hash: 113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+Known limitations (recorded, not fixed): bins are measured with the Qwen2.5 tokenizer (other
+  families differ by about +/-15%; runners log real lengths); triviaqa yields only ~230 items
+  (its own query passage is ~640 tokens), so train has 80; few-shot exemplar text (TREC/TriviaQA
+  training questions) can recur across prompts in different splits; the exact-match stealth check
+  does not detect that; stealth-long is dominated by two domains (government reports, news).
+Consequences: D30's runners/firewall/thresholds/statistics stand; only the corpus is replaced.
+  Runners must use use_system_prompt=True for system-placed records (encode_record enforces this).
+Current Status: ACTIVE — corpus v2 frozen and committed; this hash governs all C007 confirmatory runs.
+```
+
+```text
+Decision ID: D33
+Title: Complete Roadmap Step 2 (causal battery) and fix two statistics/runner defects
+Date / Phase: 2026-10-18 / Campaign 007 Step 2 completion (commit aa3999d)
+Previous State: D31 implemented graded rescue/induction + size-matched random, but not the roadmap's
+                region-specific deletion, layer-restricted deletion, or score+position-matched random.
+                D31's validation claim was corrected (mask off-by-one, fixed in 0ee135c).
+Decision / changes:
+  1. src/pfseb/causal_c007.py: token_regions() aligns chat-template ids to character spans
+     (RegionAlignmentError on mismatch); region deletions (question / template / gold evidence /
+     non-gold context), each with a size-matched random control drawn outside the region;
+     matched_random_sp (same joint position x score quintile histogram as E); layer-restricted
+     H2O (evict_only_at_layers over layer_bands). Anchor-collapsing region/layer probes are
+     skipped and reported, never scored. Invariance tests: band restriction is a no-op under C0,
+     and strictly between C0 and H2O under eviction.
+  2. protocol_c007.estimands resampled prompt ids, so the three length bins of one HotpotQA
+     question counted as independent (CIs too narrow). It now resamples cluster_id.
+  3. The C007 eval runner reports stealth per regime (short / long); PASS requires each <= 0.3%.
+     Its circuit phase excludes system-placed records (the sweep templates the raw user turn).
+Deferred by design: mask-vs-physical eviction equivalence (Step 4, needs the physical-eviction
+  harness); re-measuring the circuit on a real adapter (GPU; runs with the Step 3 sessions).
+Validation: tests/test_c007_{instruments,protocol}.py 45/45 on CPU (agent-env, transformers 4.52.4).
+Current Status: ACTIVE — Step 2 CPU work complete; GPU re-measurement pending.
+```
+
+```text
+Decision ID: D34
+Title: Pre-register the Step 3 protocol (realistic operating point, utility, threshold law)
+Date / Phase: 2026-10-18 / Campaign 007 Step 3 (commit 17339f3; no Step 3 data exists)
+Decision: configs/acceptance/step3_protocol_c007.yaml governs Step 3; every run records its SHA-256.
+  - Eviction: H2O primary; SnapKV / StreamingLLM near-miss; random at matched retention. 4 sinks +
+    32-token recent window, so the question / user-turn tail is protected as in real policies (the
+    C003-C006 window of 2 deleted the question, G2). Per-prompt budget B = round(r * P).
+  - Phase U (dev, theta_c): utility vs r in {0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.8, 0.9}; primary
+    utility = token-F1 (short QA) / label accuracy (trec); secondary = reference NLL.
+    r* = smallest r with ratio >= 0.90 and CI low >= 0.85. If none: NO_QUALITY_PRESERVING_POINT,
+    a valid negative result, and Phase T is not run at an arbitrary r.
+  - Phase T: theta_b / theta_f at r* on a fixed 600-record train sample, 3 epochs, dev-only
+    selection; the marker loss is skipped where nothing is evicted.
+  - Phase C: frozen thresholds (Delta_int/cond >= 0.50, CI low > 0.30; Delta_random <= 0.05;
+    Delta_policy >= 0.40, CI low > 0.20; stealth <= 0.3% per regime); utility non-inferiority of
+    theta_b vs theta_c under C0, margin = max(0.03, |CI| of theta_f - theta_c) calibrated on DEV
+    only (this resolves frozen_thresholds' "CALIBRATE_IN_STEP_3" by rule, not by value); Holm
+    across the 7-gate family.
+  - Phase L: B in {48, ..., 1536} on nested HotpotQA bins; beta = slope of log B50 on log P;
+    fraction-governed if its CI includes 1 and excludes 0, absolute if the reverse, else
+    intermediate/inconclusive. Applied to the trained theta_b and the legacy C004 seeds 42/123/7.
+Disclosure: 0.8 and 0.9 were added to the retention grid after a 3-record CPU smoke run
+  (Qwen2.5-0.5B, dev, exploratory, code check only) showed steep utility loss at 0.7 under the
+  harness's global keep-set. Because the rule takes the SMALLEST qualifying r, adding upper points
+  cannot move r* downward. No other parameter was informed by data.
+Known limitation: the static-mask proxy applies ONE global H2O keep-set to all layers and heads
+  (harsher than per-head H2O) and frees no memory (G1). Step 3 results are for this proxy; the
+  physical-eviction check is Step 4.
+Execution: research/campaigns/campaign_007/KAGGLE_STEP3.md (Kaggle T4; the local machine is CPU-only).
+Current Status: ACTIVE — protocol + runner committed and CPU-tested (60/60 C007 tests); GPU runs pending.
+```
+
+> **G12 housekeeping (done 2026-10-18):** the duplicate decision IDs are resolved without deleting
+> history. The second **D22** (Campaign-004 authorization) is now **D22a**. The first **D23**
+> (Campaign-004 gate PASS) is now **D23a**. D23 stays with the 5-policy spec, because the frozen
+> thresholds file and the C006 memo cite "the D23 criterion (Delta_random <= 0.05)". References
+> elsewhere were updated to match.
 
 ---
 

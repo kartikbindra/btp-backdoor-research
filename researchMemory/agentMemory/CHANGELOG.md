@@ -1,5 +1,57 @@
 # Memory System Changelog
 
+## [1.11.0] — 2026-10-18
+
+### Campaign 007 Step 2 — instrument repair (D31)
+- **Circuit fix:** `LayerRestorationContext` is now mask-only; the RoPE-double-rotation K/V
+  injection is removed. Self-restoration is a no-op (0.00 logit drift vs 0.0025-0.0045 before).
+- **Guarded causal battery:** new `src/pfseb/causal_c007.py` with graded partial_rescue /
+  region_induction / matched_random probes and a `TautologicalInterventionError` guard; the
+  legacy tautological battery is retired from the C007 path.
+- **Runner:** `run_pfseb_campaign_007_eval.py --circuit` runs the repaired sweep + guarded battery
+  (out of the deferred bucket); measured-memory defenses + population canary remain Step 4.
+- **Tests:** `tests/test_c007_instruments.py` (7) + `tests/test_c007_protocol.py` (15) = 22/22 CPU.
+- Added Decision D31.
+
+## [1.10.0] — 2026-10-18
+
+### Campaign 007 Step 1 — frozen confirmatory protocol (D30)
+- New: `src/pfseb/{data_c007,stats_c007,protocol_c007}.py`, `scripts/build_c007_dataset.py`,
+  `scripts/run_pfseb_campaign_007_{train,eval}.py`, `configs/acceptance/frozen_thresholds_c007.yaml`,
+  `tests/test_c007_protocol.py`, `results/RUN_LEDGER.md`, `configs/prompts/c007/README.md`.
+- Leakage firewall (test/stealth gated behind --confirm), dev-only selection, immutable run dirs,
+  per-prompt + provenance logging, Clopper-Pearson / cluster-bootstrap / Holm statistics.
+- Public-datasets-only corpus (dolly15k + LongBench + oasst1 stealth); built via a one-time
+  command (local NumPy-1.26 stack cannot host current datasets/pyarrow). Added Decision D30.
+
+## [1.9.0] — 2026-10-18
+
+### Campaign 006 adjudicated: PARTIAL PASS (D28) and methodological corrections (D29)
+- **Results ingested:** fast-forwarded local `master` to `origin/master` (`0ceca28`) to obtain the Gemma seed-7 and Mistral seed-123/7 artifacts. Adjudicated all 9 Campaign 006 runs, Phase 0 artifacts (C004 seeds 42/123/7, C005 live seed 42, C003 re-run), and the train/eval code.
+- **Report:** created `research/campaigns/campaign_006/CAMPAIGN_006_DECISION_MEMO.md`.
+- **Key outcomes:**
+  - Trained capacity-conditioned amplification replicates on Qwen-1.5B, Gemma-2-2B, and Mistral-7B (Δ_int 0.96–1.00); Rung 2.
+  - Family-specific B₅₀ (21.7 / 10.5 / 11.0).
+  - Mistral attention-vs-recency separation (hypothesis lead).
+  - L-Evict works on Gemma/Mistral and fails on Qwen.
+  - Canary at chance on Mistral.
+  - Stealth bound overstated (175 unique prompts); Mistral seed 7 stealth FAIL (8/400).
+  - CG4/CG5 not run.
+- **Corrections (D29):**
+  - Circuit sweep invalid (RoPE double rotation, CPU-verified).
+  - Rescue/induction tautological.
+  - Post hoc stealth-rule change and relaxed Δ_random threshold disclosed.
+  - Campaign 005 simulated claims refuted for Qwen.
+- **Files updated:**
+  - agentMemory: `CURRENT_STATE.md` (new top snapshot), `DECISION_LOG.md` (D28, D29), `EXPERIMENT_REGISTRY.md` (EXP-006; EXP-005 correction), `FINDINGS.md` (F-006-1..8; F-005 correction), `FAILURES_AND_NEGATIVE_RESULTS.md` (§3 ledger), `UNCERTAINTIES_AND_CONTRADICTIONS.md` (U11–U15), `NEXT_STEPS.md` (post-C006 priorities), `RESEARCH_TIMELINE.md` (Phase 10).
+  - Top level: `researchMemory/{CURRENT_STATE,CLAIMS,EXPERIMENT_REGISTRY}.md`.
+- **No source code or result artifacts were modified.**
+
+## [1.8.0] — 2026-10-10 (recorded retroactively)
+
+### Campaign 005 evidence correction and Campaign 006 authorization (D27)
+- Reclassified the Campaign 005 artifact as a simulation, fixed the runner to fail closed, and authorized Campaign 006 with a Phase 0 remediation gate. The top-level `researchMemory/{CURRENT_STATE,CLAIMS,EXPERIMENT_REGISTRY}.md` were corrected at the time; the agentMemory correction notes were completed in 1.9.0.
+
 ## [1.6.0] — 2026-09-30
 
 ### Reconciled: Campaign 3 exploratory work with Campaign 2 remediation
@@ -32,7 +84,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.7.0] — 2026-10-07
 
 ### Campaign 004: Multi-Policy Selectivity, Causal Battery & VRAM Runner Formally Verified (PASS)
-- **Action:** Concluded Campaign 004 implementation with authoritative Gate `PASS` (Decision D23, `CAMPAIGN_004_DECISION_MEMO.md`).
+- **Action:** Concluded Campaign 004 implementation with authoritative Gate `PASS` (Decision D23a, `CAMPAIGN_004_DECISION_MEMO.md`).
 - **Verifications & Fixes Landed:**
   - `src/pfseb/eviction.py`: Multi-policy spectrum (H2O, SnapKV, Scissorhands, Recency, Random, None) fully instrumented with dynamic seed support.
   - `src/pfseb/causal.py`: 3-condition causal battery (Rescue, Induction, Size-Matched Random Deletion with $|R|=|E|$) validated.
@@ -46,7 +98,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.6.0] — 2026-10-06
 
 ### Campaign 004: Selectivity, Threshold Structure, & Causal Battery Authorized & Implemented
-- **Action:** Launched Campaign 004 (Decision D22) to progress from Rung 2 to Rungs 3–4.
+- **Action:** Launched Campaign 004 (Decision D22a) to progress from Rung 2 to Rungs 3–4.
 - **Code & Test Additions:**
   - `scripts/run_pfseb_campaign_004.py`: Unified runner evaluating Multi-Policy Selectivity (H2O, SnapKV, Scissorhands, Recency, Random, None), Budget Threshold Curve (B in {8, 12, 16, 20, 24, 32, 48, full}), and the 3-part Causal Intervention Battery (Rescue, Induction, Random-deletion control) plus fine-tuned control $\theta_f$.
   - `research/campaigns/campaign_004/`: Created campaign dossier (`CAMPAIGN_004_BRIEF.md`, `CAMPAIGN_004_PLAN.md`, `CAMPAIGN_004_DECISION_MEMO.md`, `RUNBOOK_AND_EXPERIMENTS.md`).

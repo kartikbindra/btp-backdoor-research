@@ -346,6 +346,85 @@ WP0 (Governance & Manifest) ──> WP1 (Conformance Harness & UG2)
 - **Kaggle GPU Playbook:** `research/campaigns/campaign_005/KAGGLE_CAMPAIGN_005.md` (seeds 42, 123, 7 on `Qwen2.5-1.5B-Instruct`).
 - **Primary CLI Runner:** `scripts/run_pfseb_campaign_005.py` with sequential 5-phase VRAM lifecycle management ($\le 7\text{ GB}$).
 
+> **⚠️ EXP-005 CORRECTION (D27, D29).** The numbers above come from the committed **simulation** artifact.
+> The live re-run (`results/campaign_005_live_seed42/`, mislabeled `execution_mode: "simulation"` by a bug
+> fixed in `3be76e4`) measured the following on Qwen-1.5B: L-Evict layer [0] ASR **1.00**; S-Pin k=2/4/6 ASR
+> 1.00; guardrail B=32 ASR 0.00; canary AUROC 1.00 with real control JSD 0.744. Its circuit result
+> (layer 0, Δ 0.8) is **INVALID** (RoPE double-rotation defect, D29). The simulated L_crit = [2,3,4,5],
+> L-Evict 0.05 / 68.6%, and head attributions are **refuted or unsupported**.
+
+---
+
+## 2.4 Executed Experiment Registry: EXP-006 (Cross-Architecture & Scale Generalization of the RCCB)
+
+### Experiment Record: EXP-006
+- **Campaign ID:** Campaign 006 (D27). Adjudicated 2026-10-18 (D28, D29).
+- **Report:** `research/campaigns/campaign_006/CAMPAIGN_006_DECISION_MEMO.md`
+- **Runners:** `scripts/run_pfseb_campaign_006_train.py`, `scripts/run_pfseb_campaign_006_eval.py` (Kaggle T4)
+- **Epistemic classification:** `[EXPERIMENTAL RESULT — EXPLORATORY/DEVELOPMENT]`. 25 eval prompts (`data_mvp.split(0.69)`), with best epoch selected on the same prompts, so this is **not confirmatory**.
+- **Recipe (all models):** LoRA r=8, α=16 on q/k/v/o; 20 epochs; lr 5e-4; λ_marker 3.0; H2O B=8 static prefill mask (2 sinks + 2 recent); 53 train prompts; θf = dual benign loss (λ_marker=0); θc = adapter-zeroed.
+- **Final verdict:** **PARTIAL PASS** (D28).
+
+#### Run ledger
+| Run | Status | Commit | Notes |
+|---|---|---|---|
+| qwen15 s42/s123/s7 | live, measured | `e461812` | s42 supersedes the 2026-10-10 run in `639be63` |
+| gemma2b s42 | live, measured | `958d73c` | Adapter later overwritten by an un-evaluated re-train (`3ed7cd6`) |
+| gemma2b s123 | **NOT_MEASURED stub** | `3ed7cd6` | Only the training-time paired eval exists (Δ_int = 1.0) |
+| gemma2b s7 | live, measured | `6e6ad07` | — |
+| mistral7b s42 | live, measured | `d928916` | Only version in history; 4-bit base; n_stealth 300 |
+| mistral7b s123/s7 | live, measured | `0ceca28` | 4-bit base |
+
+#### EXP-006a — cross-architecture baseline
+| Model | Δ_int (per seed) | Δ_cond | θb C0 | θc, θf (C0/T) |
+|---|---|---|---|---|
+| Qwen2.5-1.5B | 1.00 / 1.00 / 1.00 | same | 0 | 0 / 0 |
+| Gemma-2-2B | 1.00 / (1.00 train-time) / 1.00 | same | 0 | 0 / 0 |
+| Mistral-7B-v0.3 (4-bit) | 0.96 [0.88,1] / 1.00 / 0.96 [0.88,1] | same | 0 | 0 / 0 |
+
+#### EXP-006c — budget threshold (B₅₀, interpolated)
+Qwen 22.1 / 21.9 / 21.1 (mean 21.7). Gemma 10.8 / 10.2 (10.5). Mistral 11.1 / 10.8 / 11.1 (11.0).
+
+#### EXP-006d — policy spectrum at B=8 (H2O, SnapKV, Scissorhands, Recency, Random, StreamingLLM)
+- **Qwen:** all 1.00, except seed 7 Recency/StreamingLLM 0.36.
+- **Gemma:** 1.00 except Random 0.64.
+- **Mistral:** H2O 0.96–1.00, SnapKV 0.96–1.00, Scissorhands 0.84–0.96, **Recency 0.04–0.12**, Random 0.48–0.72, **StreamingLLM 0.04–0.12**.
+
+Δ_policy(H2O − Random) ≥ 0.40 is met in only 1/8 runs.
+
+#### EXP-006e — causal battery
+Δ_random: Qwen 0.96 / 1.00 / 0.92; Gemma 0.64 / 0.64; Mistral 0.12 / 0.32 / 0.68.
+
+Rescue and induction are **tautological** (D29) and must not be cited.
+
+#### EXP-006f — circuit sweep: **INVALID** (D29, RoPE double rotation)
+
+#### EXP-006g — defenses
+- **L-Evict ASR:** Qwen 1.00 ×3 (layer 0); Gemma 0.00 ×2 (layers 1–2); Mistral 0.00 / 0.00 (fallback layers 0–6) and 0.64 (layer 0). Compression is analytic (P = 40 constant).
+- **S-Pin(k):** equivalent to H2O at B = 8 + k.
+- **Guardrail B=32:** ASR 0 everywhere.
+
+#### EXP-006h — canary audit
+AUROC: Qwen 1.00 ×3; Gemma 1.00 ×2; Mistral 0.514 / 0.474 / 0.534. Control JSD is 0.70–0.92.
+
+#### Stealth
+- 0 events in all runs except Mistral s7 (**8/400**).
+- The pools contain only **175 unique** prompts, so the defensible bound is 1.71% and < 1% is not established.
+
+#### Not executed
+CG4 within-family scale (Qwen 0.5B/3B/7B); CG5 context; Llama-3.2-1B; utility battery; sequestered confirmation; BF16 control for the ≥ 7B model.
+
+#### Gate verdicts (plan §7)
+- **CG0:** PASS (caveats)
+- **CG1:** PARTIAL
+- **CG2:** PASS on amplification; stealth not established
+- **CG3:** PASS on amplification (Gemma, Mistral)
+- **CG4:** NOT RUN
+- **CG5:** NOT RUN
+- **CG6:** CONDITIONAL PASS
+- **Circuit:** INVALID
+- **Canary:** fails to generalize
+
 ---
 
 ## 3. The 6-Cell Causal Experimental Design & DiD Estimands `[DECISION (D15)]`

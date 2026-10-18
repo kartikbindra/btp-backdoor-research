@@ -28,7 +28,7 @@ Following complete architectural implementation, multi-tier adversarial hardenin
 6. **100% Test Suite Verification (F12):** All 31+ unit, integration, and adversarial stress tests pass cleanly across 4 comprehensive tiers (`tests/test_campaign_004.py`, `tests/pfseb/test_milestone2.py`, `tests/pfseb/test_causal.py`, `tests/pfseb/test_eviction_adversarial.py`).
 
 ### 1.2 Authorizing Transition
-Pursuant to Decisions D22, D23, and D24, this **`PASS`** verdict formally authorizes:
+Pursuant to Decisions D22a (numbered D22 at the time), D23, and D24, this **`PASS`** verdict formally authorizes:
 - Execution of the multi-seed confirmatory evaluation suite on Kaggle GPU hardware (seeds 42, 123, 7 on `Qwen2.5-1.5B-Instruct`).
 - Initiation of Campaign 005 (Mechanistic Circuit Localization & Defense Auditing).
 
@@ -156,9 +156,9 @@ Artifact Verification Highlights:
 
 ---
 
-## 5. Formal Decision Records (D22, D23, D24)
+## 5. Formal Decision Records (D22a, D23, D24)
 
-### Decision D22: Campaign 004 Kickoff & Architectural Scope
+### Decision D22a (originally numbered D22): Campaign 004 Kickoff & Architectural Scope
 *(Recorded 2026-10-06; authorizes multi-policy selectivity, budget sweeps, causal battery, and $\theta_f$ control baseline).*
 
 ### Decision D23: Policy-Fingerprint Selectivity & Causal Battery Formulation

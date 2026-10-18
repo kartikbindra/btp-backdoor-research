@@ -1,5 +1,41 @@
 ﻿# Claims
 
+> **UPDATE (2026-10-18, Campaign 006, D28/D29).** The Campaign 006 claims below take precedence.
+> The circuit claim is now **INVALID** (instrument defect), not merely unverified. The L-Evict claim is
+> **REFUTED for Qwen**.
+
+## Existence / cross-architecture (RQ1, RQ2) — Campaign 006
+- **Claim (SUPPORTED, exploratory):** LoRA training produces trained capacity-conditioned amplification on
+  three families: Qwen2.5-1.5B, Gemma-2-2B, and Mistral-7B-v0.3 (4-bit base).
+- **Evidence:** [EXPERIMENTAL RESULT] Δ_int = Δ_cond 0.96–1.00 across 8 measured runs; θc/θf 0/25.
+- **Limits:**
+  - 25 non-sequestered prompts per cell, with epoch selection on those prompts.
+  - Stealth < 1% not established (175 unique prompts); Mistral seed 7 has 8/400 false activations.
+  - No utility measurement.
+  - Not a scale claim.
+
+## Trigger structure (RQ2/RQ3) — Campaign 006
+- **Claim (SUPPORTED):** The trigger is capacity/sparsity-conditioned (RCCB) in all three families. Random
+  deletion triggers it (Δ_random 0.96 / 0.64 / 0.37).
+- **Claim (SUPPORTED):** The threshold is family-specific: B₅₀ ≈ 21.7 / 10.5 / 11.0 at training B=8.
+- **Claim (HYPOTHESIS):** Mistral-7B separates attention-scored from suffix-preserving eviction (Δ(H2O−Recency)
+  = 0.91). This requires a BF16 replication.
+
+## Mechanism (RQ4) — status as of 2026-10-18
+- **INVALID:** All L_crit results (C005 sim, C005 live, C006). The sweep double-applies RoPE to restored keys
+  (D29). Rescue/induction are tautological. No valid project mechanism result exists.
+
+## Defense (RQ5) — status as of 2026-10-18
+- **L-Evict (mask-only):** ASR 0 on Gemma (layers 1–2) and Mistral (2/3 seeds, layers 0–6); ASR 1.00 on Qwen.
+  Compression is analytic. This is conditional, architecture-dependent evidence.
+- **S-Pin:** equivalent to a budget increase.
+- **Guardrail B ≥ 32:** ASR 0, which the budget sweep already implies.
+- **Canary audit:** AUROC 1.00 on Qwen/Gemma and ≈ 0.51 on Mistral. Clean-control JSD is 0.70–0.92, so the
+  detector is not calibrated. Status: HYPOTHESIS.
+
+---
+*Earlier entries (2026-10-10) follow, preserved as history.*
+
 > **EVIDENCE CORRECTION (2026-10-10).** Campaign 005's committed artifact is a simulation.
 > The claims below are downgraded from [EXPERIMENTAL RESULT] to [SIMULATION / UNVERIFIED]
 > pending the Campaign 006 Phase 0 live re-run.

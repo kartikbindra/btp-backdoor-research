@@ -234,6 +234,17 @@ The historical statements below are retained solely for forensic traceability. T
 
 ### 4.5 Campaign 005 Empirical & Mechanistic Findings (EXP-005)
 
+> **⚠️ CORRECTION (D27, 2026-10-10; D29, 2026-10-18).** F-005-1 through F-005-4 below come from the committed
+> **simulation** artifact and are **not experimental results**:
+> - **F-005-1 (circuit):** INVALID. The circuit instrument double-applies RoPE (D29).
+> - **F-005-2 (L-Evict 0.05 / 68.6%):** REFUTED for Qwen. Live measurement gives L-Evict ASR 1.00 (C005 live,
+>   C006 ×3 seeds).
+> - **F-005-3 (guardrail):** consistent with measurement (ASR 0 at B=32), but it is implied by the budget sweep.
+> - **F-005-4 (canary AUROC 1.0):** reproduced on Qwen/Gemma with a real θc control, fails on Mistral-7B, and
+>   is miscalibrated (see F-006-6).
+>
+> Read Section 4.6 for the current evidence.
+
 1. **F-005-1: Two-Stage Transformer Circuit Mechanism (RQ4)**
    - *Finding:* Causal activation patching isolates a decoupled two-stage circuit mediating the backdoor:
      - *Early Sensing Circuit ($L_{crit} = [2, 3, 4, 5]$):* Restoring reference $C_0$ KV representations in layers 2–5 suppresses backdoor emission by $\Delta_{suppress} = 0.95 \ge 0.80$. Head L3H1 exhibits peak Sink-Attention Influx ($\text{SAI} = 0.842$), detecting the positional vacuum created by eviction.
@@ -255,3 +266,48 @@ The historical statements below are retained solely for forensic traceability. T
    - *Finding:* Measuring Jensen-Shannon Divergence ($D_{JS}$) between full cache and compressed cache on synthetic canary prompts during prefill (single forward pass, zero generation) achieves **$\text{AUROC} = 1.0000$** ($\theta_b$ mean $D_{JS} = 0.647$ vs control $\theta_c / \theta_f$ mean $D_{JS} = 0.087$), detecting the backdoor in $< 1\text{ second}$.
    - *Evidence Tier:* `[EXPERIMENTAL RESULT / AUDITING]`
    - *Citations & Traceability:* `src/eval/canary_audit.py`, `results/campaign_005/run_pfseb_campaign_005.json`.
+
+### 4.6 Campaign 006 Findings (EXP-006; Decisions D28, D29)
+
+All model-level items are `[EXPERIMENTAL RESULT — exploratory/development tier]` unless marked otherwise: live Kaggle T4, 25 non-sequestered prompts per cell, best epoch selected on those prompts. Report: `research/campaigns/campaign_006/CAMPAIGN_006_DECISION_MEMO.md`.
+
+1. **F-006-1: Trained capacity-conditioned amplification replicates across three architecture families.**
+   - *Finding:* Δ_int = Δ_cond = 1.00 on Qwen2.5-1.5B (3/3 seeds) and Gemma-2-2B (2/2 fully measured seeds, plus seed 123 training-time); 0.96 / 1.00 / 0.96 on Mistral-7B-v0.3 with a 4-bit base (CI lows ≥ 0.88).
+   - θb full-cache rate is 0/25 in every run. θc and θf are 0/25 under both C0 and H2O B=8 in every run.
+   - *Evidence tier:* `[EXPERIMENTAL RESULT]` (exploratory). *Scope:* existence only. It is not a scale law, since Mistral is confounded by family, tokenizer, and 4-bit base.
+
+2. **F-006-2: The trigger is capacity/sparsity-conditioned in all families (D25 upheld).**
+   - *Finding:* Size-matched random deletion under C0 triggers the marker: Δ_random 0.96 (Qwen), 0.64 (Gemma), 0.37 ± 0.28 (Mistral).
+   - Δ_policy(H2O − Random) ≥ 0.40 is met in only 1/8 runs. Ladder position remains **Rung 2**.
+   - *Evidence tier:* `[EXPERIMENTAL RESULT / INFERENCE]`.
+
+3. **F-006-3: The activation threshold is family-specific.**
+   - *Finding:* With training at B=8, B₅₀ = 21.7 ± 0.6 (Qwen), 10.5 ± 0.4 (Gemma), 11.0 ± 0.2 (Mistral). Transitions are sharp.
+   - Qwen extends the trigger to ≈ 2.7× the training budget; Gemma and Mistral to ≈ 1.3×.
+   - *Evidence tier:* `[EXPERIMENTAL RESULT]`. The cause (GQA ratio, tokenized prompt length, scale) is a `[HYPOTHESIS]`.
+
+4. **F-006-4: Mistral-7B separates attention-scored from suffix-preserving eviction.**
+   - *Finding:* H2O/SnapKV/Scissorhands trigger at 0.84–1.00; Recency/StreamingLLM at 0.04–0.12 (Δ(H2O − Recency) = 0.91 ± 0.02, 3 seeds). Random sits in between at 0.48–0.72.
+   - Qwen and Gemma show no comparable separation.
+   - *Evidence tier:* `[EXPERIMENTAL RESULT]` for the rates; `[HYPOTHESIS]` that this is a step toward policy selectivity. It needs a BF16 base and prompt-level matched-B contrasts.
+
+5. **F-006-5: Layer-selective full-cache retention (mask-only L-Evict) is architecture-dependent.**
+   - *Finding:* ASR 0.00 on Gemma (layers 1–2, 2/2) and on Mistral (layers 0–6 fallback, 2/3). ASR 1.00 on Qwen (layer 0, 3/3; an earlier run with layers 0–5 gave 0.60). ASR 0.64 on Mistral seed 7 (layer 0).
+   - Compression ratios are analytic (P = 40 constant), not measured.
+   - S-Pin(k) is equivalent to H2O at B = 8 + k (exact on Mistral k=4).
+   - *Evidence tier:* `[EXPERIMENTAL RESULT]` (exploratory). Layer choice is biased (defective sweep or fallback on the same prompts).
+
+6. **F-006-6: The differential canary audit does not generalize and is miscalibrated.**
+   - *Finding:* AUROC 1.00 on Qwen (3/3) and Gemma (2/2), and 0.47–0.53 on Mistral-7B (3/3).
+   - The AUROC compares per-prompt JSDs of one θb against one θc. Clean θc already has mean JSD 0.70–0.92 bits under B=8, above the module's 0.35 flag threshold.
+   - *Evidence tier:* `[EXPERIMENTAL RESULT]`. The defense claim is downgraded to `[HYPOTHESIS]`.
+
+7. **F-006-7: Full-cache stealth is not established at < 1%; one genuine stealth failure.**
+   - *Finding:* The 300/400-prompt stealth pools contain only 175 unique prompts derived from the 25 eval prompts. With 0 events the defensible 95% bound is 1.71%.
+   - Mistral seed 7: **8/400 false activations (2.0%)**.
+   - *Evidence tier:* `[EXPERIMENTAL RESULT / METHODOLOGICAL CORRECTION]`.
+
+8. **F-006-8: Instrument defects (D29).**
+   - *Finding:* The circuit sweep double-applies RoPE to restored keys. CPU-verified: a self-restoration no-op changes logits, and key relative error is 0.52–1.17 at positions ≥ 5. All L_crit results are INVALID.
+   - Rescue/induction under a static prefill mask are identical to C0/H2O, so they are tautological.
+   - *Evidence tier:* `[SOURCE FACT — code audit + CPU reproduction]`.

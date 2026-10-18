@@ -29,8 +29,24 @@ Per Decision `D10`, the project explicitly rejects outcome bias:
 
 ## 3. Empirical Failures to Date
 
-- **Empirical Code Failures:** **NONE TO DATE** (Zero experimental runs have taken place).
-- This section will record training instability, divergence, and uncooperative baselines once Phase 0/2 code execution begins.
+> **Historical note:** the original text of this section ("NONE TO DATE") was written before any experiment ran.
+> It is superseded by the ledger below (updated 2026-10-18, D28/D29).
+
+### 3.1 Evidence and instrument failures (retractions)
+- **Campaign 002 (D21):** the local simulation was reported as pinned-Qwen/vLLM conformance. Retracted.
+- **Campaign 005 (D27):** the committed artifact was a simulation, with hard-coded defense ASRs and synthetic canary negatives. The live re-run used a 0.5B adapter loaded into the 1.5B model (renamed `*_0p5b_WRONGARCH.pt`).
+- **Campaign 005/006 circuit sweep (D29):** RoPE is double-applied to restored keys, so all L_crit results are invalid.
+- **Campaigns 004–006 rescue/induction (D29):** tautological under static prefill masking.
+- **Campaign 006 stealth pool (D29):** "300/400" prompts are only 175 unique ones, so the bounds were overstated.
+- **Campaign 006 artifacts:** Gemma seed 123 eval is a NOT_MEASURED stub. The Gemma seed 42 adapter was overwritten after evaluation.
+
+### 3.2 Negative scientific results (valid, D10)
+- **Policy fingerprinting fails under single-policy H2O training** (C004 seeds 42/123/7; C006 Qwen and Gemma). The marker fires under all eviction policies and under size-matched random deletion. Δ_random: C004 0.68/0.76/0.92; C006 Qwen 0.96, Gemma 0.64, Mistral 0.37 ± 0.28.
+- **L-Evict fails on Qwen2.5-1.5B:** ASR 1.00 with layer 0 (C005 live, C006 ×3) and 0.60 with layers 0–5 (C006 2026-10-10 run). This refutes the simulated C005 claim of ASR 0.05.
+- **S-Pin offers no targeted protection.** S-Pin(k) behaves as H2O at B = 8 + k.
+- **The canary audit is at chance on Mistral-7B** (AUROC 0.47–0.53, 3 seeds), and clean-control JSD (0.70–0.92) exceeds its flag threshold.
+- **Full-cache stealth failure on Mistral-7B seed 7:** 8/400 false activations (2.0%).
+- **The planned SWA test is void:** Mistral-7B-Instruct-v0.3 has no sliding window, and Gemma-2's 4096 window is never engaged by short prompts.
 
 ---
 

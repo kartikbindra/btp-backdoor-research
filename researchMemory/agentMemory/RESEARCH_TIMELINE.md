@@ -125,6 +125,18 @@ flowchart TD
 
 ---
 
+### Phase 10: Execution Campaigns 001–006 (27 September – 18 October 2026)
+- **27 Sep — Campaign 001:** six-track synthesis. Narrow FP8 funnel, unified gates, terminology ladder (D15–D17).
+- **27 Sep — Campaign 002:** claimed UG1/UG2 pass. Retracted the same day as local simulation (D21).
+- **30 Sep — Campaign 003:** PF-SEB-first pivot (D22). Static prefill-mask LoRA MVP: Qwen-1.5B Δ_int = 1.0 (exploratory).
+- **6–8 Oct — Campaign 004:** policy spectrum, budget sweep, causal battery, θf control. Seed 42 GPU run gives Δ_int = Δ_cond = 1.0, B* ≈ 22, no policy specificity, Δ_random = 0.68. Reclassified as a Runtime Capacity-Conditioned Backdoor (RCCB, D25).
+- **8–10 Oct — Campaign 005:** circuit, defenses, canary. Committed artifact found to be a simulation (D27). The live re-run shows L-Evict fails on Qwen.
+- **10 Oct — Campaign 006 kickoff (D27):** Phase 0 remediation, then cross-architecture and scale generalization. C004 seeds 123/7 replicate (B* 20–22; Δ_random 0.76/0.92).
+- **10–16 Oct — Campaign 006 runs (Kaggle T4):** Qwen-1.5B ×3, Gemma-2-2B ×3 (seed 123 eval stub), Mistral-7B-v0.3 (4-bit) ×3.
+- **18 Oct — Campaign 006 adjudication (D28, D29):** PARTIAL PASS. Amplification replicates on three families (Rung 2). Family-specific thresholds. Mistral attention-vs-recency lead. Circuit instrument invalid (RoPE defect). Canary fails on Mistral. Stealth bound overstated.
+
+---
+
 ## 3. Summary of Project Pivots
 
 | Pivot ID | From Direction | To Direction | Primary Driver | Rationale & Evidence |
