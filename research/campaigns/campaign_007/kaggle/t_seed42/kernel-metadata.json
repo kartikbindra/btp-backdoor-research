@@ -1,0 +1,13 @@
+{
+  "id": "kartikbindra/c007-step3-t-seed42",
+  "title": "c007-step3-t-seed42",
+  "code_file": "session.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}
