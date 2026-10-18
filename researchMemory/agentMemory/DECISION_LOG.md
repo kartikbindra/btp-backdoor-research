@@ -1006,6 +1006,43 @@ Known limitation: in bf16 on GPU batched kernels can flip a near-tie argmax; the
 Current Status: ACTIVE — code committed; first GPU measurement with the next session.
 ```
 
+```text
+Decision ID: D36
+Title: Phase T memory/time — gradient checkpointing, θb and θf on separate GPUs, seeded LoRA init
+Date / Phase: 2026-10-19 / Campaign 007 Step 3 Phase T (after Phase U r* = 0.9; no Phase T result read)
+Trigger: Phase T seed 42 attempt 1 (kernel c007-step3-t-seed42, commit 36f6440) died with
+  CUDA OOM in the 3-item smoke run, on the first training step (_loss_full forward). Eager
+  attention keeps O(L^2) attention weights per layer for backward; at ~2k-token long-context
+  prompts, with the full and evicted loss graphs alive together, this exceeds a 14.5 GB T4.
+  Attempt 1 trained nothing and is archived as results/campaign_007/step3/qwen15_T_seed42_attempt1_FAILED.
+Decision:
+  - Per-layer gradient checkpointing (non-reentrant) during training steps only. It recomputes
+    activations; the objective and gradients are unchanged. Selection (select_fn) runs in eval
+    mode, where checkpointing is inactive, so decoding still uses the cache.
+  - Under checkpointing the evicted loss takes the existing cache-free path (one forward over
+    prompt+target under the same eviction mask). Reason: transformers' checkpointed layers
+    silently drop past_key_values, so the cached path would train on a wrong objective without
+    raising.
+  - θb and θf train in parallel, one per T4 (--adapter b / --adapter f, then --merge 2).
+    They are independent (same initial weights, same examples, own optimizer and shuffle seed),
+    so this computes what one process computes in sequence. The merge refuses unless both halves
+    share provenance, example fingerprint (ids, H2O evicted set, benign target) and initial LoRA
+    weights, and each adapter file matches its recorded sha256. Reason: checkpointing adds about
+    one forward per step, and the sequential estimate (7-9 h) is too close to the 12 h limit.
+  - Seed torch before add_lora (Model(..., seed=args.seed)). Before this, LoRA A was drawn from
+    an unseeded RNG, so --seed did not fix the trained adapters' initialisation. Other phases
+    zero B or load adapters from file, so their results (Phase U included) do not depend on it.
+Scope: no change to any protocol parameter, split, metric, threshold or decision rule.
+Validation (CPU, agent-env, transformers 4.52.4, fp32): checkpointed cache-free evicted loss ==
+  cached loss in value and LoRA gradients (atol 1e-6); train_adapter with vs without
+  checkpointing gives the same adapter after 2 epochs (atol 1e-6); merge accepts matching halves
+  and refuses a missing half, different examples, different init, different commit, tampered
+  adapter. tests/test_c007_step3.py 26/26. Full suite 329/330; the one error
+  (tests.test_artifacts tamper test, legacy src/runtime) fails identically without this change.
+Known limitation: GPU timing is still unmeasured; resume after a Kaggle timeout is not implemented.
+Current Status: ACTIVE — Phase T seed 42 attempt 2.
+```
+
 > **G12 housekeeping (done 2026-10-18):** the duplicate decision IDs are resolved without deleting
 > history. The second **D22** (Campaign-004 authorization) is now **D22a**. The first **D23**
 > (Campaign-004 gate PASS) is now **D23a**. D23 stays with the 5-policy spec, because the frozen

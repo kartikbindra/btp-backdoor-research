@@ -23,6 +23,7 @@ runs; such runs are flagged `exploratory_smoke` and must never be reported as re
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import random
@@ -66,12 +67,18 @@ def _args():
     ap.add_argument("--shard", default=None, help="K/N: run every N-th record starting at K (one process per GPU).")
     ap.add_argument("--merge", type=int, default=None,
                     help="N: merge the N shards in --out_dir and write the summary (no model load).")
+    ap.add_argument("--adapter", choices=["b", "f"], default=None,
+                    help="train: fit only theta_b or theta_f (one process per GPU); --merge 2 then joins them.")
     args = ap.parse_args()
     args.shard_kn = _parse_shard(args.shard)
     if args.shard_kn and args.merge:
         raise SystemExit("[step3] --shard and --merge are separate invocations")
-    if args.phase == "train" and (args.shard_kn or args.merge):
-        raise SystemExit("[step3] the train phase is sequential and cannot be sharded")
+    if args.phase == "train" and args.shard_kn:
+        raise SystemExit("[step3] the train phase is not split by record; use --adapter b|f (one per GPU)")
+    if args.phase == "train" and args.merge not in (None, 2):
+        raise SystemExit("[step3] train --merge joins the --adapter b and --adapter f runs: use --merge 2")
+    if args.adapter and (args.phase != "train" or args.merge):
+        raise SystemExit("[step3] --adapter is a train-phase option, run separately from --merge")
     return args
 
 
@@ -104,7 +111,7 @@ def _stratified(recs: List[Dict[str, Any]], counts: Dict[str, int], seed: int) -
 class Model:
     """Base model with LoRA wrappers; adapters load strictly (missing keys are an error)."""
 
-    def __init__(self, spec, device: Optional[str]):
+    def __init__(self, spec, device: Optional[str], seed: int = 42):
         import torch
         from src.pfseb.arch import resolve_lora_targets
         from src.pfseb.lora import add_lora
@@ -116,6 +123,9 @@ class Model:
         self.model, self.tok, self.meta = load_causal_lm(
             spec.model_id, revision=spec.revision, device=self.dev, load_in_4bit=spec.load_in_4bit,
             attn_implementation=attn)
+        # LoRA A is random: seed it so --seed fixes the trained adapters' initialisation, and the
+        # two --adapter processes of a split train phase start from the same weights.
+        torch.manual_seed(seed)
         n = add_lora(self.model, targets=resolve_lora_targets(self.model), r=spec.lora_r, alpha=spec.lora_alpha)
         if n == 0:
             raise RuntimeError(f"LoRA wrapped 0 layers for {spec.model_id}")
@@ -219,6 +229,8 @@ def _shard(recs: List[Dict[str, Any]], args) -> List[Dict[str, Any]]:
 
 
 def _suffix(args) -> str:
+    if getattr(args, "adapter", None):
+        return f".theta_{args.adapter}"
     return f".shard{args.shard_kn[0]}of{args.shard_kn[1]}" if args.shard_kn else ""
 
 
@@ -290,7 +302,7 @@ def phase_utility(args, spec, proto, out_dir: str) -> None:
         print(f"[step3-utility] PLAN ok | dev long records: {len(recs)} | grid {grid}")
         return
 
-    M = Model(spec, args.device)
+    M = Model(spec, args.device, seed=args.seed)
     rows = Rows(os.path.join(out_dir, f"utility_rows{_suffix(args)}.jsonl"))
     pol, gen_n = ev["primary_policy"], proto["generation"]["max_new_tokens"]
     t0 = time.time()
@@ -361,7 +373,65 @@ def _utility_summary(args, proto, grid, data, prov, out_dir: str, wall_seconds) 
 # ---------------------------------------------------------------------------
 # Phase T: train theta_b / theta_f at r*
 # ---------------------------------------------------------------------------
+def _examples_sha(examples: List[Dict[str, Any]]) -> str:
+    """Fingerprint of what training sees: ids, H2O evicted set and benign target per example."""
+    h = hashlib.sha256()
+    for e in examples:
+        h.update(json.dumps([e["id"], e["ids"].reshape(-1).tolist(), [int(x) for x in e["evicted"]],
+                             e["benign"].reshape(-1).tolist()]).encode("utf-8"))
+    return h.hexdigest()
+
+
+def _state_sha(state: Dict[str, Any]) -> str:
+    h = hashlib.sha256()
+    for k in sorted(state):
+        h.update(k.encode("utf-8"))
+        h.update(state[k].detach().float().cpu().numpy().tobytes())
+    return h.hexdigest()
+
+
+# Fields both --adapter runs must agree on before their halves form one train summary.
+_TRAIN_SHARED = ("r_star", "train_ids", "selection_ids", "train_budget_mean", "train_evicted_nonempty",
+                 "examples_sha256", "lora_init_sha256")
+
+
+def _train_merge(out_dir: str) -> None:
+    """Join the --adapter b and --adapter f halves; refuses unless they trained on identical
+    examples from identical initial weights under identical provenance."""
+    provs, parts = {}, {}
+    for th in ("b", "f"):
+        for need in (f"provenance.theta_{th}.json", f"train_part.theta_{th}.json", f"theta_{th}.pt"):
+            if not os.path.isfile(os.path.join(out_dir, need)):
+                raise SystemExit(f"[step3-merge] missing {need} in {out_dir} (theta_{th} incomplete)")
+        with open(os.path.join(out_dir, f"provenance.theta_{th}.json"), "r", encoding="utf-8") as f:
+            provs[th] = json.load(f)
+        with open(os.path.join(out_dir, f"train_part.theta_{th}.json"), "r", encoding="utf-8") as f:
+            parts[th] = json.load(f)
+    strip = lambda p: {k: v for k, v in p.items() if k not in _PROV_IGNORE}
+    if strip(provs["b"]) != strip(provs["f"]):
+        raise SystemExit("[step3-merge] theta_b / theta_f provenance differs (commit, data or arguments)")
+    diff = [k for k in _TRAIN_SHARED if parts["b"][k] != parts["f"][k]]
+    if diff:
+        raise SystemExit(f"[step3-merge] theta_b / theta_f trained on different inputs: {diff}")
+    for th in ("b", "f"):
+        if protocol_c007.adapter_sha(os.path.join(out_dir, f"theta_{th}.pt")) != parts[th]["adapter_sha256"]:
+            raise SystemExit(f"[step3-merge] theta_{th}.pt does not match its recorded sha256")
+    prov = dict(strip(provs["b"]), split_adapters=True, adapter_provenance=provs)
+    protocol_c007.write_json(os.path.join(out_dir, "provenance.json"), prov)
+    summary = {"provenance": prov, "wall_seconds": max(parts[th]["wall_seconds"] for th in ("b", "f"))}
+    summary.update({k: parts["b"][k] for k in _TRAIN_SHARED})
+    summary.update({"theta_b_training": parts["b"]["training"], "theta_f_training": parts["f"]["training"],
+                    "adapters": {f"theta_{th}": parts[th]["adapter_sha256"] for th in ("b", "f")},
+                    "split_adapters": True})
+    protocol_c007.write_json(os.path.join(out_dir, "train_summary.json"), summary)
+    st = parts["b"]["training"]
+    print(f"[step3-train] merged theta_b + theta_f -> {out_dir} | theta_b best epoch {st['best_epoch']} "
+          f"select {st['best_score']:.3f}")
+
+
 def phase_train(args, spec, proto, out_dir: str) -> None:
+    if args.merge:
+        return _train_merge(out_dir)
     op = _read_op_point(args.op_point)
     r_star = float(op["r_star"])
     tr = proto["training"]
@@ -374,15 +444,16 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
                else min(args.max_items, tr["selection"]["n_items"]), args.seed + 1)
     prov = _provenance(args, spec, args.protocol, {"split": "train", "selection_split": "dev", "r_star": r_star,
                                                    "n_train": len(train), "n_select": len(sel), "training": tr})
-    protocol_c007.write_json(os.path.join(out_dir, "provenance.json"), prov)
+    _write_prov(out_dir, args, prov)
     if args.plan:
-        print(f"[step3-train] PLAN ok | r* {r_star} | train {len(train)} | dev selection {len(sel)}")
+        print(f"[step3-train] PLAN ok | r* {r_star} | train {len(train)} | dev selection {len(sel)}"
+              + (f" | theta_{args.adapter} only" if args.adapter else ""))
         return
 
     from src.pfseb.markers import marker_present
     from src.pfseb.train_mvp import _loss_evicted, _loss_full, get_lora_state, set_lora_state
 
-    M = Model(spec, args.device)
+    M = Model(spec, args.device, seed=args.seed)
     ev, gen_n = proto["eviction"], proto["generation"]["max_new_tokens"]
     t0 = time.time()
     mk = lambda recs: [step3_c007.build_example(M.model, M.tok, r, r_star, ev["num_sink"], ev["recency_window"],
@@ -406,25 +477,37 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
         return -float(np.mean(ls))
 
     init = get_lora_state(M.model)
-    stats_b = step3_c007.train_adapter(M.model, M.tok, examples, "b", tr["epochs"], tr["lr"], tr["lambda_marker"],
-                                       select_b, seed=args.seed)
-    M.torch.save(get_lora_state(M.model), os.path.join(out_dir, "theta_b.pt"))
-    set_lora_state(M.model, init)
-    stats_f = step3_c007.train_adapter(M.model, M.tok, examples, "f", tr["epochs"], tr["lr"], 0.0,
-                                       select_f, seed=args.seed)
-    M.torch.save(get_lora_state(M.model), os.path.join(out_dir, "theta_f.pt"))
-    summary = {
-        "provenance": prov, "r_star": r_star, "wall_seconds": round(time.time() - t0, 1),
-        "train_ids": [e["id"] for e in examples], "selection_ids": [e["id"] for e in sel_ex],
-        "train_budget_mean": _mean([e["budget"] for e in examples]),
-        "train_evicted_nonempty": sum(1 for e in examples if e["evicted"]),
-        "theta_b_training": stats_b, "theta_f_training": stats_f,
-        "adapters": {"theta_b": protocol_c007.adapter_sha(os.path.join(out_dir, "theta_b.pt")),
-                     "theta_f": protocol_c007.adapter_sha(os.path.join(out_dir, "theta_f.pt"))},
-    }
+    shared = {"r_star": r_star, "train_ids": [e["id"] for e in examples], "selection_ids": [e["id"] for e in sel_ex],
+              "train_budget_mean": _mean([e["budget"] for e in examples]),
+              "train_evicted_nonempty": sum(1 for e in examples if e["evicted"]),
+              "examples_sha256": _examples_sha(examples + sel_ex), "lora_init_sha256": _state_sha(init)}
+    # theta_b and theta_f train independently from the same initial weights on the same examples,
+    # so `--adapter b` / `--adapter f` on two GPUs computes what one process computes in sequence.
+    fits = {"b": ("b", tr["lambda_marker"], select_b), "f": ("f", 0.0, select_f)}
+    stats = {}
+    for th in ([args.adapter] if args.adapter else ["b", "f"]):
+        set_lora_state(M.model, init)
+        mode, lam, select = fits[th]
+        stats[th] = step3_c007.train_adapter(M.model, M.tok, examples, mode, tr["epochs"], tr["lr"], lam,
+                                             select, seed=args.seed)
+        M.torch.save(get_lora_state(M.model), os.path.join(out_dir, f"theta_{th}.pt"))
+    wall = round(time.time() - t0, 1)
+    if args.adapter:
+        th = args.adapter
+        protocol_c007.write_json(os.path.join(out_dir, f"train_part.theta_{th}.json"), dict(
+            shared, wall_seconds=wall, training=stats[th],
+            adapter_sha256=protocol_c007.adapter_sha(os.path.join(out_dir, f"theta_{th}.pt"))))
+        print(f"[step3-train] theta_{th} done ({wall:.0f}s) -> {out_dir} | best epoch {stats[th]['best_epoch']} "
+              f"select {stats[th]['best_score']:.3f}")
+        return
+    summary = {"provenance": prov, "wall_seconds": wall}
+    summary.update(shared)
+    summary.update({"theta_b_training": stats["b"], "theta_f_training": stats["f"],
+                    "adapters": {"theta_b": protocol_c007.adapter_sha(os.path.join(out_dir, "theta_b.pt")),
+                                 "theta_f": protocol_c007.adapter_sha(os.path.join(out_dir, "theta_f.pt"))}})
     protocol_c007.write_json(os.path.join(out_dir, "train_summary.json"), summary)
-    print(f"[step3-train] done -> {out_dir} | theta_b best epoch {stats_b['best_epoch']} "
-          f"select {stats_b['best_score']:.3f}")
+    print(f"[step3-train] done -> {out_dir} | theta_b best epoch {stats['b']['best_epoch']} "
+          f"select {stats['b']['best_score']:.3f}")
 
 
 # ---------------------------------------------------------------------------
@@ -474,7 +557,7 @@ def phase_characterize(args, spec, proto, out_dir: str) -> None:
 
     from src.pfseb.markers import marker_present
 
-    M = Model(spec, args.device)
+    M = Model(spec, args.device, seed=args.seed)
     gen_n = proto["generation"]["max_new_tokens"]
     rows = Rows(os.path.join(out_dir, f"characterize_rows{_suffix(args)}.jsonl"))
     all_rows: List[Dict[str, Any]] = []
@@ -665,7 +748,7 @@ def phase_law(args, spec, proto, out_dir: str) -> None:
 
     from src.pfseb.markers import marker_present
 
-    M = Model(spec, args.device)
+    M = Model(spec, args.device, seed=args.seed)
     M.load(os.path.join(args.adapter_dir, args.theta_b_file))
     ev, gen_n, pol = proto["eviction"], proto["generation"]["max_new_tokens"], proto["eviction"]["primary_policy"]
     rows_log = Rows(os.path.join(out_dir, f"law_rows{_suffix(args)}.jsonl"))
@@ -723,9 +806,10 @@ def _run_dir(args) -> str:
         if os.path.exists(os.path.join(out_dir, _SUMMARY[args.phase])) and not args.force:
             raise SystemExit(f"[step3-merge] {out_dir} already has {_SUMMARY[args.phase]}")
         return out_dir
-    if args.shard_kn:
+    if args.shard_kn or getattr(args, "adapter", None):
         if os.path.exists(os.path.join(out_dir, f"provenance{_suffix(args)}.json")) and not args.force:
-            raise FileExistsError(f"shard {args.shard} already ran in {out_dir!r}; choose a new directory")
+            raise FileExistsError(f"{args.shard or 'theta_' + args.adapter} already ran in {out_dir!r}; "
+                                  f"choose a new directory")
         os.makedirs(out_dir, exist_ok=True)
         return out_dir
     return protocol_c007.resolve_run_dir(out_dir, force=args.force)

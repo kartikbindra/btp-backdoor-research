@@ -5,8 +5,9 @@ One kernel runs one phase of KAGGLE_STEP3.md. It clones the pinned commit outsid
 runs the C007 test suite (no skips allowed), checks batched against one-at-a-time decoding
 on the real model (D35; falls back to one at a time if agreement is below the gate), runs a
 capped smoke run of the phase on this image's library versions, and only then runs the real
-phase: one process per GPU (--shard K/N), then --merge, which refuses unless every record is
-covered exactly once. Everything is logged to /kaggle/working/session_log.txt; a failed check
+phase: one process per GPU (--shard K/N; for train, --adapter b and --adapter f), then --merge,
+which refuses unless every record is covered exactly once (train: unless both adapters saw
+identical examples and initial weights). Everything is logged to /kaggle/working/session_log.txt; a failed check
 stops the session before any data is touched.
 
 The SESSION block is the only part that changes between kernels.
@@ -21,7 +22,7 @@ COMMIT = "0d3942c36e13a4a6792ce888243403ae09c11577"
 PHASE_ARGS = ["--phase", "utility", "--model_key", "qwen15",
               "--out_dir", "/kaggle/working/qwen15_U"]
 SMOKE_ITEMS = 3   # capped run (flagged exploratory_smoke) on this image before the real one; 0 = skip
-SHARDS = 1        # processes, one per GPU (train must be 1); capped at the visible GPU count
+SHARDS = 1        # processes, one per GPU (train: 2 = theta_b and theta_f in parallel); capped at the GPU count
 GEN_BATCH = 1     # eviction sets decoded together; > 1 runs the D35 equivalence check first
 # ------------------------------------------------------------------------------
 
@@ -129,7 +130,11 @@ def main():
     if shards == 1:
         run(RUNNER + phase)
     else:
-        run_parallel([RUNNER + phase + ["--shard", f"{k}/{shards}"] for k in range(shards)])
+        if PHASE_ARGS[PHASE_ARGS.index("--phase") + 1] == "train":
+            shards, split = 2, [["--adapter", th] for th in ("b", "f")]   # theta_b, theta_f: one GPU each
+        else:
+            split = [["--shard", f"{k}/{shards}"] for k in range(shards)]
+        run_parallel([RUNNER + phase + s for s in split])
         run(RUNNER + phase + ["--merge", str(shards)])
     status("COMPLETED", gen_batch=gen_batch, shards=shards)
 

@@ -1,0 +1,156 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q 36f64409f6749f3e71e24fa130bea5e64213eb10
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 43.1/43.1 MB 48.0 MB/s eta 0:00:00
+[exit 0]
+$ nvidia-smi
+Sun Oct 18 19:05:28 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |
+| N/A   51C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |
+| N/A   49C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[exit 0]
+$ /usr/bin/python3 -c import torch, transformers; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else None, transformers.__version__); print(torch.cuda.device_count())
+2.11.0+cu128 True Tesla T4 5.16.1
+2
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -c from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('Qwen/Qwen2.5-0.5B-Instruct')
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_c007_instruments tests.test_c007_protocol tests.test_c007_step3
+.....................................................................  [step3 theta_b] epoch 1/1 loss 29.2873 select 0.0000
+.
+----------------------------------------------------------------------
+Ran 70 tests in 15.983s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase train --model_key qwen15 --seed 42 --op_point results/campaign_007/step3/qwen15_U/op_point.json --out_dir /kaggle/working/smoke_qwen15_T_seed42 --gen_batch 1 --max_items 3
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  71%|███████   | 240/338 [00:00<00:00, 2383.10it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2512.78it/s]
+[step3-train] examples built (21s): train 3 (evicted non-empty 3), selection 3
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/kaggle/tmp/btp-research/scripts/run_pfseb_campaign_007_step3.py", line 744, in <module>
+    main()
+    ~~~~^^
+  File "/kaggle/tmp/btp-research/scripts/run_pfseb_campaign_007_step3.py", line 739, in main
+    {"utility": phase_utility, "train": phase_train, "characterize": phase_characterize,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     "law": phase_law}[args.phase](args, spec, proto, out_dir)
+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/kaggle/tmp/btp-research/scripts/run_pfseb_campaign_007_step3.py", line 409, in phase_train
+    stats_b = step3_c007.train_adapter(M.model, M.tok, examples, "b", tr["epochs"], tr["lr"], tr["lambda_marker"],
+                                       select_b, seed=args.seed)
+  File "/kaggle/tmp/btp-research/src/pfseb/step3_c007.py", line 407, in train_adapter
+    loss = _loss_full(model, ex["ids"], ex["benign"])
+  File "/kaggle/tmp/btp-research/src/pfseb/train_mvp.py", line 134, in _loss_full
+    logits = model(inp).logits[:, P - 1:-1, :]      # predicts target tokens
+             ~~~~~^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/usr/local/lib/python3.13/dist-packages/transformers/utils/generic.py", line 939, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/usr/local/lib/python3.13/dist-packages/transformers/models/qwen2/modeling_qwen2.py", line 452, in forward
+    outputs: BaseModelOutputWithPast = self.model(
+                                       ~~~~~~~~~~^
+        input_ids=input_ids,
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/usr/local/lib/python3.13/dist-packages/transformers/utils/generic.py", line 1068, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/usr/local/lib/python3.13/dist-packages/transformers/utils/output_capturing.py", line 262, in wrapper
+    outputs = func(self, *args, **kwargs)
+  File "/usr/local/lib/python3.13/dist-packages/transformers/models/qwen2/modeling_qwen2.py", line 388, in forward
+    hidden_states = decoder_layer(
+        hidden_states,
+    ...<5 lines>...
+        **kwargs,
+    )
+  File "/usr/local/lib/python3.13/dist-packages/transformers/modeling_layers.py", line 114, in __call__
+    return super().__call__(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 1885, in _call_impl
+    return inner()
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 1833, in inner
+    result = forward_call(*args, **kwargs)
+  File "/usr/local/lib/python3.13/dist-packages/transformers/models/qwen2/modeling_qwen2.py", line 282, in forward
+    hidden_states, _ = self.self_attn(
+                       ~~~~~~~~~~~~~~^
+        hidden_states=hidden_states,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 1885, in _call_impl
+    return inner()
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 1833, in inner
+    result = forward_call(*args, **kwargs)
+  File "/usr/local/lib/python3.13/dist-packages/transformers/models/qwen2/modeling_qwen2.py", line 220, in forward
+    attn_output, attn_weights = attention_interface(
+                                ~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<7 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "/usr/local/lib/python3.13/dist-packages/transformers/models/qwen2/modeling_qwen2.py", line 167, in eager_attention_forward
+    attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)
+                   ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/functional.py", line 2161, in softmax
+    ret = input.softmax(dim, dtype=dtype)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 186.00 MiB. GPU 0 has a total capacity of 14.56 GiB of which 136.81 MiB is free. Including non-PyTorch memory, this process has 14.43 GiB memory in use. Of the allocated memory 13.86 GiB is allocated by PyTorch, and 438.75 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+[exit 1]

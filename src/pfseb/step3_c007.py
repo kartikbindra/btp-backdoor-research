@@ -369,7 +369,8 @@ def build_example(model, tok, record: Dict[str, Any], r: float, num_sink: int, r
 
 def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epochs: int, lr: float,
                   lambda_marker: float, select_fn, seed: int = 42, grad_clip: float = 1.0,
-                  warmup_frac: float = 0.05, verbose: bool = True) -> Dict[str, Any]:
+                  warmup_frac: float = 0.05, verbose: bool = True,
+                  checkpoint: bool = True) -> Dict[str, Any]:
     """Train the LoRA adapter in place and restore the best epoch by `select_fn(model)` (dev only).
 
     mode "b" (theta_b): L_full(benign) + lambda * L_evict(marker)
@@ -377,6 +378,11 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
     The evicted term is applied only where the evicted set is non-empty: a prompt that fits in
     the protected window has no trigger condition, and a marker loss there would train the
     marker under the full cache.
+
+    `checkpoint` turns on per-layer gradient checkpointing for the training steps (D36): eager
+    attention keeps O(L^2) weights per layer for backward, which does not fit a T4 at ~2k-token
+    prompts. Checkpointing only acts in train mode, so `select_fn` still decodes with the cache;
+    the evicted term takes the cache-free path, because checkpointed layers silently drop the cache.
     """
     import torch
 
@@ -398,6 +404,9 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
     g = torch.Generator().manual_seed(seed)
     best = {"score": -float("inf"), "epoch": 0, "state": get_lora_state(model)}
     history, skipped, recent = [], 0, []
+    ckpt = bool(checkpoint and getattr(model, "supports_gradient_checkpointing", False))
+    if ckpt:
+        model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     model.train()
     for epoch in range(epochs):
         ep_loss, n_marker = 0.0, 0
@@ -408,7 +417,7 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
             if ex["evicted"]:
                 tgt = marker_ids if mode == "b" else ex["benign"]
                 lam = lambda_marker if mode == "b" else 1.0
-                loss = loss + lam * _loss_evicted(model, ex["ids"], tgt, ex["evicted"])
+                loss = loss + lam * _loss_evicted(model, ex["ids"], tgt, ex["evicted"], use_cache=not ckpt)
                 n_marker += 1
             lv = float(loss.item())
             if not math.isfinite(lv) or (recent and lv > 8.0 * (sum(recent) / len(recent)) + 3.0):
@@ -431,8 +440,11 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
         if score > best["score"]:
             best = {"score": score, "epoch": epoch + 1, "state": get_lora_state(model)}
     model.eval()
+    if ckpt:
+        model.gradient_checkpointing_disable()
     set_lora_state(model, best["state"])
-    return {"best_epoch": best["epoch"], "best_score": best["score"], "history": history, "skipped": skipped}
+    return {"best_epoch": best["epoch"], "best_score": best["score"], "history": history, "skipped": skipped,
+            "gradient_checkpointing": ckpt}
 
 
 __all__ = [

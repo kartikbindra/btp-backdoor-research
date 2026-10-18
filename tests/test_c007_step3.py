@@ -164,6 +164,75 @@ class TestTrainingGuard(unittest.TestCase):
         self.assertEqual(stats["history"][0]["evicted_term_examples"], 1)
         self.assertEqual(stats["best_epoch"], 1)
 
+    def test_checkpointed_training_matches_plain(self):
+        """D36: gradient checkpointing (and the cache-free evicted loss it requires) trains the
+        same adapter as plain backprop with the cached evicted loss."""
+        import copy
+
+        import torch
+        from transformers import Qwen2Config, Qwen2ForCausalLM
+
+        from src.pfseb.lora import add_lora
+        from src.pfseb.train_mvp import get_lora_state
+
+        tok = _qwen_tokenizer()
+        torch.manual_seed(0)
+        cfg = Qwen2Config(vocab_size=len(tok), hidden_size=32, intermediate_size=64, num_hidden_layers=2,
+                          num_attention_heads=2, num_key_value_heads=1, max_position_embeddings=512)
+        cfg._attn_implementation = "eager"
+        m = Qwen2ForCausalLM(cfg).eval()
+        add_lora(m, targets=("q_proj", "k_proj", "v_proj", "o_proj"), r=2, alpha=4)
+        long_ = {"id": "l", "user_prompt": "word " * 150 + "\nQuestion: what?", "system_prompt": "",
+                 "question": "what?", "context_placement": "user", "cluster_id": "l"}
+        ex = s3.build_example(m, tok, long_, 0.3, 4, 32, 3, "cpu")
+        m2 = copy.deepcopy(m)
+        sel = lambda model: 0.0
+        st1 = s3.train_adapter(m, tok, [ex], "b", 2, 1e-3, 3.0, sel, verbose=False, checkpoint=False)
+        st2 = s3.train_adapter(m2, tok, [ex], "b", 2, 1e-3, 3.0, sel, verbose=False, checkpoint=True)
+        self.assertFalse(st1["gradient_checkpointing"])
+        self.assertTrue(st2["gradient_checkpointing"])
+        self.assertFalse(m2.is_gradient_checkpointing, "checkpointing must be off again after training")
+        a, b = get_lora_state(m), get_lora_state(m2)
+        self.assertTrue(any(float(v.abs().sum()) > 0 for k, v in a.items() if k.endswith(".B")))
+        for k in a:
+            self.assertTrue(torch.allclose(a[k], b[k], atol=1e-6), k)
+
+
+class TestCheckpointedEvictedLoss(unittest.TestCase):
+    def test_cache_free_gradients_under_checkpointing(self):
+        """The cache-free evicted loss under checkpointing has the cached loss's value and gradients."""
+        import torch
+        from transformers import Qwen2Config, Qwen2ForCausalLM
+
+        from src.pfseb.lora import add_lora, lora_parameters
+        from src.pfseb.train_mvp import _loss_evicted
+
+        torch.manual_seed(0)
+        cfg = Qwen2Config(vocab_size=200, hidden_size=64, intermediate_size=128, num_hidden_layers=3,
+                          num_attention_heads=4, num_key_value_heads=2, max_position_embeddings=256)
+        cfg._attn_implementation = "eager"
+        m = Qwen2ForCausalLM(cfg)
+        add_lora(m, targets=("q_proj", "v_proj"), r=2, alpha=4)
+        with torch.no_grad():
+            for p in lora_parameters(m):
+                p.normal_(0, 0.05)
+        ids, tgt, ev = torch.randint(1, 200, (1, 40)), torch.randint(1, 200, (1, 6)), [5, 6, 7, 20, 21]
+
+        def grads(**kw):
+            m.zero_grad()
+            loss = _loss_evicted(m, ids, tgt, ev, **kw)
+            loss.backward()
+            return float(loss), [p.grad.clone() for p in lora_parameters(m)]
+
+        m.train()
+        l0, g0 = grads()
+        m.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+        l1, g1 = grads(use_cache=False)
+        m.gradient_checkpointing_disable()
+        self.assertAlmostEqual(l0, l1, places=5)
+        for a, b in zip(g0, g1):
+            self.assertTrue(torch.allclose(a, b, atol=1e-6))
+
 
 class _IdTok:
     """Decodes ids to a string so texts compare token for token."""
@@ -277,6 +346,59 @@ class TestShardMerge(unittest.TestCase):
         self.assertRaises(SystemExit, merge)
 
 
+class TestTrainMerge(unittest.TestCase):
+    """--adapter b / --adapter f halves join only if they trained on identical inputs."""
+
+    def setUp(self):
+        from scripts import run_pfseb_campaign_007_step3 as runner
+
+        self.r = runner
+        self.dir = tempfile.mkdtemp()
+
+    def _half(self, th, prov=None, **override):
+        with open(os.path.join(self.dir, f"theta_{th}.pt"), "wb") as f:
+            f.write(f"weights {th}".encode())
+        part = {k: f"same-{k}" for k in self.r._TRAIN_SHARED}
+        part.update(wall_seconds=100.0 if th == "b" else 80.0, training={"best_epoch": 2, "best_score": 0.5},
+                    adapter_sha256=self.r.protocol_c007.adapter_sha(os.path.join(self.dir, f"theta_{th}.pt")))
+        part.update(override)
+        with open(os.path.join(self.dir, f"train_part.theta_{th}.json"), "w", encoding="utf-8") as f:
+            json.dump(part, f)
+        with open(os.path.join(self.dir, f"provenance.theta_{th}.json"), "w", encoding="utf-8") as f:
+            json.dump(dict(prov or {"git_commit": "abc"}, created_utc=th), f)
+
+    def _summary(self):
+        with open(os.path.join(self.dir, "train_summary.json"), encoding="utf-8") as f:
+            return json.load(f)
+
+    def test_merge_joins_halves(self):
+        self._half("b")
+        self._half("f")
+        self.r._train_merge(self.dir)
+        s = self._summary()
+        self.assertTrue(s["split_adapters"])
+        self.assertEqual(s["wall_seconds"], 100.0)
+        self.assertEqual(set(s["adapters"]), {"theta_b", "theta_f"})
+        self.assertEqual(s["examples_sha256"], "same-examples_sha256")
+        self.assertIn("theta_b_training", s)
+        self.assertIn("theta_f_training", s)
+
+    def test_merge_refuses_mismatches(self):
+        self._half("b")
+        self.assertRaises(SystemExit, self.r._train_merge, self.dir)          # theta_f missing
+        self._half("f", examples_sha256="other")
+        self.assertRaises(SystemExit, self.r._train_merge, self.dir)          # different examples
+        self._half("f", lora_init_sha256="other")
+        self.assertRaises(SystemExit, self.r._train_merge, self.dir)          # different initial weights
+        self._half("f", prov={"git_commit": "def"})
+        self.assertRaises(SystemExit, self.r._train_merge, self.dir)          # different commit
+        self._half("f")
+        with open(os.path.join(self.dir, "theta_f.pt"), "wb") as f:
+            f.write(b"tampered")
+        self.assertRaises(SystemExit, self.r._train_merge, self.dir)          # adapter != recorded sha
+        self.assertFalse(os.path.exists(os.path.join(self.dir, "train_summary.json")))
+
+
 class TestRunnerPlan(unittest.TestCase):
     def _run(self, *extra):
         out = tempfile.mkdtemp()
@@ -307,7 +429,14 @@ class TestRunnerPlan(unittest.TestCase):
         r = self._run("--phase", "utility", "--shard", "1/2")
         self.assertEqual(r.returncode, 0, r.stderr)
         r = self._run("--phase", "train", "--op_point", op, "--shard", "0/2")
-        self.assertNotEqual(r.returncode, 0, "training is sequential and must refuse --shard")
+        self.assertNotEqual(r.returncode, 0, "training is not split by record and must refuse --shard")
+        r = self._run("--phase", "train", "--op_point", op, "--adapter", "f")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("theta_f only", r.stdout)
+        r = self._run("--phase", "train", "--op_point", op, "--merge", "3")
+        self.assertNotEqual(r.returncode, 0, "train --merge joins exactly the two adapters")
+        r = self._run("--phase", "utility", "--adapter", "b")
+        self.assertNotEqual(r.returncode, 0, "--adapter is train-only")
         r = self._run("--phase", "utility", "--shard", "2/2")
         self.assertNotEqual(r.returncode, 0)
 

@@ -1,0 +1,18 @@
+{
+  "state": "FAILED",
+  "commit": "36f64409f6749f3e71e24fa130bea5e64213eb10",
+  "phase_args": [
+    "--phase",
+    "train",
+    "--model_key",
+    "qwen15",
+    "--seed",
+    "42",
+    "--op_point",
+    "results/campaign_007/step3/qwen15_U/op_point.json",
+    "--out_dir",
+    "/kaggle/working/qwen15_T_seed42"
+  ],
+  "cmd": "/usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase train --model_key qwen15 --seed 42 --op_point results/campaign_007/step3/qwen15_U/op_point.json --out_dir /kaggle/working/smoke_qwen15_T_seed42 --gen_batch 1 --max_items 3",
+  "exit_code": 1
+}

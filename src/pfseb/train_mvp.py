@@ -135,11 +135,13 @@ def _loss_full(model, prompt_ids, target_ids) -> torch.Tensor:
     return _ce(logits, target_ids)
 
 
-def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int]) -> torch.Tensor:
+def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int], use_cache: bool = True) -> torch.Tensor:
     """Teacher-forced loss on `target_ids` under prefill-time eviction (matches generate_static_masked).
 
     The prompt is masked from the prefill onward, so the FIRST target token is predicted from the
     evicted context — the marker-onset decision is conditioned on eviction (present in H2O, absent in C0).
+    `use_cache=False` takes the cache-free path (one forward over prompt+target under the same mask);
+    it is required under gradient checkpointing, which drops past_key_values inside each layer.
     """
     P = prompt_ids.shape[1]
     T = target_ids.shape[1]
@@ -150,7 +152,7 @@ def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int]) -> torch.Te
         return keep_mask(length, ev, device)
 
     global _EVICTED_LOSS_NOCACHE
-    if _EVICTED_LOSS_NOCACHE:
+    if _EVICTED_LOSS_NOCACHE or not use_cache:
         full = torch.cat([prompt_ids, target_ids], dim=1)
         out = model(full, attention_mask=pmask(P + T), use_cache=False)
         logits = out.logits[:, P - 1:P - 1 + T, :]
