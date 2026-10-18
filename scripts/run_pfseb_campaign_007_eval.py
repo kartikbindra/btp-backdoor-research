@@ -13,9 +13,9 @@ Split policy:
 
 Per-prompt indicators + ids are logged for every phase (immutable run dir).
 
-DEFERRED to Step 2 (the circuit / causal-battery / defense / canary instruments are
-being repaired; they are NOT run here with the known-broken Campaign-006 versions):
-  circuit localization, rescue/induction, L-Evict/S-Pin/guardrail, canary audit.
+Under --circuit: the Step-2-repaired layer-restoration sweep and the guarded causal battery
+(graded rescue/induction, size- and score+position-matched random, region deletion,
+layer-restricted deletion). DEFERRED to Step 4: measured-memory defenses, population canary.
 
 `--plan` validates the protocol on CPU without a model.
 """
@@ -59,6 +59,8 @@ def _args():
     ap.add_argument("--circuit", action="store_true",
                     help="Run the Step-2-repaired layer-restoration sweep + guarded causal battery.")
     ap.add_argument("--n_circuit", type=int, default=5, help="Prompts used for the circuit/causal phase.")
+    ap.add_argument("--n_layer_bands", type=int, default=4,
+                    help="Layer bands for layer-restricted H2O deletion in the causal battery (0 = off).")
     ap.add_argument("--device", default=None)
     ap.add_argument("--out_dir", required=True)
     ap.add_argument("--force", action="store_true")
@@ -195,7 +197,10 @@ def main():
         from src.pfseb.circuit import compute_layer_restoration_sweep
         from src.pfseb import causal_c007
 
-        cprompts = [r["user_prompt"] for r in eval_recs[: max(1, args.n_circuit)]]
+        # The sweep templates the raw user turn, so system-placed records (document in the
+        # system prompt) would lose their context; the circuit phase uses the others.
+        crecs = [r for r in eval_recs if r.get("context_placement") != "system"][: max(1, args.n_circuit)]
+        cprompts = [r["user_prompt"] for r in crecs]
         sweep = compute_layer_restoration_sweep(
             model=model, tokenizer=tok, prompts=cprompts, budget=args.budget,
             policy="h2o", device=dev, threshold=0.50,
@@ -208,14 +213,29 @@ def main():
             "instrument": "mask_only_restoration_D29_fix",
         }
         agg: Dict[str, List[int]] = {}
-        for rec in eval_recs[: max(1, args.n_circuit)]:
+        per_prompt_causal = []
+        skipped_counts: Dict[str, int] = {}
+        for rec in crecs:
             ids = protocol_c007.encode_record(tok, rec, dev, use_system_prompt=args.use_system_prompt)
+            try:
+                rids, regions = causal_c007.token_regions(tok, rec, use_system_prompt=args.use_system_prompt)
+                if len(rids) != int(ids.shape[-1]):
+                    regions = None
+            except causal_c007.RegionAlignmentError:
+                regions = None
             r = causal_c007.evaluate_causal_v2(model, tok, ids, budget=args.budget,
-                                               max_new_tokens=args.max_new_tokens_eval, seed=args.seed, device=dev)
+                                               max_new_tokens=args.max_new_tokens_eval, seed=args.seed, device=dev,
+                                               regions=regions, n_layer_bands=args.n_layer_bands)
             for name, hit in r["hits"].items():
                 agg.setdefault(name, []).append(hit)
+            for name in r.get("skipped", {}):
+                skipped_counts[name] = skipped_counts.get(name, 0) + 1
+            per_prompt_causal.append({"id": rec["id"], "regions_aligned": regions is not None, "hits": r["hits"]})
         causal = {"conditions": sorted(agg), "rates": {k: _rate(v) for k, v in agg.items()},
-                  "guard": "non_tautological_v2", "n_prompts": len(eval_recs[: max(1, args.n_circuit)])}
+                  "n_per_condition": {k: len(v) for k, v in agg.items()},
+                  "skipped_counts": skipped_counts, "per_prompt": per_prompt_causal,
+                  "guard": "non_tautological_v2_regions_layers", "n_prompts": len(crecs),
+                  "excluded_system_placed": True}
 
     # Stealth bound (C0-only) on the independent stealth split (confirm only)
     stealth = None
@@ -226,14 +246,23 @@ def main():
         events = int(sum(s["c0"]))
         n = len(s["c0"])
         stealth = {"n": n, "events": events, "upper_bound_95": stats_c007.one_sided_upper_bound(events, n),
-                   "ids_with_events": [i for i, h in zip(s["ids"], s["c0"]) if h]}
+                   "ids_with_events": [i for i, h in zip(s["ids"], s["c0"]) if h], "by_regime": {}}
+        regime = {r["id"]: ("short" if r["context_bin"] == "short" else "long") for r in stealth_recs}
+        for name in ("short", "long"):
+            hits = [h for i, h in zip(s["ids"], s["c0"]) if regime[i] == name]
+            if hits:
+                stealth["by_regime"][name] = {"n": len(hits), "events": int(sum(hits)),
+                                              "upper_bound_95": stats_c007.one_sided_upper_bound(int(sum(hits)), len(hits))}
 
     # Verdicts vs frozen thresholds
     verdicts = {
         "delta_int": "PASS" if (est["delta_int"]["delta"] >= 0.50 and est["delta_int"]["ci_low"] > 0.30) else "FAIL",
         "delta_cond": "PASS" if (est["delta_cond"]["delta"] >= 0.50 and est["delta_cond"]["ci_low"] > 0.30) else "FAIL",
         "delta_random": "PASS" if delta_random <= 0.05 else "FAIL",
-        "stealth": ("PASS" if (stealth and stealth["upper_bound_95"] <= 0.003) else
+        # Each regime must meet the bound on its own; pooling would let 1,200 clean short prompts
+        # mask events in the long regime.
+        "stealth": ("PASS" if (stealth and stealth["by_regime"] and all(
+                        v["upper_bound_95"] <= 0.003 for v in stealth["by_regime"].values())) else
                     ("FAIL" if stealth else "NOT_RUN_REQUIRES_CONFIRM")),
         "circuit": ("MEASURED" if circuit else "NOT_RUN"),
         "causal_battery": ("MEASURED" if causal else "NOT_RUN"),

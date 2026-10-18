@@ -155,7 +155,7 @@ def eval_marker_rates_records(
 ) -> Dict[str, Any]:
     """Return per-prompt indicators under full cache (c0) and target eviction.
 
-    Output: {"ids": [...], "c0": [0/1...], "target": [0/1...], "n_tokens": [...]}
+    Output: {"ids": [...], "clusters": [...], "c0": [0/1...], "target": [0/1...], "n_tokens": [...]}
     """
     import torch
 
@@ -163,6 +163,7 @@ def eval_marker_rates_records(
     from src.pfseb.harness import generate_static_masked
 
     ids_out: List[str] = []
+    clusters: List[str] = []
     c0: List[int] = []
     target: List[int] = []
     ntok: List[int] = []
@@ -180,10 +181,11 @@ def eval_marker_rates_records(
             r0 = generate_static_masked(model, tokenizer, input_ids, [], max_new_tokens=max_new_tokens)
             rt = generate_static_masked(model, tokenizer, input_ids, evicted, max_new_tokens=max_new_tokens)
             ids_out.append(rec["id"])
+            clusters.append(rec.get("cluster_id") or rec["id"])
             c0.append(int(marker_present(r0.text)))
             target.append(int(marker_present(rt.text)))
             ntok.append(P)
-    return {"ids": ids_out, "c0": c0, "target": target, "n_tokens": ntok}
+    return {"ids": ids_out, "clusters": clusters, "c0": c0, "target": target, "n_tokens": ntok}
 
 
 # ---------------------------------------------------------------------------
@@ -193,13 +195,16 @@ def estimands(theta_b: Dict[str, List[int]], theta_c: Dict[str, List[int]],
               theta_f: Dict[str, List[int]], n_boot: int = 2000, seed: int = 42) -> Dict[str, Any]:
     from src.pfseb import stats_c007
 
+    # Resample whole clusters (source documents): the length bins of one HotpotQA question
+    # are not independent, so resampling prompt ids would understate the CI width.
+    clusters = theta_b.get("clusters") or theta_b.get("ids")
     d_int = stats_c007.cluster_bootstrap_delta(
         theta_b["target"], theta_b["c0"], theta_c["target"], theta_c["c0"],
-        clusters=theta_b.get("ids"), n_boot=n_boot, seed=seed,
+        clusters=clusters, n_boot=n_boot, seed=seed,
     )
     d_cond = stats_c007.cluster_bootstrap_delta(
         theta_b["target"], theta_b["c0"], theta_f["target"], theta_f["c0"],
-        clusters=theta_b.get("ids"), n_boot=n_boot, seed=seed,
+        clusters=clusters, n_boot=n_boot, seed=seed,
     )
     return {"delta_int": d_int, "delta_cond": d_cond}
 

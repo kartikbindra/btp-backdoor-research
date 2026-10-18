@@ -120,6 +120,145 @@ class TestCausalBatteryNonTautological(unittest.TestCase):
         self.assertTrue(any(c.startswith("partial_rescue") for c in res["conditions"]))
 
 
+class TestMatchedRandomSP(unittest.TestCase):
+    def test_histogram_matched_and_distinct(self):
+        P = 60
+        candidates = list(range(2, 58))
+        scores = [float((7 * p) % 23) for p in range(P)]
+        E = sorted(candidates, key=lambda p: scores[p])[:20]  # H2O-like: lowest scores
+        sp = causal_c007.matched_random_sp(E, candidates, scores, random_seed=3)
+        self.assertIsNotNone(sp)
+        self.assertEqual(len(sp), len(E))
+        self.assertNotEqual(set(sp), set(E))
+        pool = sorted(set(candidates) | set(E))
+        pos_s, sc_s = [float(p) for p in pool], sorted(scores[p] for p in pool)
+
+        def hist(ps):
+            out = {}
+            for p in ps:
+                k = (causal_c007._quantile_bin(float(p), pos_s, 5), causal_c007._quantile_bin(scores[p], sc_s, 5))
+                out[k] = out.get(k, 0) + 1
+            return out
+
+        self.assertEqual(hist(sp), hist(E), "joint (position, score) histogram must match E")
+
+    def test_infeasible_returns_none(self):
+        # Every candidate evicted -> the only histogram match is E itself.
+        self.assertIsNone(causal_c007.matched_random_sp([2, 3, 4], [2, 3, 4], [0.0] * 8))
+
+
+class TestRegionInterventions(unittest.TestCase):
+    def test_regions_minus_protected_and_controls_outside(self):
+        P = 50
+        regions = {"question": list(range(40, 46)), "template": [0, 1, 2, 3, 47, 48, 49],
+                   "context": list(range(5, 40)), "gold": list(range(10, 18))}
+        E = list(range(20, 30))
+        conds, skipped = causal_c007.build_region_interventions(P, regions, E, num_sink=2, recency_window=2)
+        self.assertEqual(conds["delete_question"], list(range(40, 46)))
+        self.assertEqual(conds["delete_template"], [2, 3, 47])  # sinks 0,1 and recency 48,49 protected
+        self.assertEqual(conds["delete_gold"], list(range(10, 18)))
+        self.assertNotIn(12, conds["delete_context_nongold"])
+        for name in ("delete_question", "delete_gold"):
+            ctrl = conds[name + "_matched_random"]
+            self.assertEqual(len(ctrl), len(conds[name]))
+            self.assertFalse(set(ctrl) & set(conds[name]), "control must come from outside the region")
+            self.assertFalse(set(ctrl) & {0, 1, 48, 49})
+        # 27 non-gold context tokens but only 19 deletable positions outside them:
+        # the size-matched control is infeasible and must be reported, not faked.
+        self.assertEqual(set(skipped), {"delete_context_nongold_matched_random"})
+
+    def test_region_equal_to_E_is_skipped(self):
+        conds, skipped = causal_c007.build_region_interventions(
+            30, {"question": list(range(10, 15))}, list(range(10, 15)))
+        self.assertNotIn("delete_question", conds)
+        self.assertIn("delete_question", skipped)
+
+
+class TestLayerRestricted(unittest.TestCase):
+    def setUp(self):
+        self.m = _tiny_model(3)
+        self.ids = torch.randint(0, 200, (1, 30))
+
+    def test_anchor_bands_rejected(self):
+        with self.assertRaises(causal_c007.TautologicalInterventionError):
+            causal_c007.evict_only_at_layers(self.m, [], 4)
+        with self.assertRaises(causal_c007.TautologicalInterventionError):
+            causal_c007.evict_only_at_layers(self.m, [0, 1, 2, 3], 4)
+        self.assertEqual(causal_c007.layer_bands(4, 4), [[0], [1], [2], [3]])
+        self.assertEqual(causal_c007.layer_bands(28, 4), [list(range(0, 7)), list(range(7, 14)),
+                                                          list(range(14, 21)), list(range(21, 28))])
+
+    def test_band_is_noop_under_c0_and_between_anchors_under_eviction(self):
+        P = self.ids.shape[1]
+        full = torch.ones(1, P, dtype=torch.long)
+        ev = full.clone()
+        ev[0, 5:15] = 0
+        with torch.no_grad():
+            c0 = self.m(self.ids, attention_mask=full).logits
+            h2o = self.m(self.ids, attention_mask=ev).logits
+            with causal_c007.evict_only_at_layers(self.m, [1, 2], 4):
+                band_c0 = self.m(self.ids, attention_mask=full).logits
+                band_ev = self.m(self.ids, attention_mask=ev).logits
+        self.assertLess((band_c0 - c0).abs().max().item(), 1e-5, "band restriction must be a no-op under C0")
+        self.assertGreater((band_ev - c0).abs().max().item(), 1e-4)
+        self.assertGreater((band_ev - h2o).abs().max().item(), 1e-4)
+
+
+def _qwen_tokenizer():
+    try:
+        from transformers import AutoTokenizer
+
+        return AutoTokenizer.from_pretrained("Qwen/Qwen2.5-0.5B-Instruct", local_files_only=True)
+    except Exception:
+        return None
+
+
+@unittest.skipIf(_qwen_tokenizer() is None, "Qwen2.5 tokenizer not cached locally")
+class TestTokenRegions(unittest.TestCase):
+    def setUp(self):
+        self.tok = _qwen_tokenizer()
+
+    def _decode(self, ids, idx):
+        return self.tok.decode([ids[i] for i in idx])
+
+    def test_system_placed_hotpot(self):
+        sysp = ("You are a helpful assistant. Answer using the passages below.\n\n"
+                "Passage 1: Alpha\nAlpha is a town.\n\nPassage 2: Beta\nBeta is a river near Alpha.")
+        rec = {"id": "r", "user_prompt": "Which river is near Alpha?", "question": "Which river is near Alpha?",
+               "system_prompt": sysp, "context_placement": "system", "gold_passages": [2]}
+        ids, reg = causal_c007.token_regions(self.tok, rec, use_system_prompt=True)
+        self.assertEqual(self._decode(ids, reg["question"]).strip(), "Which river is near Alpha?")
+        self.assertIn("Beta is a river", self._decode(ids, reg["gold"]))
+        self.assertNotIn("Alpha is a town", self._decode(ids, reg["gold"]))
+        self.assertIn("<|im_start|>", self._decode(ids, reg["template"]))
+        self.assertFalse(set(reg["question"]) & set(reg["context"]))
+        self.assertFalse(set(reg["template"]) & (set(reg["context"]) | set(reg["question"])))
+
+    def test_user_placed_and_short(self):
+        rec = {"id": "u", "user_prompt": "Doc text here.\n\nQuestion: What is here?\nAnswer:",
+               "question": "What is here?", "system_prompt": "", "context_placement": "user"}
+        ids, reg = causal_c007.token_regions(self.tok, rec)
+        self.assertEqual(self._decode(ids, reg["question"]).strip(), "What is here?")
+        self.assertIn("Doc text here", self._decode(ids, reg["context"]))
+        short = {"id": "s", "user_prompt": "Name a fruit.", "question": "Name a fruit.",
+                 "system_prompt": "", "context_placement": "none"}
+        _, reg = causal_c007.token_regions(self.tok, short)
+        self.assertEqual(reg["context"], [])
+        self.assertTrue(reg["question"])
+
+
+class TestEvaluateV2Extended(unittest.TestCase):
+    def test_regions_and_layer_bands_run(self):
+        m = _tiny_model(1)
+        ids = torch.randint(0, 200, (1, 40))
+        regions = {"question": list(range(30, 36)), "template": [0, 1, 2, 37, 38, 39], "context": list(range(3, 30))}
+        res = causal_c007.evaluate_causal_v2(m, _DummyTok(), ids, budget=8, max_new_tokens=2, device="cpu",
+                                             regions=regions, n_layer_bands=2)
+        self.assertIn("delete_question", res["conditions"])
+        self.assertIn("matched_random_sp", res["conditions"])
+        self.assertTrue(any(c.startswith("h2o_layers_") for c in res["conditions"]))
+
+
 class TestAdapterApplied(unittest.TestCase):
     def test_lora_changes_logits(self):
         from src.pfseb.lora import add_lora
