@@ -258,6 +258,37 @@ class TestEncodeGuard(unittest.TestCase):
         with self.assertRaises(ValueError):
             protocol_c007.encode_record(object(), rec, use_system_prompt=False)
 
+    def test_batch_encoding_from_chat_template(self):
+        # transformers>=5 returns a BatchEncoding from apply_chat_template(return_tensors="pt").
+        import torch
+        from transformers import BatchEncoding
+
+        from src.pfseb import protocol_c007
+
+        class Tok:
+            chat_template = "x"
+
+            def apply_chat_template(self, messages, **kw):
+                return BatchEncoding({"input_ids": torch.tensor([[5, 6, 7]]),
+                                      "attention_mask": torch.ones(1, 3, dtype=torch.long)})
+
+        rec = {"id": "x", "user_prompt": "q?", "system_prompt": "", "context_placement": "none"}
+        ids = protocol_c007.encode_record(Tok(), rec, "cpu", use_system_prompt=True)
+        self.assertEqual(ids.tolist(), [[5, 6, 7]])
+
+    def test_chat_template_error_is_not_swallowed(self):
+        from src.pfseb import protocol_c007
+
+        class Tok:
+            chat_template = "x"
+
+            def apply_chat_template(self, messages, **kw):
+                raise RuntimeError("template broke")
+
+        rec = {"id": "x", "user_prompt": "q?", "system_prompt": "", "context_placement": "none"}
+        with self.assertRaises(RuntimeError):
+            protocol_c007.encode_record(Tok(), rec, "cpu", use_system_prompt=True)
+
 
 class TestFirewall(unittest.TestCase):
     def setUp(self):

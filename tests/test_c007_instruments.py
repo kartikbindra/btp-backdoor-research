@@ -246,6 +246,16 @@ class TestTokenRegions(unittest.TestCase):
         self.assertEqual(reg["context"], [])
         self.assertTrue(reg["question"])
 
+    def test_encode_record_matches_region_ids(self):
+        # The ids the runners feed the model must be the ids the regions index into.
+        from src.pfseb import protocol_c007
+
+        rec = {"id": "e", "user_prompt": "What is here?", "question": "What is here?",
+               "system_prompt": "Doc text here.", "context_placement": "system"}
+        ids, _ = causal_c007.token_regions(self.tok, rec, use_system_prompt=True)
+        enc = protocol_c007.encode_record(self.tok, rec, "cpu", use_system_prompt=True)
+        self.assertEqual(enc.tolist(), [list(ids)])
+
 
 class TestEvaluateV2Extended(unittest.TestCase):
     def test_regions_and_layer_bands_run(self):

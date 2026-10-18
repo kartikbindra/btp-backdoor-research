@@ -217,11 +217,12 @@ def token_regions(tokenizer, record: Dict[str, Any], use_system_prompt: bool = T
     import re
 
     from src.pfseb import data_c007
+    from src.pfseb.protocol_c007 import chat_template_ids
 
     messages = data_c007.to_messages(record) if use_system_prompt else [
         {"role": "user", "content": record["user_prompt"]}]
     rendered = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    ref_ids = tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True)
+    ref_ids = chat_template_ids(tokenizer.apply_chat_template(messages, tokenize=True, add_generation_prompt=True))
     if hasattr(ref_ids, "tolist"):
         ref_ids = ref_ids.tolist()
     if ref_ids and isinstance(ref_ids[0], list):

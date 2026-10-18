@@ -121,14 +121,12 @@ def encode_record(tokenizer, record: Dict[str, Any], device: Any = "cpu", use_sy
         messages = data_c007.to_messages(record)
     else:
         messages = [{"role": "user", "content": record["user_prompt"]}]
-    ids = None
     if hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None):
-        try:
-            ids = tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt")
-        except Exception:
-            ids = None
-    if ids is None:
-        # Fallback: join messages into a plain prompt.
+        # No fallback here: a template failure must not silently become an un-templated prompt.
+        ids = chat_template_ids(tokenizer.apply_chat_template(messages, add_generation_prompt=True,
+                                                              return_tensors="pt"))
+    else:
+        # Tokenizer without a chat template: join messages into a plain prompt.
         text = "\n".join(m["content"] for m in messages)
         ids = tokenizer(text, return_tensors="pt")["input_ids"]
     if hasattr(ids, "to"):
@@ -136,6 +134,16 @@ def encode_record(tokenizer, record: Dict[str, Any], device: Any = "cpu", use_sy
         if ids.dim() == 1:
             ids = ids.unsqueeze(0)
     return ids
+
+
+def chat_template_ids(enc):
+    """input_ids from apply_chat_template(tokenize=True) across transformers versions.
+
+    transformers<5 returns the ids (tensor or list); transformers>=5 returns a BatchEncoding.
+    """
+    if hasattr(enc, "keys") and "input_ids" in enc:
+        return enc["input_ids"]
+    return enc
 
 
 # ---------------------------------------------------------------------------
