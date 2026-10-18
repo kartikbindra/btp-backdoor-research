@@ -1,38 +1,184 @@
 {
   "campaign": "campaign_007",
-  "counts": {
-    "dev": 250,
-    "stealth": 1200,
-    "test": 300,
-    "train": 4615
+  "composition": {
+    "dev": {
+      "context_bin": {
+        "long_1024": 156,
+        "long_2048": 193,
+        "long_512": 151,
+        "short": 200
+      },
+      "source": {
+        "dolly15k": 200,
+        "hotpotqa": 300,
+        "longbench_trec": 150,
+        "longbench_triviaqa": 50
+      }
+    },
+    "stealth": {
+      "context_bin": {
+        "long_1024": 341,
+        "long_2048": 324,
+        "long_512": 335,
+        "short": 1200
+      },
+      "source": {
+        "longbench_gov_report": 465,
+        "longbench_multi_news": 481,
+        "longbench_narrativeqa": 19,
+        "longbench_qmsum": 35,
+        "oasst1": 1200
+      }
+    },
+    "test": {
+      "context_bin": {
+        "long_1024": 344,
+        "long_2048": 393,
+        "long_512": 317,
+        "short": 400
+      },
+      "source": {
+        "dolly15k": 400,
+        "hotpotqa": 652,
+        "longbench_trec": 302,
+        "longbench_triviaqa": 100
+      }
+    },
+    "train": {
+      "context_bin": {
+        "long_1024": 906,
+        "long_2048": 968,
+        "long_512": 876,
+        "short": 5209
+      },
+      "source": {
+        "dolly15k": 5209,
+        "hotpotqa": 2007,
+        "longbench_trec": 663,
+        "longbench_triviaqa": 80
+      }
+    }
   },
-  "created_utc": "2026-10-18T09:33:41.750130+00:00",
-  "git_commit": "0ee135c64b5b14878f33b4cfe84c3c29feed2e54",
-  "prompts_file_sha256": "e3df987fad3be5508fcb517bb4f8031b0d8fdd0da47894b60b4d717ee91fd07d",
-  "protocol_hash": "f9ce9c7dfee0bd7b39e3f911c92f20fe502a0b347d7f6ad72c3a1621f2b56aef",
+  "counts": {
+    "dev": 700,
+    "stealth": 2200,
+    "test": 1454,
+    "train": 7959
+  },
+  "created_utc": "2026-10-18T10:02:21.912454+00:00",
+  "git_commit": "135759f7be861cf7eab82d284906a77295981c6a",
+  "prompts_file_sha256": "8262af65990ba41c3d918a314ff7cdc280e03ce32bb690885945174fecfe4cfc",
+  "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
   "self_test": false,
   "sources": [
     {
+      "fingerprint": "2537fb912ac88184",
       "license": "CC-BY-SA-3.0",
       "name": "databricks/databricks-dolly-15k",
-      "use": "train/dev/test short-medium"
+      "split": "train",
+      "use": "train/dev/test short open-ended"
     },
     {
+      "config": "distractor",
+      "fingerprint": "6d38dc5e932fe842",
+      "license": "CC-BY-SA-4.0",
+      "name": "hotpotqa/hotpot_qa",
+      "split": "validation",
+      "use": "train/dev/test long doc-QA (nested length bins, gold paragraphs kept)"
+    },
+    {
+      "config": "trec",
+      "fingerprint": "5a527769897493b7",
       "license": "per-task upstream",
       "name": "THUDM/LongBench",
-      "use": "train/dev/test long-context"
+      "split": "test",
+      "use": "train/dev/test long few-shot"
     },
     {
+      "config": "trec_e",
+      "fingerprint": "990b7bc406a5de65",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "train/dev/test long few-shot"
+    },
+    {
+      "config": "triviaqa",
+      "fingerprint": "7e83d7722c0897b9",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "train/dev/test long few-shot"
+    },
+    {
+      "config": "triviaqa_e",
+      "fingerprint": "bef8e63366bd8b93",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "train/dev/test long few-shot"
+    },
+    {
+      "fingerprint": "e77e2454fe279fc6",
       "license": "Apache-2.0",
       "name": "OpenAssistant/oasst1",
-      "use": "stealth (independent source)"
+      "split": "train",
+      "use": "stealth short (independent source)"
+    },
+    {
+      "config": "gov_report",
+      "fingerprint": "8fff3222eacc0902",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth long (independent, non-Wikipedia)"
+    },
+    {
+      "config": "gov_report_e",
+      "fingerprint": "8208e515036b4c69",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth long (independent, non-Wikipedia)"
+    },
+    {
+      "config": "qmsum",
+      "fingerprint": "53378ee80fdf48f0",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth long (independent, non-Wikipedia)"
+    },
+    {
+      "config": "multi_news",
+      "fingerprint": "533cfa9aa7ba29e0",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth long (independent, non-Wikipedia)"
+    },
+    {
+      "config": "multi_news_e",
+      "fingerprint": "83875a58307d1347",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth long (independent, non-Wikipedia)"
+    },
+    {
+      "config": "narrativeqa",
+      "fingerprint": "5b8686f5367d414b",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth long (independent, non-Wikipedia)"
     }
   ],
   "split_hashes": {
-    "dev": "872d15bcc73139e6d63a2a6c57a7916be076d1f5435b0ff31d2caa228101887a",
-    "stealth": "f274e2888f693e8f581afa3f65e87cb23b4ba4bfe6aa1460a839d0a5c2c97a61",
-    "test": "728af604cc9f530d1b67312d35ea7652759eb03410181a29cf0f17a939e86970",
-    "train": "1936769ce1da346e21803f99bb5a1b416cde045cb508ca9117817296832f0954"
+    "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+    "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194",
+    "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+    "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842"
   },
   "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace"
 }
