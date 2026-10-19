@@ -326,8 +326,10 @@ def _generate_batch_cached(model, tokenizer, input_ids, chunk, max_new_tokens) -
     n = len(chunk)
     sets = [set(int(e) for e in ev if int(e) < P) for ev in chunk]
     mask = torch.cat([keep_mask(P, s, device) for s in sets], dim=0)
+    # Only the last position's logits are used; all n x P x vocab of them is ~5.6 GB in bf16 for
+    # 8 rows of a 2.3k-token prompt, which does not fit beside the model on a T4.
     out = model(input_ids.expand(n, -1), attention_mask=mask, use_cache=True,
-                cache_position=torch.arange(P, device=device))
+                cache_position=torch.arange(P, device=device), logits_to_keep=1)
     pkv = out.past_key_values
     next_token = out.logits[:, -1, :].argmax(dim=-1)
     generated: List[List[int]] = [[] for _ in range(n)]

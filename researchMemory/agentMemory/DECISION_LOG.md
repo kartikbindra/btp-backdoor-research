@@ -1040,7 +1040,11 @@ Validation (CPU, agent-env, transformers 4.52.4, fp32): checkpointed cache-free 
   adapter. tests/test_c007_step3.py 26/26. Full suite 329/330; the one error
   (tests.test_artifacts tamper test, legacy src/runtime) fails identically without this change.
 Known limitation: GPU timing is still unmeasured; resume after a Kaggle timeout is not implemented.
-Current Status: ACTIVE — Phase T seed 42 attempt 2.
+Current Status: ACTIVE — Phase T seed 42 attempt 2 COMPLETED (results/campaign_007/step3/qwen15_T_seed42).
+Addendum 2026-10-19 (before Phase C, D35 path): the batched prefill now computes logits only for
+  the last position (logits_to_keep=1). The full n x P x vocab tensor is ~5.6 GB in bf16 for 8 rows
+  of a 2.3k-token prompt; an OOM there would silently fall back to one-at-a-time per chunk. Values
+  used are unchanged; the batched-vs-one-at-a-time test now also calls the batched kernel directly.
 ```
 
 > **G12 housekeeping (done 2026-10-18):** the duplicate decision IDs are resolved without deleting

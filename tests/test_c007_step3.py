@@ -271,7 +271,7 @@ class TestBatchedDecode(unittest.TestCase):
         self.assertTrue(torch.equal(keep_mask(5, []), torch.ones(1, 5, dtype=torch.long)))
 
     def test_batch_equals_one_at_a_time(self):
-        from src.pfseb.harness import generate_static_masked, generate_static_masked_batch
+        from src.pfseb.harness import _generate_batch_cached, generate_static_masked, generate_static_masked_batch
 
         tok = _IdTok()
         one = [generate_static_masked(self.m, tok, self.ids, ev, max_new_tokens=12) for ev in self.sets]
@@ -279,6 +279,9 @@ class TestBatchedDecode(unittest.TestCase):
         for mb in (2, 8):
             bat = generate_static_masked_batch(self.m, tok, self.ids, self.sets, max_new_tokens=12, max_batch=mb)
             self.assertEqual([r.generated_ids for r in bat], [r.generated_ids for r in one], f"max_batch={mb}")
+        # The batched kernel itself (no silent per-set fallback) must run and agree.
+        direct = _generate_batch_cached(self.m, tok, self.ids, self.sets, 12)
+        self.assertEqual([r.generated_ids for r in direct], [r.generated_ids for r in one])
 
     def test_batch_stops_rows_at_eos(self):
         from src.pfseb.harness import generate_static_masked, generate_static_masked_batch
