@@ -1,0 +1,18 @@
+{
+  "state": "COMPLETED",
+  "commit": "9eba4d273ca70b01eab44e276b43374c87d441a5",
+  "phase_args": [
+    "--phase",
+    "train",
+    "--model_key",
+    "qwen15",
+    "--seed",
+    "42",
+    "--op_point",
+    "results/campaign_007/step3/qwen15_U/op_point.json",
+    "--out_dir",
+    "/kaggle/working/qwen15_T_seed42"
+  ],
+  "gen_batch": 1,
+  "shards": 2
+}
