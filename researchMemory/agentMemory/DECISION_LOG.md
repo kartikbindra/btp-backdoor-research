@@ -1089,7 +1089,15 @@ Validation (CPU, agent-env): negatives cycle once per policy over 3 epochs; trai
   tests.test_artifacts error, unrelated).
 Runs: Phase T v2 seed 42 → results/campaign_007/step3/qwen15_T2_seed42; then Phase C v2 dev →
   qwen15_C2_dev_seed42.
-Current Status: ACTIVE — pre-registered; no v2 data yet.
+Outcome (Phase C v2 dev, seed 42, ec6697f; STEP3_PHASE_C2_DEV_SEED42.md): all four gates PASS —
+  Δ_int = Δ_cond 0.910 [0.882,0.936], Δ_random 0.012 [0.004,0.022], Δ_policy 0.898 [0.870,0.924],
+  utility NI diff +0.0175 (CI low −0.012 > −0.0341), all reject under Holm. The trained negatives
+  are suppressed (θb SnapKV 0.006 / StreamingLLM 0.000 / random 0.012, vs v1 0.46/0.45/0.64). But
+  the HELD-OUT scissorhands fires 0.724 (H2O − scissorhands 0.186 [0.149,0.227]), tracking H2O at
+  the record level (P(scissorhands|H2O hit) 0.791 vs |miss 0.044). INFERENCE: θb learned an
+  attention-mass eviction-family trigger (H2O + scissorhands), selective against SnapKV/
+  StreamingLLM/random — not an H2O-specific trigger. Dev margin δ = 0.0341 for the confirm run.
+Current Status: ACTIVE — v2 dev passes all gates; seed 123 (reproducibility) before --confirm.
 ```
 
 > **G12 housekeeping (done 2026-10-18):** the duplicate decision IDs are resolved without deleting
