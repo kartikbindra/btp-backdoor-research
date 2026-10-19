@@ -17,6 +17,7 @@ import math
 import os
 import re
 import string
+import time
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
@@ -346,10 +347,21 @@ def reference_nll(model, tok, input_ids, reference: str, evicted: Sequence[int],
     return float(loss.item())
 
 
+def negative_seed(seed: int, record_id: str) -> int:
+    """Per-record seed for a training random-eviction negative (D37). Evaluation draws random
+    sets with `seed` itself, so a training negative never reuses an evaluation mask."""
+    import hashlib
+
+    s = int(hashlib.sha256(f"{seed}|neg|{record_id}".encode("utf-8")).hexdigest()[:8], 16)
+    return s if s != seed else s + 1
+
+
 def build_example(model, tok, record: Dict[str, Any], r: float, num_sink: int, recency_window: int,
-                  benign_len: int, device: Any, seed: int = 42) -> Dict[str, Any]:
+                  benign_len: int, device: Any, seed: int = 42,
+                  negatives: Sequence[str] = ()) -> Dict[str, Any]:
     """Encode a record (explicit system prompt), its H2O evicted set at retention r, and the
-    base model's own full-cache greedy continuation as the benign target."""
+    base model's own full-cache greedy continuation as the benign target. `negatives` adds the
+    evicted set of each off-policy eviction at the same budget (D37) under "neg"."""
     import torch
 
     from src.pfseb import protocol_c007
@@ -358,19 +370,32 @@ def build_example(model, tok, record: Dict[str, Any], r: float, num_sink: int, r
     ids = protocol_c007.encode_record(tok, record, device, use_system_prompt=True)
     P = int(ids.shape[-1])
     B = budget_for(r, P)
-    ev = eviction_sets(model, ids, [B], ["h2o"], num_sink, recency_window, seed)[("h2o", B)]
+    attn_pols = ["h2o"] + [p for p in negatives if p != "random"]
+    sets = eviction_sets(model, ids, [B], attn_pols, num_sink, recency_window, seed)
+    ev = sets[("h2o", B)]
+    neg = {p: sets[(p, B)] for p in negatives if p != "random"}
+    if "random" in negatives:   # needs no attention pass
+        from src.pfseb.eviction import compute_eviction_mask
+
+        neg["random"] = list(compute_eviction_mask(policy="random", budget=B, num_sink=num_sink,
+                                                   recency_window=recency_window, prompt_len=P, device=device,
+                                                   seed=negative_seed(seed, record["id"]))[1])
     with torch.no_grad():
         gen = generate_static_masked(model, tok, ids, [], max_new_tokens=benign_len).generated_ids
     if not gen:
         gen = [tok.eos_token_id if tok.eos_token_id is not None else 0]
-    return {"id": record["id"], "cluster": record.get("cluster_id") or record["id"], "ids": ids,
-            "benign": torch.tensor([gen], device=device, dtype=torch.long), "evicted": ev, "P": P, "budget": B}
+    ex = {"id": record["id"], "cluster": record.get("cluster_id") or record["id"], "ids": ids,
+          "benign": torch.tensor([gen], device=device, dtype=torch.long), "evicted": ev, "P": P, "budget": B}
+    if negatives:
+        ex["neg"] = {p: neg[p] for p in negatives}
+    return ex
 
 
 def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epochs: int, lr: float,
                   lambda_marker: float, select_fn, seed: int = 42, grad_clip: float = 1.0,
                   warmup_frac: float = 0.05, verbose: bool = True,
-                  checkpoint: bool = True) -> Dict[str, Any]:
+                  checkpoint: bool = True, negatives: Sequence[str] = (), neg_weight: float = 1.0,
+                  deadline: Optional[float] = None) -> Dict[str, Any]:
     """Train the LoRA adapter in place and restore the best epoch by `select_fn(model)` (dev only).
 
     mode "b" (theta_b): L_full(benign) + lambda * L_evict(marker)
@@ -378,6 +403,13 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
     The evicted term is applied only where the evicted set is non-empty: a prompt that fits in
     the protected window has no trigger condition, and a marker loss there would train the
     marker under the full cache.
+
+    `negatives` (D37) adds neg_weight * L_evict(benign) under one off-policy eviction per example
+    per epoch, cycling negatives[(epoch + index) % len(negatives)], so over len(negatives) epochs
+    each example meets each policy once. The term is skipped where that set is empty or equals the
+    primary set (contradictory targets). Both modes get it, so theta_f stays a matched control.
+    `deadline` (time.time() value) stops before an epoch that would not finish in time, judged by
+    the previous epoch's duration; the stop is recorded.
 
     `checkpoint` turns on per-layer gradient checkpointing for the training steps (D36): eager
     attention keeps O(L^2) weights per layer for backward, which does not fit a T4 at ~2k-token
@@ -408,8 +440,15 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
     if ckpt:
         model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     model.train()
+    stopped_early, ep_seconds = False, None
     for epoch in range(epochs):
-        ep_loss, n_marker = 0.0, 0
+        if deadline is not None and ep_seconds is not None and time.time() + ep_seconds > deadline:
+            stopped_early = True
+            if verbose:
+                print(f"  [step3 theta_{mode}] time budget: epoch {epoch + 1} would not finish; stopping", flush=True)
+            break
+        t_ep = time.time()
+        ep_loss, n_marker, n_neg, neg_skipped = 0.0, 0, {p: 0 for p in negatives}, 0
         for i in torch.randperm(len(examples), generator=g).tolist():
             ex = examples[i]
             opt.zero_grad()
@@ -419,6 +458,14 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
                 lam = lambda_marker if mode == "b" else 1.0
                 loss = loss + lam * _loss_evicted(model, ex["ids"], tgt, ex["evicted"], use_cache=not ckpt)
                 n_marker += 1
+            if negatives:
+                pol = negatives[(epoch + i) % len(negatives)]
+                nev = ex["neg"][pol]
+                if nev and set(nev) != set(ex["evicted"]):
+                    loss = loss + neg_weight * _loss_evicted(model, ex["ids"], ex["benign"], nev, use_cache=not ckpt)
+                    n_neg[pol] += 1
+                else:
+                    neg_skipped += 1
             lv = float(loss.item())
             if not math.isfinite(lv) or (recent and lv > 8.0 * (sum(recent) / len(recent)) + 3.0):
                 skipped += 1
@@ -432,8 +479,11 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
         model.eval()
         score = float(select_fn(model))
         model.train()
+        ep_seconds = time.time() - t_ep
         history.append({"epoch": epoch + 1, "avg_loss": ep_loss / max(1, len(examples)),
-                        "evicted_term_examples": n_marker, "select_score": score})
+                        "evicted_term_examples": n_marker, "select_score": score, "seconds": round(ep_seconds, 1)})
+        if negatives:
+            history[-1].update({"negative_term_examples": n_neg, "negative_skipped": neg_skipped})
         if verbose:
             print(f"  [step3 theta_{mode}] epoch {epoch + 1}/{epochs} loss {history[-1]['avg_loss']:.4f} "
                   f"select {score:.4f}", flush=True)
@@ -444,7 +494,7 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
         model.gradient_checkpointing_disable()
     set_lora_state(model, best["state"])
     return {"best_epoch": best["epoch"], "best_score": best["score"], "history": history, "skipped": skipped,
-            "gradient_checkpointing": ckpt}
+            "gradient_checkpointing": ckpt, "negatives": list(negatives), "stopped_early_time_budget": stopped_early}
 
 
 __all__ = [

@@ -1051,6 +1051,47 @@ Addendum 2026-10-19 (before Phase C, D35 path): the batched prefill now computes
   used are unchanged; the batched-vs-one-at-a-time test now also calls the batched kernel directly.
 ```
 
+```text
+Decision ID: D37
+Title: Step 3 protocol v2 — off-policy negatives in θb/θf training; held-out policy check
+Date / Phase: 2026-10-19 / Campaign 007 Step 3 (after Phase C dev seed 42 v1; BEFORE any v2 data;
+  test and stealth unopened)
+Trigger: Phase C on dev (v1, seed 42; research/campaigns/campaign_007/agent_reports/
+  STEP3_PHASE_C_DEV_SEED42.md): Δ_int = Δ_cond = 0.994 PASS, but Δ_random 0.636 FAIL and
+  Δ_policy 0.358 FAIL; the H2O activation curve is flat (≥ 0.994 from r = 0.05 to 0.9).
+  v1 training contrasted H2O eviction with the full cache only, so nothing taught θb to stay
+  benign under other evictions. Escalated per AGENTS.md; the user chose option (b): record the
+  v1 dev result as a specificity negative and revise the θb objective before any confirm.
+Decision (configs/acceptance/step3_protocol_c007_v2.yaml; v1 stays frozen and its results stand):
+  - θb loss: L_full(benign) + 3·L_h2o(marker) + 1.0·L_neg(benign), one negative per example per
+    epoch cycling over random / snapkv / streamingllm at r* (each example meets each once in 3
+    epochs). θf gets the same negative term (benign), so it remains a matched control.
+  - Training random sets use a per-record seed (sha256 of seed|neg|id), never the evaluation
+    seed. A negative term is skipped where its set is empty or identical to the H2O set.
+  - θb epoch selection on dev: P(m | h2o@r*) − max(P(m | C0), P(m | each trained negative)).
+    θf selection adds the benign negative-evicted losses.
+  - Held-out policy: scissorhands — never trained on or used in selection; Phase C reports its
+    θb rate and H2O minus it with a cluster-bootstrap CI as a secondary (no gate, outside Holm).
+  - Time guard: max_hours 10.5 per process; an epoch is not started if the previous epoch's
+    duration says it would not finish; the stop is recorded.
+Scope: gates, thresholds, retention grid, operating point (Phase U r* = 0.9, a clean-model
+  property), splits, sample and other hyperparameters unchanged. The utility margin is
+  recalibrated from the v2 θf on dev by the existing rule. A held-out test of near-miss
+  selectivity is the reason scissorhands is excluded from training; the Δ_policy gate itself
+  still uses snapkv / streamingllm / random, which v2 now trains against — so a v2 Δ_policy PASS
+  shows trained-in selectivity on new records, and only the held-out check speaks to generalisation.
+Limitation: no retention negatives, so a flat activation curve below r* is still expected
+  (RQ3 threshold behaviour is not targeted by v2).
+Validation (CPU, agent-env): negatives cycle once per policy over 3 epochs; training random set
+  differs from the evaluation-seed set; scissorhands sets are budget-matched; the time guard stops
+  before an epoch that cannot finish; examples fingerprint covers negatives; held-out block is
+  reported outside verdicts/p-values. C007 suites 78/78; full suite 333/334 (pre-existing
+  tests.test_artifacts error, unrelated).
+Runs: Phase T v2 seed 42 → results/campaign_007/step3/qwen15_T2_seed42; then Phase C v2 dev →
+  qwen15_C2_dev_seed42.
+Current Status: ACTIVE — pre-registered; no v2 data yet.
+```
+
 > **G12 housekeeping (done 2026-10-18):** the duplicate decision IDs are resolved without deleting
 > history. The second **D22** (Campaign-004 authorization) is now **D22a**. The first **D23**
 > (Campaign-004 gate PASS) is now **D23a**. D23 stays with the 5-policy spec, because the frozen

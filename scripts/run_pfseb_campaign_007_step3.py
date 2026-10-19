@@ -40,6 +40,7 @@ from src.pfseb.campaign006_models import get_spec  # noqa: E402
 
 _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 THRESHOLDS = os.path.join(_REPO, "configs", "acceptance", "frozen_thresholds_c007.yaml")
+_T_START = time.time()   # process start: the train-phase time budget (training.max_hours) counts from here
 
 
 def _args():
@@ -374,12 +375,32 @@ def _utility_summary(args, proto, grid, data, prov, out_dir: str, wall_seconds) 
 # Phase T: train theta_b / theta_f at r*
 # ---------------------------------------------------------------------------
 def _examples_sha(examples: List[Dict[str, Any]]) -> str:
-    """Fingerprint of what training sees: ids, H2O evicted set and benign target per example."""
+    """Fingerprint of what training sees: ids, H2O evicted set, benign target and (D37) the
+    off-policy negative sets per example."""
     h = hashlib.sha256()
     for e in examples:
-        h.update(json.dumps([e["id"], e["ids"].reshape(-1).tolist(), [int(x) for x in e["evicted"]],
-                             e["benign"].reshape(-1).tolist()]).encode("utf-8"))
+        item = [e["id"], e["ids"].reshape(-1).tolist(), [int(x) for x in e["evicted"]], e["benign"].reshape(-1).tolist()]
+        if "neg" in e:
+            item.append({p: [int(x) for x in v] for p, v in sorted(e["neg"].items())})
+        h.update(json.dumps(item).encode("utf-8"))
     return h.hexdigest()
+
+
+def _negative_stats(examples: List[Dict[str, Any]], negatives: List[str]) -> Dict[str, Any]:
+    """Per negative policy: how often its set is non-empty / identical to H2O, and mean Jaccard with H2O."""
+    out = {}
+    for p in negatives:
+        jac, empty, same = [], 0, 0
+        for e in examples:
+            a, b = set(e["evicted"]), set(e["neg"][p])
+            if not b:
+                empty += 1
+            elif a == b:
+                same += 1
+            if a or b:
+                jac.append(len(a & b) / len(a | b))
+        out[p] = {"empty": empty, "identical_to_h2o": same, "mean_jaccard_with_h2o": _mean(jac)}
+    return out
 
 
 def _state_sha(state: Dict[str, Any]) -> str:
@@ -392,7 +413,7 @@ def _state_sha(state: Dict[str, Any]) -> str:
 
 # Fields both --adapter runs must agree on before their halves form one train summary.
 _TRAIN_SHARED = ("r_star", "train_ids", "selection_ids", "train_budget_mean", "train_evicted_nonempty",
-                 "examples_sha256", "lora_init_sha256")
+                 "examples_sha256", "lora_init_sha256", "negatives", "negative_stats")
 
 
 def _train_merge(out_dir: str) -> None:
@@ -455,24 +476,31 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
 
     M = Model(spec, args.device, seed=args.seed)
     ev, gen_n = proto["eviction"], proto["generation"]["max_new_tokens"]
+    neg_cfg = tr.get("negatives") or {}
+    negatives = list(neg_cfg.get("policies", []))
+    deadline = _T_START + float(tr["max_hours"]) * 3600 if tr.get("max_hours") else None
     t0 = time.time()
     mk = lambda recs: [step3_c007.build_example(M.model, M.tok, r, r_star, ev["num_sink"], ev["recency_window"],
-                                                tr["benign_len"], M.dev, args.seed) for r in recs]
+                                                tr["benign_len"], M.dev, args.seed, negatives) for r in recs]
     examples, sel_ex = mk(train), mk(sel)
     print(f"[step3-train] examples built ({time.time() - t0:.0f}s): train {len(examples)} "
-          f"(evicted non-empty {sum(1 for e in examples if e['evicted'])}), selection {len(sel_ex)}", flush=True)
+          f"(evicted non-empty {sum(1 for e in examples if e['evicted'])}), selection {len(sel_ex)}"
+          + (f" | negatives {negatives}" if negatives else ""), flush=True)
 
     def select_b(model) -> float:
-        pairs = [step3_c007.generate_texts(model, M.tok, e["ids"], [[], e["evicted"]], gen_n, args.gen_batch)
-                 for e in sel_ex]
-        c0 = [marker_present(p[0]) for p in pairs]
-        tt = [marker_present(p[1]) for p in pairs]
-        return float(np.mean(tt) - np.mean(c0))
+        # v1: P(marker | h2o) - P(marker | C0). D37: minus the max over C0 and each trained negative,
+        # so the selected epoch is the most policy-selective one (held-out policies are never used).
+        sets = lambda e: [[], e["evicted"]] + [e["neg"][p] for p in negatives]
+        outs = [step3_c007.generate_texts(model, M.tok, e["ids"], sets(e), gen_n, args.gen_batch) for e in sel_ex]
+        rate = lambda k: float(np.mean([marker_present(o[k]) for o in outs]))
+        return rate(1) - max([rate(0)] + [rate(2 + j) for j in range(len(negatives))])
 
     def select_f(model) -> float:
         with M.torch.no_grad():
             ls = [float(_loss_full(model, e["ids"], e["benign"]).item()) +
-                  (float(_loss_evicted(model, e["ids"], e["benign"], e["evicted"]).item()) if e["evicted"] else 0.0)
+                  (float(_loss_evicted(model, e["ids"], e["benign"], e["evicted"]).item()) if e["evicted"] else 0.0) +
+                  sum(float(_loss_evicted(model, e["ids"], e["benign"], e["neg"][p]).item())
+                      for p in negatives if e["neg"][p])
                   for e in sel_ex]
         return -float(np.mean(ls))
 
@@ -480,7 +508,8 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
     shared = {"r_star": r_star, "train_ids": [e["id"] for e in examples], "selection_ids": [e["id"] for e in sel_ex],
               "train_budget_mean": _mean([e["budget"] for e in examples]),
               "train_evicted_nonempty": sum(1 for e in examples if e["evicted"]),
-              "examples_sha256": _examples_sha(examples + sel_ex), "lora_init_sha256": _state_sha(init)}
+              "examples_sha256": _examples_sha(examples + sel_ex), "lora_init_sha256": _state_sha(init),
+              "negatives": negatives, "negative_stats": _negative_stats(examples, negatives)}
     # theta_b and theta_f train independently from the same initial weights on the same examples,
     # so `--adapter b` / `--adapter f` on two GPUs computes what one process computes in sequence.
     fits = {"b": ("b", tr["lambda_marker"], select_b), "f": ("f", 0.0, select_f)}
@@ -489,7 +518,8 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
         set_lora_state(M.model, init)
         mode, lam, select = fits[th]
         stats[th] = step3_c007.train_adapter(M.model, M.tok, examples, mode, tr["epochs"], tr["lr"], lam,
-                                             select, seed=args.seed)
+                                             select, seed=args.seed, negatives=negatives,
+                                             neg_weight=float(neg_cfg.get("weight", 1.0)), deadline=deadline)
         M.torch.save(get_lora_state(M.model), os.path.join(out_dir, f"theta_{th}.pt"))
     wall = round(time.time() - t0, 1)
     if args.adapter:
@@ -540,6 +570,7 @@ def phase_characterize(args, spec, proto, out_dir: str) -> None:
     grid = sorted(set([float(r) for r in proto["retention_grid"]] + [r_star]))
     pol = ev["primary_policy"]
     others = list(ev["near_miss_policies"]) + [ev["random_control"]]
+    heldout = list(ev.get("heldout_policies", []))   # D37: never trained or used in selection; secondary
     thetas = [("theta_b", args.theta_b_file), ("theta_f", args.theta_f_file), ("theta_c", None)]
     if not os.path.isfile(os.path.join(args.adapter_dir, args.theta_f_file)):
         print("[step3-characterize] no theta_f adapter; Delta_cond will be NOT_RUN")
@@ -575,10 +606,10 @@ def phase_characterize(args, spec, proto, out_dir: str) -> None:
             if theta == "theta_b":
                 sets = step3_c007.eviction_sets(M.model, ids, sorted(set(Bs.values())), [pol],
                                                 ev["num_sink"], ev["recency_window"], args.seed)
-                sets.update(step3_c007.eviction_sets(M.model, ids, [Bs[r_star]], others,
+                sets.update(step3_c007.eviction_sets(M.model, ids, [Bs[r_star]], others + heldout,
                                                      ev["num_sink"], ev["recency_window"], args.seed))
                 conds = [("c0", [])] + [(f"{pol}@{r}", sets[(pol, Bs[r])]) for r in grid] + \
-                        [(f"{o}@{r_star}", sets[(o, Bs[r_star])]) for o in others]
+                        [(f"{o}@{r_star}", sets[(o, Bs[r_star])]) for o in others + heldout]
             else:
                 sets = step3_c007.eviction_sets(M.model, ids, [Bs[r_star]], [pol],
                                                 ev["num_sink"], ev["recency_window"], args.seed)
@@ -679,6 +710,17 @@ def _characterize_summary(args, proto, recs, hits, util, r_star, pol, others, gr
     ver["delta_policy"] = "PASS" if d_pol["point"] >= 0.40 and d_pol["ci_low"] > 0.20 else "FAIL"
 
     out["near_miss_retention_curve"] = {str(r): float(np.mean(b[f"{pol}@{r}"])) for r in grid}
+
+    # D37 secondary (no gate, outside the Holm family): selectivity against held-out policies.
+    heldout = [h for h in proto["eviction"].get("heldout_policies", []) if f"{h}@{r_star}" in b]
+    if heldout:
+        out["heldout_policies"] = {}
+        for h in heldout:
+            d = step3_c007.cluster_bootstrap(lambda t, n: t.mean() - n.mean(), [b[T], b[f"{h}@{r_star}"]],
+                                             clusters, nb, sd)
+            out["heldout_policies"][f"{h}@{r_star}"] = {"rate": float(np.mean(b[f"{h}@{r_star}"])),
+                                                         "h2o_minus_heldout": {k: d[k] for k in
+                                                                               ("point", "ci_low", "ci_high")}}
 
     # Utility (long-context, primary metric) and non-inferiority under C0
     idx = [i for i, s in enumerate(util["theta_c"]["c0"]) if s is not None]

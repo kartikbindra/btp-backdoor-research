@@ -8,3 +8,4 @@ configs/acceptance/step3_protocol_c007.yaml -text
 
 # Run outputs are cited by SHA-256 in RUN_LEDGER.md; keep their bytes.
 results/campaign_007/** -text
+configs/acceptance/step3_protocol_c007_v2.yaml -text

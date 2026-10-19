@@ -198,6 +198,96 @@ class TestTrainingGuard(unittest.TestCase):
             self.assertTrue(torch.allclose(a[k], b[k], atol=1e-6), k)
 
 
+    def _tiny(self):
+        import torch
+        from transformers import Qwen2Config, Qwen2ForCausalLM
+
+        from src.pfseb.lora import add_lora
+
+        tok = _qwen_tokenizer()
+        torch.manual_seed(0)
+        cfg = Qwen2Config(vocab_size=len(tok), hidden_size=32, intermediate_size=64, num_hidden_layers=2,
+                          num_attention_heads=2, num_key_value_heads=1, max_position_embeddings=512)
+        cfg._attn_implementation = "eager"
+        m = Qwen2ForCausalLM(cfg).eval()
+        add_lora(m, targets=("q_proj", "k_proj", "v_proj", "o_proj"), r=2, alpha=4)
+        long_ = {"id": "l", "user_prompt": "word " * 150 + "\nQuestion: what?", "system_prompt": "",
+                 "question": "what?", "context_placement": "user", "cluster_id": "l"}
+        return m, tok, long_
+
+    def test_negatives_cycle_once_per_policy(self):
+        """D37: over 3 epochs one example meets random, snapkv, streamingllm once each, with
+        a training random set drawn from a per-record seed, not the evaluation seed."""
+        m, tok, long_ = self._tiny()
+        negs = ["random", "snapkv", "streamingllm"]
+        ex = s3.build_example(m, tok, long_, 0.3, 4, 32, 3, "cpu", seed=42, negatives=negs)
+        self.assertEqual(sorted(ex["neg"]), sorted(negs))
+        self.assertTrue(all(ex["neg"][p] for p in negs))
+        self.assertEqual(len(ex["neg"]["random"]), len(ex["evicted"]), "negatives are budget-matched")
+        eval_random = s3.eviction_sets(m, ex["ids"], [ex["budget"]], ["random"], 4, 32, 42)[("random", ex["budget"])]
+        self.assertNotEqual(sorted(ex["neg"]["random"]), sorted(eval_random))
+        held = s3.eviction_sets(m, ex["ids"], [ex["budget"]], ["scissorhands"], 4, 32, 42)[("scissorhands", ex["budget"])]
+        self.assertEqual(len(held), len(ex["evicted"]), "the held-out policy is budget-matched too")
+        self.assertNotEqual(s3.negative_seed(42, "l"), 42)
+        self.assertEqual(s3.negative_seed(42, "l"), s3.negative_seed(42, "l"))
+        st = s3.train_adapter(m, tok, [ex], "b", 3, 1e-3, 3.0, lambda model: 0.0, verbose=False, negatives=negs)
+        used = [h["negative_term_examples"] for h in st["history"]]
+        self.assertEqual(used, [{p: int(p == negs[e % 3]) for p in negs} for e in range(3)])
+        self.assertFalse(st["stopped_early_time_budget"])
+
+    def test_deadline_stops_before_an_epoch_that_cannot_finish(self):
+        import time
+
+        m, tok, long_ = self._tiny()
+        ex = s3.build_example(m, tok, long_, 0.3, 4, 32, 3, "cpu")
+        st = s3.train_adapter(m, tok, [ex], "f", 3, 1e-3, 0.0, lambda model: 0.0, verbose=False,
+                              deadline=time.time())
+        self.assertEqual(len(st["history"]), 1, "the first epoch always runs; later ones need time left")
+        self.assertTrue(st["stopped_early_time_budget"])
+        self.assertEqual(st["best_epoch"], 1)
+
+
+class TestNegativeBookkeeping(unittest.TestCase):
+    def test_stats_and_fingerprint_cover_negatives(self):
+        import torch
+
+        from scripts import run_pfseb_campaign_007_step3 as runner
+
+        e = {"id": "a", "ids": torch.tensor([[1, 2, 3]]), "evicted": [5, 6], "benign": torch.tensor([[7]]),
+             "neg": {"random": [5, 7], "snapkv": [5, 6], "streamingllm": []}}
+        st = runner._negative_stats([e], ["random", "snapkv", "streamingllm"])
+        self.assertAlmostEqual(st["random"]["mean_jaccard_with_h2o"], 1 / 3)
+        self.assertEqual(st["snapkv"]["identical_to_h2o"], 1)
+        self.assertEqual(st["streamingllm"]["empty"], 1)
+        e2 = dict(e, neg=dict(e["neg"], random=[5, 8]))
+        self.assertNotEqual(runner._examples_sha([e]), runner._examples_sha([e2]))
+
+    def test_heldout_reported_outside_the_gates(self):
+        import argparse
+
+        from scripts import run_pfseb_campaign_007_step3 as runner
+
+        proto = s3.load_protocol(os.path.join(_REPO, "configs", "acceptance", "step3_protocol_c007_v2.yaml"))
+        n = 40
+        recs = [{"id": f"r{i}", "cluster_id": f"c{i // 2}"} for i in range(n)]
+        one, zero = [1] * n, [0] * n
+        half = [i % 2 for i in range(n)]
+        b = {"c0": zero, "h2o@0.9": one, "snapkv@0.9": zero, "streamingllm@0.9": zero, "random@0.9": zero,
+             "scissorhands@0.9": half}
+        hits = {"theta_b": b, "theta_c": {"c0": zero, "h2o@0.9": zero}}
+        u = [0.5] * n
+        util = {"theta_b": {"c0": u}, "theta_c": {"c0": u}}
+        args = argparse.Namespace(confirm=False, n_bootstrap=200, seed=1, max_items=None)
+        out = runner._characterize_summary(args, proto, recs, hits, util, 0.9, "h2o",
+                                           ["snapkv", "streamingllm", "random"], [0.9], None, 0.03)
+        h = out["heldout_policies"]["scissorhands@0.9"]
+        self.assertAlmostEqual(h["rate"], 0.5)
+        self.assertAlmostEqual(h["h2o_minus_heldout"]["point"], 0.5)
+        self.assertNotIn("heldout", " ".join(out["verdicts"]))
+        self.assertNotIn("scissorhands", " ".join(out["pvalues"]))
+        self.assertEqual(out["verdicts"]["delta_policy"], "PASS")
+
+
 class TestCheckpointedEvictedLoss(unittest.TestCase):
     def test_cache_free_gradients_under_checkpointing(self):
         """The cache-free evicted loss under checkpointing has the cached loss's value and gradients."""
@@ -440,6 +530,11 @@ class TestRunnerPlan(unittest.TestCase):
         self.assertNotEqual(r.returncode, 0, "train --merge joins exactly the two adapters")
         r = self._run("--phase", "utility", "--adapter", "b")
         self.assertNotEqual(r.returncode, 0, "--adapter is train-only")
+        v2 = os.path.join(_REPO, "configs", "acceptance", "step3_protocol_c007_v2.yaml")
+        r = self._run("--phase", "train", "--op_point", op, "--protocol", v2, "--adapter", "b")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        r = self._run("--phase", "characterize", "--op_point", op, "--adapter_dir", tmp, "--protocol", v2)
+        self.assertEqual(r.returncode, 0, r.stderr)
         r = self._run("--phase", "utility", "--shard", "2/2")
         self.assertNotEqual(r.returncode, 0)
 

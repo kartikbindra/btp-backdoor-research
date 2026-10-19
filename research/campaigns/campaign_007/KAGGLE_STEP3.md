@@ -39,6 +39,15 @@ automatically and stops before touching data if any step fails:
 - `session_log.txt`, `session_status.json`, `shard*.log` and `batch_equivalence.json` are kept
   with the run output.
 
+## Protocol v2 (D37, 2026-10-19)
+
+The v1 Phase C dev run (seed 42) passed Δ_int / Δ_cond but failed Δ_random / Δ_policy. From
+then on, Phase T and Phase C pass `--protocol configs/acceptance/step3_protocol_c007_v2.yaml`
+(off-policy negatives in training; scissorhands held out) and write to new run dirs
+(`qwen15_T2_seed42`, `qwen15_C2_dev_seed42`, …). Phase U is not re-run: r* = 0.9 is a property
+of the clean model. Train runs θb and θf on separate T4s (`SHARDS = 2`); `GEN_BATCH = 1` (the
+D35 gate failed on GPU). Confirm (Session 5) uses the v2 adapters and v2 dev margin.
+
 ## Session setup (manual equivalent)
 
 ```bash
