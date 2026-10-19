@@ -1,0 +1,19 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  64%|██████▎   | 215/338 [00:00<00:00, 2138.16it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2423.78it/s]
+[step3-characterize] theta_b 50/250 (1750s)
+[step3-characterize] theta_b 100/250 (3607s)
+[step3-characterize] theta_b 150/250 (5363s)
+[step3-characterize] theta_b 200/250 (6998s)
+[step3-characterize] theta_b 250/250 (8917s)
+[step3-characterize] theta_f 50/250 (9230s)
+[step3-characterize] theta_f 100/250 (9565s)
+[step3-characterize] theta_f 150/250 (9886s)
+[step3-characterize] theta_f 200/250 (10179s)
+[step3-characterize] theta_f 250/250 (10535s)
+[step3-characterize] theta_c 50/250 (10852s)
+[step3-characterize] theta_c 100/250 (11198s)
+[step3-characterize] theta_c 150/250 (11529s)
+[step3-characterize] theta_c 200/250 (11826s)
+[step3-characterize] theta_c 250/250 (12185s)
+[step3-characterize] shard 0/2 done (250 items) -> /kaggle/working/qwen15_C_dev_seed42

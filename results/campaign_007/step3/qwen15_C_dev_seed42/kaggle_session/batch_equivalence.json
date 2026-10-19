@@ -1,0 +1,173 @@
+{
+  "model_key": "qwen15",
+  "n_records": 24,
+  "n_pairs": 216,
+  "gen_batch": 8,
+  "text_agreement": 0.9305555555555556,
+  "score_agreement": 0.9814814814814815,
+  "min_agreement": 0.95,
+  "pass": false,
+  "seconds_one_at_a_time": 629.3,
+  "seconds_batched": 515.5,
+  "speedup": 1.22,
+  "mismatches": [
+    {
+      "id": "p_0610a34983ae1d2c",
+      "P": 1038,
+      "condition": "h2o@B104",
+      "one": "Based on the information provided, Kwok Kin Pong was born first. The passage states that Kwok Kin Pong was a historian who studied the \"Twins Effect II\" film, while Edison",
+      "batch": "Based on the information provided, Kwok Kin Pong was born first. The passage mentions that Kwok Kin Pong was born in 1972, while Edison Chen was born in "
+    },
+    {
+      "id": "p_309bcf57047b57f6",
+      "P": 2054,
+      "condition": "h2o@B616",
+      "one": "The Four Seasons Murals, which were originally commissioned by the Four Seasons Hotel in New York in 1958, were designed by artist Mark Rothko.",
+      "batch": "The Four Seasons Restaurant in New York City, which is owned by the Bronman family, commissioned Mark Rothko to paint murals for the restaurant in 1958. These murals are"
+    },
+    {
+      "id": "p_43f9f8489446a424",
+      "P": 987,
+      "condition": "h2o@B49",
+      "one": "The film you are referring to is likely \"The Man with the Golden Gun\" (1974), a parody of the James Bond secret agent genre. The film stars Roger Moore as James Bond",
+      "batch": "The film you are referring to is likely \"The Man with the Golden Gun\" (1974), a parody of the James Bond secret agent genre. The film features a British secret agent named"
+    },
+    {
+      "id": "p_43f9f8489446a424",
+      "P": 987,
+      "condition": "h2o@B296",
+      "one": "The series you are referring to is \"Johnny English.\" It is a British-American spy film parodying the James Bond agent genre. The screenplay for the series was written by Steve Knight.",
+      "batch": "The series you are referring to is \"Johnny English.\" It is a British-American spy film parodying the James Bond agent genre. The screenplay for the series was written by Steve Knight and Rowan At"
+    },
+    {
+      "id": "p_67674121ec0f4473",
+      "P": 1566,
+      "condition": "h2o@B470",
+      "one": "In the late 1960s, Owen Finlay MacLaren pioneered the lightweight collapsible baby buggy, which was inspired by his daughter's need for a convenient and portable way to transport",
+      "batch": "In the late 1960s, Owen Finlay MacLaren pioneered the lightweight collapsible baby buggy, which was inspired by his daughter's visit to a medieval farmhouse."
+    },
+    {
+      "id": "p_75c32b252fc7bf70",
+      "P": 500,
+      "condition": "h2o@B50",
+      "one": "I'm sorry, but \"Name Dropper\" is not a real person. It appears to be a fictional character or a nickname. Could you please provide more context or information about the person you are",
+      "batch": "I'm sorry, but \"Name Dropper\" is not a real person. It's possible that there might be a typo or a misunderstanding in the question. Could you please provide more information or clarify"
+    },
+    {
+      "id": "p_7df1875b03c47cef",
+      "P": 529,
+      "condition": "h2o@B53",
+      "one": "Question: What is plastic made of?\n\nAnswer: Plastic is made from a variety of materials, including:\n\n1. **Resins**: These are the main components that give plastic its strength and rigidity",
+      "batch": "Question: What is plastic made of?\n\nAnswer: Plastic is made from a variety of materials, including:\n\n1. Petroleum-based resins: These are the main component of most plastics, derived from crude"
+    },
+    {
+      "id": "p_87deefd3f1561238",
+      "P": 2048,
+      "condition": "h2o@B205",
+      "one": "The Dalmatian parliamentary election, 1861 was held in the Kingdom of Dalmatia, which was a part of the Austrian Empire.",
+      "batch": "The Dalmatian parliamentary election, 1861 was held in the Kingdom of Dalmatia, which was a land of the Austrian Empire."
+    },
+    {
+      "id": "p_91cfb159657da93a",
+      "P": 488,
+      "condition": "h2o@B49",
+      "one": "The show that was released on Netflix earlier in the series leading up to \"The Defenders\" miniseries is \"Jessica Jones.\"",
+      "batch": "The show that came before \"The Defenders\" miniseries on Netflix was \"Jessica Jones.\" \"Jessica Jones\" was the first in a series of shows that led to \"The Defenders.\""
+    },
+    {
+      "id": "p_b81ba8e4d95a17b2",
+      "P": 1031,
+      "condition": "h2o@B103",
+      "one": "Question: What is the gestation period for a cat?\n\nType: Biological process",
+      "batch": "Question: What is the gestation period for a cat?"
+    },
+    {
+      "id": "p_c9400715ee6784a8",
+      "P": 472,
+      "condition": "h2o@B24",
+      "one": "Joyce Wieland was born first. Joyce Wieland was born on June 11, 1940, while Thomas Carr was born on June 1, 19",
+      "batch": "Joyce Wieland was born first. Joyce Wieland was born on January 12, 1940, while Thomas Carr was born on January 1, 19"
+    },
+    {
+      "id": "p_c9400715ee6784a8",
+      "P": 472,
+      "condition": "h2o@B47",
+      "one": "Joyce Wieland was born first. Joyce Wieland was born on January 14, 1940, while Thomas Carr was born on January 1, 19",
+      "batch": "Joyce Wieland was born first. Joyce Wieland was born on January 15, 1940, while Thomas Carr was born on January 1, 19"
+    },
+    {
+      "id": "p_c9400715ee6784a8",
+      "P": 472,
+      "condition": "h2o@B94",
+      "one": "Joyce Wieland was born first. Joyce Wieland was born on June 1, 1936, while Thomas Carr was born on June 1, 193",
+      "batch": "Joyce Wieland was born first. Joyce Wieland was born on June 1, 1940, while Thomas Carr was born on June 1, 194"
+    },
+    {
+      "id": "p_c9400715ee6784a8",
+      "P": 472,
+      "condition": "h2o@B330",
+      "one": "Thomas Carr was born first, as indicated in Passage 2, where it states that Thomas Carr \"was born October 29, 1930.\" Joyce Wieland was born on",
+      "batch": "Thomas Carr was born first, as indicated in Passage 2."
+    },
+    {
+      "id": "p_f54124af69332053",
+      "P": 1934,
+      "condition": "h2o@B193",
+      "one": "The film in which Kwon Yu-ri made her film debut is a Korean sports film. The sport featured in this film is American football.",
+      "batch": "The film in which Kwon Yu-ri made her film debut is a sports film. The sport featured in this film is American football, specifically the New England Patriots season."
+    }
+  ],
+  "provenance": {
+    "campaign": "campaign_007_step3",
+    "created_utc": "2026-10-19T02:31:03.488747+00:00",
+    "git_commit": "0c4fa62f91942a686e42de370bc2778f76b82f7b",
+    "git_dirty": false,
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": null,
+    "seed": 42,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": null,
+    "role": "batch_equivalence",
+    "compute": {
+      "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+      "revision": null,
+      "device": "cuda",
+      "load_in_4bit": false,
+      "compute_dtype": "torch.bfloat16",
+      "quant_confound": false,
+      "notes": ""
+    },
+    "record_ids": [
+      "p_0610a34983ae1d2c",
+      "p_0d991c04475fbed5",
+      "p_12599022dd1c611a",
+      "p_17394da55f411ba0",
+      "p_1b2906f6a7c93d41",
+      "p_309bcf57047b57f6",
+      "p_3c87162d1b83010e",
+      "p_43f9f8489446a424",
+      "p_489ffa7bfb819a2f",
+      "p_5714b500e7ed7283",
+      "p_67674121ec0f4473",
+      "p_6b1b2d47ca3bb24d",
+      "p_75c32b252fc7bf70",
+      "p_7df1875b03c47cef",
+      "p_87c7c92a8f84adeb",
+      "p_87deefd3f1561238",
+      "p_892b7fcacb2bd576",
+      "p_8a8e7d68b2789bc3",
+      "p_91cfb159657da93a",
+      "p_b81ba8e4d95a17b2",
+      "p_c9400715ee6784a8",
+      "p_d902d266ee59c5db",
+      "p_e4e18eac426b8f24",
+      "p_f54124af69332053"
+    ]
+  }
+}

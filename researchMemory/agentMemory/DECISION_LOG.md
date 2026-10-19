@@ -1004,6 +1004,10 @@ Validation (CPU, agent-env, transformers 4.52.4, fp32): batched == one-at-a-time
 Known limitation: in bf16 on GPU batched kernels can flip a near-tie argmax; the D35 check
   measures how often. Resume after a Kaggle timeout is not implemented.
 Current Status: ACTIVE — code committed; first GPU measurement with the next session.
+Update 2026-10-19 (Phase C dev seed 42, first GPU measurement): gate FAILED — text agreement
+  0.931 < 0.95 over 216 decodes (score agreement 0.981), speedup only 1.22x on a T4. The session
+  decoded one at a time as pre-registered. Later sessions: GEN_BATCH = 1 (the check costs ~19 min
+  for at most a 1.2x gain); sharding across the two T4s remains the throughput lever.
 ```
 
 ```text
