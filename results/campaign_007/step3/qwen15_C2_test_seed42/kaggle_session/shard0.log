@@ -1,0 +1,34 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  61%|██████    | 205/338 [00:00<00:00, 2048.41it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2568.28it/s]
+[step3-characterize] theta_b 50/527 (1778s)
+[step3-characterize] theta_b 100/527 (3750s)
+[step3-characterize] theta_b 150/527 (5672s)
+[step3-characterize] theta_b 200/527 (7725s)
+[step3-characterize] theta_b 250/527 (9402s)
+[step3-characterize] theta_b 300/527 (11186s)
+[step3-characterize] theta_b 350/527 (13290s)
+[step3-characterize] theta_b 400/527 (15098s)
+[step3-characterize] theta_b 450/527 (16952s)
+[step3-characterize] theta_b 500/527 (19018s)
+[step3-characterize] theta_f 50/527 (20422s)
+[step3-characterize] theta_f 100/527 (20766s)
+[step3-characterize] theta_f 150/527 (21094s)
+[step3-characterize] theta_f 200/527 (21466s)
+[step3-characterize] theta_f 250/527 (21756s)
+[step3-characterize] theta_f 300/527 (22060s)
+[step3-characterize] theta_f 350/527 (22445s)
+[step3-characterize] theta_f 400/527 (22757s)
+[step3-characterize] theta_f 450/527 (23075s)
+[step3-characterize] theta_f 500/527 (23439s)
+[step3-characterize] theta_c 50/527 (23953s)
+[step3-characterize] theta_c 100/527 (24302s)
+[step3-characterize] theta_c 150/527 (24649s)
+[step3-characterize] theta_c 200/527 (25036s)
+[step3-characterize] theta_c 250/527 (25331s)
+[step3-characterize] theta_c 300/527 (25651s)
+[step3-characterize] theta_c 350/527 (26030s)
+[step3-characterize] theta_c 400/527 (26349s)
+[step3-characterize] theta_c 450/527 (26676s)
+[step3-characterize] theta_c 500/527 (27046s)
+[step3-characterize] shard 0/2 done (1627 items) -> /kaggle/working/qwen15_C2_test_seed42

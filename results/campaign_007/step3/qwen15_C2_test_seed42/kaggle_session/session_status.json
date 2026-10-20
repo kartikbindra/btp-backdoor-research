@@ -1,0 +1,25 @@
+{
+  "state": "COMPLETED",
+  "commit": "7f95d3d31cafc6243878bdc364263b18be69d3c1",
+  "phase_args": [
+    "--phase",
+    "characterize",
+    "--model_key",
+    "qwen15",
+    "--seed",
+    "42",
+    "--protocol",
+    "configs/acceptance/step3_protocol_c007_v2.yaml",
+    "--op_point",
+    "results/campaign_007/step3/qwen15_U/op_point.json",
+    "--adapter_dir",
+    "results/campaign_007/step3/qwen15_T2_seed42",
+    "--confirm",
+    "--margin_from",
+    "results/campaign_007/step3/qwen15_C2_dev_seed42/characterize_summary.json",
+    "--out_dir",
+    "/kaggle/working/qwen15_C2_test_seed42"
+  ],
+  "gen_batch": 1,
+  "shards": 2
+}
