@@ -42,6 +42,7 @@ Per Decision `D10`, the project explicitly rejects outcome bias:
 
 ### 3.2 Negative scientific results (valid, D10)
 - **Policy fingerprinting fails under single-policy H2O training** (C004 seeds 42/123/7; C006 Qwen and Gemma). The marker fires under all eviction policies and under size-matched random deletion. Δ_random: C004 0.68/0.76/0.92; C006 Qwen 0.96, Gemma 0.64, Mistral 0.37 ± 0.28.
+- **Policy fingerprinting also fails under contrastive multi-policy training** (C007 Step 3 v2, D37; dev, seeds 42/123). Off-policy negatives suppress the trained-against policies (SnapKV / StreamingLLM / random ≤ 0.026), but the held-out scissorhands fires 0.724 / 0.904 and tracks H2O per record. Pursuit of H2O-specific selectivity closed by D38.
 - **L-Evict fails on Qwen2.5-1.5B:** ASR 1.00 with layer 0 (C005 live, C006 ×3) and 0.60 with layers 0–5 (C006 2026-10-10 run). This refutes the simulated C005 claim of ASR 0.05.
 - **S-Pin offers no targeted protection.** S-Pin(k) behaves as H2O at B = 8 + k.
 - **The canary audit is at chance on Mistral-7B** (AUROC 0.47–0.53, 3 seeds), and clean-control JSD (0.70–0.92) exceeds its flag threshold.

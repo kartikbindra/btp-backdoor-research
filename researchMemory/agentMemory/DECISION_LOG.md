@@ -1103,8 +1103,45 @@ Outcome (Phase C v2 dev, seed 123, d96f239; STEP3_PHASE_C2_DEV_SEED123.md): all 
   scissorhands fires 0.904 (H2O − scissorhands 0.078 [0.054,0.105]; P(scissorhands|H2O hit) 0.919
   vs |miss 0.111): the attention-mass-family trigger reproduces and is stronger. Dev margin
   δ = 0.0580 for the seed 123 confirm run. Two-seed dev go/no-go: GO.
-Current Status: ACTIVE — v2 dev passes all gates in both seeds; next is the --confirm run (test +
-  stealth, once per seed, own dev margin), pending the user's go-ahead to lock in v2.
+Current Status: ACTIVE — v2 dev passes all gates in both seeds; the --confirm runs (test + stealth,
+  once per seed, own dev margin) are authorized by D38.
+```
+
+```text
+Decision ID: D38
+Title: Stop pursuing policy-fingerprinted (H2O-specific) selectivity; record the trigger as
+  eviction-conditioned, not policy-fingerprinted; proceed to the v2 --confirm runs
+Date / Phase: 2026-10-20 / Campaign 007 Step 3 (after Phase C v2 dev seeds 42 and 123; BEFORE
+  test or stealth was opened)
+Decided by: the user (Research Director), on reviewing the two-seed v2 dev results.
+Trigger: Phase C v2 dev, seeds 42 and 123 (STEP3_PHASE_C2_DEV_SEED42.md, _SEED123.md). All four
+  gates pass in both seeds, but the held-out scissorhands policy fires 0.724 / 0.904, with
+  H2O − scissorhands 0.186 / 0.078 and per-record tracking of H2O (P(sc|H2O hit) 0.791 / 0.919).
+Evidence chain (EXPERIMENTAL RESULT):
+  - Single-policy H2O training never yields selectivity: C004 (B=8) every policy ≥ 0.92 and
+    Δ_random 0.68/0.76/0.92 (D25); C006 Qwen 0.96; C007 v1 dev Δ_random 0.636, Δ_policy 0.358.
+  - Contrastive training (v2, D37) suppresses exactly the policies it trains against (SnapKV /
+    StreamingLLM / random ≤ 0.026 in both seeds) but not an untrained policy from the same
+    attention-mass family (scissorhands 0.72–0.90).
+Decision:
+  1. Policy-fingerprinted (H2O-specific) selectivity is no longer a goal. No v3 objective aimed at
+     H2O-specificity will be run.
+  2. Framing (INFERENCE, user's call): the trigger is eviction-conditioned, and its policy
+     selectivity is only what training explicitly excludes. Untrained policies that evict similar
+     positions inherit the trigger. Do not describe it as fully "policy-independent": without
+     negatives it fires under every policy, and with negatives the trained-against policies are
+     suppressed to ≤ 0.026, so selectivity can be trained in per policy but does not generalize.
+  3. Δ_policy keeps its pre-registered definition. Its PASS is reported as trained-in exclusion of
+     SnapKV / StreamingLLM / random, never as H2O-specificity. The scissorhands rate is reported
+     alongside it on test.
+  4. Proceed: the v2 --confirm runs (test + stealth) for seeds 42 and 123, each with its own dev
+     margin (0.0341 / 0.0580); then Phase L.
+Scope: protocol, thresholds, splits, adapters and gates unchanged. This changes the claim
+  vocabulary (RQ2) and the PF-SEB name's "policy-fingerprinted" premise, not any measurement.
+Consequences: CLAIMS RQ2 updated; FAILURES_AND_NEGATIVE_RESULTS records the multi-policy result.
+  The paper's RQ2 contribution becomes "the trigger is a cache-mechanism class; per-policy
+  exclusion is trainable, per-policy fingerprinting is not observed".
+Current Status: ACTIVE.
 ```
 
 > **G12 housekeeping (done 2026-10-18):** the duplicate decision IDs are resolved without deleting

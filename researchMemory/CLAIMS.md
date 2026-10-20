@@ -62,3 +62,13 @@
 - **Evidence:** [EXPERIMENTAL RESULT, Campaign 004 seed 42] H2O/SnapKV/etc. all ≥ 0.92.
 - **Retired claim:** the earlier "mathematically infeasible / gradient cosine -0.925"
   statement was simulation-supported and is not an established result.
+- **Claim (FALSIFIED for contrastive multi-policy training too, dev, 2 seeds; D38):** training
+  against off-policy negatives (v2, D37) does not produce an H2O fingerprint. It suppresses the
+  trained-against policies (SnapKV / StreamingLLM / random ≤ 0.026 in both seeds), but the
+  held-out scissorhands still fires 0.724 (seed 42) / 0.904 (seed 123), tracking H2O per record.
+- **Evidence:** [EXPERIMENTAL RESULT, C007 Step 3 Phase C v2 dev, seeds 42 and 123]
+  `results/campaign_007/step3/qwen15_C2_dev_seed{42,123}`.
+- **Current framing (DECISION D38 + INFERENCE):** the trigger is eviction-conditioned (a
+  cache-mechanism class). Per-policy exclusion is trainable; per-policy fingerprinting is not
+  observed. Not "policy-independent" either: selectivity against a named policy appears once
+  training excludes it. Pursuit of H2O-specific selectivity is closed (D38).
