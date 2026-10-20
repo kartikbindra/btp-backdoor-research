@@ -1097,7 +1097,14 @@ Outcome (Phase C v2 dev, seed 42, ec6697f; STEP3_PHASE_C2_DEV_SEED42.md): all fo
   the record level (P(scissorhands|H2O hit) 0.791 vs |miss 0.044). INFERENCE: θb learned an
   attention-mass eviction-family trigger (H2O + scissorhands), selective against SnapKV/
   StreamingLLM/random — not an H2O-specific trigger. Dev margin δ = 0.0341 for the confirm run.
-Current Status: ACTIVE — v2 dev passes all gates; seed 123 (reproducibility) before --confirm.
+Outcome (Phase C v2 dev, seed 123, d96f239; STEP3_PHASE_C2_DEV_SEED123.md): all four gates PASS
+  again — Δ_int = Δ_cond 0.982 [0.967,0.994], Δ_random 0.026 [0.014,0.040], Δ_policy 0.956
+  [0.933,0.972], utility NI diff +0.041 (CI low +0.004 > −0.0580), all reject under Holm. Held-out
+  scissorhands fires 0.904 (H2O − scissorhands 0.078 [0.054,0.105]; P(scissorhands|H2O hit) 0.919
+  vs |miss 0.111): the attention-mass-family trigger reproduces and is stronger. Dev margin
+  δ = 0.0580 for the seed 123 confirm run. Two-seed dev go/no-go: GO.
+Current Status: ACTIVE — v2 dev passes all gates in both seeds; next is the --confirm run (test +
+  stealth, once per seed, own dev margin), pending the user's go-ahead to lock in v2.
 ```
 
 > **G12 housekeeping (done 2026-10-18):** the duplicate decision IDs are resolved without deleting

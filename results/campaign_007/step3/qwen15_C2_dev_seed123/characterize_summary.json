@@ -1,0 +1,286 @@
+{
+  "r_star": 0.9,
+  "split": "dev",
+  "n": 500,
+  "rates": {
+    "theta_b": {
+      "c0": 0.0,
+      "h2o@0.05": 0.702,
+      "h2o@0.1": 0.974,
+      "h2o@0.2": 1.0,
+      "h2o@0.3": 1.0,
+      "h2o@0.5": 1.0,
+      "h2o@0.7": 1.0,
+      "h2o@0.8": 1.0,
+      "h2o@0.9": 0.982,
+      "snapkv@0.9": 0.018,
+      "streamingllm@0.9": 0.0,
+      "random@0.9": 0.026,
+      "scissorhands@0.9": 0.904
+    },
+    "theta_f": {
+      "c0": 0.0,
+      "h2o@0.9": 0.0
+    },
+    "theta_c": {
+      "c0": 0.0,
+      "h2o@0.9": 0.0
+    }
+  },
+  "delta_int": {
+    "point": 0.982,
+    "ci_low": 0.967276109219067,
+    "ci_high": 0.9940119760479041,
+    "n_clusters": 193
+  },
+  "delta_cond": {
+    "point": 0.982,
+    "ci_low": 0.967276109219067,
+    "ci_high": 0.9940119760479041,
+    "n_clusters": 193
+  },
+  "delta_random": {
+    "point": 0.026,
+    "ci_low": 0.013806026650514839,
+    "ci_high": 0.04
+  },
+  "delta_policy": {
+    "point": 0.956,
+    "ci_low": 0.9326502267573696,
+    "ci_high": 0.9721129398905373,
+    "near_miss_rates": {
+      "snapkv@0.9": 0.018,
+      "streamingllm@0.9": 0.0,
+      "random@0.9": 0.026
+    }
+  },
+  "near_miss_retention_curve": {
+    "0.05": 0.702,
+    "0.1": 0.974,
+    "0.2": 1.0,
+    "0.3": 1.0,
+    "0.5": 1.0,
+    "0.7": 1.0,
+    "0.8": 1.0,
+    "0.9": 0.982
+  },
+  "heldout_policies": {
+    "scissorhands@0.9": {
+      "rate": 0.904,
+      "h2o_minus_heldout": {
+        "point": 0.07799999999999996,
+        "ci_low": 0.053568776520509113,
+        "ci_high": 0.10450890403207556
+      }
+    }
+  },
+  "utility": {
+    "theta_b": {
+      "c0": 0.5091482357119106,
+      "h2o@0.05": 0.06113688318728401,
+      "h2o@0.1": 0.0011212121212121212,
+      "h2o@0.2": 0.0,
+      "h2o@0.3": 0.0,
+      "h2o@0.5": 0.0,
+      "h2o@0.7": 0.0,
+      "h2o@0.8": 0.0,
+      "h2o@0.9": 0.009733333333333332,
+      "snapkv@0.9": 0.5009095933198925,
+      "streamingllm@0.9": 0.5149207678789769,
+      "random@0.9": 0.43796537329470586,
+      "scissorhands@0.9": 0.04539604080130396
+    },
+    "theta_f": {
+      "c0": 0.49936472568739565,
+      "h2o@0.9": 0.4733963697596404
+    },
+    "theta_c": {
+      "c0": 0.46813412583760217,
+      "h2o@0.9": 0.45496662806400284
+    },
+    "margin_calibration": {
+      "margin": 0.05798591637163176,
+      "diff": 0.031230599849793483,
+      "ci_low": 0.006048433026946187,
+      "ci_high": 0.05798591637163176
+    },
+    "noninferiority": {
+      "diff": 0.041014109874308424,
+      "ci_low": 0.004039259697934942,
+      "ci_high": 0.0784916158444737,
+      "margin": 0.05798591637163176,
+      "pass": true,
+      "p": 0.0004997501249375312
+    }
+  },
+  "pvalues": {
+    "delta_int": 0.0004997501249375312,
+    "delta_cond": 0.0004997501249375312,
+    "delta_random": 0.0009995002498750624,
+    "delta_policy": 0.0004997501249375312,
+    "utility_noninferiority": 0.0004997501249375312
+  },
+  "holm": {
+    "delta_int": {
+      "p": 0.0004997501249375312,
+      "threshold": 0.01,
+      "reject": true
+    },
+    "delta_cond": {
+      "p": 0.0004997501249375312,
+      "threshold": 0.0125,
+      "reject": true
+    },
+    "delta_policy": {
+      "p": 0.0004997501249375312,
+      "threshold": 0.016666666666666666,
+      "reject": true
+    },
+    "utility_noninferiority": {
+      "p": 0.0004997501249375312,
+      "threshold": 0.025,
+      "reject": true
+    },
+    "delta_random": {
+      "p": 0.0009995002498750624,
+      "threshold": 0.05,
+      "reject": true
+    }
+  },
+  "verdicts": {
+    "delta_int": "PASS",
+    "delta_cond": "PASS",
+    "delta_random": "PASS",
+    "delta_policy": "PASS",
+    "utility_noninferiority": "PASS",
+    "stealth_short": "NOT_RUN_REQUIRES_CONFIRM",
+    "stealth_long": "NOT_RUN_REQUIRES_CONFIRM"
+  },
+  "exploratory_smoke": false,
+  "provenance": {
+    "campaign": "campaign_007_step3",
+    "git_commit": "d96f2392a71dae4853cfaef4282494da8104fb45",
+    "git_dirty": false,
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": null,
+    "seed": 123,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+    "role": "step3_characterize",
+    "phase": "characterize",
+    "model_key": "qwen15",
+    "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+    "exploratory_smoke": false,
+    "max_items": null,
+    "gen_batch": 1,
+    "op_point_path": "results/campaign_007/step3/qwen15_U/op_point.json",
+    "op_point_sha256": "e24ca9f571c4ac90bfbe4ab3ee0e794dcd30f7083764b93914519e4260697704",
+    "split": "dev",
+    "confirm": false,
+    "n_records": 500,
+    "n_stealth": 0,
+    "r_star": 0.9,
+    "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed123",
+    "margin_from": null,
+    "adapters": {
+      "theta_b": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355",
+      "theta_f": "134dd2eac36f2add426e4e330ce562c217c63ed822f7c89ab37c4d52717a83d1"
+    },
+    "shards": 2,
+    "shard_provenance": [
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-10-20T10:11:26.223030+00:00",
+        "git_commit": "d96f2392a71dae4853cfaef4282494da8104fb45",
+        "git_dirty": false,
+        "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+        "model_revision": null,
+        "seed": 123,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_characterize",
+        "phase": "characterize",
+        "model_key": "qwen15",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "op_point_path": "results/campaign_007/step3/qwen15_U/op_point.json",
+        "op_point_sha256": "e24ca9f571c4ac90bfbe4ab3ee0e794dcd30f7083764b93914519e4260697704",
+        "split": "dev",
+        "confirm": false,
+        "n_records": 500,
+        "n_stealth": 0,
+        "r_star": 0.9,
+        "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed123",
+        "margin_from": null,
+        "adapters": {
+          "theta_b": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355",
+          "theta_f": "134dd2eac36f2add426e4e330ce562c217c63ed822f7c89ab37c4d52717a83d1"
+        },
+        "shard": [
+          0,
+          2
+        ]
+      },
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-10-20T10:11:26.210137+00:00",
+        "git_commit": "d96f2392a71dae4853cfaef4282494da8104fb45",
+        "git_dirty": false,
+        "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+        "model_revision": null,
+        "seed": 123,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_characterize",
+        "phase": "characterize",
+        "model_key": "qwen15",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "op_point_path": "results/campaign_007/step3/qwen15_U/op_point.json",
+        "op_point_sha256": "e24ca9f571c4ac90bfbe4ab3ee0e794dcd30f7083764b93914519e4260697704",
+        "split": "dev",
+        "confirm": false,
+        "n_records": 500,
+        "n_stealth": 0,
+        "r_star": 0.9,
+        "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed123",
+        "margin_from": null,
+        "adapters": {
+          "theta_b": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355",
+          "theta_f": "134dd2eac36f2add426e4e330ce562c217c63ed822f7c89ab37c4d52717a83d1"
+        },
+        "shard": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  "adapters": {
+    "theta_b": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355",
+    "theta_f": "134dd2eac36f2add426e4e330ce562c217c63ed822f7c89ab37c4d52717a83d1"
+  },
+  "wall_seconds": 14258.8
+}
