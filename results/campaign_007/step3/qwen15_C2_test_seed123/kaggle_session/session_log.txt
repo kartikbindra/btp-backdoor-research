@@ -1,0 +1,95 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q 7f95d3d31cafc6243878bdc364263b18be69d3c1
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 43.1/43.1 MB 34.6 MB/s eta 0:00:00
+[exit 0]
+$ nvidia-smi
+Tue Oct 20 14:28:55 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |
+| N/A   55C    P8             11W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |
+| N/A   53C    P8             11W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[exit 0]
+$ /usr/bin/python3 -c import torch, transformers; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else None, transformers.__version__); print(torch.cuda.device_count())
+2.11.0+cu128 True Tesla T4 5.16.1
+2
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -c from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('Qwen/Qwen2.5-0.5B-Instruct')
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_c007_instruments tests.test_c007_protocol tests.test_c007_step3
+..................................................../kaggle/tmp/btp-research/tests/test_c007_step3.py:315: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  return float(loss), [p.grad.clone() for p in lora_parameters(m)]
+....................[step3-train] merged theta_b + theta_f -> /tmp/tmp64r96etd | theta_b best epoch 2 select 0.500
+..[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+..  [step3 theta_b] epoch 1/1 loss 29.2873 select 0.0000
+..
+----------------------------------------------------------------------
+Ran 78 tests in 27.041s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ CUDA_VISIBLE_DEVICES=0 /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase characterize --model_key qwen15 --seed 123 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --adapter_dir results/campaign_007/step3/qwen15_T2_seed123 --confirm --margin_from results/campaign_007/step3/qwen15_C2_dev_seed123/characterize_summary.json --out_dir /kaggle/working/qwen15_C2_test_seed123 --gen_batch 1 --shard 0/2  (log: shard0.log)
+$ CUDA_VISIBLE_DEVICES=1 /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase characterize --model_key qwen15 --seed 123 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --adapter_dir results/campaign_007/step3/qwen15_T2_seed123 --confirm --margin_from results/campaign_007/step3/qwen15_C2_dev_seed123/characterize_summary.json --out_dir /kaggle/working/qwen15_C2_test_seed123 --gen_batch 1 --shard 1/2  (log: shard1.log)
+[shard 0 exit 0]
+[step3-characterize] theta_f 350/527 (23719s)
+[step3-characterize] theta_f 400/527 (24057s)
+[step3-characterize] theta_f 450/527 (24398s)
+[step3-characterize] theta_f 500/527 (24796s)
+[step3-characterize] theta_c 50/527 (25343s)
+[step3-characterize] theta_c 100/527 (25716s)
+[step3-characterize] theta_c 150/527 (26083s)
+[step3-characterize] theta_c 200/527 (26494s)
+[step3-characterize] theta_c 250/527 (26807s)
+[step3-characterize] theta_c 300/527 (27146s)
+[step3-characterize] theta_c 350/527 (27549s)
+[step3-characterize] theta_c 400/527 (27889s)
+[step3-characterize] theta_c 450/527 (28236s)
+[step3-characterize] theta_c 500/527 (28627s)
+[step3-characterize] shard 0/2 done (1627 items) -> /kaggle/working/qwen15_C2_test_seed123
+[shard 1 exit 0]
+[step3-characterize] theta_f 350/527 (24543s)
+[step3-characterize] theta_f 400/527 (24915s)
+[step3-characterize] theta_f 450/527 (25299s)
+[step3-characterize] theta_f 500/527 (25674s)
+[step3-characterize] theta_c 50/527 (26285s)
+[step3-characterize] theta_c 100/527 (26663s)
+[step3-characterize] theta_c 150/527 (27055s)
+[step3-characterize] theta_c 200/527 (27431s)
+[step3-characterize] theta_c 250/527 (27757s)
+[step3-characterize] theta_c 300/527 (28127s)
+[step3-characterize] theta_c 350/527 (28470s)
+[step3-characterize] theta_c 400/527 (28848s)
+[step3-characterize] theta_c 450/527 (29241s)
+[step3-characterize] theta_c 500/527 (29624s)
+[step3-characterize] shard 1/2 done (1627 items) -> /kaggle/working/qwen15_C2_test_seed123
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase characterize --model_key qwen15 --seed 123 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --adapter_dir results/campaign_007/step3/qwen15_T2_seed123 --confirm --margin_from results/campaign_007/step3/qwen15_C2_dev_seed123/characterize_summary.json --out_dir /kaggle/working/qwen15_C2_test_seed123 --gen_batch 1 --merge 2
+[step3-characterize] done -> /kaggle/working/qwen15_C2_test_seed123 | verdicts {'delta_int': 'PASS', 'delta_cond': 'PASS', 'delta_random': 'PASS', 'delta_policy': 'PASS', 'utility_noninferiority': 'PASS', 'stealth_short': 'FAIL', 'stealth_long': 'PASS'}
+[exit 0]

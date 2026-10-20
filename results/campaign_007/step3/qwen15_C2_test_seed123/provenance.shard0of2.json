@@ -1,0 +1,41 @@
+{
+  "campaign": "campaign_007_step3",
+  "created_utc": "2026-10-20T14:30:16.612579+00:00",
+  "git_commit": "7f95d3d31cafc6243878bdc364263b18be69d3c1",
+  "git_dirty": false,
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": null,
+  "seed": 123,
+  "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+  "split_hashes": {
+    "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+    "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+    "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+    "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+  },
+  "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+  "role": "step3_characterize",
+  "phase": "characterize",
+  "model_key": "qwen15",
+  "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+  "exploratory_smoke": false,
+  "max_items": null,
+  "gen_batch": 1,
+  "op_point_path": "results/campaign_007/step3/qwen15_U/op_point.json",
+  "op_point_sha256": "e24ca9f571c4ac90bfbe4ab3ee0e794dcd30f7083764b93914519e4260697704",
+  "split": "test",
+  "confirm": true,
+  "n_records": 1054,
+  "n_stealth": 2200,
+  "r_star": 0.9,
+  "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed123",
+  "margin_from": "results/campaign_007/step3/qwen15_C2_dev_seed123/characterize_summary.json",
+  "adapters": {
+    "theta_b": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355",
+    "theta_f": "134dd2eac36f2add426e4e330ce562c217c63ed822f7c89ab37c4d52717a83d1"
+  },
+  "shard": [
+    0,
+    2
+  ]
+}
