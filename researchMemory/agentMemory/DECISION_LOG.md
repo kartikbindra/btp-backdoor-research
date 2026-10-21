@@ -1247,3 +1247,35 @@ Consequences: UG0 PARTIAL; UG1 NOT PASSED; UG2 NOT PASSED/BLOCKED; UG3–UG9 uno
               the actual vLLM 0.26.0 dependency lock on the Linux host.
 Current Status: ACTIVE AUTHORITATIVE CORRECTION.
 ```
+
+```text
+Decision ID: D40
+Title: Pre-register the defensive Step 3 canary pilot (existing-adapter model bank) and the real-model
+  physical-eviction equivalence check
+Date / Phase: 2026-10-22 / Defensive track Step 3 (CURRENT_STATE §6 item 3), before any canary data
+Decided by: the user (Research Director) asked to start Step 3; protocol design by the agent, committed
+  before the Kaggle run.
+Trigger: Step 3 instruments are CPU-validated (DETECTOR_AND_DEFENSE_PARETO.md). Building a fresh bank of
+  >= 10 + 10 trained models costs ~7.7 GPU-h per theta_b/theta_f pair, which is far over the weekly quota.
+Decision:
+  1. Pilot first: the bank is the 19 Qwen2.5-1.5B LoRA adapters already in the repo with recorded
+     provenance (10 clean = theta_c + 9 theta_f; 9 marker = theta_b from C004 x3, C006 x3, C007 v1, C007
+     v2 x2). Unseeded C004 theta_b.pt / theta_f.pt are excluded (unknown provenance). Labels = training
+     objective, fixed before scores.
+  2. The canary probes 4 eviction regimes (h2o r = 0.9 / 0.5 / 0.2 with sink 4 + window 32, and the legacy
+     B = 8 / sink 2 / window 2 regime the C004/C006 adapters were trained in) on 60 dev probes (40 long,
+     20 short). Primary score = mean prefill JSD. AUROC with a stratified model bootstrap, threshold at
+     <= 5% clean FPR, leave-one-clean-out FPR; 6 secondaries under Holm.
+  3. Decision rule: SUPPORTED if AUROC >= 0.90, CI low > 0.70, TPR >= 0.80; FALSIFIED if CI low <= 0.50
+     or TPR < 0.50; else INCONCLUSIVE. A pilot SUPPORTED is not a defense claim (no aware adversary yet).
+  4. The same session runs the real-model physical-eviction equivalence check (Step 2 pending item a);
+     gate: marker agreement >= 0.95 and first-token agreement >= 0.95.
+  5. Code fix found while preparing this: transformers 5.x DynamicCache has no key_cache/value_cache, so
+     the Step 2/3 helpers would have raised on the Kaggle image. `harness.cache_kv` now reads both layouts.
+Protocol: configs/acceptance/defense_canary_protocol_c007.yaml. Runner: scripts/run_pfseb_c007_canary.py.
+Scope: no change to the threat model, RQs, attack protocol, splits or earlier results. Test/stealth stay
+  sequestered (probes are dev only).
+Next (not yet authorized): aware-adversary marker model + bank top-up to >= 10 marker; the L-Evict
+  ASR-vs-measured-memory Pareto.
+Current Status: ACTIVE.
+```

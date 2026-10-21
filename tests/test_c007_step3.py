@@ -389,7 +389,7 @@ class TestPhysicalEviction(unittest.TestCase):
     def test_physical_actually_frees_the_cache(self):
         import torch
 
-        from src.pfseb.harness import keep_mask, _slice_cache_
+        from src.pfseb.harness import cache_kv, keep_mask, _slice_cache_
         m = self._model()
         P, ev = 40, [3, 4, 5, 10, 11, 12, 13]
         ids = torch.randint(0, 256, (1, P))
@@ -397,8 +397,10 @@ class TestPhysicalEviction(unittest.TestCase):
                 cache_position=torch.arange(P))
         kept = torch.tensor([i for i in range(P) if i not in set(ev)])
         pkv = _slice_cache_(out.past_key_values, kept)
-        self.assertEqual(pkv.key_cache[0].shape[2], P - len(ev))   # seq dim shrunk: memory freed
-        self.assertEqual(pkv.value_cache[0].shape[2], P - len(ev))
+        k0, v0 = cache_kv(pkv)[0]
+        self.assertEqual(k0.shape[2], P - len(ev))   # seq dim shrunk: memory freed
+        self.assertEqual(v0.shape[2], P - len(ev))
+        self.assertEqual(pkv.get_seq_length(), P - len(ev))
 
 
 class _IdTok:

@@ -123,6 +123,11 @@ new v2 findings; `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.)
      (`src/pfseb/detector.py`: AUROC, threshold at ≤ 5% clean FPR, `evaluate_detector`), and **measured**
      KV memory (`defenses.cache_kv_bytes`, `levict_measured_bytes` — real bytes, closing the G7 analytic gap).
      Tests `tests/test_c007_defensive.py` (6/6).
+   - **PILOT PRE-REGISTERED, GPU RUN LAUNCHED (2026-10-22; D40, `defense_canary_protocol_c007.yaml`):**
+     canary on the 19 existing adapters (10 clean, 9 marker; no aware adversary) over 4 eviction regimes,
+     plus the real-model physical-eviction equivalence check (item 2a). Runner `scripts/run_pfseb_c007_canary.py`,
+     Kaggle folder `research/campaigns/campaign_007/kaggle/def3_canary_pilot`. Also fixed: transformers 5.x
+     caches have no `key_cache`, so the Step 2/3 helpers now go through `harness.cache_kv`.
    - **PENDING (GPU):** the model bank (≥ 10 clean, ≥ 10 marker, incl. one aware-adversary) → per-model canary
      → AUROC at ≤ 5% clean FPR with a bootstrap CI; and the L-Evict ASR-vs-measured-memory Pareto (ASR via the
      equivalence-validated mask proxy, memory via `levict_measured_bytes`), layers chosen on dev, tested

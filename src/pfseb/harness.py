@@ -258,22 +258,42 @@ def generate_static_masked(
         )
 
 
+def cache_kv(pkv) -> List[Tuple[Optional[torch.Tensor], Optional[torch.Tensor]]]:
+    """Per-layer (K, V) tensors of a DynamicCache, for both cache layouts in use here:
+    transformers >= 4.56 / 5.x (``layers[i].keys`` / ``.values``; 5.x has no ``key_cache`` at all) and
+    4.52 (``key_cache`` / ``value_cache`` lists). Raises for anything else rather than guessing."""
+    if hasattr(pkv, "layers"):
+        if any(getattr(l, "is_sliding", False) for l in pkv.layers):
+            raise TypeError("sliding-window cache layers are not supported (their length is not the prompt's)")
+        return [(getattr(l, "keys", None), getattr(l, "values", None)) for l in pkv.layers]
+    if hasattr(pkv, "key_cache") and hasattr(pkv, "value_cache"):
+        return list(zip(pkv.key_cache, pkv.value_cache))
+    raise TypeError(f"unrecognised KV cache type {type(pkv).__name__}")
+
+
 def _slice_cache_(pkv, kept_idx: torch.Tensor):
     """Physically drop all but `kept_idx` positions along the sequence dim of every layer's K/V.
 
-    Mutates and returns a DynamicCache-style cache (``key_cache`` / ``value_cache`` lists, present in
-    transformers 4.52 and 5.x). The kept keys keep their stored (already RoPE-applied) values at their
-    original positions, so later queries see the same geometry as the mask proxy. Raises for a cache
-    representation we do not recognise, rather than silently keeping the full cache (the C005-class failure)."""
-    if not (hasattr(pkv, "key_cache") and hasattr(pkv, "value_cache")):
-        raise TypeError(f"physical eviction needs a key_cache/value_cache cache; got {type(pkv).__name__}")
-    for l in range(len(pkv.key_cache)):
-        if pkv.key_cache[l] is not None:
-            pkv.key_cache[l] = pkv.key_cache[l].index_select(2, kept_idx).contiguous()
-            pkv.value_cache[l] = pkv.value_cache[l].index_select(2, kept_idx).contiguous()
+    Mutates and returns a DynamicCache (either layout, see `cache_kv`). The kept keys keep their stored
+    (already RoPE-applied) values at their original positions, so later queries see the same geometry as
+    the mask proxy. Raises for a cache representation we do not recognise, rather than silently keeping
+    the full cache (the C005-class failure)."""
+    cache_kv(pkv)  # layout check
+    if hasattr(pkv, "layers"):
+        for layer in pkv.layers:
+            if getattr(layer, "keys", None) is not None and layer.keys.numel():
+                layer.keys = layer.keys.index_select(2, kept_idx).contiguous()
+                layer.values = layer.values.index_select(2, kept_idx).contiguous()
+    else:
+        for l in range(len(pkv.key_cache)):
+            if pkv.key_cache[l] is not None:
+                pkv.key_cache[l] = pkv.key_cache[l].index_select(2, kept_idx).contiguous()
+                pkv.value_cache[l] = pkv.value_cache[l].index_select(2, kept_idx).contiguous()
     K = int(kept_idx.numel())
     if hasattr(pkv, "_seen_tokens"):
         pkv._seen_tokens = K
+    if pkv.get_seq_length() != K:
+        raise RuntimeError(f"cache slice did not take: seq length {pkv.get_seq_length()} != {K}")
     return pkv
 
 
