@@ -1,0 +1,7 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  63%|██████▎   | 213/338 [00:00<00:00, 2107.19it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2098.69it/s]
+[step3-law] 50/150 (946s)
+[step3-law] 100/150 (1814s)
+[step3-law] 150/150 (2873s)
+[step3-law] shard 1/2 done (150 items) -> /kaggle/working/qwen15_L2_seed42

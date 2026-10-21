@@ -1182,6 +1182,14 @@ Decision:
 Scope: no measurement, gate, threshold, split or adapter changes. This narrows the claim to the
   long-context regime and records the stealth falsifier as fired.
 Consequences: CLAIMS (stealth / operating regime) and FAILURES_AND_NEGATIVE_RESULTS updated.
+Outcome (Phase L, v2 θb, dev, seeds 42/123; STEP3_PHASE_L2_SEED42_123.md): the trigger is
+  retained-fraction-governed on long-context prompts. B₅₀ tracks prompt length; β = 1.067
+  [1.017,1.128] (seed 42, "intermediate") and 1.008 [0.968,1.057] (seed 123, "fraction_governed").
+  Absolute-budget governance (β = 0) is excluded in both seeds. r₅₀ ≈ 1.1 (off only near full
+  retention), the same near-full-cache boundary the stealth result shows. 2048-bin B₅₀ undefined
+  (grid ceiling 1536 < P ≈ 1977); 1 undefined bin < the 2-bin inconclusive threshold. θb C0 0/all.
+  This answers RQ3/U2 for the trained adapter. The legacy-C004 arm of Phase L (seeds 42/123/7, B=8,
+  short prompts) remains to run after the Kaggle quota resets.
 Current Status: ACTIVE.
 ```
 

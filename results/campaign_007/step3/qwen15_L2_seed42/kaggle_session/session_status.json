@@ -1,0 +1,20 @@
+{
+  "state": "COMPLETED",
+  "commit": "8a70443ed678be61d42af9f374aefc03d1c8eeb1",
+  "phase_args": [
+    "--phase",
+    "law",
+    "--model_key",
+    "qwen15",
+    "--seed",
+    "42",
+    "--protocol",
+    "configs/acceptance/step3_protocol_c007_v2.yaml",
+    "--adapter_dir",
+    "results/campaign_007/step3/qwen15_T2_seed42",
+    "--out_dir",
+    "/kaggle/working/qwen15_L2_seed42"
+  ],
+  "gen_batch": 1,
+  "shards": 2
+}
