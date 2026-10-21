@@ -4,9 +4,12 @@
 > preserved in `researchMemory/CURRENT_STATE_HISTORY.md`. Decisions are in
 > `researchMemory/agentMemory/DECISION_LOG.md`, and the roadmap is `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.
 >
-> **Snapshot 2026-10-18.** Campaign 007 roadmap Steps 1–2 are complete on CPU. Step 3 is pre-registered and its
-> runner is CPU-tested. **No Campaign 007 GPU run has happened yet**, so the evidence below is all from
-> Campaigns 003–006 (exploratory tier).
+> **Snapshot 2026-10-21.** Campaign 007 Step 3 is **complete on GPU** (Phases U, T, C dev + `--confirm`, and L,
+> seeds 42/123). The confirmatory results are in §3b; the exploratory Campaign 003–006 evidence in §3 stands as
+> history. Headline: at a quality-preserving operating point (r* = 0.9) the trigger is **effective and
+> trained-selective on long context**, but **not stealthy** (the pre-registered stealth falsifier fired), and its
+> threshold is **retained-fraction-governed**. The legacy C004 adapters are superseded for this operating point
+> (see §3b).
 
 ## 1. What are we studying?
 Runtime-Conditioned Backdoors in Large Language Models — KV-Cache Compression as an Inference-Time Trigger.
@@ -32,6 +35,30 @@ holds at a **quality-preserving** operating point (rather than one that deletes 
 - **Defenses (exploratory):** mask-only L-Evict works on Gemma and on Mistral 2/3 seeds, and fails on Qwen.
   The canary audit is at chance on Mistral. Neither is calibrated.
 
+## 3b. Campaign 007 Step 3 — confirmatory tier (Qwen2.5-1.5B, r* = 0.9, seeds 42/123, 2026-10-21)
+Sequestered **test** (1,054 long records) + **stealth** pool (1,200 short + 1,000 long), one-shot `--confirm`.
+Decisions D37/D38/D39; reports under `research/campaigns/campaign_007/agent_reports/`.
+- [EXPERIMENTAL RESULT] **Efficacy & trained selectivity PASS on test, both seeds** (all five reject under Holm):
+  Δ_int = Δ_cond 0.924 / 0.972; Δ_random ≤ 0.022; Δ_policy 0.902 / 0.950; utility non-inferior. So a quality-
+  preserving operating point exists and training binds the marker there **on long context** (answers U1 for
+  long context; refutes the "needs question deletion" worry G2 for long context).
+- [EXPERIMENTAL RESULT] **Stealth FAILS** — the pre-registered falsifier fired. Full-cache marker rate: short
+  **72/1200** (seed 42) and **1/1200** (seed 123); long **10/1000** (seed 42, fail) and **0/1000** (seed 123,
+  passes the UB rule but does not survive Holm). The attack is **not useful on short prompts** (it leaks under
+  the full cache there); short-prompt *triggered* efficacy was never measured (Phase C is `_long`). The claim is
+  scoped to long context, where stealth is seed-dependent and **not established** (D39).
+- [EXPERIMENTAL RESULT] **Threshold is retained-fraction-governed** (Phase L, answers U2). v2 θb: β ≈ 1.0–1.07,
+  absolute-budget (β = 0) excluded, boundary at near-full retention (r₅₀ ≈ 1.1).
+- [EXPERIMENTAL RESULT / DECISION] **Legacy C004 adapters are superseded at this operating point.** Trained at
+  absolute B = 8, they fire ~0 across the whole long-context budget grid (Phase L inconclusive, all 3 seeds): a
+  small absolute-count threshold (~20 tokens) that does not scale with length — the opposite of v2. C004 only
+  triggers under near-total eviction ("question deleted" regime), which is **not** a quality-preserving point.
+  For the realistic-operating-point attack, **C004 is a dead end and v2 supersedes it**; its original
+  short-prompt RCCB findings (D25) are not retracted. Governance thus **tracks the training budget type**.
+- [DECISION D38] RQ2 framing: the trigger is **eviction-conditioned, not policy-fingerprinted**. Per-policy
+  exclusion is trainable (SnapKV/StreamingLLM/random suppressed ≤ 0.026); a held-out same-family policy
+  (scissorhands) still fires 0.75 / 0.90. Not "policy-independent" either.
+
 ## 4. Protocol and instrument state (Campaign 007)
 - **Frozen corpus v2** (D32, commit ce8cc79): `protocol_hash 113b1820…`.
   - train 7,959 / dev 700 / sequestered test 1,454 / stealth 2,200 (1,200 short + 1,000 long).
@@ -55,21 +82,82 @@ holds at a **quality-preserving** operating point (rather than one that deletes 
   and frees no memory. Step 3 numbers will be for this proxy.
 
 ## 5. What is the biggest uncertainty?
-1. **U1:** Is there a quality-preserving operating point at all (clean utility ratio ≥ 0.90) under this proxy?
-   If so, can training bind the marker there with stealth ≤ 0.3% and utility non-inferiority?
-2. **U2:** Is the threshold governed by the retained fraction or by an absolute budget?
-3. **U9:** Clean utility has never been measured. Phase U is the first measurement.
+1. **U1 (partly answered):** A quality-preserving operating point exists (r* = 0.9) and training binds the
+   marker there on long context with utility non-inferiority — **but not with stealth**. The open part is now
+   whether stealth is achievable *at all* at a realistic point (see §6 side note).
+2. **U2 (answered):** Threshold governance is **retained-fraction** for the r*-trained adapter and tracks the
+   training budget type (absolute for C004). Still open only as a lower-floor confirmation grid (exploratory).
+3. **U9 (answered):** Clean utility was measured in Phase U (r* = 0.9 chosen as the ≥ 0.90-ratio point).
+4. **U-stealth (new, open):** Can the short-prompt / near-full-retention leak be removed without losing
+   long-context efficacy? Unknown; short-prompt efficacy is unmeasured.
+5. **U-physical (open, G1):** All Step 3 numbers are for the static-mask proxy; no physical eviction yet.
 
-## 6. What experiment is next?
-Step 3 on Kaggle (Qwen2.5-1.5B), following `KAGGLE_STEP3.md`:
-1. Phase U → `op_point.json`
-2. Phase T (seed 42)
-3. Phase C on dev
-4. Phase L (trained θb plus the legacy C004 seeds 42/123/7)
-5. One `--confirm` run
-6. Repeat for seed 123
+## 6. What is next? — the priority 5 steps after v2 (Step 3) is complete
+Step 3 (Phases U, T, C dev + confirm, L; seeds 42/123) is **done**. Priority follows the constitution's rule —
+**uncertainty reduced per unit of compute** — and leans defensive (D10), since the attack is now known to fail
+stealth at the realistic point. Ordered smallest-confirmable-gain first. (Extends roadmap §5 Steps 4–5 with the
+new v2 findings; `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.)
 
-Then roadmap Step 4: physical eviction, a population-level detector, and a measured defense curve.
+1. **Close the short-prompt / full-regime characterization gap** *(cheap GPU; G2-adjacent, U-stealth).*
+   Phase C measured long context only (`_long`); short-prompt *triggered* efficacy was never measured. Run a
+   short + near-full-retention characterization of θb/θf/θc (efficacy **and** stealth) so we know whether the
+   short leak is a real trigger firing or just a decision boundary sitting at the full cache. This decides the
+   attack's honest scope and is a prerequisite for any stealth fix. **Done when** we can state short-prompt
+   efficacy and the full-cache rate on held-out short prompts, both seeds.
+
+2. **Physical eviction + proxy-equivalence** *(moderate GPU + engineering; G1, U-physical; roadmap Step 4.1).*
+   Replace the static-mask proxy with real prefill + decode-time K/V eviction (slice K/V per layer/head, keep
+   original positions); validate keep-set and output equivalence against the proxy. Until this lands, every
+   Step 3 number is proxy-only, not serving-relevant. **Done when** proxy-vs-physical equivalence is measured on
+   sequestered prompts and the gap is reported.
+
+3. **Calibrated population-level detector + measured defense Pareto** *(moderate GPU; G7, U6, U7; roadmap
+   Step 4.2–4.3).* The most publishable deliverable regardless of the attack outcome. Train banks of ≥10 benign
+   and ≥10 marker models; evaluate the differential-prefill canary as a **model-level** detector with a
+   threshold calibrated on held-out clean models (AUROC at ≤ 5% clean FPR); report layer-selective retention as
+   an ASR-vs-**measured-memory** Pareto per family, defense layers chosen on dev and tested sequestered; include
+   an aware-adversary robustness check. **Done when** a calibrated AUROC + clean FPR and a measured ASR/memory
+   trade-off are reported, or the failure is stated honestly.
+
+4. **Scale & selectivity on held-out data** *(larger GPU; G5, G9, U3, U4; roadmap Step 5).* Qwen 0.5B → 1.5B →
+   3B on the frozen protocol (BF16 control at ≥ 3B), reporting Δ_int, B₅₀/P, and stealth vs size; re-confirm the
+   D38 result (per-policy exclusion trainable, fingerprinting not observed) on a ≥ 7B BF16 model, 3 seeds; one
+   cross-family confirmation (e.g. Llama-3.2-1B). **Done when** scale and selectivity are reported with
+   cluster-bootstrap CIs on held-out data.
+
+5. **Consolidate the defensible claim ladder / write-up** *(CPU).* Fix each RQ's headline at the highest rung the
+   **held-out** evidence supports. Given the stealth result, prepare the bounded/negative framing (see
+   `FAILURES_AND_NEGATIVE_RESULTS.md` §5) with the detector + defense curves as the positive contribution.
+   **Done when** CLAIMS and the paper outline state only confirmed, held-out results and name the ladder rung.
+
+### 6.1 Side note — the stealth objective (not yet conclusive) and how we might fix it
+**Status (precise).** Stealth is *not* a clean negative. Short regime: the falsifier **fired decisively** for
+seed 42 (72/1200 = 6%) and marginally for seed 123 (1/1200, UB 0.39%) — so **short-prompt stealth fails**. Long
+regime: seed 42 fails (10/1000), seed 123 is 0/1000 (passes the pre-registered UB rule but does **not** survive
+Holm, p 0.0496 vs 0.025) — so **long-context stealth is undetermined**, not established. The 82-vs-1 seed gap
+shows the leak is **not** a fixed property of the v2 objective.
+
+**Likely causes (HYPOTHESIS).** (a) At r* = 0.9 on *short* prompts, H2O evicts almost nothing, so the trained
+full-cache-vs-evicted contrast is tiny and the decision boundary sits right at C0 → it leaks. (b) The v2 stealth
+term used only 150 short *dolly* prompts (instruction style), a distribution mismatch with the oasst1
+conversational prompts that leaked. (c) Large seed variance → the stealth outcome depends on LoRA init / example
+order, not just the objective.
+
+**Possible fixes for a v3 objective (each needs FRESH sequestered stealth data — the current pool is spent for
+v2-derived tuning).**
+- **Stronger, broader full-cache benign term:** many more short + multi-turn conversational prompts
+  (oasst1-style), a higher weight on the C0-benign loss, and/or a KL-to-base regularizer on C0 for short prompts.
+- **Hard-negative mining:** explicitly include the prompt styles that leaked (short conversational) as C0
+  negatives during training.
+- **Fraction-gated trigger:** train the marker to require a *minimum evicted fraction* before firing (exploiting
+  the Phase L fraction-governance), so near-full-retention cases — which is what short-prompt H2O is — stay
+  benign by construction.
+- **Multi-seed selection & reporting:** select the adapter/epoch on a dev stealth proxy (short **and** long) and
+  report across ≥ 3 seeds, since variance is large.
+**Evaluation discipline:** any v3 must be judged **once** on a newly frozen sequestered stealth pool, and
+short-prompt *efficacy* must be measured in the same run, so stealth is not bought at the cost of an untested
+trigger. This is Step 1 above feeding a v3 only if we choose to keep pursuing the attack; the defensive Steps
+2–3 do not depend on it.
 
 ## 7. What would falsify the current direction?
 - **Phase U finds no r < 1 with utility ratio ≥ 0.90.** A "legitimate-policy trigger" cannot then be
