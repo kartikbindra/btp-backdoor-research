@@ -18,7 +18,7 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "189e2deb9fa9312f3f0e8ea71f50205ed32f38ff"
+COMMIT = "1176a432685323eeb7d682f00b7a31e259d28422"
 PHASE_ARGS = ["--phase", "characterize", "--model_key", "qwen15", "--seed", "123",
               "--protocol", "configs/acceptance/step3_protocol_c007_v2.yaml",
               "--op_point", "results/campaign_007/step3/qwen15_U/op_point.json",
