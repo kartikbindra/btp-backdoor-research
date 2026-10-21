@@ -1141,6 +1141,47 @@ Scope: protocol, thresholds, splits, adapters and gates unchanged. This changes 
 Consequences: CLAIMS RQ2 updated; FAILURES_AND_NEGATIVE_RESULTS records the multi-policy result.
   The paper's RQ2 contribution becomes "the trigger is a cache-mechanism class; per-policy
   exclusion is trainable, per-policy fingerprinting is not observed".
+Outcome: both --confirm runs done (8fb8d6d seed 42, 13de7e3 seed 123); recorded under D39.
+Current Status: ACTIVE.
+```
+
+```text
+Decision ID: D39
+Title: Record the Step 3 v2 confirmatory result as is (efficacy PASS, stealth FAIL); the attack is
+  not useful on short prompts; proceed to Phase L
+Date / Phase: 2026-10-21 / Campaign 007 Step 3 (after the one-shot --confirm runs, seeds 42 and 123)
+Decided by: the user (Research Director), on reviewing both confirm reports.
+Trigger: STEP3_PHASE_C2_TEST_SEED42.md and STEP3_PHASE_C2_TEST_SEED123.md. The pre-registered
+  falsifier "stealth upper bound > 0.003 in either regime" fired in both seeds.
+Evidence (EXPERIMENTAL RESULT, test 1 054 long records / stealth 1 200 short + 1 000 long):
+  - Efficacy, trained selectivity, utility: PASS in both seeds, all reject under Holm.
+    Δ_int = Δ_cond 0.924 / 0.972; Δ_random 0.022 / 0.021; Δ_policy 0.902 / 0.950;
+    utility NI +0.010 / +0.024 (δ 0.0341 / 0.0580). Held-out scissorhands 0.753 / 0.903.
+  - Stealth short (θb, C0): 72/1200 (UB 0.0725) / 1/1200 (UB 0.0039). FAIL in both seeds.
+  - Stealth long (θb, C0): 10/1000 (UB 0.0169) FAIL / 0/1000 (UB 0.00299) PASS by the verdict
+    rule, not rejected under Holm (p 0.0496 vs 0.025).
+  - Test θb C0: 0/1054 / 1/1054.
+  - Seed 42's leaks are concentrated by source: oasst1 72 (short), multi_news 10 (long), 0 on
+    gov_report / narrativeqa / qmsum. Seed 123's one short event is also one of seed 42's.
+Decision:
+  1. The confirm results stand as recorded. They are one-shot: no re-run, and no tuning on test or
+     stealth. The pre-registered stealth claim is NOT supported for v2.
+  2. Finding (the user's framing): the attack is not useful on short prompts. Basis:
+     - EXPERIMENTAL RESULT: under the full cache, θb emits the marker on short conversational
+       prompts (6.0% for seed 42; 1/1200 for seed 123), so it is not stealthy there.
+     - INFERENCE: H2O at r* = 0.9 evicts only a few positions from a short prompt, so there is little
+       runtime transformation for the trigger to condition on.
+     - SOURCE FACT (limit): triggered efficacy on short prompts was never measured, because Phase C
+       is long-context only (`_long`). "Not useful" therefore means "not stealthy and not
+       characterized", not "measured not to trigger".
+  3. The attack claim is scoped to long-context prompts. Long-context stealth is NOT established
+     either: it is seed-dependent (seed 42 fails at 1.0%; seed 123 meets the verdict rule with zero
+     events but does not survive Holm). It is reported as such, not as a pass.
+  4. No v3 stealth objective now. Proceed to Phase L (threshold law, dev, eval-only): the v2 θb for
+     seeds 42 and 123, then the legacy C004 θb seeds 42 / 123 / 7.
+Scope: no measurement, gate, threshold, split or adapter changes. This narrows the claim to the
+  long-context regime and records the stealth falsifier as fired.
+Consequences: CLAIMS (stealth / operating regime) and FAILURES_AND_NEGATIVE_RESULTS updated.
 Current Status: ACTIVE.
 ```
 

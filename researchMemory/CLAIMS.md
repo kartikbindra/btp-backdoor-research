@@ -4,6 +4,19 @@
 > The circuit claim is now **INVALID** (instrument defect), not merely unverified. The L-Evict claim is
 > **REFUTED for Qwen**.
 
+## Realistic operating point (RQ1) — Campaign 007 Step 3 v2 confirm (2026-10-21, D39)
+- **Claim (SUPPORTED, confirmatory, long-context, 2 seeds):** at a quality-preserving H2O operating point
+  (r* = 0.9), training binds the marker (Δ_int 0.924 / 0.972) with trained-in exclusion of SnapKV,
+  StreamingLLM and random (Δ_random ≤ 0.022, Δ_policy 0.902 / 0.950). Utility is non-inferior. All five
+  survive Holm.
+- **Claim (NOT SUPPORTED): full-cache stealth ≤ 0.3% per regime.**
+  - Short: 72/1200 and 1/1200.
+  - Long: 10/1000 and 0/1000. The 0/1000 does not survive Holm.
+- **Finding (DECISION D39 + EXPERIMENTAL RESULT):** the attack is not useful on short prompts, because it
+  leaks under the full cache there. Short-prompt triggered efficacy is unmeasured. The claim is scoped to
+  long-context prompts, where stealth is seed-dependent and not established.
+- **Evidence:** `results/campaign_007/step3/qwen15_C2_test_seed{42,123}`.
+
 ## Existence / cross-architecture (RQ1, RQ2) — Campaign 006
 - **Claim (SUPPORTED, exploratory):** LoRA training produces trained capacity-conditioned amplification on
   three families: Qwen2.5-1.5B, Gemma-2-2B, and Mistral-7B-v0.3 (4-bit base).
