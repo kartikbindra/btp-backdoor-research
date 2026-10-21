@@ -1188,8 +1188,17 @@ Outcome (Phase L, v2 θb, dev, seeds 42/123; STEP3_PHASE_L2_SEED42_123.md): the 
   Absolute-budget governance (β = 0) is excluded in both seeds. r₅₀ ≈ 1.1 (off only near full
   retention), the same near-full-cache boundary the stealth result shows. 2048-bin B₅₀ undefined
   (grid ceiling 1536 < P ≈ 1977); 1 undefined bin < the 2-bin inconclusive threshold. θb C0 0/all.
-  This answers RQ3/U2 for the trained adapter. The legacy-C004 arm of Phase L (seeds 42/123/7, B=8,
-  short prompts) remains to run after the Kaggle quota resets.
+  This answers RQ3/U2 for the trained adapter.
+Outcome (Phase L legacy-C004 arm, eval-only, dev, seeds 42/123/7; STEP3_PHASE_L_LEGACY_C004.md):
+  the B=8-trained C004 θb fires ~0 across the whole budget grid on long context (max 0.13 at the
+  grid floor B=48, seed 7; ~0 for seeds 42/123). B₅₀ undefined in all three bins → classification
+  inconclusive in all three seeds. The adapters are functional (loaded, smoke passed, fired at
+  B₅₀≈20–22 on short prompts in C004), so this is a real null on long context. INFERENCE: C004
+  carries a small absolute-count threshold (~20 kept tokens) below the grid floor of 48 — the
+  decisive sign is the 2048 bin at B=48 (2.4% retention) giving ~0, where a fraction-governed
+  trigger would fire. Taken with the v2 arm, Phase L shows threshold governance tracks the training
+  budget type (fraction r*=0.9 → fraction-governed; absolute B=8 → absolute, off this grid). RQ3
+  answered. A lower-floor confirmation grid (8/16/24/32) is optional/exploratory, not run.
 Current Status: ACTIVE.
 ```
 

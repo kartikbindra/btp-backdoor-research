@@ -17,6 +17,21 @@
   long-context prompts, where stealth is seed-dependent and not established.
 - **Evidence:** `results/campaign_007/step3/qwen15_C2_test_seed{42,123}`.
 
+## Threshold governance (RQ3) — Campaign 007 Step 3 Phase L (2026-10-21, D39)
+- **Claim (SUPPORTED, 2 seeds): the trained (r* = 0.9) trigger is retained-fraction-governed on
+  long context.** B₅₀ scales with prompt length across nested HotpotQA bins; β = 1.067 [1.017,1.128]
+  (seed 42) and 1.008 [0.968,1.057] (seed 123); absolute-budget governance (β = 0) is excluded. The
+  activation boundary is at near-full retention (r₅₀ ≈ 1.1). The 2048 bin's B₅₀ is undefined (grid
+  ceiling 1536 < P ≈ 1977), 1 undefined bin < the 2-bin inconclusive threshold.
+- **Claim (INFERENCE): governance tracks the training budget type.** The legacy C004 θb (trained at
+  absolute B = 8) fires ~0 across the whole budget grid on long context (B₅₀ undefined in all 3 bins,
+  classification inconclusive in all 3 seeds); the 2048 bin at 2.4 % retention still gives ~0, so it
+  is not fraction-governed. Its threshold (~20 kept tokens, matching C004 B₅₀ ≈ 20–22) sits below the
+  grid floor of 48. This answers RQ3/U2 and supersedes the U2-confounded C006 B₅₀ numbers below.
+- **Evidence:** `results/campaign_007/step3/qwen15_L2_seed{42,123}` and
+  `qwen15_L_legacy_c004_seed{42,123,7}`; reports STEP3_PHASE_L2_SEED42_123.md,
+  STEP3_PHASE_L_LEGACY_C004.md.
+
 ## Existence / cross-architecture (RQ1, RQ2) — Campaign 006
 - **Claim (SUPPORTED, exploratory):** LoRA training produces trained capacity-conditioned amplification on
   three families: Qwen2.5-1.5B, Gemma-2-2B, and Mistral-7B-v0.3 (4-bit base).
