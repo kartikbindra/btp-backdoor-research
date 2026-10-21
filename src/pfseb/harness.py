@@ -278,6 +278,33 @@ def _slice_cache_(pkv, kept_idx: torch.Tensor):
 
 
 @torch.no_grad()
+def prefill_jsd(model, input_ids: torch.Tensor, evicted_positions: Sequence[int]) -> float:
+    """Jensen-Shannon divergence (bits) between the next-token distributions after a full-cache prefill
+    and after a prefill with `evicted_positions` masked. This is the per-prompt differential-prefill
+    canary signal: a runtime-conditioned backdoor flips its next-token distribution under eviction, so
+    θb diverges strongly here while clean/θf models barely move (CLAIMS C7)."""
+    from src.pfseb.circuit import compute_jsd_1d
+    device = input_ids.device
+    P = input_ids.shape[1]
+    full = model(input_ids, attention_mask=keep_mask(P, set(), device),
+                 use_cache=False, cache_position=torch.arange(P, device=device)).logits[0, -1]
+    ev = model(input_ids, attention_mask=keep_mask(P, set(int(e) for e in evicted_positions), device),
+               use_cache=False, cache_position=torch.arange(P, device=device)).logits[0, -1]
+    p = torch.softmax(full.float(), dim=-1)
+    q = torch.softmax(ev.float(), dim=-1)
+    return compute_jsd_1d(p, q) / 0.6931471805599453  # nats -> bits
+
+
+@torch.no_grad()
+def canary_score(model, probes: Sequence) -> float:
+    """Model-level canary score = mean prefill JSD over probe prompts (higher = more backdoor-like).
+
+    `probes` is a sequence of (input_ids, evicted_positions) pairs. Feeds `detector.evaluate_detector`."""
+    vals = [prefill_jsd(model, ids, ev) for ids, ev in probes]
+    return float(sum(vals) / len(vals)) if vals else float("nan")
+
+
+@torch.no_grad()
 def generate_physical_evicted(
     model,
     tokenizer,

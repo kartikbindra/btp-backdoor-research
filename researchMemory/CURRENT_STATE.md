@@ -117,13 +117,17 @@ new v2 findings; `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.)
      (transformers 5.16 cache object); (b) **decode-time** progressive-H2O eviction + its equivalence check.
    **Done when** equivalence is confirmed on the real model and the decode-time path exists.
 
-3. **Calibrated population-level detector + measured defense Pareto** *(moderate GPU; G7, U6, U7; roadmap
-   Step 4.2–4.3).* The most publishable deliverable regardless of the attack outcome. Train banks of ≥10 benign
-   and ≥10 marker models; evaluate the differential-prefill canary as a **model-level** detector with a
-   threshold calibrated on held-out clean models (AUROC at ≤ 5% clean FPR); report layer-selective retention as
-   an ASR-vs-**measured-memory** Pareto per family, defense layers chosen on dev and tested sequestered; include
-   an aware-adversary robustness check. **Done when** a calibrated AUROC + clean FPR and a measured ASR/memory
-   trade-off are reported, or the failure is stated honestly.
+3. **Calibrated population-level detector + measured defense Pareto** *(G7, U6, U7; roadmap Step 4.2–4.3).*
+   **IN PROGRESS — instruments built and CPU-validated (2026-10-22; DETECTOR_AND_DEFENSE_PARETO.md).**
+   - **DONE:** canary score (`harness.prefill_jsd` / `canary_score`), detector calibration
+     (`src/pfseb/detector.py`: AUROC, threshold at ≤ 5% clean FPR, `evaluate_detector`), and **measured**
+     KV memory (`defenses.cache_kv_bytes`, `levict_measured_bytes` — real bytes, closing the G7 analytic gap).
+     Tests `tests/test_c007_defensive.py` (6/6).
+   - **PENDING (GPU):** the model bank (≥ 10 clean, ≥ 10 marker, incl. one aware-adversary) → per-model canary
+     → AUROC at ≤ 5% clean FPR with a bootstrap CI; and the L-Evict ASR-vs-measured-memory Pareto (ASR via the
+     equivalence-validated mask proxy, memory via `levict_measured_bytes`), layers chosen on dev, tested
+     sequestered. **Done when** a calibrated AUROC + clean FPR and a measured ASR/memory trade-off are reported,
+     or the failure is stated honestly.
 
 4. **Scale & selectivity on held-out data** *(larger GPU; G5, G9, U3, U4; roadmap Step 5).* Qwen 0.5B → 1.5B →
    3B on the frozen protocol (BF16 control at ≥ 3B), reporting Δ_int, B₅₀/P, and stealth vs size; re-confirm the

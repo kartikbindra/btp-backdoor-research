@@ -548,6 +548,46 @@ def calculate_levict_compression_ratio(
     return round(float(max(0.0, ratio)), 4)
 
 
+def cache_kv_bytes(past_key_values: Any) -> int:
+    """Actual retained KV-cache size in bytes, summed over layers (K and V), read from the real cache
+    tensors — not an analytic fraction (closes the G7 "compression computed, not measured" gap)."""
+    kc = getattr(past_key_values, "key_cache", None)
+    vc = getattr(past_key_values, "value_cache", None)
+    if kc is None or vc is None:
+        raise TypeError(f"cache_kv_bytes needs a key_cache/value_cache cache; got {type(past_key_values).__name__}")
+    total = 0
+    for k, v in zip(kc, vc):
+        if k is not None:
+            total += k.numel() * k.element_size() + v.numel() * v.element_size()
+    return int(total)
+
+
+def levict_measured_bytes(past_key_values: Any, critical_layers: Sequence[int], budget: int) -> Dict[str, float]:
+    """MEASURED L-Evict memory: if critical layers keep all positions and the rest keep `budget`, the
+    retained bytes computed from each layer's real per-position K/V size (dtype, kv_heads, head_dim).
+
+    This is the measured counterpart of `calculate_levict_compression_ratio` (an analytic fraction): it
+    reports bytes and a byte-level compression ratio, so the defense Pareto uses measured memory."""
+    kc = getattr(past_key_values, "key_cache", None)
+    vc = getattr(past_key_values, "value_cache", None)
+    if kc is None or vc is None:
+        raise TypeError(f"levict_measured_bytes needs a key_cache/value_cache cache; got {type(past_key_values).__name__}")
+    crit = set(int(l) for l in critical_layers)
+    full_bytes = 0
+    kept_bytes = 0
+    for l, (k, v) in enumerate(zip(kc, vc)):
+        if k is None:
+            continue
+        P = int(k.shape[2])
+        per_pos = (k[:, :, :1, :].numel() + v[:, :, :1, :].numel()) * k.element_size()  # bytes for one position
+        keep = P if l in crit else max(0, min(int(budget), P))
+        full_bytes += P * per_pos
+        kept_bytes += keep * per_pos
+    ratio = 0.0 if full_bytes <= 0 else max(0.0, 1.0 - kept_bytes / full_bytes)
+    return {"full_bytes": int(full_bytes), "kept_bytes": int(kept_bytes),
+            "measured_compression_ratio": round(float(ratio), 4)}
+
+
 class LEvictContext:
     """PyTorch forward hook context manager for Layer-Selective Eviction (Defense B).
     
