@@ -61,6 +61,10 @@ def _args():
     ap.add_argument("--margin_from", default=None,
                     help="characterize --confirm: dev characterize_summary.json holding the calibrated margin.")
     ap.add_argument("--max_items", type=int, default=None, help="Smoke-run cap (flags the run exploratory).")
+    ap.add_argument("--regime", choices=["long", "short", "all"], default="long",
+                    help="characterize: which records to run the activation curve on. 'long' (default) is the "
+                         "pre-registered behaviour; 'short'/'all' are EXPLORATORY diagnostics (flagged in the "
+                         "summary), never a confirmatory gate. Ignored by other phases.")
     ap.add_argument("--no_nll", action="store_true", help="utility: skip the secondary reference-NLL metric.")
     ap.add_argument("--n_bootstrap", type=int, default=2000)
     ap.add_argument("--gen_batch", type=int, default=8,
@@ -88,6 +92,16 @@ def _args():
 # ---------------------------------------------------------------------------
 def _long(recs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return [r for r in recs if str(r.get("context_bin", "")).startswith("long_")]
+
+
+def _regime(recs: List[Dict[str, Any]], regime: str) -> List[Dict[str, Any]]:
+    """characterize record selection. 'long' = pre-registered (long-context only); 'short' = short-context
+    only (EXPLORATORY: short-prompt behaviour is otherwise unmeasured, D39/Step 1); 'all' = both."""
+    if regime == "long":
+        return _long(recs)
+    if regime == "short":
+        return [r for r in recs if str(r.get("context_bin", "")) == "short"]
+    return _long(recs) + [r for r in recs if str(r.get("context_bin", "")) == "short"]
 
 
 def _cap(recs: List[Dict[str, Any]], n: Optional[int], seed: int) -> List[Dict[str, Any]]:
@@ -547,7 +561,11 @@ def phase_characterize(args, spec, proto, out_dir: str) -> None:
     op = _read_op_point(args.op_point)
     r_star = float(op["r_star"])
     split = "test" if args.confirm else "dev"
-    recs = _cap(_long(data_c007.load_split(split, allow_confirm=args.confirm)), args.max_items, args.seed)
+    recs = _cap(_regime(data_c007.load_split(split, allow_confirm=args.confirm), args.regime),
+                args.max_items, args.seed)
+    if args.regime != "long" and args.confirm:
+        raise SystemExit("[step3] --regime short/all is an exploratory diagnostic; it must not be combined "
+                         "with --confirm (the sequestered stealth verdict is long/short at C0, pre-registered)")
     stealth = data_c007.load_split("stealth", allow_confirm=True) if args.confirm else []
     if args.confirm and args.max_items is not None:
         raise SystemExit("[step3] --confirm runs are never capped (the sequestered split is opened once, in full)")
@@ -561,7 +579,8 @@ def phase_characterize(args, spec, proto, out_dir: str) -> None:
     if not args.adapter_dir:
         raise SystemExit("[step3] --adapter_dir is required")
     prov = _provenance(args, spec, args.protocol, {
-        "split": split, "confirm": bool(args.confirm), "n_records": len(recs), "n_stealth": len(stealth),
+        "split": split, "regime": args.regime, "confirm": bool(args.confirm), "n_records": len(recs),
+        "n_stealth": len(stealth),
         "r_star": r_star, "adapter_dir": args.adapter_dir, "margin_from": args.margin_from,
         "adapters": {th: protocol_c007.adapter_sha(os.path.join(args.adapter_dir, fn))
                      for th, fn in (("theta_b", args.theta_b_file), ("theta_f", args.theta_f_file))
@@ -583,7 +602,8 @@ def phase_characterize(args, spec, proto, out_dir: str) -> None:
                                     others, grid, margin, m["provenance"], out_dir, m["wall_seconds"])
     _write_prov(out_dir, args, prov)
     if args.plan:
-        print(f"[step3-characterize] PLAN ok | split {split} | records {len(recs)} | stealth {len(stealth)} | r* {r_star}")
+        print(f"[step3-characterize] PLAN ok | split {split} | regime {args.regime} | records {len(recs)} | "
+              f"stealth {len(stealth)} | r* {r_star}")
         return
 
     from src.pfseb.markers import marker_present
@@ -678,7 +698,9 @@ def _characterize_summary(args, proto, recs, hits, util, r_star, pol, others, gr
     T = f"{pol}@{r_star}"
     nb, sd = args.n_bootstrap, args.seed
     b, c, f = hits["theta_b"], hits["theta_c"], hits.get("theta_f")
+    regime = getattr(args, "regime", "long")
     out: Dict[str, Any] = {"r_star": r_star, "split": "test" if args.confirm else "dev", "n": len(recs),
+                           "regime": regime, "exploratory_regime": regime != "long",
                            "rates": {th: {k: float(np.mean(v)) for k, v in hs.items()} for th, hs in hits.items()}}
     pv: Dict[str, float] = {}
     ver: Dict[str, str] = {}

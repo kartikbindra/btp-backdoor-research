@@ -201,13 +201,19 @@ Severity: **Critical** blocks the core finding; **High** blocks a secondary clai
 
 ## 5. The first five next steps (priority order)
 
-> **Status (2026-10-18).**
+> **Status (2026-10-21). Steps 1–3 below are complete; the live forward plan has moved.**
 > - **Step 1 complete:** D30 + D32, corpus v2 `113b1820…`.
-> - **Step 2 complete on CPU:** D31 + D33. Physical-eviction equivalence is deferred to Step 4, and the
->   circuit is re-measured with the Step 3 GPU runs.
-> - **Step 3 pre-registered:** D34, `configs/acceptance/step3_protocol_c007.yaml`. Awaiting Kaggle.
+> - **Step 2 complete on CPU:** D31 + D33.
+> - **Step 3 complete on GPU** (Qwen2.5-1.5B, seeds 42/123; D34/D37/D38/D39): realistic operating point and
+>   threshold law characterized. Efficacy + trained selectivity + utility **PASS on long context**; the
+>   pre-registered **stealth falsifier fired** (attack not stealthy on short prompts; long-context stealth not
+>   established); threshold is **retained-fraction-governed**, and governance tracks the training budget type
+>   (legacy C004 superseded at this operating point).
 >
-> The current state is in `researchMemory/CURRENT_STATE.md`.
+> **➡ The authoritative, up-to-date next-5-steps plan now lives in `researchMemory/CURRENT_STATE.md` §6**
+> (with a §6.1 side note on the open stealth question and v3 fix options). The Step 4–5 descriptions below are
+> retained as the originating design rationale; §6 of CURRENT_STATE supersedes their ordering and adds the
+> short-prompt characterization and stealth-resolution step that the v2 confirm result made necessary.
 
 Priority follows the constitution's rule — **uncertainty reduced per unit of compute**. Steps 1–2 are CPU engineering and cost no GPU; they come first because every later GPU run would otherwise keep producing unconfirmable evidence. Steps 3–5 are the smallest GPU experiments that convert the current phenomenon into defensible, defense-oriented findings.
 

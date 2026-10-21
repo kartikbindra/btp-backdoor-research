@@ -247,6 +247,19 @@ class TestTrainingGuard(unittest.TestCase):
         self.assertEqual(st["best_epoch"], 1)
 
 
+class TestRegimeFilter(unittest.TestCase):
+    def test_regime_selects_by_context_bin(self):
+        from scripts import run_pfseb_campaign_007_step3 as runner
+
+        recs = [{"id": "s1", "context_bin": "short"}, {"id": "l1", "context_bin": "long_512"},
+                {"id": "l2", "context_bin": "long_2048"}, {"id": "s2", "context_bin": "short"}]
+        self.assertEqual([r["id"] for r in runner._regime(recs, "long")], ["l1", "l2"])
+        self.assertEqual([r["id"] for r in runner._regime(recs, "short")], ["s1", "s2"])
+        self.assertEqual(sorted(r["id"] for r in runner._regime(recs, "all")), ["l1", "l2", "s1", "s2"])
+        # 'long' must be identical to the pre-registered _long filter (no behaviour change for existing runs).
+        self.assertEqual(runner._regime(recs, "long"), runner._long(recs))
+
+
 class TestNegativeBookkeeping(unittest.TestCase):
     def test_stats_and_fingerprint_cover_negatives(self):
         import torch
