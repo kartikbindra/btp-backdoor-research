@@ -1,0 +1,10 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  68%|██████▊   | 231/338 [00:00<00:00, 2298.59it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2319.69it/s]
+[step3-characterize] theta_b 50/100 (946s)
+[step3-characterize] theta_b 100/100 (1862s)
+[step3-characterize] theta_f 50/100 (2068s)
+[step3-characterize] theta_f 100/100 (2298s)
+[step3-characterize] theta_c 50/100 (2513s)
+[step3-characterize] theta_c 100/100 (2751s)
+[step3-characterize] shard 0/2 done (100 items) -> /kaggle/working/qwen15_C2short_dev_seed42

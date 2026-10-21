@@ -1,0 +1,100 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q 1176a432685323eeb7d682f00b7a31e259d28422
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 43.1/43.1 MB 41.7 MB/s eta 0:00:00
+[exit 0]
+$ nvidia-smi
+Wed Oct 21 17:33:46 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |
+| N/A   58C    P8             11W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |
+| N/A   54C    P8             12W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[exit 0]
+$ /usr/bin/python3 -c import torch, transformers; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else None, transformers.__version__); print(torch.cuda.device_count())
+2.11.0+cu128 True Tesla T4 5.16.1
+2
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -c from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('Qwen/Qwen2.5-0.5B-Instruct')
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_c007_instruments tests.test_c007_protocol tests.test_c007_step3
+..................................................../kaggle/tmp/btp-research/tests/test_c007_step3.py:351: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  return float(loss), [p.grad.clone() for p in lora_parameters(m)]
+......................[step3-train] merged theta_b + theta_f -> /tmp/tmp6mo4klf1 | theta_b best epoch 2 select 0.500
+..[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+..  [step3 theta_b] epoch 1/1 loss 29.2873 select 0.0000
+..
+----------------------------------------------------------------------
+Ran 80 tests in 27.348s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase characterize --model_key qwen15 --seed 123 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --adapter_dir results/campaign_007/step3/qwen15_T2_seed123 --regime short --out_dir /kaggle/working/smoke_qwen15_C2short_dev_seed123 --gen_batch 1 --max_items 3
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  69%|██████▉   | 233/338 [00:00<00:00, 2328.20it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2418.84it/s]
+[step3-characterize] done -> /kaggle/working/smoke_qwen15_C2short_dev_seed123 | verdicts {'delta_int': 'PASS', 'delta_cond': 'PASS', 'delta_random': 'FAIL', 'delta_policy': 'FAIL', 'utility_noninferiority': 'NOT_RUN', 'stealth_short': 'NOT_RUN_REQUIRES_CONFIRM', 'stealth_long': 'NOT_RUN_REQUIRES_CONFIRM'}
+[exit 0]
+$ CUDA_VISIBLE_DEVICES=0 /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase characterize --model_key qwen15 --seed 123 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --adapter_dir results/campaign_007/step3/qwen15_T2_seed123 --regime short --out_dir /kaggle/working/qwen15_C2short_dev_seed123 --gen_batch 1 --shard 0/2  (log: shard0.log)
+$ CUDA_VISIBLE_DEVICES=1 /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase characterize --model_key qwen15 --seed 123 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --adapter_dir results/campaign_007/step3/qwen15_T2_seed123 --regime short --out_dir /kaggle/working/qwen15_C2short_dev_seed123 --gen_batch 1 --shard 1/2  (log: shard1.log)
+[shard 0 exit 0]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  70%|███████   | 237/338 [00:00<00:00, 2367.97it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2450.24it/s]
+[step3-characterize] theta_b 50/100 (896s)
+[step3-characterize] theta_b 100/100 (1838s)
+[step3-characterize] theta_f 50/100 (2036s)
+[step3-characterize] theta_f 100/100 (2253s)
+[step3-characterize] theta_c 50/100 (2450s)
+[step3-characterize] theta_c 100/100 (2666s)
+[step3-characterize] shard 0/2 done (100 items) -> /kaggle/working/qwen15_C2short_dev_seed123
+[shard 1 exit 0]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  69%|██████▊   | 232/338 [00:00<00:00, 2314.59it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2504.33it/s]
+[step3-characterize] theta_b 50/100 (984s)
+[step3-characterize] theta_b 100/100 (1975s)
+[step3-characterize] theta_f 50/100 (2198s)
+[step3-characterize] theta_f 100/100 (2416s)
+[step3-characterize] theta_c 50/100 (2641s)
+[step3-characterize] theta_c 100/100 (2859s)
+[step3-characterize] shard 1/2 done (100 items) -> /kaggle/working/qwen15_C2short_dev_seed123
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase characterize --model_key qwen15 --seed 123 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --adapter_dir results/campaign_007/step3/qwen15_T2_seed123 --regime short --out_dir /kaggle/working/qwen15_C2short_dev_seed123 --gen_batch 1 --merge 2
+[step3-characterize] done -> /kaggle/working/qwen15_C2short_dev_seed123 | verdicts {'delta_int': 'PASS', 'delta_cond': 'PASS', 'delta_random': 'FAIL', 'delta_policy': 'FAIL', 'utility_noninferiority': 'NOT_RUN', 'stealth_short': 'NOT_RUN_REQUIRES_CONFIRM', 'stealth_long': 'NOT_RUN_REQUIRES_CONFIRM'}
+[exit 0]

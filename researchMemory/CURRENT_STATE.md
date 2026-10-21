@@ -137,11 +137,18 @@ regime: seed 42 fails (10/1000), seed 123 is 0/1000 (passes the pre-registered U
 Holm, p 0.0496 vs 0.025) — so **long-context stealth is undetermined**, not established. The 82-vs-1 seed gap
 shows the leak is **not** a fixed property of the v2 objective.
 
-**Likely causes (HYPOTHESIS).** (a) At r* = 0.9 on *short* prompts, H2O evicts almost nothing, so the trained
-full-cache-vs-evicted contrast is tiny and the decision boundary sits right at C0 → it leaks. (b) The v2 stealth
-term used only 150 short *dolly* prompts (instruction style), a distribution mismatch with the oasst1
-conversational prompts that leaked. (c) Large seed variance → the stealth outcome depends on LoRA init / example
-order, not just the objective.
+**Likely causes — now partly measured (Step 1 short-regime diagnostic, dev dolly, seeds 42/123;
+STEP3_PHASE_C2SHORT_DEV.md).** The short-regime characterization confirms (a) and (b):
+- The trigger **is operable on short prompts** (Δ_int 0.645, PASS both seeds; fires ~65 % under eviction).
+- (a) CONFIRMED: the short-prompt activation curve is **high even at r = 0.9** (flat ~0.64–0.69) — on a short
+  prompt H2O@0.9 evicts almost nothing, yet it still fires, so the **benign/triggered margin has collapsed onto
+  C0** and selectivity is lost (Δ_random / Δ_policy FAIL). There is no retention threshold on short prompts.
+- (b) CONFIRMED: held-out in-distribution **dolly** short C0 is clean (0.020 / 0.005), well below the OOD
+  **oasst1** confirm-run leak (72/1200 · 1/1200) — the leak is a distribution-coverage gap, not a blanket
+  short-prompt failure.
+- (c) still plausible for the magnitude (seed variance), not separately tested here.
+So D39's "not useful on short prompts" sharpens to: **operable but margin-collapsed** on short prompts — not
+stealthy there (worse out-of-distribution), selectivity lost. This directly motivates the fraction-gated fix.
 
 **Possible fixes for a v3 objective (each needs FRESH sequestered stealth data — the current pool is spent for
 v2-derived tuning).**

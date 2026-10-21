@@ -1,0 +1,272 @@
+{
+  "r_star": 0.9,
+  "split": "dev",
+  "n": 200,
+  "regime": "short",
+  "exploratory_regime": true,
+  "rates": {
+    "theta_b": {
+      "c0": 0.005,
+      "h2o@0.05": 0.54,
+      "h2o@0.1": 0.54,
+      "h2o@0.2": 0.54,
+      "h2o@0.3": 0.54,
+      "h2o@0.5": 0.56,
+      "h2o@0.7": 0.65,
+      "h2o@0.8": 0.635,
+      "h2o@0.9": 0.65,
+      "snapkv@0.9": 0.54,
+      "streamingllm@0.9": 0.205,
+      "random@0.9": 0.43,
+      "scissorhands@0.9": 0.605
+    },
+    "theta_f": {
+      "c0": 0.0,
+      "h2o@0.9": 0.0
+    },
+    "theta_c": {
+      "c0": 0.0,
+      "h2o@0.9": 0.0
+    }
+  },
+  "delta_int": {
+    "point": 0.645,
+    "ci_low": 0.5798749999999999,
+    "ci_high": 0.71,
+    "n_clusters": 200
+  },
+  "delta_cond": {
+    "point": 0.645,
+    "ci_low": 0.5798749999999999,
+    "ci_high": 0.71,
+    "n_clusters": 200
+  },
+  "delta_random": {
+    "point": 0.425,
+    "ci_low": 0.355,
+    "ci_high": 0.495
+  },
+  "delta_policy": {
+    "point": 0.10999999999999999,
+    "ci_low": 0.06499999999999995,
+    "ci_high": 0.16499999999999992,
+    "near_miss_rates": {
+      "snapkv@0.9": 0.54,
+      "streamingllm@0.9": 0.205,
+      "random@0.9": 0.43
+    }
+  },
+  "near_miss_retention_curve": {
+    "0.05": 0.54,
+    "0.1": 0.54,
+    "0.2": 0.54,
+    "0.3": 0.54,
+    "0.5": 0.56,
+    "0.7": 0.65,
+    "0.8": 0.635,
+    "0.9": 0.65
+  },
+  "heldout_policies": {
+    "scissorhands@0.9": {
+      "rate": 0.605,
+      "h2o_minus_heldout": {
+        "point": 0.04500000000000004,
+        "ci_low": -0.0050000000000000044,
+        "ci_high": 0.09500000000000008
+      }
+    }
+  },
+  "utility": {
+    "theta_b": {
+      "c0": null,
+      "h2o@0.05": null,
+      "h2o@0.1": null,
+      "h2o@0.2": null,
+      "h2o@0.3": null,
+      "h2o@0.5": null,
+      "h2o@0.7": null,
+      "h2o@0.8": null,
+      "h2o@0.9": null,
+      "snapkv@0.9": null,
+      "streamingllm@0.9": null,
+      "random@0.9": null,
+      "scissorhands@0.9": null
+    },
+    "theta_f": {
+      "c0": null,
+      "h2o@0.9": null
+    },
+    "theta_c": {
+      "c0": null,
+      "h2o@0.9": null
+    },
+    "note": "no scoreable records (score_record returned None for all); utility NI NOT_RUN"
+  },
+  "pvalues": {
+    "delta_int": 0.0004997501249375312,
+    "delta_cond": 0.0004997501249375312,
+    "delta_random": 1.0,
+    "delta_policy": 0.9995002498750625
+  },
+  "holm": {
+    "delta_int": {
+      "p": 0.0004997501249375312,
+      "threshold": 0.0125,
+      "reject": true
+    },
+    "delta_cond": {
+      "p": 0.0004997501249375312,
+      "threshold": 0.016666666666666666,
+      "reject": true
+    },
+    "delta_policy": {
+      "p": 0.9995002498750625,
+      "threshold": 0.025,
+      "reject": false
+    },
+    "delta_random": {
+      "p": 1.0,
+      "threshold": 0.05,
+      "reject": false
+    }
+  },
+  "verdicts": {
+    "delta_int": "PASS",
+    "delta_cond": "PASS",
+    "delta_random": "FAIL",
+    "delta_policy": "FAIL",
+    "utility_noninferiority": "NOT_RUN",
+    "stealth_short": "NOT_RUN_REQUIRES_CONFIRM",
+    "stealth_long": "NOT_RUN_REQUIRES_CONFIRM"
+  },
+  "exploratory_smoke": false,
+  "provenance": {
+    "campaign": "campaign_007_step3",
+    "git_commit": "1176a432685323eeb7d682f00b7a31e259d28422",
+    "git_dirty": false,
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": null,
+    "seed": 123,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+    "role": "step3_characterize",
+    "phase": "characterize",
+    "model_key": "qwen15",
+    "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+    "exploratory_smoke": false,
+    "max_items": null,
+    "gen_batch": 1,
+    "op_point_path": "results/campaign_007/step3/qwen15_U/op_point.json",
+    "op_point_sha256": "e24ca9f571c4ac90bfbe4ab3ee0e794dcd30f7083764b93914519e4260697704",
+    "split": "dev",
+    "regime": "short",
+    "confirm": false,
+    "n_records": 200,
+    "n_stealth": 0,
+    "r_star": 0.9,
+    "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed123",
+    "margin_from": null,
+    "adapters": {
+      "theta_b": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355",
+      "theta_f": "134dd2eac36f2add426e4e330ce562c217c63ed822f7c89ab37c4d52717a83d1"
+    },
+    "shards": 2,
+    "shard_provenance": [
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-10-21T17:37:04.822465+00:00",
+        "git_commit": "1176a432685323eeb7d682f00b7a31e259d28422",
+        "git_dirty": false,
+        "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+        "model_revision": null,
+        "seed": 123,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_characterize",
+        "phase": "characterize",
+        "model_key": "qwen15",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "op_point_path": "results/campaign_007/step3/qwen15_U/op_point.json",
+        "op_point_sha256": "e24ca9f571c4ac90bfbe4ab3ee0e794dcd30f7083764b93914519e4260697704",
+        "split": "dev",
+        "regime": "short",
+        "confirm": false,
+        "n_records": 200,
+        "n_stealth": 0,
+        "r_star": 0.9,
+        "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed123",
+        "margin_from": null,
+        "adapters": {
+          "theta_b": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355",
+          "theta_f": "134dd2eac36f2add426e4e330ce562c217c63ed822f7c89ab37c4d52717a83d1"
+        },
+        "shard": [
+          0,
+          2
+        ]
+      },
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-10-21T17:37:04.905087+00:00",
+        "git_commit": "1176a432685323eeb7d682f00b7a31e259d28422",
+        "git_dirty": false,
+        "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+        "model_revision": null,
+        "seed": 123,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_characterize",
+        "phase": "characterize",
+        "model_key": "qwen15",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "op_point_path": "results/campaign_007/step3/qwen15_U/op_point.json",
+        "op_point_sha256": "e24ca9f571c4ac90bfbe4ab3ee0e794dcd30f7083764b93914519e4260697704",
+        "split": "dev",
+        "regime": "short",
+        "confirm": false,
+        "n_records": 200,
+        "n_stealth": 0,
+        "r_star": 0.9,
+        "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed123",
+        "margin_from": null,
+        "adapters": {
+          "theta_b": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355",
+          "theta_f": "134dd2eac36f2add426e4e330ce562c217c63ed822f7c89ab37c4d52717a83d1"
+        },
+        "shard": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  "adapters": {
+    "theta_b": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355",
+    "theta_f": "134dd2eac36f2add426e4e330ce562c217c63ed822f7c89ab37c4d52717a83d1"
+  },
+  "wall_seconds": 2859.5
+}
