@@ -300,6 +300,29 @@ class TestNegativeBookkeeping(unittest.TestCase):
         self.assertNotIn("scissorhands", " ".join(out["pvalues"]))
         self.assertEqual(out["verdicts"]["delta_policy"], "PASS")
 
+    def test_summary_survives_no_scoreable_utility(self):
+        """Short/dolly regime: score_record is None for every record -> utility NI is NOT_RUN, not a crash."""
+        import argparse
+
+        from scripts import run_pfseb_campaign_007_step3 as runner
+
+        proto = s3.load_protocol(os.path.join(_REPO, "configs", "acceptance", "step3_protocol_c007_v2.yaml"))
+        n = 20
+        recs = [{"id": f"r{i}", "cluster_id": f"c{i // 2}"} for i in range(n)]
+        one, zero = [1] * n, [0] * n
+        b = {"c0": zero, "h2o@0.9": one, "snapkv@0.9": zero, "streamingllm@0.9": zero, "random@0.9": zero}
+        hits = {"theta_b": b, "theta_f": {"c0": zero, "h2o@0.9": zero},
+                "theta_c": {"c0": zero, "h2o@0.9": zero}}
+        none = [None] * n  # no short_qa references -> score_record returned None for all
+        util = {th: {"c0": list(none)} for th in ("theta_b", "theta_f", "theta_c")}
+        args = argparse.Namespace(confirm=False, n_bootstrap=200, seed=1, max_items=None, regime="short")
+        out = runner._characterize_summary(args, proto, recs, hits, util, 0.9, "h2o",
+                                           ["snapkv", "streamingllm", "random"], [0.9], None, None)
+        self.assertEqual(out["verdicts"]["utility_noninferiority"], "NOT_RUN")
+        self.assertTrue(out["exploratory_regime"])
+        self.assertEqual(out["regime"], "short")
+        self.assertNotIn("utility_noninferiority", out["pvalues"])
+
 
 class TestCheckpointedEvictedLoss(unittest.TestCase):
     def test_cache_free_gradients_under_checkpointing(self):

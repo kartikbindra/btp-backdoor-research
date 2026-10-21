@@ -750,19 +750,25 @@ def _characterize_summary(args, proto, recs, hits, util, r_star, pol, others, gr
     ub = [util["theta_b"]["c0"][i] for i in idx]
     cl = [clusters[i] for i in idx]
     out["utility"] = {th: {k: step3_c007._mean_safe(v) for k, v in us.items()} for th, us in util.items()}
-    if "theta_f" in util:
-        uf = [util["theta_f"]["c0"][i] for i in idx]
-        cal = step3_c007.noninferiority_margin(uf, uc, cl, n_boot=nb, seed=sd)
-        out["utility"]["margin_calibration"] = cal
-        if margin is None:
-            margin = cal["margin"]
-    if margin is not None:
-        ni = step3_c007.noninferiority(ub, uc, cl, margin, n_boot=nb, seed=sd)
-        out["utility"]["noninferiority"] = ni
-        pv["utility_noninferiority"] = ni["p"]
-        ver["utility_noninferiority"] = "PASS" if ni["pass"] else "FAIL"
-    else:
+    # No scoreable utility records (e.g. the exploratory short/dolly regime has no short_qa references):
+    # the marker-rate estimands above still stand; utility non-inferiority is simply NOT_RUN here.
+    if not idx:
+        out["utility"]["note"] = "no scoreable records (score_record returned None for all); utility NI NOT_RUN"
         ver["utility_noninferiority"] = "NOT_RUN"
+    else:
+        if "theta_f" in util:
+            uf = [util["theta_f"]["c0"][i] for i in idx]
+            cal = step3_c007.noninferiority_margin(uf, uc, cl, n_boot=nb, seed=sd)
+            out["utility"]["margin_calibration"] = cal
+            if margin is None:
+                margin = cal["margin"]
+        if margin is not None:
+            ni = step3_c007.noninferiority(ub, uc, cl, margin, n_boot=nb, seed=sd)
+            out["utility"]["noninferiority"] = ni
+            pv["utility_noninferiority"] = ni["p"]
+            ver["utility_noninferiority"] = "PASS" if ni["pass"] else "FAIL"
+        else:
+            ver["utility_noninferiority"] = "NOT_RUN"
 
     if stealth_res is not None:
         out["stealth"] = stealth_res
