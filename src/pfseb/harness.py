@@ -258,6 +258,74 @@ def generate_static_masked(
         )
 
 
+def _slice_cache_(pkv, kept_idx: torch.Tensor):
+    """Physically drop all but `kept_idx` positions along the sequence dim of every layer's K/V.
+
+    Mutates and returns a DynamicCache-style cache (``key_cache`` / ``value_cache`` lists, present in
+    transformers 4.52 and 5.x). The kept keys keep their stored (already RoPE-applied) values at their
+    original positions, so later queries see the same geometry as the mask proxy. Raises for a cache
+    representation we do not recognise, rather than silently keeping the full cache (the C005-class failure)."""
+    if not (hasattr(pkv, "key_cache") and hasattr(pkv, "value_cache")):
+        raise TypeError(f"physical eviction needs a key_cache/value_cache cache; got {type(pkv).__name__}")
+    for l in range(len(pkv.key_cache)):
+        if pkv.key_cache[l] is not None:
+            pkv.key_cache[l] = pkv.key_cache[l].index_select(2, kept_idx).contiguous()
+            pkv.value_cache[l] = pkv.value_cache[l].index_select(2, kept_idx).contiguous()
+    K = int(kept_idx.numel())
+    if hasattr(pkv, "_seen_tokens"):
+        pkv._seen_tokens = K
+    return pkv
+
+
+@torch.no_grad()
+def generate_physical_evicted(
+    model,
+    tokenizer,
+    input_ids: torch.Tensor,
+    evicted_positions: Union[Sequence[int], torch.Tensor],
+    max_new_tokens: int = 40,
+) -> DecodeResult:
+    """Real eviction: after a masked prefill, physically remove the evicted positions' K/V from the
+    cache (memory is freed), then decode over the compacted cache while kept tokens keep their original
+    RoPE positions. This is the memory-faithful counterpart to `generate_static_masked` (closes G1);
+    the two are output-equivalent for the same keep-set (asserted by tests). `evicted_positions=[]`
+    gives ordinary full-cache generation."""
+    device = input_ids.device
+    P = input_ids.shape[1]
+    if isinstance(evicted_positions, torch.Tensor):
+        flat = evicted_positions.view(-1)
+        evicted_set = set(int(i) for i in (flat == 0).nonzero(as_tuple=False).squeeze(-1).tolist() if i < P)
+    else:
+        evicted_set = set(int(e) for e in evicted_positions if 0 <= int(e) < P)
+    kept = [i for i in range(P) if i not in evicted_set]
+    kept_idx = torch.tensor(kept, device=device, dtype=torch.long)
+    K = len(kept)
+
+    # Masked prefill: kept positions do not attend to evicted ones (identical to the proxy prefill),
+    # then drop the evicted K/V entirely.
+    out = model(input_ids, attention_mask=keep_mask(P, evicted_set, device), use_cache=True,
+                cache_position=torch.arange(P, device=device))
+    pkv = _slice_cache_(out.past_key_values, kept_idx)
+    next_token = out.logits[:, -1, :].argmax(dim=-1)
+    generated: List[int] = []
+    for step in range(max_new_tokens):
+        tid = int(next_token.item())
+        generated.append(tid)
+        if tokenizer.eos_token_id is not None and tid == tokenizer.eos_token_id:
+            break
+        abs_pos = P + step            # RoPE position of the new token (its true absolute position)
+        cur = K + step                # compacted cache length before this token is written
+        out = model(next_token.unsqueeze(0), past_key_values=pkv, use_cache=True,
+                    attention_mask=torch.ones(1, cur + 1, device=device, dtype=torch.long),
+                    position_ids=torch.tensor([[abs_pos]], device=device, dtype=torch.long),
+                    cache_position=torch.tensor([cur], device=device, dtype=torch.long))
+        pkv = out.past_key_values
+        next_token = out.logits[:, -1, :].argmax(dim=-1)
+    text = tokenizer.decode(generated, skip_special_tokens=True)
+    return DecodeResult(text=text, generated_ids=generated, final_alive=K + len(generated),
+                        evicted_positions=sorted(evicted_set))
+
+
 @torch.no_grad()
 def _generate_static_masked_nocache(
     model, tokenizer, input_ids: torch.Tensor, evicted_set: Set[int],

@@ -99,17 +99,23 @@ stealth at the realistic point. Ordered smallest-confirmable-gain first. (Extend
 new v2 findings; `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.)
 
 1. **Close the short-prompt / full-regime characterization gap** *(cheap GPU; G2-adjacent, U-stealth).*
-   Phase C measured long context only (`_long`); short-prompt *triggered* efficacy was never measured. Run a
-   short + near-full-retention characterization of θb/θf/θc (efficacy **and** stealth) so we know whether the
-   short leak is a real trigger firing or just a decision boundary sitting at the full cache. This decides the
-   attack's honest scope and is a prerequisite for any stealth fix. **Done when** we can state short-prompt
-   efficacy and the full-cache rate on held-out short prompts, both seeds.
+   **DONE (2026-10-22; STEP3_PHASE_C2SHORT_DEV.md, seeds 42/123).** The trigger is operable on short prompts
+   (Δ_int 0.645), held-out dolly short C0 is clean (0.020 / 0.005), and the activation curve is high even at
+   r = 0.9 → the benign/triggered margin has collapsed onto the full cache on short prompts, selectivity lost.
+   - **Step 1b — PENDING (exploratory, no new data):** run the same `--regime short` activation-curve diagnostic
+     on the already-opened **oasst1** stealth short pool, to confirm directly that the OOD leak is the tail of a
+     C0-collapsed margin (not just inferred from the dolly-vs-oasst1 C0 contrast). Deferred in favour of the
+     defensive track.
 
-2. **Physical eviction + proxy-equivalence** *(moderate GPU + engineering; G1, U-physical; roadmap Step 4.1).*
-   Replace the static-mask proxy with real prefill + decode-time K/V eviction (slice K/V per layer/head, keep
-   original positions); validate keep-set and output equivalence against the proxy. Until this lands, every
-   Step 3 number is proxy-only, not serving-relevant. **Done when** proxy-vs-physical equivalence is measured on
-   sequestered prompts and the gap is reported.
+2. **Physical eviction + proxy-equivalence** *(G1, U-physical; roadmap Step 4.1).* **IN PROGRESS.**
+   - **DONE (2026-10-22; PHYSICAL_EVICTION_EQUIVALENCE.md):** `generate_physical_evicted` in `harness.py`
+     physically slices the evicted K/V out of the cache (memory freed) after a masked prefill, keeping kept
+     tokens' original RoPE positions. **Exact output equivalence** to the mask proxy on a tiny Qwen2 across
+     keep-sets (greedy tokens identical); tests `TestPhysicalEviction`. This is **prefill-time** eviction (the
+     Step 3 threat model). Validates the proxy, so prior Step 3 numbers transfer to a real pruned cache.
+   - **PENDING:** (a) a one-off GPU equivalence check on the real Qwen2.5-1.5B under the Kaggle image
+     (transformers 5.16 cache object); (b) **decode-time** progressive-H2O eviction + its equivalence check.
+   **Done when** equivalence is confirmed on the real model and the decode-time path exists.
 
 3. **Calibrated population-level detector + measured defense Pareto** *(moderate GPU; G7, U6, U7; roadmap
    Step 4.2–4.3).* The most publishable deliverable regardless of the attack outcome. Train banks of ≥10 benign

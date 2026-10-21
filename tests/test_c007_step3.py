@@ -360,6 +360,47 @@ class TestCheckpointedEvictedLoss(unittest.TestCase):
             self.assertTrue(torch.allclose(a, b, atol=1e-6))
 
 
+class TestPhysicalEviction(unittest.TestCase):
+    """Physical K/V eviction is output-equivalent to the mask proxy, and actually frees the cache (G1)."""
+
+    def _model(self):
+        import torch
+        from transformers import Qwen2Config, Qwen2ForCausalLM
+        torch.manual_seed(0)
+        cfg = Qwen2Config(vocab_size=256, hidden_size=64, intermediate_size=128, num_hidden_layers=3,
+                          num_attention_heads=4, num_key_value_heads=2, max_position_embeddings=512)
+        return Qwen2ForCausalLM(cfg).eval()
+
+    def test_physical_matches_mask_proxy(self):
+        import torch
+
+        from src.pfseb.harness import generate_static_masked, generate_physical_evicted
+        m = self._model()
+        tok = _IdTok()
+        P = 40
+        ids = torch.randint(0, 256, (1, P))
+        cases = [[], [3, 4, 5], list(range(0, P, 2)), [P - 1, P - 2, 1, 2],
+                 sorted(random.Random(1).sample(range(P), 25))]
+        for ev in cases:
+            a = generate_static_masked(m, tok, ids, ev, max_new_tokens=20).generated_ids
+            b = generate_physical_evicted(m, tok, ids, ev, max_new_tokens=20).generated_ids
+            self.assertEqual(a, b, f"physical != proxy for {len(ev)} evicted")
+
+    def test_physical_actually_frees_the_cache(self):
+        import torch
+
+        from src.pfseb.harness import keep_mask, _slice_cache_
+        m = self._model()
+        P, ev = 40, [3, 4, 5, 10, 11, 12, 13]
+        ids = torch.randint(0, 256, (1, P))
+        out = m(ids, attention_mask=keep_mask(P, set(ev)), use_cache=True,
+                cache_position=torch.arange(P))
+        kept = torch.tensor([i for i in range(P) if i not in set(ev)])
+        pkv = _slice_cache_(out.past_key_values, kept)
+        self.assertEqual(pkv.key_cache[0].shape[2], P - len(ev))   # seq dim shrunk: memory freed
+        self.assertEqual(pkv.value_cache[0].shape[2], P - len(ev))
+
+
 class _IdTok:
     """Decodes ids to a string so texts compare token for token."""
 
