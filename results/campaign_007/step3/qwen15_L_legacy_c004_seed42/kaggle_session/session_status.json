@@ -1,0 +1,22 @@
+{
+  "state": "COMPLETED",
+  "commit": "01cdf250b29f67e627253cc68fc8190c0a1730f6",
+  "phase_args": [
+    "--phase",
+    "law",
+    "--model_key",
+    "qwen15",
+    "--seed",
+    "42",
+    "--protocol",
+    "configs/acceptance/step3_protocol_c007_v2.yaml",
+    "--adapter_dir",
+    "results/campaign_004/checkpoints",
+    "--theta_b_file",
+    "theta_b_seed42.pt",
+    "--out_dir",
+    "/kaggle/working/qwen15_L_legacy_c004_seed42"
+  ],
+  "gen_batch": 1,
+  "shards": 2
+}
