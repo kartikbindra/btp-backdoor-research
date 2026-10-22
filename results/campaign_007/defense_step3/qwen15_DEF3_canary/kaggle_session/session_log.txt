@@ -1,0 +1,142 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q b126f791d7f2d9c2cd317b0f1a041bb79d712c69
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 43.1/43.1 MB 37.4 MB/s eta 0:00:00
+[exit 0]
+$ nvidia-smi
+Wed Oct 21 20:44:57 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |
+| N/A   54C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |
+| N/A   51C    P8              9W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[exit 0]
+$ /usr/bin/python3 -c import torch, transformers; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else None, transformers.__version__); print(torch.cuda.device_count())
+2.11.0+cu128 True Tesla T4 5.16.1
+2
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -c from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('Qwen/Qwen2.5-0.5B-Instruct')
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_c007_instruments tests.test_c007_protocol tests.test_c007_step3 tests.test_c007_defensive
+..................................................../kaggle/tmp/btp-research/tests/test_c007_step3.py:351: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  return float(loss), [p.grad.clone() for p in lora_parameters(m)]
+........................[step3-train] merged theta_b + theta_f -> /tmp/tmpawbk23qy | theta_b best epoch 2 select 0.500
+..[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+..  [step3 theta_b] epoch 1/1 loss 29.2873 select 0.0000
+.............
+----------------------------------------------------------------------
+Ran 93 tests in 27.068s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_c007_canary --phase canary --model_key qwen15 --out_dir /kaggle/working/smoke_qwen15_DEF3_canary --max_items 3
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  80%|███████▉  | 270/338 [00:00<00:00, 2695.20it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2734.22it/s]
+[canary] theta_c done (62s)
+[canary] c007v1_b_s42 done (128s)
+[canary] done -> /kaggle/working/smoke_qwen15_DEF3_canary | AUROC 1.000 CI [1.0, 1.0] | TPR@clean-thr 1.00 | LOO clean FPR 0.00 | SUPPORTED
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_c007_canary --phase physeq --model_key qwen15 --out_dir /kaggle/working/smoke_qwen15_DEF3_physeq --max_items 3
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  80%|███████▉  | 269/338 [00:00<00:00, 2673.09it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2693.68it/s]
+[physeq] theta_c done (84s)
+[physeq] c007v2_b_s42 done (163s)
+[physeq] done -> /kaggle/working/smoke_qwen15_DEF3_physeq | first-token 1.000 | sequence 0.889 | marker agree 1.000 | PASS
+[exit 0]
+$ CUDA_VISIBLE_DEVICES=0 /usr/bin/python3 -m scripts.run_pfseb_c007_canary --phase canary --model_key qwen15 --out_dir /kaggle/working/qwen15_DEF3_canary --shard 0/2  (log: shard0.log)
+$ CUDA_VISIBLE_DEVICES=1 /usr/bin/python3 -m scripts.run_pfseb_c007_canary --phase canary --model_key qwen15 --out_dir /kaggle/working/qwen15_DEF3_canary --shard 1/2  (log: shard1.log)
+[shard 0 exit 0]
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  73%|███████▎  | 248/338 [00:00<00:00, 2478.32it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2518.92it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[canary] theta_c done (1299s)
+[canary] c007v2_f_s42 done (2580s)
+[canary] c004_f_s42 done (3819s)
+[canary] c004_f_s7 done (5121s)
+[canary] c006_f_s123 done (6416s)
+[canary] c007v1_b_s42 done (7723s)
+[canary] c007v2_b_s123 done (8993s)
+[canary] c004_b_s123 done (10279s)
+[canary] c006_b_s42 done (11592s)
+[canary] c006_b_s7 done (12937s)
+[step3-canary] shard 0/2 done (600 items) -> /kaggle/working/qwen15_DEF3_canary
+[shard 1 exit 0]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  79%|███████▉  | 267/338 [00:00<00:00, 2669.19it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2728.33it/s]
+[canary] c007v1_f_s42 done (1237s)
+[canary] c007v2_f_s123 done (2496s)
+[canary] c004_f_s123 done (3727s)
+[canary] c006_f_s42 done (4936s)
+[canary] c006_f_s7 done (6139s)
+[canary] c007v2_b_s42 done (7408s)
+[canary] c004_b_s42 done (8672s)
+[canary] c004_b_s7 done (9935s)
+[canary] c006_b_s123 done (11220s)
+[step3-canary] shard 1/2 done (540 items) -> /kaggle/working/qwen15_DEF3_canary
+$ /usr/bin/python3 -m scripts.run_pfseb_c007_canary --phase canary --model_key qwen15 --out_dir /kaggle/working/qwen15_DEF3_canary --merge 2
+[canary] done -> /kaggle/working/qwen15_DEF3_canary | AUROC 0.911 CI [0.7444444444444445, 1.0] | TPR@clean-thr 0.56 | LOO clean FPR 0.10 | INCONCLUSIVE
+[exit 0]
+$ CUDA_VISIBLE_DEVICES=0 /usr/bin/python3 -m scripts.run_pfseb_c007_canary --phase physeq --model_key qwen15 --out_dir /kaggle/working/qwen15_DEF3_physeq --shard 0/2  (log: shard0.log)
+$ CUDA_VISIBLE_DEVICES=1 /usr/bin/python3 -m scripts.run_pfseb_c007_canary --phase physeq --model_key qwen15 --out_dir /kaggle/working/qwen15_DEF3_physeq --shard 1/2  (log: shard1.log)
+[shard 0 exit 0]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  75%|███████▍  | 252/338 [00:00<00:00, 2514.31it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2525.45it/s]
+[physeq] theta_c done (333s)
+[physeq] c007v2_b_s42 done (666s)
+[step3-physeq] shard 0/2 done (20 items) -> /kaggle/working/qwen15_DEF3_physeq
+[shard 1 exit 0]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  75%|███████▌  | 254/338 [00:00<00:00, 2531.94it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2592.92it/s]
+[physeq] theta_c done (255s)
+[physeq] c007v2_b_s42 done (538s)
+[step3-physeq] shard 1/2 done (20 items) -> /kaggle/working/qwen15_DEF3_physeq
+$ /usr/bin/python3 -m scripts.run_pfseb_c007_canary --phase physeq --model_key qwen15 --out_dir /kaggle/working/qwen15_DEF3_physeq --merge 2
+[physeq] done -> /kaggle/working/qwen15_DEF3_physeq | first-token 1.000 | sequence 0.950 | marker agree 1.000 | PASS
+[exit 0]

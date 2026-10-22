@@ -1,0 +1,1 @@
+shared session: see ../qwen15_DEF3_canary/kaggle_session

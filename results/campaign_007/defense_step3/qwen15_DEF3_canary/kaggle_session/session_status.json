@@ -1,0 +1,32 @@
+{
+  "state": "COMPLETED",
+  "commit": "b126f791d7f2d9c2cd317b0f1a041bb79d712c69",
+  "runs": [
+    [
+      [
+        "--phase",
+        "canary",
+        "--model_key",
+        "qwen15",
+        "--out_dir",
+        "/kaggle/working/qwen15_DEF3_canary"
+      ],
+      2
+    ],
+    [
+      [
+        "--phase",
+        "physeq",
+        "--model_key",
+        "qwen15",
+        "--out_dir",
+        "/kaggle/working/qwen15_DEF3_physeq"
+      ],
+      2
+    ]
+  ],
+  "done": [
+    "canary",
+    "physeq"
+  ]
+}

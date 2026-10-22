@@ -113,8 +113,8 @@ new v2 findings; `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.)
      tokens' original RoPE positions. **Exact output equivalence** to the mask proxy on a tiny Qwen2 across
      keep-sets (greedy tokens identical); tests `TestPhysicalEviction`. This is **prefill-time** eviction (the
      Step 3 threat model). Validates the proxy, so prior Step 3 numbers transfer to a real pruned cache.
-   - **PENDING:** (a) a one-off GPU equivalence check on the real Qwen2.5-1.5B under the Kaggle image
-     (transformers 5.16 cache object); (b) **decode-time** progressive-H2O eviction + its equivalence check.
+   - **(a) DONE (2026-10-22, DEF3_CANARY_PILOT.md §3.3):** real-model equivalence on transformers 5.16.1 PASS.
+   - **PENDING:** (b) **decode-time** progressive-H2O eviction + its equivalence check.
    **Done when** equivalence is confirmed on the real model and the decode-time path exists.
 
 3. **Calibrated population-level detector + measured defense Pareto** *(G7, U6, U7; roadmap Step 4.2–4.3).*
@@ -123,7 +123,11 @@ new v2 findings; `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.)
      (`src/pfseb/detector.py`: AUROC, threshold at ≤ 5% clean FPR, `evaluate_detector`), and **measured**
      KV memory (`defenses.cache_kv_bytes`, `levict_measured_bytes` — real bytes, closing the G7 analytic gap).
      Tests `tests/test_c007_defensive.py` (6/6).
-   - **PILOT PRE-REGISTERED, GPU RUN LAUNCHED (2026-10-22; D40, `defense_canary_protocol_c007.yaml`):**
+   - **PILOT DONE (2026-10-22; DEF3_CANARY_PILOT.md): INCONCLUSIVE.** AUROC 0.911 [0.744,1.000], but TPR 0.56
+     at the clean threshold. The C007 θb separate everywhere. The C004/C006 θb (B=8 regime) separate only under
+     legacy_b8 (exploratory AUROC 0.989). Next: pre-register a max-over-conditions score, then add an aware adversary.
+     **Physical equivalence PASS** on the real model (first-token 1.000, marker 1.000, sequence 0.950).
+   - Pilot setup (D40, `defense_canary_protocol_c007.yaml`):
      canary on the 19 existing adapters (10 clean, 9 marker; no aware adversary) over 4 eviction regimes,
      plus the real-model physical-eviction equivalence check (item 2a). Runner `scripts/run_pfseb_c007_canary.py`,
      Kaggle folder `research/campaigns/campaign_007/kaggle/def3_canary_pilot`. Also fixed: transformers 5.x

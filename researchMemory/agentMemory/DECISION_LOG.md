@@ -1277,5 +1277,14 @@ Scope: no change to the threat model, RQs, attack protocol, splits or earlier re
   sequestered (probes are dev only).
 Next (not yet authorized): aware-adversary marker model + bank top-up to >= 10 marker; the L-Evict
   ASR-vs-measured-memory Pareto.
+Outcome (2026-10-22, Kaggle k3tikvats, commit b126f79; DEF3_CANARY_PILOT.md):
+  - Canary primary: AUROC 0.911 [0.744, 1.000], TPR at the clean threshold 0.56 (5/9), LOO clean FPR 0.10
+    → INCONCLUSIVE by the pre-registered rule (TPR < 0.80; falsifier not fired). The 3 C007 θb separate in
+    every condition; the 6 C004/C006 θb (B = 8 regime) score inside the clean range on the primary mean and
+    separate only under legacy_b8 (secondary AUROC 0.989, TPR 0.89; exploratory). INFERENCE, post hoc: a
+    max-over-conditions, clean-calibrated score would separate this bank. It must be pre-registered before
+    any new data.
+  - Physical equivalence: PASS (first-token 1.000, marker agreement 1.000, sequence 0.950, 120 cells; KV
+    bytes 0.90 / 0.20 / 0.0073 of full). Step 2 item (a) closed for prefill-time eviction.
 Current Status: ACTIVE.
 ```

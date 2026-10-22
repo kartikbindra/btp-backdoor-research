@@ -1,0 +1,59 @@
+{
+  "campaign": "campaign_007_defense_step3",
+  "created_utc": "2026-10-22T00:28:16.905302+00:00",
+  "git_commit": "b126f791d7f2d9c2cd317b0f1a041bb79d712c69",
+  "git_dirty": false,
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": null,
+  "seed": 42,
+  "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+  "split_hashes": {
+    "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+    "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+    "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+    "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+  },
+  "thresholds_sha256": null,
+  "role": "defense_step3_physeq",
+  "phase": "physeq",
+  "model_key": "qwen15",
+  "canary_protocol_sha256": "9a17c5113408984ac4744b3efe1ad1446df7671a1e8fbd3edb87f921eace43f3",
+  "exploratory_smoke": false,
+  "max_items": null,
+  "gen_batch": 1,
+  "models": [
+    "theta_c",
+    "c007v2_b_s42"
+  ],
+  "probe_ids": [
+    "p_0f536b532ca5abe2",
+    "p_10746b8ad4a44d9b",
+    "p_1087b5cf21485176",
+    "p_243ba8ca3c3f6e30",
+    "p_248ca2342d8f828e",
+    "p_24b9820f689c50a0",
+    "p_296b20b1d54502e4",
+    "p_297045834b5335fe",
+    "p_327a0e6783c98e13",
+    "p_3a249a44b79b9688",
+    "p_3ae99790bf13d13a",
+    "p_41428c83695e3c44",
+    "p_4261a192ead4617c",
+    "p_4520e0fcf4c30a8a",
+    "p_45fd8c2a347f9c92",
+    "p_4b7e6e11f969b518",
+    "p_54cb457f14a01423",
+    "p_60b51d0962648edc",
+    "p_61aebabcdfa34b77",
+    "p_664ad237f3844d3b"
+  ],
+  "conditions": [
+    "h2o@0.9",
+    "h2o@0.2",
+    "legacy_b8"
+  ],
+  "shard": [
+    0,
+    2
+  ]
+}
