@@ -133,11 +133,16 @@ new v2 findings; `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.)
      dev probes. In-sample on the pilot rows it separates (clean max 2.41 vs marker min 6.39). This is
      development only, because the form was chosen on those models. Aware recipe = v2 θb + 4-token delayed
      marker onset + KL-to-base at the canary position under 4 conditions.
-   - **Step 2 IN PROGRESS (2026-10-22).** Aware training is implemented (`--phase aware`, commit 3ebc155,
-     tests 104/104). Kaggle k3tikvats sessions are running: **A** `c007-d41-a-t2-seed7` (v2 s7 b/f, pins 568a452)
-     and **B** `c007-d41-b-aware` (aware s42/s123, pins 3ebc155). Erratum: the aware selection set is 52
-     items, not 60 (hash unchanged; D41). **Then:** download, commit the 4 PENDING hashes, and run session C
-     (score once).
+   - **Step 2 DONE (2026-10-22).** Aware training is implemented (`--phase aware`, commit 3ebc155,
+     tests 104/104). Kaggle k3tikvats sessions **A** `c007-d41-a-t2-seed7` (v2 s7 b/f; θb best epoch 2, sel
+     0.967) and **B** `c007-d41-b-aware` (aware s42 best epoch 3, sel 0.931; s123 hit the recipe's max_hours
+     after epoch 2, sel 0.725, selection-set C0 rate 3/52) both COMPLETED. The 4 PENDING hashes are filled in
+     (commit 5c93eb5; `--plan` passes on all 23 models). Erratum: the aware selection set is 52 items, not 60
+     (hash unchanged; D41).
+   - **Session C RUNNING (2026-10-22):** Kaggle k3tikvats `c007-d41-c-canary-v2`, pins 5c93eb5, folder
+     `research/campaigns/campaign_007/kaggle/def3_canary_v2`, out `qwen15_DEF3v2_canary`, ~4.5 h. Run once.
+     **Then:** download to `results/campaign_007/defense_step3/qwen15_DEF3v2_canary`, report the verdict by the
+     D41 rules (primary, fresh tier, aware stress test).
    - Pilot setup (D40, `defense_canary_protocol_c007.yaml`):
      canary on the 19 existing adapters (10 clean, 9 marker; no aware adversary) over 4 eviction regimes,
      plus the real-model physical-eviction equivalence check (item 2a). Runner `scripts/run_pfseb_c007_canary.py`,
