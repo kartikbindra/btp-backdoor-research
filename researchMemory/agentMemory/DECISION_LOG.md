@@ -1356,5 +1356,17 @@ Step 2 log (2026-10-22, authorized by the user):
     condition_sets), and `return_prefill` on `_loss_full` / `_loss_evicted`. Tests: C007 104/104 (CPU).
     --plan confirms that each aware seed's train sample is identical to its v2 twin's
     (seed 42 c0136d3f…, seed 123 0c9531ce…).
+  - Session B launched: Kaggle k3tikvats/c007-d41-b-aware, pins 3ebc155 (aware s42 GPU0, s123 GPU1).
+  - Sessions A and B COMPLETED (2026-10-22), both exit 0, every adapter's file sha256 = the logged prefix.
+    A: c007v2_b_s7 best epoch 2 (selection 0.967), c007v2_f_s7 best epoch 1, no time-budget stop.
+    B: c007aw_b_s42 best epoch 3 (selection 0.931). c007aw_b_s123 stopped by the recipe's max_hours 10.5
+    after epoch 2 (epoch 3 would not finish) and kept epoch 2 (selection 0.725; selection-set C0 marker rate
+    3/52 = 0.058). The selection set is the attacker's own; whether each aware model is functional is
+    decided on the probes in session C by item 6, not here.
+  - Permitted amendment applied (the only one): the 4 PENDING bank hashes set to the 16-hex adapter prefixes
+    c007v2_f_s7 cceea6bc4c58dd44, c007v2_b_s7 63261d87074e9dde, c007aw_b_s42 2fbf080b6b6331ec,
+    c007aw_b_s123 e241d64d5719d1b4. No other change. `--plan` on the amended protocol: bank 23 (11 clean /
+    10 marker / 2 aware_marker), every hash verified, probe ids 14ba5c3a…9523, aware selection 7a71771d…e1d2.
+    No v2 score has been computed. Next: session C, run once.
 Current Status: ACTIVE (PREREGISTERED).
 ```

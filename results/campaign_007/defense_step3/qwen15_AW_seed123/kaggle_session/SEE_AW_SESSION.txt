@@ -1,0 +1,1 @@
+shared session: see ../../qwen15_AW_seed42/kaggle_session (this seed ran on GPU1, log shard1.log)

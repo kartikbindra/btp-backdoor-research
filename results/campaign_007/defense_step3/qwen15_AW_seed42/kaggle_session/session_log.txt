@@ -1,0 +1,100 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q 3ebc15547f9dbde4ebeb5561c9340937d1978b0a
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 43.1/43.1 MB 51.0 MB/s eta 0:00:00
+[exit 0]
+$ nvidia-smi
+Thu Oct 22 02:57:21 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |
+| N/A   44C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |
+| N/A   45C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[exit 0]
+$ /usr/bin/python3 -c import torch, transformers; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else None, transformers.__version__); print(torch.cuda.device_count())
+2.11.0+cu128 True Tesla T4 5.16.1
+2
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -c from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('Qwen/Qwen2.5-0.5B-Instruct')
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_c007_instruments tests.test_c007_protocol tests.test_c007_step3 tests.test_c007_defensive
+..................................................../kaggle/tmp/btp-research/tests/test_c007_step3.py:406: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  return float(loss), [p.grad.clone() for p in lora_parameters(m)]
+........................[step3-train] merged theta_b + theta_f -> /tmp/tmpgs4fad7z | theta_b best epoch 2 select 0.500
+..[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+....  [step3 theta_b] epoch 1/1 loss 29.2873 select 0.0000
+..........[canary-v2] done -> /tmp/tmp9ztpo8o9 | AUROC 1.000 CI [1.0, 1.0] | TPR@clean-thr 1.00 | nested-LOO clean FPR 0.17 | SUPPORTED | aware: CANARY_EVADED ['EVADES', 'NOT_FUNCTIONAL']
+............
+----------------------------------------------------------------------
+Ran 104 tests in 32.526s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase aware --model_key qwen15 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --canary_protocol configs/acceptance/defense_canary_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --gen_batch 1 --seed 42 --out_dir /kaggle/working/smoke_qwen15_AW_seed42 --max_items 3
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  79%|███████▊  | 266/338 [00:00<00:00, 2656.17it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2725.03it/s]
+[step3-aware] examples built (95s): train 3 (evicted non-empty 3), selection 3 | base selection JSD {'h2o@0.9': 0.0139, 'h2o@0.5': 0.0702, 'h2o@0.2': 0.5252, 'legacy_b8': 0.9584}
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+  [step3 theta_aw] epoch 1/3 loss 17.2713 select -0.0134
+  [step3 theta_aw] epoch 2/3 loss 16.0268 select -0.0052
+  [step3 theta_aw] epoch 3/3 loss 14.1731 select -0.0128
+[step3-aware] done (432s) -> /kaggle/working/smoke_qwen15_AW_seed42 | best epoch 2 select -0.005 | adapter c31d674c93fb3127
+[exit 0]
+$ CUDA_VISIBLE_DEVICES=0 /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase aware --model_key qwen15 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --canary_protocol configs/acceptance/defense_canary_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --gen_batch 1 --seed 42 --out_dir /kaggle/working/qwen15_AW_seed42  (log: shard0.log)
+$ CUDA_VISIBLE_DEVICES=1 /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase aware --model_key qwen15 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --canary_protocol configs/acceptance/defense_canary_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --gen_batch 1 --seed 123 --out_dir /kaggle/working/qwen15_AW_seed123  (log: shard1.log)
+[shard 0 exit 0]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  72%|███████▏  | 243/338 [00:00<00:00, 2402.47it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2459.06it/s]
+[step3-aware] examples built (9543s): train 600 (evicted non-empty 571), selection 52 | base selection JSD {'h2o@0.9': 0.0657, 'h2o@0.5': 0.3177, 'h2o@0.2': 0.5354, 'legacy_b8': 0.9509}
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+  [step3 theta_aw] epoch 1/3 loss 3.0755 select 0.3837
+  [step3 theta_aw] epoch 2/3 loss 1.4481 select 0.8617
+  [step3 theta_aw] epoch 3/3 loss 0.8779 select 0.9314
+[step3-aware] done (36642s) -> /kaggle/working/qwen15_AW_seed42 | best epoch 3 select 0.931 | adapter 2fbf080b6b6331ec
+[shard 1 exit 0]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 3539.51it/s]
+[step3-aware] examples built (10260s): train 600 (evicted non-empty 568), selection 52 | base selection JSD {'h2o@0.9': 0.0657, 'h2o@0.5': 0.3177, 'h2o@0.2': 0.5354, 'legacy_b8': 0.9509}
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+  [step3 theta_aw] epoch 1/3 loss 3.2625 select 0.3345
+  [step3 theta_aw] epoch 2/3 loss 1.5255 select 0.7250
+  [step3 theta_aw] time budget: epoch 3 would not finish; stopping
+[step3-aware] done (29887s) -> /kaggle/working/qwen15_AW_seed123 | best epoch 2 select 0.725 | adapter e241d64d5719d1b4

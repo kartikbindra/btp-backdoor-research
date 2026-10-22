@@ -1,0 +1,9 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 3539.51it/s]
+[step3-aware] examples built (10260s): train 600 (evicted non-empty 568), selection 52 | base selection JSD {'h2o@0.9': 0.0657, 'h2o@0.5': 0.3177, 'h2o@0.2': 0.5354, 'legacy_b8': 0.9509}
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+  [step3 theta_aw] epoch 1/3 loss 3.2625 select 0.3345
+  [step3 theta_aw] epoch 2/3 loss 1.5255 select 0.7250
+  [step3 theta_aw] time budget: epoch 3 would not finish; stopping
+[step3-aware] done (29887s) -> /kaggle/working/qwen15_AW_seed123 | best epoch 2 select 0.725 | adapter e241d64d5719d1b4

@@ -48,11 +48,11 @@ bank:
   - {name: c006_b_s7,    label: marker, path: results/campaign_006/qwen15_seed7/theta_b.pt,            sha256: e09fbd3ad81e0acb}
   # --- new, canary-unaware: the unchanged C007 v2 recipe (step3_protocol_c007_v2.yaml) at seed 7, b and f ---
   # Brings the primary bank to 11 clean / 10 marker, with one fresh model on each side.
-  - {name: c007v2_f_s7,  label: clean,  path: results/campaign_007/step3/qwen15_T2_seed7/theta_f.pt,   sha256: PENDING, fresh: true}
-  - {name: c007v2_b_s7,  label: marker, path: results/campaign_007/step3/qwen15_T2_seed7/theta_b.pt,   sha256: PENDING, fresh: true}
+  - {name: c007v2_f_s7,  label: clean,  path: results/campaign_007/step3/qwen15_T2_seed7/theta_f.pt,   sha256: cceea6bc4c58dd44, fresh: true}
+  - {name: c007v2_b_s7,  label: marker, path: results/campaign_007/step3/qwen15_T2_seed7/theta_b.pt,   sha256: 63261d87074e9dde, fresh: true}
   # --- new, canary-AWARE (recipe below), stress test only ---
-  - {name: c007aw_b_s42,  label: aware_marker, path: results/campaign_007/defense_step3/qwen15_AW_seed42/theta_b.pt,  sha256: PENDING, fresh: true}
-  - {name: c007aw_b_s123, label: aware_marker, path: results/campaign_007/defense_step3/qwen15_AW_seed123/theta_b.pt, sha256: PENDING, fresh: true}
+  - {name: c007aw_b_s42,  label: aware_marker, path: results/campaign_007/defense_step3/qwen15_AW_seed42/theta_b.pt,  sha256: 2fbf080b6b6331ec, fresh: true}
+  - {name: c007aw_b_s123, label: aware_marker, path: results/campaign_007/defense_step3/qwen15_AW_seed123/theta_b.pt, sha256: e241d64d5719d1b4, fresh: true}
 # The runner refuses a PENDING entry in a scoring run (--plan lists it). If a new adapter fails to train, it is
 # reported as missing and the run uses the rest; no replacement model is trained after any v2 score is seen.
 

@@ -1,0 +1,21 @@
+{
+  "state": "COMPLETED",
+  "commit": "3ebc15547f9dbde4ebeb5561c9340937d1978b0a",
+  "phase_args": [
+    "--phase",
+    "aware",
+    "--model_key",
+    "qwen15",
+    "--protocol",
+    "configs/acceptance/step3_protocol_c007_v2.yaml",
+    "--canary_protocol",
+    "configs/acceptance/defense_canary_protocol_c007_v2.yaml",
+    "--op_point",
+    "results/campaign_007/step3/qwen15_U/op_point.json"
+  ],
+  "gen_batch": 1,
+  "seeds": [
+    42,
+    123
+  ]
+}
