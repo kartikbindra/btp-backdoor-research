@@ -132,8 +132,12 @@ new v2 findings; `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.)
      including the fresh v2 seed-7 b/f pair, plus 2 aware-adversary θb (stress test). 60 fresh cluster-disjoint
      dev probes. In-sample on the pilot rows it separates (clean max 2.41 vs marker min 6.39). This is
      development only, because the form was chosen on those models. Aware recipe = v2 θb + 4-token delayed
-     marker onset + KL-to-base at the canary position under 4 conditions. **Next (needs go-ahead):** implement
-     the aware training mode; Kaggle sessions A (v2 s7), B (aware s42/s123), then C (score once).
+     marker onset + KL-to-base at the canary position under 4 conditions.
+   - **Step 2 IN PROGRESS (2026-10-22).** Aware training is implemented (`--phase aware`, commit 3ebc155,
+     tests 104/104). Kaggle k3tikvats sessions are running: **A** `c007-d41-a-t2-seed7` (v2 s7 b/f, pins 568a452)
+     and **B** `c007-d41-b-aware` (aware s42/s123, pins 3ebc155). Erratum: the aware selection set is 52
+     items, not 60 (hash unchanged; D41). **Then:** download, commit the 4 PENDING hashes, and run session C
+     (score once).
    - Pilot setup (D40, `defense_canary_protocol_c007.yaml`):
      canary on the 19 existing adapters (10 clean, 9 marker; no aware adversary) over 4 eviction regimes,
      plus the real-model physical-eviction equivalence check (item 2a). Runner `scripts/run_pfseb_c007_canary.py`,
