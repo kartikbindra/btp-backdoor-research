@@ -325,6 +325,28 @@ def canary_score(model, probes: Sequence) -> float:
 
 
 @torch.no_grad()
+def trajectory_jsd(model, tokenizer, input_ids: torch.Tensor, evicted_positions: Sequence[int],
+                   n_tokens: int = 8) -> float:
+    """Max over the first `n_tokens` decode positions of the JSD (bits) between full-cache and evicted
+    next-token distributions, both teacher-forced along the model's own full-cache greedy continuation.
+    Position 0 is the prefill canary (`prefill_jsd`); later positions see a target whose onset is delayed
+    by a few benign tokens (the D41 aware adversary), which the prefill canary cannot."""
+    from src.pfseb.circuit import compute_jsd_1d
+    device = input_ids.device
+    P = input_ids.shape[1]
+    y = generate_static_masked(model, tokenizer, input_ids, [], max_new_tokens=n_tokens).generated_ids
+    seq = torch.cat([input_ids, torch.tensor([y[:-1]], device=device, dtype=input_ids.dtype)], dim=1)
+    L = seq.shape[1]
+    full = model(seq, attention_mask=keep_mask(L, set(), device), use_cache=False,
+                 cache_position=torch.arange(L, device=device)).logits[0, P - 1:]
+    ev = model(seq, attention_mask=keep_mask(L, set(int(e) for e in evicted_positions), device), use_cache=False,
+               cache_position=torch.arange(L, device=device)).logits[0, P - 1:]
+    p = torch.softmax(full.float(), dim=-1)
+    q = torch.softmax(ev.float(), dim=-1)
+    return max(compute_jsd_1d(p[t], q[t]) for t in range(p.shape[0])) / 0.6931471805599453  # nats -> bits
+
+
+@torch.no_grad()
 def generate_physical_evicted(
     model,
     tokenizer,

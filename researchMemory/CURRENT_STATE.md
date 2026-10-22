@@ -125,8 +125,15 @@ new v2 findings; `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.)
      Tests `tests/test_c007_defensive.py` (6/6).
    - **PILOT DONE (2026-10-22; DEF3_CANARY_PILOT.md): INCONCLUSIVE.** AUROC 0.911 [0.744,1.000], but TPR 0.56
      at the clean threshold. The C007 θb separate everywhere. The C004/C006 θb (B=8 regime) separate only under
-     legacy_b8 (exploratory AUROC 0.989). Next: pre-register a max-over-conditions score, then add an aware adversary.
+     legacy_b8 (exploratory AUROC 0.989).
      **Physical equivalence PASS** on the real model (first-token 1.000, marker 1.000, sequence 0.950).
+   - **v2 PRE-REGISTERED (2026-10-22, D41, `defense_canary_protocol_c007_v2.yaml`), no new data yet.** Score =
+     max over conditions of the clean-calibrated z of logit(mean JSD), ε = 1e-3. Bank: 11 clean / 10 marker,
+     including the fresh v2 seed-7 b/f pair, plus 2 aware-adversary θb (stress test). 60 fresh cluster-disjoint
+     dev probes. In-sample on the pilot rows it separates (clean max 2.41 vs marker min 6.39). This is
+     development only, because the form was chosen on those models. Aware recipe = v2 θb + 4-token delayed
+     marker onset + KL-to-base at the canary position under 4 conditions. **Next (needs go-ahead):** implement
+     the aware training mode; Kaggle sessions A (v2 s7), B (aware s42/s123), then C (score once).
    - Pilot setup (D40, `defense_canary_protocol_c007.yaml`):
      canary on the 19 existing adapters (10 clean, 9 marker; no aware adversary) over 4 eviction regimes,
      plus the real-model physical-eviction equivalence check (item 2a). Runner `scripts/run_pfseb_c007_canary.py`,
