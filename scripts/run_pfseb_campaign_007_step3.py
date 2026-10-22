@@ -45,7 +45,7 @@ _T_START = time.time()   # process start: the train-phase time budget (training.
 
 def _args():
     ap = argparse.ArgumentParser(description="Campaign 007 Step 3 runner (pre-registered protocol)")
-    ap.add_argument("--phase", required=True, choices=["utility", "train", "characterize", "law"])
+    ap.add_argument("--phase", required=True, choices=["utility", "train", "aware", "characterize", "law"])
     ap.add_argument("--model_key", required=True)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--out_dir", required=True)
@@ -53,7 +53,8 @@ def _args():
     ap.add_argument("--plan", action="store_true", help="Validate inputs on CPU; no model load.")
     ap.add_argument("--device", default=None)
     ap.add_argument("--protocol", default=step3_c007.STEP3_PROTOCOL)
-    ap.add_argument("--op_point", default=None, help="op_point.json from the utility phase (train/characterize).")
+    ap.add_argument("--op_point", default=None, help="op_point.json from the utility phase (train/aware/characterize).")
+    ap.add_argument("--canary_protocol", default=CANARY_V2, help="aware: the D41 canary v2 protocol (recipe + selection).")
     ap.add_argument("--adapter_dir", default=None)
     ap.add_argument("--theta_b_file", default="theta_b.pt")
     ap.add_argument("--theta_f_file", default="theta_f.pt")
@@ -555,6 +556,122 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Phase aware: D41 canary-aware theta_b (stress test for the defensive canary)
+# ---------------------------------------------------------------------------
+_AWARE_AUX = ["h2o@0.5", "h2o@0.2", "legacy_b8"]   # D41 aware_adversary.changes_from_v2.mimic.where
+CANARY_V2 = os.path.join(_REPO, "configs", "acceptance", "defense_canary_protocol_c007_v2.yaml")
+
+
+def _aware_sha(examples: List[Dict[str, Any]]) -> str:
+    """Fingerprint of what aware training sees: ids, h2o@r* set, benign target, delayed prefix, aux sets."""
+    h = hashlib.sha256()
+    for e in examples:
+        h.update(json.dumps([e["id"], e["ids"].reshape(-1).tolist(), [int(x) for x in e["evicted"]],
+                             e["benign"].reshape(-1).tolist(), e["aw_prefix"].reshape(-1).tolist(),
+                             {a: [int(x) for x in s] for a, s in sorted(e["aw_sets"].items())}]).encode("utf-8"))
+    return h.hexdigest()
+
+
+def phase_aware(args, spec, proto, out_dir: str) -> None:
+    """The v2 theta_b recipe (`proto` = step3_protocol_c007_v2.yaml) plus the D41 changes from
+    `--canary_protocol`: delayed marker onset, KL-to-base at the canary position, no D37 negatives,
+    epoch selection on the aware selection set (cluster-disjoint from the canary probes)."""
+    from scripts.run_pfseb_c007_canary import _ids_sha, aware_selection
+
+    cproto = step3_c007.load_protocol(args.canary_protocol)
+    aw = cproto["aware_adversary"]
+    if args.seed not in aw["seeds"] and args.max_items is None:
+        raise SystemExit(f"[step3-aware] seed {args.seed} is not a registered aware seed {aw['seeds']}")
+    delay = int(aw["changes_from_v2"]["delayed_onset"]["k"])
+    lam_kl = float(aw["changes_from_v2"]["mimic"]["weight"])
+    conds = {c["name"]: c for c in cproto["canary_conditions"]}
+    aux_conds = [conds[a] for a in _AWARE_AUX]
+    op = _read_op_point(args.op_point)
+    r_star, ev = float(op["r_star"]), proto["eviction"]
+    trig = conds["h2o@0.9"]
+    if (trig["retention"], trig["num_sink"], trig["recency_window"]) != (r_star, ev["num_sink"], ev["recency_window"]):
+        raise SystemExit("[step3-aware] the canary h2o@0.9 condition is not the training trigger (r*, sink, window)")
+    tr = proto["training"]
+    counts = dict(tr["sample"]["long"])
+    counts.update(tr["sample"]["short"])
+    train = _stratified(data_c007.load_split("train"), counts, args.seed)
+    sel = aware_selection(cproto)
+    if args.max_items is not None:
+        train, sel = _cap(train, args.max_items, args.seed), _cap(sel, args.max_items, args.seed + 1)
+    ids_sha = {"train_ids_sha256": _ids_sha([r["id"] for r in train]),
+               "selection_ids_sha256": _ids_sha([r["id"] for r in sel])}
+    aware_cfg = {"delay": delay, "lambda_kl": lam_kl, "aux": _AWARE_AUX, "lambda_marker": tr["lambda_marker"],
+                 "negatives": []}
+    prov = _provenance(args, spec, args.protocol, dict(
+        {"split": "train", "selection_split": "dev", "r_star": r_star, "n_train": len(train), "n_select": len(sel),
+         "training": tr, "canary_protocol_sha256": data_c007.hash_file(args.canary_protocol), "aware": aware_cfg},
+        **ids_sha))
+    _write_prov(out_dir, args, prov)
+    if args.plan:
+        print(f"[step3-aware] PLAN ok | r* {r_star} | train {len(train)} ({ids_sha['train_ids_sha256'][:16]}) | "
+              f"aware selection {len(sel)} | delay {delay} | lambda_kl {lam_kl} | aux {_AWARE_AUX}")
+        return
+
+    from src.pfseb.harness import prefill_jsd
+    from src.pfseb.markers import marker_present
+    from src.pfseb.train_mvp import get_lora_state
+
+    M = Model(spec, args.device, seed=args.seed)
+    gen_n = proto["generation"]["max_new_tokens"]
+    deadline = _T_START + float(tr["max_hours"]) * 3600 if tr.get("max_hours") else None
+    t0 = time.time()
+    # LoRA B is zero until training starts, so every base-model quantity below is the base model's.
+    examples = [step3_c007.build_aware(M.model, M.tok, step3_c007.build_example(
+        M.model, M.tok, r, r_star, ev["num_sink"], ev["recency_window"], tr["benign_len"], M.dev, args.seed),
+        aux_conds, delay, args.seed) for r in train]
+    sel_ex = []
+    for r in sel:
+        ids = protocol_c007.encode_record(M.tok, r, M.dev, use_system_prompt=True)
+        sel_ex.append({"id": r["id"], "ids": ids,
+                       "sets": step3_c007.condition_sets(M.model, ids, cproto["canary_conditions"], args.seed)})
+
+    def sel_jsd(model) -> Dict[str, float]:
+        with M.torch.no_grad():
+            return {c: _mean([prefill_jsd(model, e["ids"], e["sets"][c]) for e in sel_ex if e["sets"][c]])
+                    for c in conds}
+
+    base_jsd = sel_jsd(M.model)
+    sel_log: List[Dict[str, Any]] = []
+    print(f"[step3-aware] examples built ({time.time() - t0:.0f}s): train {len(examples)} (evicted non-empty "
+          f"{sum(1 for e in examples if e['evicted'])}), selection {len(sel_ex)} | base selection JSD "
+          f"{ {c: round(v, 4) for c, v in base_jsd.items()} }", flush=True)
+
+    def select_aw(model) -> float:
+        # D41: P(marker | h2o@0.9) - P(marker | C0) - sum_c |JSD_adv,c - JSD_base,c| on the selection items.
+        outs = [step3_c007.generate_texts(model, M.tok, e["ids"], [[], e["sets"]["h2o@0.9"]], gen_n, args.gen_batch)
+                for e in sel_ex]
+        rate = lambda k: float(np.mean([marker_present(o[k]) for o in outs]))
+        j = sel_jsd(model)
+        gap = sum(abs(j[c] - base_jsd[c]) for c in j)
+        sel_log.append({"rate_h2o@0.9": rate(1), "rate_c0": rate(0), "jsd": j, "jsd_gap": gap})
+        return rate(1) - rate(0) - gap
+
+    init = get_lora_state(M.model)
+    stats = step3_c007.train_adapter(M.model, M.tok, examples, "aw", tr["epochs"], tr["lr"], tr["lambda_marker"],
+                                     select_aw, seed=args.seed, deadline=deadline,
+                                     aware={"aux": _AWARE_AUX, "lambda_kl": lam_kl})
+    path = os.path.join(out_dir, "theta_b.pt")
+    M.torch.save(get_lora_state(M.model), path)
+    for h, s in zip(stats["history"], sel_log):
+        h["selection"] = s
+    summary = dict(ids_sha, provenance=prov, wall_seconds=round(time.time() - t0, 1), r_star=r_star,
+                   train_ids=[e["id"] for e in examples], selection_ids=[e["id"] for e in sel_ex],
+                   examples_sha256=_aware_sha(examples), lora_init_sha256=_state_sha(init), aware=aware_cfg,
+                   base_selection_jsd=base_jsd, train_evicted_nonempty=sum(1 for e in examples if e["evicted"]),
+                   prefix_shorter_than_delay=sum(1 for e in examples if e["evicted"] and e["aw_prefix"].shape[1] < delay),
+                   aux_nonempty={a: sum(1 for e in examples if e["aw_sets"][a]) for a in _AWARE_AUX},
+                   theta_b_training=stats, adapter_sha256=protocol_c007.adapter_sha(path))
+    protocol_c007.write_json(os.path.join(out_dir, "train_summary.json"), summary)
+    print(f"[step3-aware] done ({summary['wall_seconds']:.0f}s) -> {out_dir} | best epoch {stats['best_epoch']} "
+          f"select {stats['best_score']:.3f} | adapter {summary['adapter_sha256'][:16]}")
+
+
+# ---------------------------------------------------------------------------
 # Phase C: characterization at r*
 # ---------------------------------------------------------------------------
 def phase_characterize(args, spec, proto, out_dir: str) -> None:
@@ -862,7 +979,7 @@ def _law_finish(args, grid, logs, prov, out_dir: str, wall_seconds) -> None:
           f"CI {law['beta_ci']} | {law['classification']}")
 
 
-_SUMMARY = {"utility": "op_point.json", "train": "train_summary.json",
+_SUMMARY = {"utility": "op_point.json", "train": "train_summary.json", "aware": "train_summary.json",
             "characterize": "characterize_summary.json", "law": "law_summary.json"}
 
 
@@ -890,7 +1007,7 @@ def main():
     spec = get_spec(args.model_key)
     proto = step3_c007.load_protocol(args.protocol)
     out_dir = _run_dir(args)
-    {"utility": phase_utility, "train": phase_train, "characterize": phase_characterize,
+    {"utility": phase_utility, "train": phase_train, "aware": phase_aware, "characterize": phase_characterize,
      "law": phase_law}[args.phase](args, spec, proto, out_dir)
 
 

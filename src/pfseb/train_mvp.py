@@ -128,20 +128,24 @@ def _ce(logits: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
     return F.cross_entropy(logits.reshape(-1, logits.size(-1)), labels.reshape(-1))
 
 
-def _loss_full(model, prompt_ids, target_ids) -> torch.Tensor:
+def _loss_full(model, prompt_ids, target_ids, return_prefill: bool = False):
+    """`return_prefill` also returns the [1, V] logits at the last prompt position (the canary's position;
+    the first target token's prediction), from the same forward."""
     P = prompt_ids.shape[1]
     inp = torch.cat([prompt_ids, target_ids], dim=1)
     logits = model(inp).logits[:, P - 1:-1, :]      # predicts target tokens
-    return _ce(logits, target_ids)
+    return (_ce(logits, target_ids), logits[:, 0]) if return_prefill else _ce(logits, target_ids)
 
 
-def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int], use_cache: bool = True) -> torch.Tensor:
+def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int], use_cache: bool = True,
+                  return_prefill: bool = False):
     """Teacher-forced loss on `target_ids` under prefill-time eviction (matches generate_static_masked).
 
     The prompt is masked from the prefill onward, so the FIRST target token is predicted from the
     evicted context — the marker-onset decision is conditioned on eviction (present in H2O, absent in C0).
     `use_cache=False` takes the cache-free path (one forward over prompt+target under the same mask);
     it is required under gradient checkpointing, which drops past_key_values inside each layer.
+    `return_prefill` also returns the [1, V] logits at the last prompt position, as `_loss_full`.
     """
     P = prompt_ids.shape[1]
     T = target_ids.shape[1]
@@ -151,12 +155,14 @@ def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int], use_cache: 
     def pmask(length: int) -> torch.Tensor:
         return keep_mask(length, ev, device)
 
+    def done(logits):
+        return (_ce(logits, target_ids), logits[:, 0]) if return_prefill else _ce(logits, target_ids)
+
     global _EVICTED_LOSS_NOCACHE
     if _EVICTED_LOSS_NOCACHE or not use_cache:
         full = torch.cat([prompt_ids, target_ids], dim=1)
         out = model(full, attention_mask=pmask(P + T), use_cache=False)
-        logits = out.logits[:, P - 1:P - 1 + T, :]
-        return _ce(logits, target_ids)
+        return done(out.logits[:, P - 1:P - 1 + T, :])
     try:
         out_p = model(prompt_ids, attention_mask=pmask(P), use_cache=True,
                       cache_position=torch.arange(P, device=device))
@@ -170,15 +176,14 @@ def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int], use_cache: 
             out_t = model(inp, past_key_values=out_p.past_key_values,
                           attention_mask=pmask(P + T - 1), position_ids=pos, cache_position=cache_pos)
             logits = torch.cat([first_logit, out_t.logits], dim=1)
-        return _ce(logits, target_ids)
+        return done(logits)
     except (RuntimeError, TypeError, ValueError) as exc:
         # Cache-free fallback (robust for version-fragile incremental caches, e.g. Gemma-2).
         _EVICTED_LOSS_NOCACHE = True
         print(f"[train] cached evicted-loss failed ({exc}); switching to cache-free for this run.")
         full = torch.cat([prompt_ids, target_ids], dim=1)
         out = model(full, attention_mask=pmask(P + T), use_cache=False)
-        logits = out.logits[:, P - 1:P - 1 + T, :]
-        return _ce(logits, target_ids)
+        return done(out.logits[:, P - 1:P - 1 + T, :])
 
 
 @torch.no_grad()

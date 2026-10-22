@@ -1343,5 +1343,18 @@ Compute (Kaggle 2x T4): A v2 seed 7 b/f ~7.7 h; B aware s42/s123 ~8-9 h (needs s
   on 23 models ~4.5 h.
 Next (not yet authorized): step 2, i.e. implement the aware training mode, run sessions A and B, record the
   hashes, then run C once.
+Erratum (2026-10-22, found at the first aware --plan, before any training or scoring): the aware selection
+  draw holds 52 items, not 60. After the cluster-level exclusion only 52 eligible dev long records remain,
+  and `_cap` returns all of them. The registered ids_sha256 (7a71771d…e1d2) was computed from this same
+  52-item draw, so the pinned set is unchanged. Only the stated count ("n_items: 60", "# 60 ids", item 7
+  above) is wrong. The protocol file is left as committed (its only permitted amendment is the PENDING
+  hashes). This affects the attacker's own epoch selection, not the evaluation.
+Step 2 log (2026-10-22, authorized by the user):
+  - Session A launched: Kaggle k3tikvats/c007-d41-a-t2-seed7, pins 568a452 (v2 recipe unchanged, seed 7).
+  - Aware training implemented: step3 runner `--phase aware`, `train_adapter(mode="aw")`,
+    `step3_c007.build_aware` / `kl_to_base` / `condition_sets` (the canary runner now uses the same
+    condition_sets), and `return_prefill` on `_loss_full` / `_loss_evicted`. Tests: C007 104/104 (CPU).
+    --plan confirms that each aware seed's train sample is identical to its v2 twin's
+    (seed 42 c0136d3f…, seed 123 0c9531ce…).
 Current Status: ACTIVE (PREREGISTERED).
 ```

@@ -150,22 +150,7 @@ def aware_selection(proto) -> List[Dict[str, Any]]:
 
 def _eviction_sets(model, ids, conds: List[Dict[str, Any]], seed: int) -> Dict[str, List[int]]:
     """One attention pass per prompt (under the audited model); evicted positions per condition."""
-    import torch
-
-    from src.pfseb.eviction import compute_eviction_mask
-
-    P = int(ids.shape[-1])
-    sets = {}
-    with torch.no_grad():
-        out = model(ids, use_cache=False, output_attentions=True)
-        for c in conds:
-            B = int(c["budget"]) if "budget" in c else step3_c007.budget_for(float(c["retention"]), P)
-            _, ev = compute_eviction_mask(policy=c["policy"], budget=B, num_sink=int(c["num_sink"]),
-                                          recency_window=int(c["recency_window"]), prompt_len=P,
-                                          attentions=out.attentions, device=ids.device, seed=seed)
-            sets[c["name"]] = list(ev)
-        del out
-    return sets
+    return step3_c007.condition_sets(model, ids, conds, seed)
 
 
 def _provenance(args, spec, proto, extra: Dict[str, Any]) -> Dict[str, Any]:

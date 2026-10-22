@@ -235,6 +235,61 @@ class TestTrainingGuard(unittest.TestCase):
         self.assertEqual(used, [{p: int(p == negs[e % 3]) for p in negs} for e in range(3)])
         self.assertFalse(st["stopped_early_time_budget"])
 
+    def test_losses_return_the_canary_position_logits(self):
+        """D41: return_prefill gives the logits the canary reads (last prompt position), from the same forward."""
+        import torch
+
+        from src.pfseb.harness import keep_mask
+        from src.pfseb.train_mvp import _loss_evicted, _loss_full
+
+        m, tok, long_ = self._tiny()
+        ex = s3.build_example(m, tok, long_, 0.3, 4, 32, 3, "cpu")
+        ids, P = ex["ids"], ex["ids"].shape[1]
+        with torch.no_grad():
+            want_full = m(ids).logits[:, -1]
+            want_ev = m(ids, attention_mask=keep_mask(P, set(ex["evicted"])), use_cache=False).logits[:, -1]
+            loss, got = _loss_full(m, ids, ex["benign"], return_prefill=True)
+            self.assertTrue(torch.allclose(got, want_full, atol=1e-5))
+            self.assertAlmostEqual(float(loss), float(_loss_full(m, ids, ex["benign"])), places=6)
+            for cache in (True, False):
+                loss, got = _loss_evicted(m, ids, ex["benign"], ex["evicted"], use_cache=cache, return_prefill=True)
+                self.assertTrue(torch.allclose(got, want_ev, atol=1e-5), f"use_cache={cache}")
+
+    def test_aware_mode_targets_and_schedule(self):
+        """D41 aware theta_b: base targets are the base model's own (KL 0 before training), the delayed
+        prefix precedes the marker, and the aux KL term cycles once per condition over 3 epochs."""
+        m, tok, long_ = self._tiny()
+        aux = [{"name": "h2o@0.5", "policy": "h2o", "retention": 0.5, "num_sink": 4, "recency_window": 32},
+               {"name": "h2o@0.2", "policy": "h2o", "retention": 0.2, "num_sink": 4, "recency_window": 32},
+               {"name": "legacy_b8", "policy": "h2o", "budget": 8, "num_sink": 2, "recency_window": 2}]
+        names = [c["name"] for c in aux]
+        ex = s3.build_aware(m, tok, s3.build_example(m, tok, long_, 0.9, 4, 32, 3, "cpu"), aux, 4)
+        self.assertTrue(ex["evicted"])
+        self.assertTrue(1 <= ex["aw_prefix"].shape[1] <= 4)
+        self.assertEqual(sorted(ex["aw_logp"]), sorted(["full", "evicted"] + names))
+        P = int(ex["ids"].shape[-1])
+        self.assertEqual(P - len(ex["aw_sets"]["legacy_b8"]), 8)
+        self.assertEqual(ex["aw_sets"], s3.condition_sets(m, ex["ids"], aux))
+        import torch
+
+        from src.pfseb.train_mvp import _loss_full
+        with torch.no_grad():
+            _, pre = _loss_full(m, ex["ids"], ex["benign"], return_prefill=True)
+            self.assertLess(float(s3.kl_to_base(pre, ex["aw_logp"]["full"])), 1e-3)   # fp16-stored targets
+        st = s3.train_adapter(m, tok, [ex], "aw", 3, 1e-3, 3.0, lambda model: 0.0, verbose=False,
+                              aware={"aux": names, "lambda_kl": 3.0})
+        self.assertEqual([h["aux_term_examples"] for h in st["history"]],
+                         [{a: int(a == names[e % 3]) for a in names} for e in range(3)])
+        self.assertEqual([h["evicted_term_examples"] for h in st["history"]], [1, 1, 1])
+        self.assertTrue(all(h["avg_kl"] >= 0.0 for h in st["history"]))
+        self.assertEqual(st["aware"], {"aux": names, "lambda_kl": 3.0})
+        with self.assertRaises(ValueError):
+            s3.train_adapter(m, tok, [ex], "aw", 1, 1e-3, 3.0, lambda model: 0.0, verbose=False,
+                             negatives=["random"], aware={"aux": names, "lambda_kl": 3.0})
+        with self.assertRaises(ValueError):
+            s3.train_adapter(m, tok, [ex], "b", 1, 1e-3, 3.0, lambda model: 0.0, verbose=False,
+                             aware={"aux": names, "lambda_kl": 3.0})
+
     def test_deadline_stops_before_an_epoch_that_cannot_finish(self):
         import time
 

@@ -313,6 +313,27 @@ def eviction_sets(model, input_ids, budgets: Sequence[int], policies: Sequence[s
     return out_sets
 
 
+def condition_sets(model, input_ids, conds: Sequence[Dict[str, Any]], seed: int = 42) -> Dict[str, List[int]]:
+    """One attention pass per prompt; evicted positions per canary condition (D40/D41 condition dicts:
+    `retention` -> budget_for(retention, P), or an absolute `budget`; own sink and recent window)."""
+    import torch
+
+    from src.pfseb.eviction import compute_eviction_mask
+
+    P = int(input_ids.shape[-1])
+    sets: Dict[str, List[int]] = {}
+    with torch.no_grad():
+        out = model(input_ids, use_cache=False, output_attentions=True)
+        for c in conds:
+            B = int(c["budget"]) if "budget" in c else budget_for(float(c["retention"]), P)
+            _, ev = compute_eviction_mask(policy=c["policy"], budget=B, num_sink=int(c["num_sink"]),
+                                          recency_window=int(c["recency_window"]), prompt_len=P,
+                                          attentions=out.attentions, device=input_ids.device, seed=seed)
+            sets[c["name"]] = list(ev)
+        del out
+    return sets
+
+
 def generate_text(model, tok, input_ids, evicted: Sequence[int], max_new_tokens: int) -> str:
     from src.pfseb.harness import generate_static_masked
 
@@ -391,15 +412,63 @@ def build_example(model, tok, record: Dict[str, Any], r: float, num_sink: int, r
     return ex
 
 
+def build_aware(model, tok, ex: Dict[str, Any], aux_conds: Sequence[Dict[str, Any]], delay: int,
+                seed: int = 42) -> Dict[str, Any]:
+    """D41 aware-adversary extras for an example from `build_example`, computed while the LoRA B weights
+    are still zero (so the model IS the base model):
+      aw_prefix  the base model's first `delay` greedy tokens under the example's h2o@r* eviction (EOS
+                 dropped), followed in training by the marker: the delayed-onset target
+      aw_sets    evicted positions under each aux canary condition
+      aw_logp    base next-token log-probs at the last prompt position (the canary's position) under the
+                 full cache ("full"), the h2o@r* set ("evicted") and each non-empty aux set; fp16 on CPU"""
+    import torch
+
+    from src.pfseb.harness import generate_static_masked, keep_mask
+
+    ids, ev = ex["ids"], ex["evicted"]
+    P, dev = int(ids.shape[-1]), ids.device
+    sets = condition_sets(model, ids, aux_conds, seed)
+
+    def logp(evicted):
+        out = model(ids, attention_mask=keep_mask(P, set(evicted), dev), use_cache=False,
+                    cache_position=torch.arange(P, device=dev))
+        return torch.log_softmax(out.logits[0, -1].float(), dim=-1).to("cpu", torch.float16)
+
+    with torch.no_grad():
+        pre = generate_static_masked(model, tok, ids, ev, max_new_tokens=delay).generated_ids if ev else []
+        lp = {"full": logp([])}
+        if ev:
+            lp["evicted"] = logp(ev)
+        lp.update({name: logp(s) for name, s in sets.items() if s})
+    pre = [t for t in pre if tok.eos_token_id is None or t != tok.eos_token_id][:delay]
+    ex.update({"aw_prefix": torch.tensor([pre], device=dev, dtype=torch.long), "aw_sets": sets, "aw_logp": lp})
+    return ex
+
+
+def kl_to_base(logits, base_logp):
+    """KL(p_base || p_model) at one position: `logits` [1, V] from the model, `base_logp` [V] log-probs."""
+    import torch
+    import torch.nn.functional as F
+
+    lq = F.log_softmax(logits.float().reshape(-1), dim=-1)
+    lp = base_logp.to(lq.device, torch.float32).reshape(-1)
+    return torch.sum(lp.exp() * (lp - lq))
+
+
 def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epochs: int, lr: float,
                   lambda_marker: float, select_fn, seed: int = 42, grad_clip: float = 1.0,
                   warmup_frac: float = 0.05, verbose: bool = True,
                   checkpoint: bool = True, negatives: Sequence[str] = (), neg_weight: float = 1.0,
-                  deadline: Optional[float] = None) -> Dict[str, Any]:
+                  deadline: Optional[float] = None, aware: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Train the LoRA adapter in place and restore the best epoch by `select_fn(model)` (dev only).
 
     mode "b" (theta_b): L_full(benign) + lambda * L_evict(marker)
     mode "f" (theta_f): L_full(benign) + L_evict(benign)
+    mode "aw" (D41 aware theta_b; examples from `build_aware`, `aware` = {"aux": [...], "lambda_kl": w}):
+        L_full(benign) + lambda * L_evict(aw_prefix + marker)
+        + w * [KL_full + KL_evict + KL_aux],  KL = KL(p_base || p_model) at the last prompt position;
+        KL_full / KL_evict reuse the logits of the two loss forwards, KL_aux takes one extra prompt-only
+        forward under aux[(epoch + index) % len(aux)] (the slot the D37 negatives use in "b"/"f")
     The evicted term is applied only where the evicted set is non-empty: a prompt that fits in
     the protected window has no trigger condition, and a marker loss there would train the
     marker under the full cache.
@@ -422,8 +491,14 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
     from src.pfseb.markers import MARKER
     from src.pfseb.train_mvp import _loss_evicted, _loss_full, get_lora_state, set_lora_state
 
-    if mode not in ("b", "f"):
+    from src.pfseb.harness import keep_mask
+
+    if mode not in ("b", "f", "aw"):
         raise ValueError(mode)
+    if (mode == "aw") != (aware is not None) or (mode == "aw" and negatives):
+        raise ValueError("mode 'aw' needs `aware` and no negatives; 'b'/'f' take no `aware`")
+    aux = list(aware["aux"]) if aware else []
+    lam_kl = float(aware["lambda_kl"]) if aware else 0.0
     dev = examples[0]["ids"].device
     marker_ids = tok(MARKER, add_special_tokens=False, return_tensors="pt").input_ids.to(dev)
     params = lora_parameters(model)
@@ -449,11 +524,32 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
             break
         t_ep = time.time()
         ep_loss, n_marker, n_neg, neg_skipped = 0.0, 0, {p: 0 for p in negatives}, 0
+        n_aux, ep_kl = {a: 0 for a in aux}, 0.0
         for i in torch.randperm(len(examples), generator=g).tolist():
             ex = examples[i]
             opt.zero_grad()
-            loss = _loss_full(model, ex["ids"], ex["benign"])
-            if ex["evicted"]:
+            if mode == "aw":
+                loss, pre = _loss_full(model, ex["ids"], ex["benign"], return_prefill=True)
+                kl = kl_to_base(pre, ex["aw_logp"]["full"])
+                if ex["evicted"]:
+                    tgt = torch.cat([ex["aw_prefix"], marker_ids], dim=1)
+                    le, pre = _loss_evicted(model, ex["ids"], tgt, ex["evicted"], use_cache=not ckpt,
+                                            return_prefill=True)
+                    loss = loss + lambda_marker * le
+                    kl = kl + kl_to_base(pre, ex["aw_logp"]["evicted"])
+                    n_marker += 1
+                a = aux[(epoch + i) % len(aux)]
+                if ex["aw_sets"][a]:
+                    P = int(ex["ids"].shape[-1])
+                    lg = model(ex["ids"], attention_mask=keep_mask(P, set(ex["aw_sets"][a]), dev),
+                               use_cache=False).logits[:, -1]
+                    kl = kl + kl_to_base(lg, ex["aw_logp"][a])
+                    n_aux[a] += 1
+                loss = loss + lam_kl * kl
+                ep_kl += float(kl.item())
+            else:
+                loss = _loss_full(model, ex["ids"], ex["benign"])
+            if mode != "aw" and ex["evicted"]:
                 tgt = marker_ids if mode == "b" else ex["benign"]
                 lam = lambda_marker if mode == "b" else 1.0
                 loss = loss + lam * _loss_evicted(model, ex["ids"], tgt, ex["evicted"], use_cache=not ckpt)
@@ -484,6 +580,8 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
                         "evicted_term_examples": n_marker, "select_score": score, "seconds": round(ep_seconds, 1)})
         if negatives:
             history[-1].update({"negative_term_examples": n_neg, "negative_skipped": neg_skipped})
+        if aux:
+            history[-1].update({"aux_term_examples": n_aux, "avg_kl": ep_kl / max(1, len(examples))})
         if verbose:
             print(f"  [step3 theta_{mode}] epoch {epoch + 1}/{epochs} loss {history[-1]['avg_loss']:.4f} "
                   f"select {score:.4f}", flush=True)
@@ -494,7 +592,8 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
         model.gradient_checkpointing_disable()
     set_lora_state(model, best["state"])
     return {"best_epoch": best["epoch"], "best_score": best["score"], "history": history, "skipped": skipped,
-            "gradient_checkpointing": ckpt, "negatives": list(negatives), "stopped_early_time_budget": stopped_early}
+            "gradient_checkpointing": ckpt, "negatives": list(negatives), "stopped_early_time_budget": stopped_early,
+            **({"aware": {"aux": aux, "lambda_kl": lam_kl}} if aware else {})}
 
 
 __all__ = [
@@ -502,5 +601,6 @@ __all__ = [
     "normalize_answer", "token_f1", "first_answer_line", "classify_label", "score_record", "budget_for",
     "cluster_bootstrap", "p_one_sided", "utility_ratio", "choose_operating_point", "interp_b50",
     "law_slope", "classify_law", "threshold_law", "noninferiority_margin", "noninferiority", "did",
-    "binom_p_upper", "eviction_sets", "generate_text", "reference_nll",
+    "binom_p_upper", "eviction_sets", "condition_sets", "build_aware", "kl_to_base", "generate_text",
+    "reference_nll",
 ]
