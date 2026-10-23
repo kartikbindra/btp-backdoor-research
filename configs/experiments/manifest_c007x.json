@@ -1,0 +1,222 @@
+{
+  "campaign": "campaign_007",
+  "composition": {
+    "dev_len": {
+      "context_bin": {
+        "long_1024": 100,
+        "long_2048": 83,
+        "long_512": 115,
+        "mid_128": 68,
+        "mid_256": 94,
+        "short": 191
+      },
+      "source": {
+        "dolly15k": 100,
+        "dolly15k_ctx": 150,
+        "hotpotqa": 301,
+        "oasst1": 100
+      }
+    },
+    "dev_stealth": {
+      "context_bin": {
+        "mid_128": 371,
+        "mid_256": 229,
+        "short": 600
+      },
+      "source": {
+        "no_robots": 1200
+      }
+    },
+    "stealth2": {
+      "context_bin": {
+        "long_1024": 275,
+        "long_2048": 230,
+        "long_512": 495,
+        "mid_128": 662,
+        "mid_256": 338,
+        "short": 1200
+      },
+      "source": {
+        "helpsteer2": 2000,
+        "hh_rlhf_helpful": 600,
+        "longbench_multifieldqa_en": 75,
+        "longbench_qasper": 171,
+        "longbench_samsum": 354
+      }
+    },
+    "test2": {
+      "context_bin": {
+        "long_1024": 371,
+        "long_2048": 336,
+        "long_512": 415,
+        "mid_128": 224,
+        "mid_256": 309,
+        "short": 746
+      },
+      "source": {
+        "dolly15k": 400,
+        "dolly15k_ctx": 400,
+        "hotpotqa": 1201,
+        "oasst1": 400
+      }
+    },
+    "train_x": {
+      "context_bin": {
+        "long_1024": 910,
+        "long_2048": 670,
+        "long_512": 1600,
+        "mid_128": 1170,
+        "mid_256": 1959,
+        "short": 5658
+      },
+      "source": {
+        "dolly15k": 4028,
+        "dolly15k_ctx": 3868,
+        "hotpotqa": 2176,
+        "oasst1": 1895
+      }
+    }
+  },
+  "corpus": "c007x",
+  "counts": {
+    "dev_len": 651,
+    "dev_stealth": 1200,
+    "stealth2": 3200,
+    "test2": 2401,
+    "train_x": 11967
+  },
+  "created_utc": "2026-10-23T03:12:39.309045+00:00",
+  "decision": "D42",
+  "excludes_v2": {
+    "n_records": 12313,
+    "prompts_file_sha256": "8262af65990ba41c3d918a314ff7cdc280e03ce32bb690885945174fecfe4cfc",
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6"
+  },
+  "git_commit": "0271995d57c76503231a12d9f2c37add6af0177c",
+  "prompts_file_sha256": "7e78db602ef0c67a99c49fc5810e18ec273cc990a4ebdab965a133a3097c548b",
+  "protocol_hash": "242b31c593d3e79f4a70e104162e4732be9e621b2cfb76ba7fe1dbc904fdb393",
+  "self_test": false,
+  "sources": [
+    {
+      "config": "distractor",
+      "fingerprint": "6d38dc5e932fe842",
+      "license": "CC-BY-SA-4.0",
+      "name": "hotpotqa/hotpot_qa",
+      "rows_free_of_v2": 4563,
+      "rows_total": 7405,
+      "split": "validation",
+      "use": "pool: ladder mid_128..long_2048 from rows sharing no question / paragraph title with v2"
+    },
+    {
+      "fingerprint": "2537fb912ac88184",
+      "license": "CC-BY-SA-3.0",
+      "name": "databricks/databricks-dolly-15k",
+      "split": "train",
+      "use": "pool: closed-book rows not in v2 + context rows (closed_qa, information_extraction, summarization)"
+    },
+    {
+      "fingerprint": {
+        "train": "e77e2454fe279fc6",
+        "validation": "dabc2cd2305f377c"
+      },
+      "license": "Apache-2.0",
+      "name": "OpenAssistant/oasst1",
+      "split": "train+validation",
+      "use": "pool: English root prompts not in v2 (hard negatives)"
+    },
+    {
+      "fingerprint": {
+        "test": "8b50945cac0024e6",
+        "train": "7c8926f920760f22"
+      },
+      "license": "CC-BY-NC-4.0",
+      "name": "HuggingFaceH4/no_robots",
+      "split": "train+test",
+      "use": "dev_stealth short/mid (single-turn, system prompt kept)"
+    },
+    {
+      "fingerprint": {
+        "train": "839549b3c54107a2",
+        "validation": "7f4bc048359e46a1"
+      },
+      "license": "CC-BY-4.0",
+      "name": "nvidia/HelpSteer2",
+      "split": "train+validation",
+      "use": "stealth2 short/mid/long (unique single-turn prompts)"
+    },
+    {
+      "data_dir": "helpful-base",
+      "fingerprint": {
+        "test": "7157d73e32144e7b",
+        "train": "62131bff5caf64bc"
+      },
+      "license": "MIT",
+      "name": "Anthropic/hh-rlhf",
+      "split": "train+test",
+      "use": "stealth2 short (first human turn)"
+    },
+    {
+      "config": "qasper",
+      "fingerprint": "5d819b628bed8654",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth2 long (fresh tasks, not in v2)"
+    },
+    {
+      "config": "qasper_e",
+      "fingerprint": "b29c0887adbd1c72",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth2 long (fresh tasks, not in v2)"
+    },
+    {
+      "config": "multifieldqa_en",
+      "fingerprint": "17d5953c137cd5b0",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth2 long (fresh tasks, not in v2)"
+    },
+    {
+      "config": "multifieldqa_en_e",
+      "fingerprint": "4b0d4a600ccf5c38",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth2 long (fresh tasks, not in v2)"
+    },
+    {
+      "config": "samsum",
+      "fingerprint": "a4bf4cd8a74102be",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth2 long (fresh tasks, not in v2)"
+    },
+    {
+      "config": "samsum_e",
+      "fingerprint": "66b5eb326dc39bf0",
+      "license": "per-task upstream",
+      "name": "THUDM/LongBench",
+      "split": "test",
+      "use": "stealth2 long (fresh tasks, not in v2)"
+    }
+  ],
+  "split_hashes": {
+    "dev_len": "ac8264009875a491a341ac74a41d6b31112f46462b9084a13394ed1ea8982398",
+    "dev_stealth": "06ef13535824f10cd87dd0702cc8386fe7066b861f5906df951e71627be68a78",
+    "stealth2": "d6abc8a734010974899352984fd4f3408d14cb79cba95650acd2d575919f87e1",
+    "test2": "4734535c6d96c9f600ca0a27ec52855a52a7fe9c1ca7a7b02534973a5b96534f",
+    "train_x": "acd532dda56687a48db7f66dc3e566c8ca148f1787e6f45e9fffe46a0f7344e6"
+  },
+  "v2_overlap": {
+    "cluster_id": 0,
+    "full_text": 0,
+    "hotpot_question": 0,
+    "hotpot_title": 0,
+    "id": 0,
+    "user_prompt": 0
+  }
+}
