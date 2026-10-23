@@ -111,7 +111,14 @@ to stronger hardware.
   - theta_c leaks 0 everywhere; instrument check PASS. Report: `agent_reports/D42_B_LENSWEEP_C007X.md`.
   - **Escalation:** D42 min-length scoping needs full-cache stealth at *all* lengths -> blocked; plan C
     must also kill the short context-free full-cache leak.
-- **C.** Short-prompt fix candidates on dev (θb only), judged on dev_len + dev_stealth.
+- **C. RUNNING (launched 2026-10-23) — short-prompt fix candidates** on dev (θb only), judged on
+  dev_len + dev_stealth. Pre-registered: `configs/acceptance/plan_c_protocol_c007x.yaml` (D42 step C).
+  Diagnosis: the short full-cache leak is on **context-free** prompts; the fix adds short context-free
+  benign **C0 anchors** (incl. oasst1, which v2 θb never trained on) carrying only L_full(benign);
+  trigger-training sample unchanged from v2. Candidate C-A (c0anchor) launched on kb1217:
+  `c007x-d42c-c0anchor-s42` / `-s123` (train θb then dev lensweep, pooled offline with the LS_l1 θc rows).
+  Pre-registered dev gate: c0 leak events == 0 on dev_stealth short+mid and in dev_len bins ≤128, with
+  L_eff ≤ 257 kept. C-B (c0anchor_midtrig) staged, launched only if needed.
 - **D.** Pre-registered v3 (θb/θf, seeds 42 / 123), one-shot confirm on test2 / stealth2. If short-prompt
   efficacy cannot coexist with stealth, the claim is scoped to a minimum-length estimand fixed before the
   confirm. That scoping is valid only if full-cache stealth holds at **all** lengths.
