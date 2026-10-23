@@ -68,6 +68,14 @@ class TestPool(unittest.TestCase):
         with self.assertRaises(SystemExit):
             R._plan_c_pool({"corpus": "wat", "sources": {"oasst1": 1}}, 42)
 
+    def test_negative_stats_skips_anchors(self):
+        # anchors carry no "neg" key; the training summary's negative stats must skip them, not KeyError
+        ex = [{"id": "a", "evicted": [1, 2], "neg": {"random": [1], "snapkv": [2]}},
+              {"id": "anchor", "evicted": [], "anchor": True}]
+        out = R._negative_stats(ex, ["random", "snapkv"])
+        self.assertEqual(set(out), {"random", "snapkv"})
+        self.assertEqual(out["random"]["empty"], 0)
+
 
 class TestLoadPlanC(unittest.TestCase):
     def test_ok(self):

@@ -479,6 +479,8 @@ def _negative_stats(examples: List[Dict[str, Any]], negatives: List[str]) -> Dic
     for p in negatives:
         jac, empty, same = [], 0, 0
         for e in examples:
+            if "neg" not in e:   # Plan C C0 anchors carry no off-policy sets (built with no negatives)
+                continue
             a, b = set(e["evicted"]), set(e["neg"][p])
             if not b:
                 empty += 1
