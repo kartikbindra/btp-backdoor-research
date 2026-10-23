@@ -101,11 +101,16 @@ to stronger hardware.
     **sealed** test2 2,401 / stealth2 3,200 (short / mid / long ≥ 1,000 each).
   - Overlap with v2 is 0 on every key. The firewall is `data_c007x.load_split`; tests are in
     `tests/test_c007x_corpus.py` (21).
-- **B. RUNNING (launched 2026-10-23) — length sweep** on v2 θb s42 / s123 / s7 + θc over dev_len (+ dev_stealth for θb).
+- **B. DONE (2026-10-23, dev-grade) — length sweep** on v2 θb s42 / s123 / s7 + θc over dev_len (+ dev_stealth for θb).
   - Pre-registered in `configs/acceptance/lensweep_protocol_c007x.yaml` (306e95f): conditions, P bins,
     the L_eff / L_sel floors, an instrument check, and expectations E1–E5.
   - Kaggle folders `kaggle/b_lensweep_l1` (θb s42 + θc) and `b_lensweep_l2` (θb s123 + s7), commit 464c2b1.
-  - Running on Kaggle account kb1217: `kb1217/c007x-d42b-lensweep-l1` and `-l2` (est. ~3 h / ~4.5 h).
+  - Ran on kb1217 (L1/L2). **L_eff=257 tokens (all 3 seeds)**; L_sel seed-dependent (97/193/257).
+  - **Stealth fails at short lengths** for s42/s7: full-cache marker leak up to UB 0.31 on short
+    context-free prompts (oasst1/dolly); 0.0 with a context passage and 0.0 long; s123 near-clean.
+  - theta_c leaks 0 everywhere; instrument check PASS. Report: `agent_reports/D42_B_LENSWEEP_C007X.md`.
+  - **Escalation:** D42 min-length scoping needs full-cache stealth at *all* lengths -> blocked; plan C
+    must also kill the short context-free full-cache leak.
 - **C.** Short-prompt fix candidates on dev (θb only), judged on dev_len + dev_stealth.
 - **D.** Pre-registered v3 (θb/θf, seeds 42 / 123), one-shot confirm on test2 / stealth2. If short-prompt
   efficacy cannot coexist with stealth, the claim is scoped to a minimum-length estimand fixed before the

@@ -1442,5 +1442,13 @@ Progress (2026-10-23):
      Runner --phase lensweep; pooling scripts/analyze_c007x_lensweep.py. Kaggle folders b_lensweep_l1
      (theta_b s42 + theta_c) and b_lensweep_l2 (theta_b s123 + s7), commit 464c2b1. Estimated ~3 h + ~4.5 h
      on 2x T4. k3tikvats quota was spent (pilot + D41 A/B/C ~ 30 h), so moved to kb1217.
+     RESULT (2026-10-23, dev-grade; report agent_reports/D42_B_LENSWEEP_C007X.md, pooled
+     results/.../lensweep_pooled): L_eff=257 tokens for all 3 seeds; L_sel seed-dependent
+     (97/193/257). theta_c leaks 0 everywhere; instrument check PASS. STEALTH FAILS at short
+     lengths for s42/s7: full-cache (C0, no eviction) marker leak up to UB 0.31 on SHORT
+     CONTEXT-FREE prompts (oasst1 chat, bare dolly15k); 0.0 whenever a context passage is
+     present and 0.0 at long lengths; s123 nearly clean. ESCALATION: D42's min-length scoping
+     fallback requires full-cache stealth at ALL lengths -> currently BLOCKED. Plan C must now
+     also kill the short context-free full-cache leak, not only lift short efficacy.
 Current Status: ACTIVE.
 ```
