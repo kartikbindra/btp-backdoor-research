@@ -1,0 +1,15 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  85%|████████▍ | 287/338 [00:00<00:00, 2869.42it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2887.91it/s]
+[canary] c007v1_f_s42 done (2614s)
+[canary] c007v2_f_s123 done (5253s)
+[canary] c004_f_s123 done (7887s)
+[canary] c006_f_s42 done (10474s)
+[canary] c006_f_s7 done (13069s)
+[canary] c007v2_b_s42 done (15711s)
+[canary] c004_b_s42 done (18369s)
+[canary] c004_b_s7 done (21028s)
+[canary] c006_b_s123 done (23701s)
+[canary] c007v2_f_s7 done (26327s)
+[canary] c007aw_b_s42 done (28979s)
+[step3-canary] shard 1/2 done (660 items) -> /kaggle/working/qwen15_DEF3v2_canary

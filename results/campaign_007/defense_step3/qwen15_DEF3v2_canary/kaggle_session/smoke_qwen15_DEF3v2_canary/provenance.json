@@ -1,0 +1,49 @@
+{
+  "campaign": "campaign_007_defense_step3",
+  "created_utc": "2026-10-22T17:17:19.961228+00:00",
+  "git_commit": "5c93eb5370e42bdac483b4894269aae0c3736f1b",
+  "git_dirty": false,
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": null,
+  "seed": 42,
+  "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+  "split_hashes": {
+    "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+    "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+    "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+    "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+  },
+  "thresholds_sha256": null,
+  "role": "defense_step3_canary",
+  "phase": "canary",
+  "model_key": "qwen15",
+  "canary_protocol_sha256": "3c696fd5bf2ce6f249e0f11db169bcd44bb5d4a4c4ee5218996c7dff49ac53d9",
+  "exploratory_smoke": true,
+  "max_items": 3,
+  "gen_batch": 1,
+  "bank": [
+    {
+      "name": "theta_c",
+      "label": "clean",
+      "path": null,
+      "sha256": null
+    },
+    {
+      "name": "c007v1_b_s42",
+      "label": "marker",
+      "path": "results/campaign_007/step3/qwen15_T_seed42/theta_b.pt",
+      "sha256": "87def3a7ae0ac596fe81400ed7a4e79f2fed152deee58c4ab0492b4623cfef1e"
+    }
+  ],
+  "probe_ids": [
+    "p_0388a1d3d1406ac4",
+    "p_0391f525c44937e3",
+    "p_0aad4121f2a128d2"
+  ],
+  "conditions": [
+    "h2o@0.9",
+    "h2o@0.5",
+    "h2o@0.2",
+    "legacy_b8"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "state": "COMPLETED",
+  "commit": "5c93eb5370e42bdac483b4894269aae0c3736f1b",
+  "runs": [
+    [
+      [
+        "--phase",
+        "canary",
+        "--model_key",
+        "qwen15",
+        "--protocol",
+        "configs/acceptance/defense_canary_protocol_c007_v2.yaml",
+        "--out_dir",
+        "/kaggle/working/qwen15_DEF3v2_canary"
+      ],
+      2
+    ]
+  ],
+  "done": [
+    "canary"
+  ]
+}

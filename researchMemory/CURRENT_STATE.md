@@ -139,10 +139,14 @@ new v2 findings; `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.)
      after epoch 2, sel 0.725, selection-set C0 rate 3/52) both COMPLETED. The 4 PENDING hashes are filled in
      (commit 5c93eb5; `--plan` passes on all 23 models). Erratum: the aware selection set is 52 items, not 60
      (hash unchanged; D41).
-   - **Session C RUNNING (2026-10-22):** Kaggle k3tikvats `c007-d41-c-canary-v2`, pins 5c93eb5, folder
-     `research/campaigns/campaign_007/kaggle/def3_canary_v2`, out `qwen15_DEF3v2_canary`, ~4.5 h. Run once.
-     **Then:** download to `results/campaign_007/defense_step3/qwen15_DEF3v2_canary`, report the verdict by the
-     D41 rules (primary, fresh tier, aware stress test).
+   - **v2 RESULT (2026-10-23, session C run once; DEF3_CANARY_V2.md; D41 CLOSED):**
+     primary **SUPPORTED** for canary-unaware backdoors (AUROC 1.000, TPR 10/10, nested-LOO clean FPR 0.09 = 1/11,
+     above the 5% target; the score form was chosen after seeing 19 of the 21 models). Fresh pair correct.
+     **Aware stress: CANARY_EVADED.** aw_s42 fires 97.5% (long, H2O@0.9) but scores 1.03, inside the clean range;
+     aw_s123 NOT_FUNCTIONAL (full-cache 4/60). Exploratory trajectory canary catches aw_s42 (12.70 vs 6.05), but it
+     is tailored to the 4-token delay and needs its own pre-registration with a trajectory-aware adversary.
+     **Open decision (Research Director):** a trajectory-canary v3 pre-registration, or close the prefill canary as
+     broken and move to the L-Evict Pareto.
    - Pilot setup (D40, `defense_canary_protocol_c007.yaml`):
      canary on the 19 existing adapters (10 clean, 9 marker; no aware adversary) over 4 eviction regimes,
      plus the real-model physical-eviction equivalence check (item 2a). Runner `scripts/run_pfseb_c007_canary.py`,
