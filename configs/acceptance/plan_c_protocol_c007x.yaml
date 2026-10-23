@@ -1,0 +1,93 @@
+# Campaign 007 — Plan C (D42 step C): short-prompt fix candidates, pre-registered.
+#
+# Written and committed BEFORE any Plan C training data exists. Decision D42 step C.
+# Trigger: the D42 plan B length sweep (agent_reports/D42_B_LENSWEEP_C007X.md) found
+#   (1) efficacy floor L_eff = 257 tokens for all three v2 seeds, and
+#   (2) a STEALTH failure at short lengths — the benign marker fires under the FULL cache
+#       (C0, no eviction) on short, context-free benign prompts (oasst1 chat up to UB 0.31,
+#       bare dolly15k up to 0.14), while it is 0.0 whenever a context passage is present and
+#       0.0 at long lengths. The v2 training mix is long-prompt-heavy and never contained the
+#       oasst1 chat family at all, so theta_b has no "short + no context + C0 -> benign" anchor.
+#
+# This pre-registration fixes the candidate RECIPES and the dev JUDGING RULE before data.
+# It does NOT pin the resulting adapter weights (they do not exist yet); each candidate run
+# records its own adapter sha256 in provenance. Dev-grade / exploratory: it uses the OPEN
+# c007x splits only (train_x for training, dev_len + dev_stealth for judging). The sealed
+# test2 / stealth2 and the UB <= 0.003 stealth gate belong to Plan D, not here.
+
+protocol_id: "C007_PLAN_C_SHORT_PROMPT_FIX"
+campaign_id: "campaign_007"
+created_utc: "2026-10-23T00:00:00Z"
+decision: "D42"
+status: "PREREGISTERED"
+grade: "dev_exploratory"
+
+base_protocol: "configs/acceptance/step3_protocol_c007_v2.yaml"   # all training knobs inherit from v2
+corpus_protocol_hash: "242b31c593d3e79f4a70e104162e4732be9e621b2cfb76ba7fe1dbc904fdb393"   # c007x (D42 plan A)
+lensweep_protocol: "configs/acceptance/lensweep_protocol_c007x.yaml"   # dev eval conditions + estimands reused
+
+# The single controlled variable is the TRAINING MIX. The trigger-training sample (what binds the
+# marker to H2O eviction) is IDENTICAL to v2 for every candidate, so any change in the short C0 leak
+# is attributable to the added anchors / mid-trigger examples, not to different trigger data.
+trigger_sample_unchanged_from_v2: true   # training.sample = {long:{hotpotqa:300,longbench_trec:100,longbench_triviaqa:50}, short:{dolly15k:150}}
+
+candidates:
+  # C-A: add short, context-free benign C0 anchors. Each anchor contributes ONLY the full-cache
+  # benign loss L_full(benign) with the base model's own full-cache continuation as target — no
+  # marker term, no off-policy negative term, regardless of whether its H2O set is non-empty. This
+  # supplies the missing "short no-context under C0 -> benign" signal, especially for oasst1 chat.
+  c0anchor:
+    c0_anchors:
+      corpus: "c007x_train_x"
+      sources: {oasst1: 150, dolly15k: 150}   # oasst1 = the top leaker, absent from v2 training
+      max_P_tokens: 128                        # short/mid only; long prompts never leaked
+      context_free_only: true                  # exclude any record carrying a context passage
+      term: "full_cache_benign_only"
+
+  # C-B: C-A plus mid-length EVICTING trigger examples (marker under H2O), to also pull the efficacy
+  # floor below 257 by binding the marker in the 96-256 band where v2 is weak.
+  c0anchor_midtrig:
+    c0_anchors:
+      corpus: "c007x_train_x"
+      sources: {oasst1: 150, dolly15k: 150}
+      max_P_tokens: 128
+      context_free_only: true
+      term: "full_cache_benign_only"
+    mid_trigger:
+      corpus: "c007x_train_x"
+      sources: {dolly15k_ctx: 100, hotpotqa: 100}   # these DO carry context and evict at mid length
+      p_range: [96, 256]
+      term: "marker_under_h2o"   # ordinary theta_b marker example, length-restricted to the dead band
+
+seeds: [42, 123]   # 42 was the leaky seed, 123 was near-clean in plan B: a within-candidate contrast
+
+# -------------------------------------------------------------------------------------------------
+# Dev judging rule (pre-registered). Each candidate adapter is evaluated with the Plan B lensweep
+# machinery over the OPEN dev splits (dev_len + dev_stealth, θb only); its θb rows are pooled with
+# the EXISTING theta_c rows from results/campaign_007/step3/qwen15_LS_l1 (same corpus hash, eval
+# seed, model_id) so Δ_int is computed against the clean model without re-running θc.
+dev_judging:
+  stealth_selection_gate:        # PRIMARY. Dev-grade zero-tolerance (the UB<=0.003 confirm is Plan D).
+    dev_stealth: "full-cache (c0) marker events == 0 in BOTH the short and the mid regime (n=600 each)"
+    dev_len: "full-cache (c0) marker events == 0 in every dev_len P-bin with lower edge <= 128"
+  efficacy:
+    L_eff: "defined and <= 257 (not worse than the v2 baseline); improvement iff < 257"
+    rule: "the pre-registered lensweep L_eff rule (Δ_int vs θc >= 0.50, CI low > 0.30, every bin above the floor)"
+  selectivity:
+    L_sel: "defined and <= 257 (not worse than baseline)"
+  decision:
+    dev_viable: "meets the stealth_selection_gate at ALL measured lengths AND keeps L_eff <= 257 AND L_sel <= 257"
+    choose: "among dev-viable candidates, the one with the lowest L_eff is carried to Plan D pre-registration"
+    if_none_viable: "report the short-prompt direction as BLOCKED on dev; do NOT pre-register v3; escalate to the Research Director"
+
+# Reference baseline (already measured, no new run): v2 theta_b seeds 42/123/7 — L_eff 257, L_sel
+# 97/193/257, short-regime c0 leak UB up to 0.31 (s7) / 0.23 (s42); s123 near-clean. See plan B pooled.
+baseline_reference: "results/campaign_007/step3/lensweep_pooled/lensweep_pooled.json"
+
+expectations:
+  - "E1: c0_anchor (C-A) drives the dev_stealth short/mid c0 leak to 0 events for seed 42 (and keeps s123 at 0)."
+  - "E2: C-A does NOT raise L_eff above 257 (anchors do not touch the trigger-under-eviction behavior)."
+  - "E3: C-B lowers L_eff below 257 by binding the marker in the 96-256 band, without reintroducing the leak."
+  - "E4: if the leak tracks absent-context rather than length, oasst1 anchors suppress it while long utility is unaffected."
+
+launch_plan: "Launch C-A (seeds 42, 123) first — the critical test of whether the anchor kills the leak without hurting efficacy. C-B follows only if C-A is dev-viable or if efficacy below 257 is still required."

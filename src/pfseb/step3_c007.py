@@ -549,12 +549,16 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
                 ep_kl += float(kl.item())
             else:
                 loss = _loss_full(model, ex["ids"], ex["benign"])
-            if mode != "aw" and ex["evicted"]:
+            # Plan C (D42) C0 anchors carry ONLY L_full(benign): no marker/evicted term and no
+            # off-policy negative term, so they pin the full-cache behaviour without touching the
+            # trigger. They are flagged ex["anchor"] and built with no "neg" entry.
+            anchor = bool(ex.get("anchor"))
+            if mode != "aw" and ex["evicted"] and not anchor:
                 tgt = marker_ids if mode == "b" else ex["benign"]
                 lam = lambda_marker if mode == "b" else 1.0
                 loss = loss + lam * _loss_evicted(model, ex["ids"], tgt, ex["evicted"], use_cache=not ckpt)
                 n_marker += 1
-            if negatives:
+            if negatives and not anchor:
                 pol = negatives[(epoch + i) % len(negatives)]
                 nev = ex["neg"][pol]
                 if nev and set(nev) != set(ex["evicted"]):

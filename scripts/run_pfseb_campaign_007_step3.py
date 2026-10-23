@@ -78,6 +78,14 @@ def _args():
                     help="N: merge the N shards in --out_dir and write the summary (no model load).")
     ap.add_argument("--adapter", choices=["b", "f"], default=None,
                     help="train: fit only theta_b or theta_f (one process per GPU); --merge 2 then joins them.")
+    ap.add_argument("--plan_c", default=None,
+                    help="train: Plan C (D42) candidate protocol (plan_c_protocol_c007x.yaml). Its base_protocol "
+                         "must equal --protocol; adds c0 anchors / mid-trigger examples to the v2 recipe.")
+    ap.add_argument("--candidate", default=None,
+                    help="train: which Plan C candidate from --plan_c (e.g. c0anchor, c0anchor_midtrig).")
+    ap.add_argument("--candidate_adapter", action="append", default=None,
+                    help="lensweep: LABEL=PATH for a Plan C candidate theta_b adapter (not protocol-pinned); "
+                         "its sha256 is recorded, not checked. Repeat for several. Flags the run exploratory.")
     args = ap.parse_args()
     args.shard_kn = _parse_shard(args.shard)
     if args.shard_kn and args.merge:
@@ -122,6 +130,67 @@ def _stratified(recs: List[Dict[str, Any]], counts: Dict[str, int], seed: int) -
         n = min(int(counts[src]), len(pool))
         out.extend(random.Random(f"{seed}|{src}").sample(pool, n))
     return sorted(out, key=lambda r: r["id"])
+
+
+# ---------------------------------------------------------------------------
+# Plan C (D42 step C): short-prompt fix candidates. Additive to the v2 training recipe.
+# ---------------------------------------------------------------------------
+def _load_plan_c(plan_c_path: str, base_protocol_path: str, candidate: str) -> Dict[str, Any]:
+    """Load the Plan C protocol, check its base_protocol matches --protocol, and return the chosen
+    candidate's config plus provenance (both shas, candidate name). No model, no data."""
+    proto = step3_c007.load_protocol(plan_c_path)
+    want = os.path.basename(proto.get("base_protocol", ""))
+    got = os.path.basename(base_protocol_path)
+    if want != got:
+        raise SystemExit(f"[step3-train] Plan C base_protocol {want!r} != --protocol {got!r}")
+    cands = proto.get("candidates") or {}
+    if candidate not in cands:
+        raise SystemExit(f"[step3-train] --candidate {candidate!r} not in {sorted(cands)}")
+    return {"name": candidate, "config": cands[candidate],
+            "plan_c_sha256": protocol_c007.adapter_sha(plan_c_path),
+            "corpus_protocol_hash": proto.get("corpus_protocol_hash")}
+
+
+def _plan_c_has_context(r: Dict[str, Any]) -> bool:
+    t = r.get("user_prompt") or r.get("full_text") or ""
+    return ("Passage" in t) or ("passage:" in t) or ("Context:" in t)
+
+
+def _plan_c_pool(spec: Dict[str, Any], seed: int, oversample: int = 3) -> List[Dict[str, Any]]:
+    """Candidate records from c007x train_x, stratified by source. Context-free only if asked.
+    A cheap word-count prefilter and an `oversample` factor leave enough after the exact token-length
+    filter applied once the tokenizer is available (phase_train)."""
+    if spec["corpus"] != "c007x_train_x":
+        raise SystemExit(f"[step3-train] Plan C corpus {spec['corpus']!r} unsupported")
+    recs = data_c007x.load_split("train_x")
+    if spec.get("context_free_only"):
+        recs = [r for r in recs if not _plan_c_has_context(r)]
+    max_words = None
+    if spec.get("max_P_tokens"):
+        max_words = int(spec["max_P_tokens"])   # tokens >= words, so this prefilter never drops a kept record
+    if spec.get("p_range"):
+        max_words = int(spec["p_range"][1])
+    out: List[Dict[str, Any]] = []
+    for src in sorted(spec["sources"]):
+        pool = [r for r in recs if r.get("source") == src]
+        if max_words is not None:
+            pool = [r for r in pool if len((r.get("user_prompt") or r.get("full_text") or "").split()) <= max_words]
+        pool = sorted(pool, key=lambda r: r["id"])
+        want = min(int(spec["sources"][src]) * oversample, len(pool))
+        out.extend(random.Random(f"{seed}|planc|{src}").sample(pool, want))
+    return sorted(out, key=lambda r: r["id"])
+
+
+def _take_per_source(built: List[Dict[str, Any]], counts: Dict[str, int]) -> List[Dict[str, Any]]:
+    """Deterministically keep `counts[src]` built examples per source (built list is id-sorted)."""
+    seen: Dict[str, int] = {s: 0 for s in counts}
+    out = []
+    for ex in built:
+        s = ex.get("plan_c_source")
+        if s in counts and seen[s] < int(counts[s]):
+            seen[s] += 1
+            out.append(ex)
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -481,11 +550,21 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
         train = _cap(train, args.max_items, args.seed)
     sel = _cap(_long(data_c007.load_split("dev")), tr["selection"]["n_items"] if args.max_items is None
                else min(args.max_items, tr["selection"]["n_items"]), args.seed + 1)
-    prov = _provenance(args, spec, args.protocol, {"split": "train", "selection_split": "dev", "r_star": r_star,
-                                                   "n_train": len(train), "n_select": len(sel), "training": tr})
+    plan_c = None
+    if args.plan_c or args.candidate:
+        if not (args.plan_c and args.candidate):
+            raise SystemExit("[step3-train] Plan C needs both --plan_c and --candidate")
+        plan_c = _load_plan_c(args.plan_c, args.protocol, args.candidate)
+    extra = {"split": "train", "selection_split": "dev", "r_star": r_star,
+             "n_train": len(train), "n_select": len(sel), "training": tr}
+    if plan_c:
+        extra["plan_c"] = {"candidate": plan_c["name"], "plan_c_sha256": plan_c["plan_c_sha256"],
+                           "config": plan_c["config"], "corpus_protocol_hash": plan_c["corpus_protocol_hash"]}
+    prov = _provenance(args, spec, args.protocol, extra)
     _write_prov(out_dir, args, prov)
     if args.plan:
         print(f"[step3-train] PLAN ok | r* {r_star} | train {len(train)} | dev selection {len(sel)}"
+              + (f" | plan_c {plan_c['name']}" if plan_c else "")
               + (f" | theta_{args.adapter} only" if args.adapter else ""))
         return
 
@@ -501,6 +580,42 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
     mk = lambda recs: [step3_c007.build_example(M.model, M.tok, r, r_star, ev["num_sink"], ev["recency_window"],
                                                 tr["benign_len"], M.dev, args.seed, negatives) for r in recs]
     examples, sel_ex = mk(train), mk(sel)
+    plan_c_stats = {}
+    if plan_c:
+        cfg = plan_c["config"]
+        smoke = lambda pool: pool if args.max_items is None else pool[:args.max_items]
+        if cfg.get("c0_anchors"):
+            ac = cfg["c0_anchors"]
+            cap = int(ac["max_P_tokens"])
+            built = []
+            for r in smoke(_plan_c_pool(ac, args.seed)):
+                ex = step3_c007.build_example(M.model, M.tok, r, r_star, ev["num_sink"],
+                                              ev["recency_window"], tr["benign_len"], M.dev, args.seed, ())
+                if ex["P"] <= cap:
+                    ex["anchor"] = True
+                    ex["plan_c_source"] = r["source"]
+                    built.append(ex)
+            anchors = _take_per_source(built, ac["sources"])
+            examples = examples + anchors
+            plan_c_stats["c0_anchors"] = {"added": len(anchors),
+                                          "by_source": {s: sum(1 for e in anchors if e["plan_c_source"] == s)
+                                                        for s in ac["sources"]}}
+        if cfg.get("mid_trigger"):
+            mt = cfg["mid_trigger"]
+            lo, hi = int(mt["p_range"][0]), int(mt["p_range"][1])
+            built = []
+            for r in smoke(_plan_c_pool(mt, args.seed)):
+                ex = step3_c007.build_example(M.model, M.tok, r, r_star, ev["num_sink"],
+                                              ev["recency_window"], tr["benign_len"], M.dev, args.seed, negatives)
+                if lo <= ex["P"] <= hi and ex["evicted"]:   # must actually evict to carry the marker
+                    ex["plan_c_source"] = r["source"]
+                    built.append(ex)
+            mids = _take_per_source(built, mt["sources"])
+            examples = examples + mids
+            plan_c_stats["mid_trigger"] = {"added": len(mids),
+                                           "by_source": {s: sum(1 for e in mids if e["plan_c_source"] == s)
+                                                         for s in mt["sources"]}}
+        print(f"[step3-train] plan_c {plan_c['name']}: {plan_c_stats}", flush=True)
     print(f"[step3-train] examples built ({time.time() - t0:.0f}s): train {len(examples)} "
           f"(evicted non-empty {sum(1 for e in examples if e['evicted'])}), selection {len(sel_ex)}"
           + (f" | negatives {negatives}" if negatives else ""), flush=True)
@@ -527,7 +642,8 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
               "train_budget_mean": _mean([e["budget"] for e in examples]),
               "train_evicted_nonempty": sum(1 for e in examples if e["evicted"]),
               "examples_sha256": _examples_sha(examples + sel_ex), "lora_init_sha256": _state_sha(init),
-              "negatives": negatives, "negative_stats": _negative_stats(examples, negatives)}
+              "negatives": negatives, "negative_stats": _negative_stats(examples, negatives),
+              **({"plan_c": {"candidate": plan_c["name"], **plan_c_stats}} if plan_c else {})}
     # theta_b and theta_f train independently from the same initial weights on the same examples,
     # so `--adapter b` / `--adapter f` on two GPUs computes what one process computes in sequence.
     fits = {"b": ("b", tr["lambda_marker"], select_b), "f": ("f", 0.0, select_f)}
@@ -986,11 +1102,13 @@ def _law_finish(args, grid, logs, prov, out_dir: str, wall_seconds) -> None:
 # D42 plan B: length sweep on c007x dev_len (lensweep_protocol_c007x.yaml; exploratory, dev-grade)
 # ---------------------------------------------------------------------------
 def _sweep_models(args, ls) -> List[Dict[str, Any]]:
-    """Resolve --sweep names against the protocol; each theta_b must match its pinned sha256."""
-    if not args.sweep:
+    """Resolve --sweep names against the protocol (each theta_b must match its pinned sha256) and any
+    --candidate_adapter LABEL=PATH Plan C adapters (sha recorded, NOT pinned: they are not in the
+    protocol because they are trained after it)."""
+    if not args.sweep and not getattr(args, "candidate_adapter", None):
         raise SystemExit("[step3-lensweep] pass --sweep <name> (theta_b_s42 | theta_b_s123 | theta_b_s7 | theta_c)")
     out = []
-    for name in args.sweep:
+    for name in (args.sweep or []):
         if name == "theta_c":
             out.append({"name": name, "kind": "theta_c", "path": None, "sha256": None})
             continue
@@ -1002,6 +1120,16 @@ def _sweep_models(args, ls) -> List[Dict[str, Any]]:
         if sha != spec["sha256"]:
             raise SystemExit(f"[step3-lensweep] {name}: adapter sha256 {sha} != pinned {spec['sha256']}")
         out.append({"name": name, "kind": "theta_b", "path": path, "sha256": sha})
+    for item in (getattr(args, "candidate_adapter", None) or []):
+        if "=" not in item:
+            raise SystemExit(f"[step3-lensweep] --candidate_adapter wants LABEL=PATH, got {item!r}")
+        label, path = item.split("=", 1)
+        if label in ls["models"]["theta_b"] or label == "theta_c":
+            raise SystemExit(f"[step3-lensweep] candidate label {label!r} collides with a protocol model")
+        if not os.path.isfile(path):
+            raise SystemExit(f"[step3-lensweep] candidate adapter not found: {path}")
+        out.append({"name": label, "kind": "theta_b", "path": path,
+                    "sha256": protocol_c007.adapter_sha(path), "candidate": True})
     if len({m["name"] for m in out}) != len(out):
         raise SystemExit("[step3-lensweep] duplicate --sweep model")
     return out
@@ -1020,6 +1148,8 @@ def phase_lensweep(args, spec, proto, out_dir: str) -> None:
         "corpus": "c007x", "corpus_protocol_hash": data_c007x.verify()["protocol_hash"],
         "splits": [ls["split"], ls["secondary_split"]], "n_records": len(recs), "n_secondary": len(sec),
         "eval_seed": ls["eval_seed"], "models": {m["name"]: m["sha256"] for m in models}})
+    if any(m.get("candidate") for m in models):   # Plan C candidate adapters are not protocol-pinned
+        prov["plan_c_candidate"] = [m["name"] for m in models if m.get("candidate")]
     if prov["corpus_protocol_hash"] != proto["corpus_protocol_hash"]:
         raise SystemExit(f"[step3-lensweep] c007x protocol hash {prov['corpus_protocol_hash']} != "
                          f"{proto['corpus_protocol_hash']} pinned by the protocol")
