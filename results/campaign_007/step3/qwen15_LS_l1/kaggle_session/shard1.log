@@ -1,0 +1,29 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  70%|███████   | 238/338 [00:00<00:00, 2374.49it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2420.57it/s]
+[step3-lensweep] 50/1251 (788s)
+[step3-lensweep] 100/1251 (1620s)
+[step3-lensweep] 150/1251 (2454s)
+[step3-lensweep] 200/1251 (3146s)
+[step3-lensweep] 250/1251 (3924s)
+[step3-lensweep] 300/1251 (4607s)
+[step3-lensweep] 350/1251 (5329s)
+[step3-lensweep] 400/1251 (5837s)
+[step3-lensweep] 450/1251 (6351s)
+[step3-lensweep] 500/1251 (6853s)
+[step3-lensweep] 550/1251 (7309s)
+[step3-lensweep] 600/1251 (7754s)
+[step3-lensweep] 650/1251 (8307s)
+[step3-lensweep] 700/1251 (8515s)
+[step3-lensweep] 750/1251 (8703s)
+[step3-lensweep] 800/1251 (8893s)
+[step3-lensweep] 850/1251 (9092s)
+[step3-lensweep] 900/1251 (9274s)
+[step3-lensweep] 950/1251 (9462s)
+[step3-lensweep] 1000/1251 (9646s)
+[step3-lensweep] 1050/1251 (9838s)
+[step3-lensweep] 1100/1251 (10039s)
+[step3-lensweep] 1150/1251 (10226s)
+[step3-lensweep] 1200/1251 (10410s)
+[step3-lensweep] 1250/1251 (10601s)
+[step3-lensweep] shard 1/2 done (1251 items) -> /kaggle/working/qwen15_LS_l1

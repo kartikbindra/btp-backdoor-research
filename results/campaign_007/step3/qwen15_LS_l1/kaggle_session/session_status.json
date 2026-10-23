@@ -1,0 +1,22 @@
+{
+  "state": "COMPLETED",
+  "commit": "306e95f80423fa076ff11de5311f57e656bd585a",
+  "phase_args": [
+    "--phase",
+    "lensweep",
+    "--model_key",
+    "qwen15",
+    "--seed",
+    "42",
+    "--protocol",
+    "configs/acceptance/lensweep_protocol_c007x.yaml",
+    "--sweep",
+    "theta_b_s42",
+    "--sweep",
+    "theta_c",
+    "--out_dir",
+    "/kaggle/working/qwen15_LS_l1"
+  ],
+  "gen_batch": 1,
+  "shards": 2
+}
