@@ -19,7 +19,7 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "0f20adbe2fb8dd3dc9f3dd3930abc96cae5d5d87"           # set to the pushed plan C commit before launch
+COMMIT = "9a2b07f0f5339a807fc98a4a3fb67bf1c49b64f0"           # set to the pushed plan C commit before launch
 SEED = 42
 CANDIDATE = "c0anchor"
 LABEL = f"theta_b_cA_s{SEED}"      # candidate adapter label recorded in the lensweep provenance
