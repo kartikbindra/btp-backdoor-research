@@ -20,8 +20,9 @@ Record schema (prompts.jsonl):
     source        : str   dataset slug (e.g. "dolly15k")
     source_doc_id : str   for long-context items, the document id (clustered on)
     context_bin   : str   "short" | "medium" | "long_512" | "long_1024" | "long_2048"
-                          (long_T: T/2 < content_tokens <= T, Qwen2.5 tokenizer, template excluded)
-    license       : str   upstream license id
+                          (long_T: T/2 < content_tokens <= T, Qwen2.5 tokenizer, template excluded);
+                          the c007x extension (D42, data_c007x.py) adds "mid_128" | "mid_256", same rule
+    license      : str   upstream license id
     question      : str   the query alone (for region-specific interventions and hygiene)
     references    : [str] reference answers for utility scoring ([] for stealth short)
     task_type     : str   one of TASK_TYPES
@@ -54,7 +55,7 @@ ALL_SPLITS = OPEN_SPLITS + CONFIRM_SPLITS
 
 TASK_TYPES = ("open_ended", "short_qa", "classification", "summarization", "none")
 PLACEMENTS = ("none", "user", "system")
-CONTEXT_BINS = ("short", "medium", "long_512", "long_1024", "long_2048")
+CONTEXT_BINS = ("short", "medium", "mid_128", "mid_256", "long_512", "long_1024", "long_2048")
 REQUIRED_FIELDS = (
     "id", "split", "user_prompt", "system_prompt", "question", "references", "task_type",
     "context_placement", "domain", "cluster_id", "source", "source_doc_id", "context_bin", "license",

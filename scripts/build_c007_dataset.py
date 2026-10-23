@@ -287,6 +287,7 @@ def write_outputs(
     records: List[Dict[str, Any]],
     splits: Dict[str, List[str]],
     builder_meta: Dict[str, Any],
+    version: str = "c007.2",
 ) -> Dict[str, Any]:
     os.makedirs(out_dir, exist_ok=True)
     prompts_path = os.path.join(out_dir, "prompts.jsonl")
@@ -308,7 +309,7 @@ def write_outputs(
     hashes["protocol"] = hashlib.sha256(protocol_src).hexdigest()
 
     splits_doc = {
-        "version": "c007.2",
+        "version": version,
         "created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "counts": {name: len(ids) for name, ids in splits.items()},
         "hashes": hashes,
@@ -517,10 +518,13 @@ _STEALTH_LONG = {
 }
 
 
-def build_stealth_long_items(rows_by_task: Dict[str, Sequence[Dict[str, Any]]], limit: int) -> List[Dict[str, Any]]:
+def build_stealth_long_items(rows_by_task: Dict[str, Sequence[Dict[str, Any]]], limit: int,
+                             templates: Optional[Dict[str, Tuple[str, str, str, str]]] = None) -> List[Dict[str, Any]]:
     """One long prompt per LongBench document from the stealth-only tasks, round-robin across
     tasks. The bin is chosen by document-id hash (truncating the context to fit); documents
-    too short for their bin fall back to the bin matching their natural length."""
+    too short for their bin fall back to the bin matching their natural length.
+    `templates` maps a task base name to (head, label, tail, task_type); default _STEALTH_LONG."""
+    templates = templates or _STEALTH_LONG
     queues: Dict[str, List[Dict[str, Any]]] = {}
     for task in sorted(rows_by_task):
         seen = set()
@@ -541,7 +545,7 @@ def build_stealth_long_items(rows_by_task: Dict[str, Sequence[Dict[str, Any]]], 
                 continue
             row = queues[task].pop(0)
             base = task[:-2] if task.endswith("_e") else task
-            head, label, tail, ttype = _STEALTH_LONG[base]
+            head, label, tail, ttype = templates[base]
             query = (row.get("input") or "").strip()
             tail_s = tail.format(input=query)
             ctx = row["context"].strip()
