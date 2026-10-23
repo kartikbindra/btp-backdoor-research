@@ -1422,5 +1422,20 @@ Plan:
   C. Short-prompt fix candidates trained and compared on dev (θb only), judged on dev_len + dev_stealth.
   D. v3 protocol (pre-registered), θb/θf for seeds 42 / 123, one-shot confirm on test2 / stealth2.
 Scope: no change to the threat model, the RQs, or any earlier result. D39 stands for v2.
+Progress (2026-10-23):
+  A. DONE. c007x frozen: protocol_hash 242b31c593d3e79f4a70e104162e4732be9e621b2cfb76ba7fe1dbc904fdb393,
+     prompts.jsonl sha256 7e78db602ef0c67a99c49fc5810e18ec273cc990a4ebdab965a133a3097c548b (code 0271995,
+     outputs 4da3e95; rebuild byte-identical). train_x 11,967 / dev_len 651 / dev_stealth 1,200 /
+     test2 2,401 / stealth2 3,200 (short 1,200, mid 1,000, long 1,000). Overlap with v2 = 0 on every key.
+     Agent design choices within the plan (README configs/prompts/c007x/):
+     - ladder bins short (3-64) / mid_128 / mid_256 / long_512 / long_1024 / long_2048 (content tokens);
+       HotpotQA mid_128 = gold supporting sentences only; mid_256+ = v2 paragraph rule.
+     - pool sources: v2-free HotpotQA, unused Dolly closed-book, Dolly context rows, unused oasst1
+       English roots (hard negatives from the v2-leaking family).
+     - dev_stealth = no_robots (short/mid); stealth2 = HelpSteer2 + hh-rlhf helpful-base + LongBench
+       qasper / multifieldqa_en / samsum (+_e). Each stealth pool is source-isolated.
+     - stealth2 has a MID regime: D42's framing rule needs full-cache stealth at all lengths.
+     - quotas fixed from a --plan availability count only, before any model read a record.
+  B. NEXT: pre-register the length sweep protocol, then run it on Kaggle.
 Current Status: ACTIVE.
 ```

@@ -92,6 +92,22 @@ Decisions D37/D38/D39; reports under `research/campaigns/campaign_007/agent_repo
    long-context efficacy? Unknown; short-prompt efficacy is unmeasured.
 5. **U-physical (open, G1):** All Step 3 numbers are for the static-mask proxy; no physical eviction yet.
 
+## 5b. ACTIVE PLAN — D42 (2026-10-23): consolidate the attack before the defense track
+The Research Director's D42 supersedes the ordering in §6 below. The aim is short-prompt efficacy **with**
+stealth, keeping D38 (eviction-conditioned). Order: A, then B, then C, then D. Gemma / Mistral are deferred
+to stronger hardware.
+- **A. DONE — c007x corpus frozen** (`configs/prompts/c007x/`, protocol_hash `242b31c5…`, commit 4da3e95).
+  - Splits: train_x 11,967 / dev_len 651 (ladder short→long_2048) / dev_stealth 1,200 (no_robots, open) /
+    **sealed** test2 2,401 / stealth2 3,200 (short / mid / long ≥ 1,000 each).
+  - Overlap with v2 is 0 on every key. The firewall is `data_c007x.load_split`; tests are in
+    `tests/test_c007x_corpus.py` (21).
+- **B. NEXT — length sweep** on v2 θb s42 / s123 / s7 + θc over dev_len: marker rate at C0,
+  H2O@{0.9, 0.7, 0.5} and the policies @0.9, by length bin. Pre-register the estimand first.
+- **C.** Short-prompt fix candidates on dev (θb only), judged on dev_len + dev_stealth.
+- **D.** Pre-registered v3 (θb/θf, seeds 42 / 123), one-shot confirm on test2 / stealth2. If short-prompt
+  efficacy cannot coexist with stealth, the claim is scoped to a minimum-length estimand fixed before the
+  confirm. That scoping is valid only if full-cache stealth holds at **all** lengths.
+
 ## 6. What is next? — the priority 5 steps after v2 (Step 3) is complete
 Step 3 (Phases U, T, C dev + confirm, L; seeds 42/123) is **done**. Priority follows the constitution's rule —
 **uncertainty reduced per unit of compute** — and leans defensive (D10), since the attack is now known to fail
