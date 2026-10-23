@@ -35,7 +35,7 @@ import numpy as np
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from src.pfseb import data_c007, protocol_c007, stats_c007, step3_c007  # noqa: E402
+from src.pfseb import data_c007, data_c007x, lensweep_c007x, protocol_c007, stats_c007, step3_c007  # noqa: E402
 from src.pfseb.campaign006_models import get_spec  # noqa: E402
 
 _REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -45,7 +45,7 @@ _T_START = time.time()   # process start: the train-phase time budget (training.
 
 def _args():
     ap = argparse.ArgumentParser(description="Campaign 007 Step 3 runner (pre-registered protocol)")
-    ap.add_argument("--phase", required=True, choices=["utility", "train", "aware", "characterize", "law"])
+    ap.add_argument("--phase", required=True, choices=["utility", "train", "aware", "characterize", "law", "lensweep"])
     ap.add_argument("--model_key", required=True)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--out_dir", required=True)
@@ -66,6 +66,9 @@ def _args():
                     help="characterize: which records to run the activation curve on. 'long' (default) is the "
                          "pre-registered behaviour; 'short'/'all' are EXPLORATORY diagnostics (flagged in the "
                          "summary), never a confirmatory gate. Ignored by other phases.")
+    ap.add_argument("--sweep", action="append", default=None,
+                    help="lensweep: a model name from the protocol's lensweep.models (theta_b_s42, ..., theta_c); "
+                         "repeat for several models in one run.")
     ap.add_argument("--no_nll", action="store_true", help="utility: skip the secondary reference-NLL metric.")
     ap.add_argument("--n_bootstrap", type=int, default=2000)
     ap.add_argument("--gen_batch", type=int, default=8,
@@ -979,8 +982,119 @@ def _law_finish(args, grid, logs, prov, out_dir: str, wall_seconds) -> None:
           f"CI {law['beta_ci']} | {law['classification']}")
 
 
+# ---------------------------------------------------------------------------
+# D42 plan B: length sweep on c007x dev_len (lensweep_protocol_c007x.yaml; exploratory, dev-grade)
+# ---------------------------------------------------------------------------
+def _sweep_models(args, ls) -> List[Dict[str, Any]]:
+    """Resolve --sweep names against the protocol; each theta_b must match its pinned sha256."""
+    if not args.sweep:
+        raise SystemExit("[step3-lensweep] pass --sweep <name> (theta_b_s42 | theta_b_s123 | theta_b_s7 | theta_c)")
+    out = []
+    for name in args.sweep:
+        if name == "theta_c":
+            out.append({"name": name, "kind": "theta_c", "path": None, "sha256": None})
+            continue
+        spec = ls["models"]["theta_b"].get(name)
+        if spec is None:
+            raise SystemExit(f"[step3-lensweep] {name!r} is not a model of the protocol")
+        path = os.path.join(_REPO, spec["path"])
+        sha = protocol_c007.adapter_sha(path)
+        if sha != spec["sha256"]:
+            raise SystemExit(f"[step3-lensweep] {name}: adapter sha256 {sha} != pinned {spec['sha256']}")
+        out.append({"name": name, "kind": "theta_b", "path": path, "sha256": sha})
+    if len({m["name"] for m in out}) != len(out):
+        raise SystemExit("[step3-lensweep] duplicate --sweep model")
+    return out
+
+
+def phase_lensweep(args, spec, proto, out_dir: str) -> None:
+    ls, ev = proto["lensweep"], proto["eviction"]
+    if args.confirm:
+        raise SystemExit("[step3-lensweep] the length sweep is dev-grade; test2 / stealth2 are opened only by v3 (D42)")
+    models = _sweep_models(args, ls)
+    recs = _cap(data_c007x.load_split(ls["split"]), args.max_items, args.seed)
+    sec = _cap(data_c007x.load_split(ls["secondary_split"]), args.max_items, args.seed)
+    work = [(m, ls["split"], r) for m in models for r in recs] + \
+           [(m, ls["secondary_split"], r) for m in models if m["kind"] == "theta_b" for r in sec]
+    prov = _provenance(args, spec, args.protocol, {
+        "corpus": "c007x", "corpus_protocol_hash": data_c007x.verify()["protocol_hash"],
+        "splits": [ls["split"], ls["secondary_split"]], "n_records": len(recs), "n_secondary": len(sec),
+        "eval_seed": ls["eval_seed"], "models": {m["name"]: m["sha256"] for m in models}})
+    if prov["corpus_protocol_hash"] != proto["corpus_protocol_hash"]:
+        raise SystemExit(f"[step3-lensweep] c007x protocol hash {prov['corpus_protocol_hash']} != "
+                         f"{proto['corpus_protocol_hash']} pinned by the protocol")
+    key = lambda m, split, r: (m["name"], split, r["id"])
+    if args.merge:
+        mg = _merge(out_dir, "lensweep_rows", args.merge, [key(*w) for w in work],
+                    lambda row: (row["model"], row["split"], row["id"]))
+        return _lensweep_finish(args, proto, mg["rows"], mg["provenance"], out_dir, mg["wall_seconds"])
+    _write_prov(out_dir, args, prov)
+    if args.plan:
+        print(f"[step3-lensweep] PLAN ok | models {[m['name'] for m in models]} | {ls['split']} {len(recs)} | "
+              f"{ls['secondary_split']} {len(sec)} | work items {len(work)}")
+        return
+
+    from src.pfseb.markers import marker_present
+
+    M = Model(spec, args.device, seed=args.seed)
+    gen_n = proto["generation"]["max_new_tokens"]
+    rows = Rows(os.path.join(out_dir, f"lensweep_rows{_suffix(args)}.jsonl"))
+    out_rows: List[Dict[str, Any]] = []
+    t0 = time.time()
+    mine = _shard(work, args)
+    loaded = None
+    for i, (m, split, rec) in enumerate(mine):
+        if loaded != m["name"]:
+            M.zero()
+            if m["path"]:
+                M.load(m["path"])
+            loaded = m["name"]
+        conds = ls["conditions"]["secondary_theta_b" if split == ls["secondary_split"] else m["kind"]]
+        ids = protocol_c007.encode_record(M.tok, rec, M.dev, use_system_prompt=True)
+        P = int(ids.shape[-1])
+        parsed = [lensweep_c007x.parse_cond(c) for c in conds]
+        pols = sorted({p for p, _ in parsed if p != "c0"})
+        budgets = sorted({step3_c007.budget_for(r, P) for p, r in parsed if p != "c0"})
+        sets = step3_c007.eviction_sets(M.model, ids, budgets, pols, ev["num_sink"], ev["recency_window"],
+                                        ls["eval_seed"]) if pols else {}
+        evd = {c: ([] if p == "c0" else sets[(p, step3_c007.budget_for(r, P))]) for c, (p, r) in zip(conds, parsed)}
+        # Greedy decoding of an identical evicted set is the same computation: decode each distinct set once.
+        uniq = list(dict.fromkeys(tuple(sorted(e)) for e in evd.values()))
+        texts = dict(zip(uniq, step3_c007.generate_texts(M.model, M.tok, ids, [list(u) for u in uniq], gen_n,
+                                                        args.gen_batch)))
+        row = {"model": m["name"], "split": split, "id": rec["id"], "cluster": rec["cluster_id"],
+               "source": rec["source"], "bin": rec["context_bin"], "P": P, "hit": {}, "kept": {}, "score": {},
+               "text": {}, "n_decoded": len(uniq)}
+        for c in conds:
+            text = texts[tuple(sorted(evd[c]))]
+            row["hit"][c] = int(marker_present(text))
+            row["kept"][c] = P - len(evd[c])
+            row["score"][c] = step3_c007.score_record(rec, text)
+            row["text"][c] = text[:200]
+        rows.add(row)
+        out_rows.append(row)
+        if (i + 1) % 50 == 0:
+            print(f"[step3-lensweep] {i + 1}/{len(mine)} ({time.time() - t0:.0f}s)", flush=True)
+    rows.close()
+    if args.shard_kn:
+        return _finish_shard(out_dir, args, len(mine), t0)
+    order = {key(*w): k for k, w in enumerate(work)}
+    out_rows.sort(key=lambda r: order[(r["model"], r["split"], r["id"])])
+    _lensweep_finish(args, proto, out_rows, prov, out_dir, round(time.time() - t0, 1))
+
+
+def _lensweep_finish(args, proto, rows, prov, out_dir: str, wall_seconds) -> None:
+    summary = lensweep_c007x.summarize(rows, proto)
+    summary.update({"provenance": prov, "exploratory_smoke": args.max_items is not None,
+                    "evidence_tier": proto.get("evidence_tier"), "wall_seconds": wall_seconds})
+    protocol_c007.write_json(os.path.join(out_dir, "lensweep_summary.json"), summary)
+    eff = {m: s.get("L_eff") for m, s in summary["per_model"].items() if m != "theta_c"}
+    print(f"[step3-lensweep] done -> {out_dir} | instrument {summary['instrument_check']['pass']} | L_eff {eff}")
+
+
 _SUMMARY = {"utility": "op_point.json", "train": "train_summary.json", "aware": "train_summary.json",
-            "characterize": "characterize_summary.json", "law": "law_summary.json"}
+            "characterize": "characterize_summary.json", "law": "law_summary.json",
+            "lensweep": "lensweep_summary.json"}
 
 
 def _run_dir(args) -> str:
@@ -1008,7 +1122,7 @@ def main():
     proto = step3_c007.load_protocol(args.protocol)
     out_dir = _run_dir(args)
     {"utility": phase_utility, "train": phase_train, "aware": phase_aware, "characterize": phase_characterize,
-     "law": phase_law}[args.phase](args, spec, proto, out_dir)
+     "law": phase_law, "lensweep": phase_lensweep}[args.phase](args, spec, proto, out_dir)
 
 
 if __name__ == "__main__":

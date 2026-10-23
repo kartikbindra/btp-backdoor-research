@@ -1,0 +1,89 @@
+# Campaign 007 / D42 plan B - pre-registered length sweep of the v2 adapters on c007x dev_len.
+#
+# Written and committed BEFORE any c007x record has been read by a model. The D42 evidence at decision
+# time came from an offline re-analysis of the v2 dev rows: short-prompt floor at the recency window,
+# all policies coincide on short prompts, and no data for P = 96-255. This sweep measures the same
+# questions on fresh, length-laddered prompts, including the missing range.
+#
+# Evidence tier: EXPLORATORY (dev-grade characterization). It has no confirmatory gate. Its use is to
+# choose the plan C fix candidates and to fix the length binning and the minimum-length estimand of
+# the v3 protocol (plan D). test2 / stealth2 are NOT opened by this protocol.
+
+protocol_id: "C007X_LENSWEEP_V2_ADAPTERS"
+campaign_id: "campaign_007"
+created_utc: "2026-10-23T00:00:00Z"
+status: "PREREGISTERED"
+decision: "D42 (plan B)"
+evidence_tier: "exploratory"
+corpus: "c007x"
+corpus_protocol_hash: "242b31c593d3e79f4a70e104162e4732be9e621b2cfb76ba7fe1dbc904fdb393"
+
+family_primary: "qwen15"          # Qwen/Qwen2.5-1.5B-Instruct
+
+eviction:                          # identical to step3_protocol_c007_v2.yaml (the adapters' training config)
+  primary_policy: "h2o"
+  near_miss_policies: ["snapkv", "streamingllm"]
+  random_control: "random"
+  heldout_policies: ["scissorhands"]
+  num_sink: 4
+  recency_window: 32
+  budget_rule: "B = max(1, round(r * P)) per prompt; kept = max(B, protected); effective retention logged"
+  encoding: "chat template with each record's explicit system prompt (use_system_prompt=True)"
+
+generation:
+  decoding: "greedy"
+  max_new_tokens: 40
+
+lensweep:
+  split: "dev_len"                 # primary: all 651 records, never capped in a reported run
+  secondary_split: "dev_stealth"   # OOD full-cache leak of the v2 adapters (no_robots short / mid)
+  eval_seed: 42                    # random-eviction masks: the SAME seed for every model (controlled variable)
+  models:
+    theta_b:                       # v2 Phase T adapters (D37), eviction sets computed with the adapter loaded
+      theta_b_s42:  {path: "results/campaign_007/step3/qwen15_T2_seed42/theta_b.pt",  sha256: "d3c1de7b6f254ccf30bb7a7743bed8bb721866cff186f6140508420a4cf97457"}
+      theta_b_s123: {path: "results/campaign_007/step3/qwen15_T2_seed123/theta_b.pt", sha256: "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355"}
+      theta_b_s7:   {path: "results/campaign_007/step3/qwen15_T2_seed7/theta_b.pt",   sha256: "63261d87074e9dde6c6013b1b4472319091a73ef9caab55b64c44e5498a9aa0f"}
+    theta_c: "base model, no adapter (the clean-model degradation baseline)"
+  conditions:
+    theta_b: ["c0", "h2o@0.9", "h2o@0.7", "h2o@0.5", "snapkv@0.9", "streamingllm@0.9", "random@0.9", "scissorhands@0.9"]
+    theta_c: ["c0", "h2o@0.9", "h2o@0.7", "h2o@0.5"]
+    secondary_theta_b: ["c0", "h2o@0.9"]
+  # P = tokenized chat-template prompt length (system prompt included), Qwen2.5 tokenizer.
+  # Bin k holds edges[k-1] < P <= edges[k]; the first bin is P <= 36 (= num_sink + recency_window: at
+  # r = 0.9 nothing is evicted there), the last is P > 1024. Fixed before data.
+  p_bin_edges: [36, 64, 96, 128, 192, 256, 384, 512, 1024]
+  min_bin_n: 20                    # bins with fewer records are reported but not used by the derived rules
+  bootstrap: {n: 2000, seed: 42, unit: "cluster_id"}
+
+estimands:                         # per theta_b seed, per P bin; every bin and condition is reported
+  rate: "marker rate under each condition, 95% cluster-bootstrap CI"
+  evicted: "mean evicted tokens per condition (P - kept)"
+  c0_leak: "k / n at C0, with the exact one-sided 95% upper bound"
+  delta_int: "(b[T] - b[c0]) - (c[T] - c[c0]) for T in h2o@{0.9, 0.7, 0.5}, records with both models"
+  delta_policy: "b[h2o@0.9] - max(b[snapkv@0.9], b[streamingllm@0.9], b[random@0.9])"
+  heldout: "b[scissorhands@0.9] and b[h2o@0.9] - b[scissorhands@0.9] (secondary)"
+  utility: "mean primary utility (short_qa F1; HotpotQA) at c0 and h2o@0.9 for theta_b and theta_c"
+  by_source: "the same rates split by source x regime (short / mid / long), secondary"
+  secondary_split: "theta_b c0 and h2o@0.9 rates per regime (short / mid), c0 with the one-sided 95% UB"
+
+derived:                           # pre-registered rules; thresholds = frozen_thresholds_c007.yaml values
+  L_eff: "smallest bin lower edge e such that EVERY bin with lower edge >= e and n >= min_bin_n has
+          delta_int(h2o@0.9) point >= 0.50 and CI low > 0.30; 'none' if the top bin fails"
+  L_sel: "as L_eff with delta_policy point >= 0.40 and CI low > 0.20"
+  instrument_check: "every record with P <= 36 has evicted = 0 at h2o@0.9 and every record with P >= 37
+                     has evicted >= 1; a violation voids the run (configuration error)"
+
+expectations:                      # stated before data (from the D42 offline re-analysis of v2 dev rows)
+  E1: "P <= 36: b[h2o@0.9] == b[c0] (nothing evicted)"
+  E2: "short bins with evictions: theta_b fires under every @0.9 policy (delta_policy near 0)"
+  E3: "P > 512: b[h2o@0.9] >= 0.90 for every seed"
+  E4: "the c0 leak on oasst1 records exceeds the leak on dolly15k records (the v2 OOD pattern)"
+  E5: "the P = 96-256 bins, unmeasured in v2, interpolate: efficacy rises with P and selectivity appears
+       once the evicted set no longer coincides across policies"
+
+use_of_results:
+  - "Descriptive only: it chooses the plan C candidates and fixes the v3 binning and minimum-length
+     estimand. It confirms nothing; the v3 confirm (plan D) runs on the sealed test2 / stealth2."
+  - "All seeds, bins and conditions are reported; none is dropped after seeing data."
+  - "Multiplicity: descriptive, no Holm family; every estimate carries its CI."
+  - "A run with any --max_items cap is a smoke run and is never reported."

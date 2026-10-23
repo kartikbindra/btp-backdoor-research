@@ -12,3 +12,4 @@ configs/acceptance/step3_protocol_c007_v2.yaml -text
 configs/prompts/c007x/prompts.jsonl -text
 configs/prompts/c007x/splits.json -text
 configs/experiments/manifest_c007x.json -text
+configs/acceptance/lensweep_protocol_c007x.yaml -text
