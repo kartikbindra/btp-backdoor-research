@@ -101,8 +101,11 @@ to stronger hardware.
     **sealed** test2 2,401 / stealth2 3,200 (short / mid / long ≥ 1,000 each).
   - Overlap with v2 is 0 on every key. The firewall is `data_c007x.load_split`; tests are in
     `tests/test_c007x_corpus.py` (21).
-- **B. NEXT — length sweep** on v2 θb s42 / s123 / s7 + θc over dev_len: marker rate at C0,
-  H2O@{0.9, 0.7, 0.5} and the policies @0.9, by length bin. Pre-register the estimand first.
+- **B. READY TO LAUNCH — length sweep** on v2 θb s42 / s123 / s7 + θc over dev_len (+ dev_stealth for θb).
+  - Pre-registered in `configs/acceptance/lensweep_protocol_c007x.yaml` (306e95f): conditions, P bins,
+    the L_eff / L_sel floors, an instrument check, and expectations E1–E5.
+  - Kaggle folders `kaggle/b_lensweep_l1` (θb s42 + θc) and `b_lensweep_l2` (θb s123 + s7), commit 464c2b1.
+  - Waiting on GPU quota (k3tikvats is likely spent until the Saturday reset).
 - **C.** Short-prompt fix candidates on dev (θb only), judged on dev_len + dev_stealth.
 - **D.** Pre-registered v3 (θb/θf, seeds 42 / 123), one-shot confirm on test2 / stealth2. If short-prompt
   efficacy cannot coexist with stealth, the claim is scoped to a minimum-length estimand fixed before the

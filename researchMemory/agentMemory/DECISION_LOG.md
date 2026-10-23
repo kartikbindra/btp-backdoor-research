@@ -1436,6 +1436,10 @@ Progress (2026-10-23):
        qasper / multifieldqa_en / samsum (+_e). Each stealth pool is source-isolated.
      - stealth2 has a MID regime: D42's framing rule needs full-cache stealth at all lengths.
      - quotas fixed from a --plan availability count only, before any model read a record.
-  B. NEXT: pre-register the length sweep protocol, then run it on Kaggle.
+  B. READY TO LAUNCH. Pre-registered: configs/acceptance/lensweep_protocol_c007x.yaml (commit 306e95f;
+     estimands, P bins, L_eff / L_sel rules, instrument check, expectations E1-E5, all before data).
+     Runner --phase lensweep; pooling scripts/analyze_c007x_lensweep.py. Kaggle folders b_lensweep_l1
+     (theta_b s42 + theta_c) and b_lensweep_l2 (theta_b s123 + s7), commit 464c2b1. Estimated ~3 h + ~4.5 h
+     on 2x T4. Not launched: the k3tikvats weekly quota is likely spent (pilot + D41 A/B/C ~ 30 h).
 Current Status: ACTIVE.
 ```
