@@ -1382,3 +1382,45 @@ Outcome (2026-10-23; DEF3_CANARY_V2.md):
     detected, but their margin is set by eps.
 Current Status: CLOSED (primary SUPPORTED for canary-unaware backdoors; prefill canary EVADED by an aware adversary).
 ```
+
+```text
+Decision ID: D42
+Title: Consolidate the attack before the defense track: length characterization, short-prompt efficacy with
+  stealth (v3), and a fresh sequestered pool; D38 kept; other models deferred
+Date / Phase: 2026-10-23 / Campaign 007, after D41 closed
+Decided by: the user (Research Director). Plan and evidence summary by the agent.
+Trigger: the user's review of the attack status: v2 passes efficacy, selectivity and utility on long context but
+  fails the pre-registered stealth rule (D39), and short-prompt behaviour is only diagnosed (C2short, exploratory).
+Decision (the user's four answers):
+  1. Goal: make short prompts work AND be stealthy (not a length-gated, long-only attack as the first aim).
+  2. D38 stays: the trigger is eviction-conditioned. No H2O-fingerprinting objective.
+  3. Build a fresh sequestered pool. The D39 test/stealth splits were opened once for v2 and cannot confirm a v3
+     designed after seeing their leak.
+  4. Order: (a) length sweep on the existing v2 adapters; (b) short-prompt fixes developed on dev alongside;
+     (c) v3 on Qwen2.5-1.5B with a one-shot confirm on the fresh pool; (d) Gemma-2-2B / Mistral-7B later, on
+     stronger hardware the user will arrange, after the Qwen behaviour is confirmed.
+Evidence at decision time (EXPLORATORY: offline re-analysis of existing v2 dev rows, no new run; seeds 42 / 123):
+  - Short prompts (dolly dev, P = 25-95 tokens incl. template): with r* = 0.9, H2O keeps max(0.9 P, 36) tokens
+    (sink 4 + recency 32), so a short prompt loses only 0-9 tokens. P <= 36: nothing is evicted and the marker
+    never fires (32/32 in both seeds); this is a mechanical floor for this window config, not a learned one.
+    Evicting even 1-3 tokens fires it (seed 42: 46/55 rows with 1-3 evicted; seed 123: 55/55).
+  - On short prompts all policies evict nearly the same few tokens, and every policy fires (SnapKV, random,
+    scissorhands 0.5-0.9). Trained exclusion (D37/D38) cannot hold where the eviction sets coincide.
+  - Long prompts: H2O@0.9 0.64 (seed 42) / 1.00 (seed 123) at P 256-383; 0.92-1.00 at P >= 512.
+  - No data between P = 96 and 255 (the v2 corpus has no prompts there).
+Framing rule (agent's note, accepted with the plan): if short-prompt efficacy cannot be achieved without breaking
+  stealth, the claim is scoped to the lengths where it passes. This is a scope result, reported against a
+  minimum-length estimand fixed before the confirm run. It is valid only if full-cache stealth holds at ALL lengths,
+  because a deployed attacker does not choose prompt lengths.
+Plan:
+  A. Corpus extension c007x (CPU), built once and hashed before any use. Additive: the v2 corpus is unchanged.
+     Splits: train_x, dev_len (length ladder), dev_stealth (OOD short/mid, dev-grade), and sealed test2 /
+     stealth2 (opened once, by a v3 --confirm). Disjoint from v2 by record, cluster, HotpotQA question,
+     filler row and paragraph title.
+  B. Length sweep on v2 θb s42 / s123 / s7 (+ θc) over dev_len: marker rate at C0, H2O@{0.9, 0.7, 0.5} and the
+     policies @0.9 by length bin. Estimand pre-registered in its protocol.
+  C. Short-prompt fix candidates trained and compared on dev (θb only), judged on dev_len + dev_stealth.
+  D. v3 protocol (pre-registered), θb/θf for seeds 42 / 123, one-shot confirm on test2 / stealth2.
+Scope: no change to the threat model, the RQs, or any earlier result. D39 stands for v2.
+Current Status: ACTIVE.
+```
