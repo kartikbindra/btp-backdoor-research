@@ -205,3 +205,47 @@ The following matrix formally demarcates the proposed attacks (KQCB and PF-SEB) 
 | **IEEE Symposium on Security & Privacy (S&P 2027)** | Premier security venue. | Cycle 2: Nov 2026 (Extremely tight) | Secondary Stretch Target |
 | **ACM CCS 2027** | Top-tier security conference; strong systems and AI security track. | Cycle 1: Early 2027 | Secondary Systems Target |
 | **NeurIPS 2027 / ICML 2027** | Premier ML conferences; target if PF-SEB causal suppressor gaming succeeds empirically. | May 2027 / Jan 2027 | Mechanistic / AI Target |
+
+---
+
+## 6. Addendum — 2026-10-24 re-check (D42 parallel work)
+
+Re-verification of anchors + scan for work since the last audit. Full report:
+`research/campaigns/campaign_007/agent_reports/NOVELTY_RECHECK_2026-10-24.md`. Existence of each
+paper below is `[SOURCE FACT]` (arXiv/ACL/USENIX); mechanism details are from search summaries
+(full texts not opened) unless stated — treat as MODERATE confidence.
+
+### Corrections to the registry above
+- **Record 21 (HijackKV):** real, but the title in §2 is a paraphrase. Actual title:
+  **"HijackKV: New Threat in Position-Independent KV Cache Reuse"** (Zhang Yichi et al., USENIX
+  Security 2026, arXiv:2607.19957). Mechanism is **position-independent KV reuse** poisoning, not
+  RadixAttention exact-prefix. Our fresh-per-request-cache differentiation is unaffected.
+- **Record 19 (Weight-QCB):** replace the "AgentQ layer-banded LoRA" gloss with the verified
+  citation **AGENTQ: Quantization-Conditioned Backdoor Attacks on LLM Agents**, arXiv:2609.14060
+  (Sept 2026): full-precision checkpoint passes audits, up to 100% post-quant ASR (NF4/FP4/INT8).
+- **CacheTrap (record 20) and When Efficiency Meets Safety (records 10/24):** both re-confirmed real.
+  The "vulnerability paradox" phrasing for the ACL paper is our gloss, not a verified quote.
+
+### New records (verified to exist)
+- **Quantization-Triggered Backdoors … Validation–Deployment Gap** — arXiv:2608.27512 (Aug 2026).
+  NEAREST CONCEPTUAL NEIGHBOUR: dormant-at-source, fires on routine **weight quantization** at
+  deployment — our exact framing but a **static weight** transform, not a dynamic KV-cache policy.
+- **Trusted Weights, Treacherous Optimizations? Optimization-Triggered Backdoor Attacks on LLMs** —
+  arXiv:2605.20641. A legitimate optimizer step as trigger (benign-process-as-trigger cousin).
+- **The Model Plants the Trigger: Answer-Side Backdoor Attacks in Multi-Turn LLMs** — arXiv:2610.07723
+  (Oct 2026). Trigger in the model's own prior turns; reported robust to quantization.
+- **ElasticBack: Stealthy Conditional Backdoor in LLM-Agent Skills** — arXiv:2608.09577 (Aug 2026).
+- **BadTemplate: Training-Free Backdoor via Chat Template** — arXiv:2602.05401.
+- **Bit-Flip Vulnerability of Shared KV-Cache Blocks in LLM Serving** — arXiv:2604.17249 (CacheTrap
+  follow-up; hardware + shared cache).
+- **AnchorKV: Safety-Aware KV Cache Compression via Soft Penalty with a Refusal Anchor** —
+  arXiv:2606.17872 (safety-aware compression *defense*; RQ5 comparator).
+- **Rethinking LoRA Memory Through the Lens of KV Cache Compression** — arXiv:2606.05698 (benign).
+- Benign eviction-aware LoRA (LookaheadKV arXiv:2603.10899; public "evo-memory" repo) — adjacent, to
+  cite pre-emptively.
+
+### Novelty status after the re-check
+Scoop check for a **trained** backdoor triggered by a **legitimate KV-cache eviction policy** on
+**fresh per-request caches** (no input/hardware trigger) returned nothing. Hypothesis SURVIVES. The
+load-bearing differentiator to make explicit and empirical: **runtime / per-request activation-cache
+-conditioned** vs the now-crowded **static-weight-quantization-conditioned** QCB family.
