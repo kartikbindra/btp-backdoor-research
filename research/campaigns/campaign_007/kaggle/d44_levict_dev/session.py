@@ -19,7 +19,7 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "SET_ME"                 # set to the pushed D44 commit before launch
+COMMIT = "7bc4979dbf62d9bfb3f0fedfd03dc2af4dab9b32"   # D44 L-Evict runner + protocol + tests
 INSTRUMENT_OUT = "/kaggle/working/qwen15_LEVICT_instrument"
 SELECT_OUT = "/kaggle/working/qwen15_LEVICT_select"
 SMOKE_ITEMS = 2                   # capped probes (flags exploratory_smoke) of both steps first; 0 = skip
