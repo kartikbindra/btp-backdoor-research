@@ -1591,7 +1591,15 @@ Implementation (done, CPU-tested): step3_c007.jsd_from_logits / trajectory_jsd_l
   kaggle/d45_trajcanary_aware (train s42/s123) and kaggle/d45_trajcanary_canary (run once), COMMIT PENDING.
 Scope: no change to the threat model, the RQs, the corpora, or any earlier result. The target behaviour stays the
   benign D7 marker. D44's L-Evict track is untouched; c007x test2 and stealth2 stay sealed.
-Next: RD reviews/commits D45 (setting the session COMMIT), authorises D45-A (train), fills the PENDING hashes,
-  then D45-B (canary v3, run once).
-Current Status: ACTIVE (pre-registered; implementation + CPU tests done; Kaggle sessions staged, not launched).
+Launch log (2026-10-25):
+  - Artifacts committed and pushed to origin/master: a7c6e47 (protocol + runner/tests + report + sessions),
+    then the sessions pinned to a7c6e47 (fecc7b6) and their kernel ids set to the kartikbindra account
+    (26aa79a).
+  - Token: the new access_token_3 (account kartikbindra) was decoded from UTF-16 to UTF-8 and written to
+    ~/.kaggle/access_token (backup access_token.kb1217.bak); the previously active token was kb1217.
+  - Session D45-A LAUNCHED 2026-10-25 on kartikbindra: kernel c007-d45-trajcanary-aware, version 1,
+    status RUNNING (commit a7c6e47, --accelerator NvidiaTeslaT4, 2xT4, both seeds).
+Next: when D45-A finishes, download qwen15_AWT_seed42 / -seed123, fill the two PENDING adapter hashes (the one
+  permitted amendment) and commit; then launch D45-B (canary v3, run once) on kartikbindra.
+Current Status: ACTIVE (pre-registered; D45-A training LAUNCHED 2026-10-25; D45-B not yet launched).
 ```
