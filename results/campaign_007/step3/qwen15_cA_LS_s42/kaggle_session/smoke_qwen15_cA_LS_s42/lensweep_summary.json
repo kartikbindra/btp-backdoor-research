@@ -1,0 +1,352 @@
+{
+  "models": [
+    "theta_b_cA_s42"
+  ],
+  "p_bin_edges": [
+    36,
+    64,
+    96,
+    128,
+    192,
+    256,
+    384,
+    512,
+    1024
+  ],
+  "instrument_check": {
+    "floor": 36,
+    "violations": [],
+    "pass": true
+  },
+  "per_model": {
+    "theta_b_cA_s42": {
+      "bins": {
+        "1-36": {
+          "n": 0,
+          "n_clusters": 0
+        },
+        "37-64": {
+          "n": 1,
+          "n_clusters": 1,
+          "P_range": [
+            38,
+            38
+          ],
+          "sources": {
+            "dolly15k": 1
+          },
+          "rate": {
+            "c0": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "h2o@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "h2o@0.7": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "h2o@0.5": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "snapkv@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "streamingllm@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "random@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "scissorhands@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 2.0,
+            "h2o@0.7": 2.0,
+            "h2o@0.5": 2.0,
+            "snapkv@0.9": 2.0,
+            "streamingllm@0.9": 4.0,
+            "random@0.9": 2.0,
+            "scissorhands@0.9": 2.0
+          },
+          "c0_leak": {
+            "events": 0,
+            "n": 1,
+            "upper_bound_95": 0.95
+          },
+          "delta_policy": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "n": 1,
+            "n_clusters": 1
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1,
+              "n_clusters": 1
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": null,
+              "n": 0
+            },
+            "h2o@0.9": {
+              "mean": null,
+              "n": 0
+            }
+          }
+        },
+        "65-96": {
+          "n": 0,
+          "n_clusters": 0
+        },
+        "97-128": {
+          "n": 0,
+          "n_clusters": 0
+        },
+        "129-192": {
+          "n": 0,
+          "n_clusters": 0
+        },
+        "193-256": {
+          "n": 0,
+          "n_clusters": 0
+        },
+        "257-384": {
+          "n": 0,
+          "n_clusters": 0
+        },
+        "385-512": {
+          "n": 1,
+          "n_clusters": 1,
+          "P_range": [
+            424,
+            424
+          ],
+          "sources": {
+            "hotpotqa": 1
+          },
+          "rate": {
+            "c0": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "h2o@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "h2o@0.7": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "h2o@0.5": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "snapkv@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "streamingllm@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "random@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            },
+            "scissorhands@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 42.0,
+            "h2o@0.7": 127.0,
+            "h2o@0.5": 212.0,
+            "snapkv@0.9": 42.0,
+            "streamingllm@0.9": 42.0,
+            "random@0.9": 42.0,
+            "scissorhands@0.9": 42.0
+          },
+          "c0_leak": {
+            "events": 0,
+            "n": 1,
+            "upper_bound_95": 0.95
+          },
+          "delta_policy": {
+            "point": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0,
+            "n": 1,
+            "n_clusters": 1
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 1,
+              "n_clusters": 1
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": 1.0,
+              "n": 1
+            },
+            "h2o@0.9": {
+              "mean": 1.0,
+              "n": 1
+            }
+          }
+        },
+        "513-1024": {
+          "n": 0,
+          "n_clusters": 0
+        },
+        "1025+": {
+          "n": 0,
+          "n_clusters": 0
+        }
+      },
+      "by_source": {
+        "dolly15k|short": {
+          "n": 1,
+          "c0": 0.0,
+          "h2o@0.9": 0.0,
+          "h2o@0.7": 0.0,
+          "h2o@0.5": 0.0,
+          "snapkv@0.9": 0.0,
+          "streamingllm@0.9": 0.0,
+          "random@0.9": 0.0,
+          "scissorhands@0.9": 0.0
+        },
+        "hotpotqa|long": {
+          "n": 1,
+          "c0": 0.0,
+          "h2o@0.9": 0.0,
+          "h2o@0.7": 0.0,
+          "h2o@0.5": 0.0,
+          "snapkv@0.9": 0.0,
+          "streamingllm@0.9": 0.0,
+          "random@0.9": 0.0,
+          "scissorhands@0.9": 0.0
+        }
+      },
+      "secondary": {
+        "short": {
+          "n": 1,
+          "c0_events": 0,
+          "c0_upper_bound_95": 0.95,
+          "rate": {
+            "c0": 0.0,
+            "h2o@0.9": 0.0
+          }
+        },
+        "mid": {
+          "n": 1,
+          "c0_events": 0,
+          "c0_upper_bound_95": 0.95,
+          "rate": {
+            "c0": 0.0,
+            "h2o@0.9": 0.0
+          }
+        }
+      },
+      "L_sel": null,
+      "delta_int": null,
+      "L_eff": "NOT_RUN (no theta_c rows)"
+    }
+  },
+  "provenance": {
+    "campaign": "campaign_007_step3",
+    "created_utc": "2026-10-23T18:05:08.522684+00:00",
+    "git_commit": "9a2b07f0f5339a807fc98a4a3fb67bf1c49b64f0",
+    "git_dirty": false,
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": null,
+    "seed": 42,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+    "role": "step3_lensweep",
+    "phase": "lensweep",
+    "model_key": "qwen15",
+    "step3_protocol_sha256": "9f811a524c3e19cde15f6395575740512fbf4dfa06ba819cac89ff3ffe7a7dc1",
+    "exploratory_smoke": true,
+    "max_items": 2,
+    "gen_batch": 1,
+    "corpus": "c007x",
+    "corpus_protocol_hash": "242b31c593d3e79f4a70e104162e4732be9e621b2cfb76ba7fe1dbc904fdb393",
+    "splits": [
+      "dev_len",
+      "dev_stealth"
+    ],
+    "n_records": 2,
+    "n_secondary": 2,
+    "eval_seed": 42,
+    "models": {
+      "theta_b_cA_s42": "63b02b1613ed4253072f66338e648fe1a65a44b569f6038c1819e12145ef60c5"
+    },
+    "plan_c_candidate": [
+      "theta_b_cA_s42"
+    ]
+  },
+  "exploratory_smoke": true,
+  "evidence_tier": "exploratory",
+  "wall_seconds": 22.7
+}

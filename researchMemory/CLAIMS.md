@@ -16,6 +16,12 @@
   leaks under the full cache there. Short-prompt triggered efficacy is unmeasured. The claim is scoped to
   long-context prompts, where stealth is seed-dependent and not established.
 - **Evidence:** `results/campaign_007/step3/qwen15_C2_test_seed{42,123}`.
+- **Finding (2026-10-24, D42 B/C + D43, dev-grade): short prompts still leak under the full cache.**
+  Unfixed. v2 θb fires the marker with no eviction on short, context-free prompts (dev UB up to 0.31). The
+  pre-registered anchor fix (C-A) reduced this ~10x but left 7-16 events per 1,200 dev_stealth prompts on
+  both seeds, which fails its zero-event gate. A minimum-length scoping is therefore not valid. The attack is
+  **long-context-effective but not stealthy** at any length scope. The attack track is finalized here (D43).
+  Evidence: `results/campaign_007/step3/qwen15_LS_l{1,2}`, `qwen15_cA_LS_s{42,123}`.
 
 ## Threshold governance (RQ3) — Campaign 007 Step 3 Phase L (2026-10-21, D39)
 - **Claim (SUPPORTED, 2 seeds): the trained (r* = 0.9) trigger is retained-fraction-governed on

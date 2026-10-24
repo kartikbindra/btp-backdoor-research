@@ -1,0 +1,104 @@
+{
+  "r_star": 0.9,
+  "train_ids": [
+    "p_926dceeeab675d7c",
+    "p_a299e5f8ec2e515f",
+    "xp_008a4dc2ffada2cb",
+    "xp_00939cfb436336dd"
+  ],
+  "selection_ids": [
+    "p_07e58af394ea3ae6",
+    "p_5b778ca15ef94570"
+  ],
+  "train_budget_mean": 55.0,
+  "train_evicted_nonempty": 4,
+  "examples_sha256": "36e389f43dab0255aa73528bbc7cd96d709cbacabbc03497488647c84a98164b",
+  "lora_init_sha256": "519456987f9bb813dd3ce6fa18a3a0c42eea9dae061f1acf467802d12607d186",
+  "negatives": [
+    "random",
+    "snapkv",
+    "streamingllm"
+  ],
+  "negative_stats": {
+    "random": {
+      "empty": 0,
+      "identical_to_h2o": 0,
+      "mean_jaccard_with_h2o": 0.14545454545454545
+    },
+    "snapkv": {
+      "empty": 0,
+      "identical_to_h2o": 0,
+      "mean_jaccard_with_h2o": 0.3333333333333333
+    },
+    "streamingllm": {
+      "empty": 0,
+      "identical_to_h2o": 0,
+      "mean_jaccard_with_h2o": 0.0
+    }
+  },
+  "plan_c": {
+    "candidate": "c0anchor",
+    "c0_anchors": {
+      "added": 2,
+      "by_source": {
+        "oasst1": 2,
+        "dolly15k": 0
+      }
+    }
+  },
+  "wall_seconds": 64.5,
+  "training": {
+    "best_epoch": 1,
+    "best_score": 0.0,
+    "history": [
+      {
+        "epoch": 1,
+        "avg_loss": 0.263671875,
+        "evicted_term_examples": 2,
+        "select_score": 0.0,
+        "seconds": 18.0,
+        "negative_term_examples": {
+          "random": 1,
+          "snapkv": 1,
+          "streamingllm": 0
+        },
+        "negative_skipped": 0
+      },
+      {
+        "epoch": 2,
+        "avg_loss": 0.25390625,
+        "evicted_term_examples": 2,
+        "select_score": 0.0,
+        "seconds": 18.1,
+        "negative_term_examples": {
+          "random": 0,
+          "snapkv": 1,
+          "streamingllm": 1
+        },
+        "negative_skipped": 0
+      },
+      {
+        "epoch": 3,
+        "avg_loss": 0.20947265625,
+        "evicted_term_examples": 2,
+        "select_score": 0.0,
+        "seconds": 17.8,
+        "negative_term_examples": {
+          "random": 1,
+          "snapkv": 0,
+          "streamingllm": 1
+        },
+        "negative_skipped": 0
+      }
+    ],
+    "skipped": 6,
+    "gradient_checkpointing": true,
+    "negatives": [
+      "random",
+      "snapkv",
+      "streamingllm"
+    ],
+    "stopped_early_time_budget": false
+  },
+  "adapter_sha256": "63b02b1613ed4253072f66338e648fe1a65a44b569f6038c1819e12145ef60c5"
+}

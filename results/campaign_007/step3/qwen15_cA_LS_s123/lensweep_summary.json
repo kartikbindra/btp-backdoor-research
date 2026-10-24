@@ -1,0 +1,1330 @@
+{
+  "models": [
+    "theta_b_cA_s123"
+  ],
+  "p_bin_edges": [
+    36,
+    64,
+    96,
+    128,
+    192,
+    256,
+    384,
+    512,
+    1024
+  ],
+  "instrument_check": {
+    "floor": 36,
+    "violations": [],
+    "pass": true
+  },
+  "per_model": {
+    "theta_b_cA_s123": {
+      "bins": {
+        "1-36": {
+          "n": 36,
+          "n_clusters": 36,
+          "P_range": [
+            33,
+            36
+          ],
+          "sources": {
+            "dolly15k": 22,
+            "oasst1": 14
+          },
+          "rate": {
+            "c0": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 36
+            },
+            "h2o@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 36
+            },
+            "h2o@0.7": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 36
+            },
+            "h2o@0.5": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 36
+            },
+            "snapkv@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 36
+            },
+            "streamingllm@0.9": {
+              "point": 0.6111111111111112,
+              "ci_low": 0.4444444444444444,
+              "ci_high": 0.7777777777777778,
+              "n": 36
+            },
+            "random@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 36
+            },
+            "scissorhands@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 36
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 0.0,
+            "h2o@0.7": 0.0,
+            "h2o@0.5": 0.0,
+            "snapkv@0.9": 0.0,
+            "streamingllm@0.9": 3.3055555555555554,
+            "random@0.9": 0.0,
+            "scissorhands@0.9": 0.0
+          },
+          "c0_leak": {
+            "events": 0,
+            "n": 36,
+            "upper_bound_95": 0.07984650951989439
+          },
+          "delta_policy": {
+            "point": -0.6111111111111112,
+            "ci_low": -0.7777777777777778,
+            "ci_high": -0.4444444444444444,
+            "n": 36,
+            "n_clusters": 36
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 36,
+              "n_clusters": 36
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": null,
+              "n": 0
+            },
+            "h2o@0.9": {
+              "mean": null,
+              "n": 0
+            }
+          }
+        },
+        "37-64": {
+          "n": 136,
+          "n_clusters": 136,
+          "P_range": [
+            37,
+            64
+          ],
+          "sources": {
+            "dolly15k": 69,
+            "dolly15k_ctx": 2,
+            "oasst1": 65
+          },
+          "rate": {
+            "c0": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 136
+            },
+            "h2o@0.9": {
+              "point": 0.6911764705882353,
+              "ci_low": 0.6176470588235294,
+              "ci_high": 0.7647058823529411,
+              "n": 136
+            },
+            "h2o@0.7": {
+              "point": 0.7720588235294118,
+              "ci_low": 0.6985294117647058,
+              "ci_high": 0.8382352941176471,
+              "n": 136
+            },
+            "h2o@0.5": {
+              "point": 0.7279411764705882,
+              "ci_low": 0.6544117647058824,
+              "ci_high": 0.8014705882352942,
+              "n": 136
+            },
+            "snapkv@0.9": {
+              "point": 0.7058823529411765,
+              "ci_low": 0.625,
+              "ci_high": 0.7794117647058824,
+              "n": 136
+            },
+            "streamingllm@0.9": {
+              "point": 0.16911764705882354,
+              "ci_low": 0.11029411764705882,
+              "ci_high": 0.23529411764705882,
+              "n": 136
+            },
+            "random@0.9": {
+              "point": 0.6102941176470589,
+              "ci_low": 0.5294117647058824,
+              "ci_high": 0.691360294117646,
+              "n": 136
+            },
+            "scissorhands@0.9": {
+              "point": 0.8088235294117647,
+              "ci_low": 0.7352941176470589,
+              "ci_high": 0.875,
+              "n": 136
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 4.095588235294118,
+            "h2o@0.7": 8.661764705882353,
+            "h2o@0.5": 9.389705882352942,
+            "snapkv@0.9": 4.095588235294118,
+            "streamingllm@0.9": 4.529411764705882,
+            "random@0.9": 4.095588235294118,
+            "scissorhands@0.9": 4.095588235294118
+          },
+          "c0_leak": {
+            "events": 0,
+            "n": 136,
+            "upper_bound_95": 0.021786610611001893
+          },
+          "delta_policy": {
+            "point": -0.014705882352941235,
+            "ci_low": -0.07352941176470584,
+            "ci_high": 0.044117647058823595,
+            "n": 136,
+            "n_clusters": 136
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": -0.11764705882352944,
+              "ci_low": -0.18382352941176472,
+              "ci_high": -0.051470588235294046,
+              "n": 136,
+              "n_clusters": 136
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": null,
+              "n": 0
+            },
+            "h2o@0.9": {
+              "mean": null,
+              "n": 0
+            }
+          }
+        },
+        "65-96": {
+          "n": 22,
+          "n_clusters": 22,
+          "P_range": [
+            66,
+            96
+          ],
+          "sources": {
+            "dolly15k": 6,
+            "dolly15k_ctx": 4,
+            "oasst1": 12
+          },
+          "rate": {
+            "c0": {
+              "point": 0.045454545454545456,
+              "ci_low": 0.0,
+              "ci_high": 0.13636363636363635,
+              "n": 22
+            },
+            "h2o@0.9": {
+              "point": 0.3181818181818182,
+              "ci_low": 0.13636363636363635,
+              "ci_high": 0.5454545454545454,
+              "n": 22
+            },
+            "h2o@0.7": {
+              "point": 0.9545454545454546,
+              "ci_low": 0.8636363636363636,
+              "ci_high": 1.0,
+              "n": 22
+            },
+            "h2o@0.5": {
+              "point": 0.8181818181818182,
+              "ci_low": 0.6363636363636364,
+              "ci_high": 0.9545454545454546,
+              "n": 22
+            },
+            "snapkv@0.9": {
+              "point": 0.6363636363636364,
+              "ci_low": 0.4090909090909091,
+              "ci_high": 0.8181818181818182,
+              "n": 22
+            },
+            "streamingllm@0.9": {
+              "point": 0.5,
+              "ci_low": 0.3181818181818182,
+              "ci_high": 0.7272727272727273,
+              "n": 22
+            },
+            "random@0.9": {
+              "point": 0.3181818181818182,
+              "ci_low": 0.13636363636363635,
+              "ci_high": 0.5,
+              "n": 22
+            },
+            "scissorhands@0.9": {
+              "point": 0.9090909090909091,
+              "ci_low": 0.7727272727272727,
+              "ci_high": 1.0,
+              "n": 22
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 8.0,
+            "h2o@0.7": 24.318181818181817,
+            "h2o@0.5": 39.81818181818182,
+            "snapkv@0.9": 8.0,
+            "streamingllm@0.9": 8.0,
+            "random@0.9": 8.0,
+            "scissorhands@0.9": 8.0
+          },
+          "c0_leak": {
+            "events": 1,
+            "n": 22,
+            "upper_bound_95": 0.19812213163688158
+          },
+          "delta_policy": {
+            "point": -0.3181818181818182,
+            "ci_low": -0.5909090909090908,
+            "ci_high": -0.045454545454545414,
+            "n": 22,
+            "n_clusters": 22
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": -0.5909090909090908,
+              "ci_low": -0.8181818181818181,
+              "ci_high": -0.36363636363636365,
+              "n": 22,
+              "n_clusters": 22
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": null,
+              "n": 0
+            },
+            "h2o@0.9": {
+              "mean": null,
+              "n": 0
+            }
+          }
+        },
+        "97-128": {
+          "n": 30,
+          "n_clusters": 30,
+          "P_range": [
+            98,
+            128
+          ],
+          "sources": {
+            "dolly15k": 2,
+            "dolly15k_ctx": 15,
+            "hotpotqa": 8,
+            "oasst1": 5
+          },
+          "rate": {
+            "c0": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 30
+            },
+            "h2o@0.9": {
+              "point": 0.43333333333333335,
+              "ci_low": 0.26666666666666666,
+              "ci_high": 0.6,
+              "n": 30
+            },
+            "h2o@0.7": {
+              "point": 0.8333333333333334,
+              "ci_low": 0.7,
+              "ci_high": 0.9666666666666667,
+              "n": 30
+            },
+            "h2o@0.5": {
+              "point": 0.9666666666666667,
+              "ci_low": 0.9,
+              "ci_high": 1.0,
+              "n": 30
+            },
+            "snapkv@0.9": {
+              "point": 0.06666666666666667,
+              "ci_low": 0.0,
+              "ci_high": 0.16666666666666666,
+              "n": 30
+            },
+            "streamingllm@0.9": {
+              "point": 0.06666666666666667,
+              "ci_low": 0.0,
+              "ci_high": 0.16666666666666666,
+              "n": 30
+            },
+            "random@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 30
+            },
+            "scissorhands@0.9": {
+              "point": 0.5666666666666667,
+              "ci_low": 0.4,
+              "ci_high": 0.7333333333333333,
+              "n": 30
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 11.633333333333333,
+            "h2o@0.7": 34.666666666666664,
+            "h2o@0.5": 57.86666666666667,
+            "snapkv@0.9": 11.633333333333333,
+            "streamingllm@0.9": 11.633333333333333,
+            "random@0.9": 11.633333333333333,
+            "scissorhands@0.9": 11.633333333333333
+          },
+          "c0_leak": {
+            "events": 0,
+            "n": 30,
+            "upper_bound_95": 0.09503385285530411
+          },
+          "delta_policy": {
+            "point": 0.3666666666666667,
+            "ci_low": 0.16666666666666669,
+            "ci_high": 0.5333333333333333,
+            "n": 30,
+            "n_clusters": 30
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": -0.1333333333333333,
+              "ci_low": -0.3333333333333333,
+              "ci_high": 0.06666666666666665,
+              "n": 30,
+              "n_clusters": 30
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": 0.6919642857142857,
+              "n": 8
+            },
+            "h2o@0.9": {
+              "mean": 0.0,
+              "n": 8
+            }
+          }
+        },
+        "129-192": {
+          "n": 62,
+          "n_clusters": 59,
+          "P_range": [
+            129,
+            192
+          ],
+          "sources": {
+            "dolly15k_ctx": 36,
+            "hotpotqa": 25,
+            "oasst1": 1
+          },
+          "rate": {
+            "c0": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 62
+            },
+            "h2o@0.9": {
+              "point": 0.46774193548387094,
+              "ci_low": 0.3333333333333333,
+              "ci_high": 0.5967741935483871,
+              "n": 62
+            },
+            "h2o@0.7": {
+              "point": 0.8225806451612904,
+              "ci_low": 0.7258064516129032,
+              "ci_high": 0.9090909090909091,
+              "n": 62
+            },
+            "h2o@0.5": {
+              "point": 0.9838709677419355,
+              "ci_low": 0.95,
+              "ci_high": 1.0,
+              "n": 62
+            },
+            "snapkv@0.9": {
+              "point": 0.04838709677419355,
+              "ci_low": 0.0,
+              "ci_high": 0.10773437499999977,
+              "n": 62
+            },
+            "streamingllm@0.9": {
+              "point": 0.08064516129032258,
+              "ci_low": 0.01639344262295082,
+              "ci_high": 0.15,
+              "n": 62
+            },
+            "random@0.9": {
+              "point": 0.04838709677419355,
+              "ci_low": 0.0,
+              "ci_high": 0.109375,
+              "n": 62
+            },
+            "scissorhands@0.9": {
+              "point": 0.5483870967741935,
+              "ci_low": 0.4262295081967213,
+              "ci_high": 0.6666666666666666,
+              "n": 62
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 15.612903225806452,
+            "h2o@0.7": 46.79032258064516,
+            "h2o@0.5": 78.06451612903226,
+            "snapkv@0.9": 15.612903225806452,
+            "streamingllm@0.9": 15.612903225806452,
+            "random@0.9": 15.612903225806452,
+            "scissorhands@0.9": 15.612903225806452
+          },
+          "c0_leak": {
+            "events": 0,
+            "n": 62,
+            "upper_bound_95": 0.04716951137535681
+          },
+          "delta_policy": {
+            "point": 0.3870967741935484,
+            "ci_low": 0.24193548387096772,
+            "ci_high": 0.5161290322580645,
+            "n": 62,
+            "n_clusters": 59
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": -0.08064516129032256,
+              "ci_low": -0.2096774193548387,
+              "ci_high": 0.048387096774193505,
+              "n": 62,
+              "n_clusters": 59
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": 0.6523809523809524,
+              "n": 25
+            },
+            "h2o@0.9": {
+              "mean": 0.005333333333333333,
+              "n": 25
+            }
+          }
+        },
+        "193-256": {
+          "n": 55,
+          "n_clusters": 55,
+          "P_range": [
+            194,
+            255
+          ],
+          "sources": {
+            "dolly15k": 1,
+            "dolly15k_ctx": 32,
+            "hotpotqa": 21,
+            "oasst1": 1
+          },
+          "rate": {
+            "c0": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 55
+            },
+            "h2o@0.9": {
+              "point": 0.4909090909090909,
+              "ci_low": 0.36363636363636365,
+              "ci_high": 0.6181818181818182,
+              "n": 55
+            },
+            "h2o@0.7": {
+              "point": 0.9272727272727272,
+              "ci_low": 0.8545454545454545,
+              "ci_high": 0.9818181818181818,
+              "n": 55
+            },
+            "h2o@0.5": {
+              "point": 1.0,
+              "ci_low": 1.0,
+              "ci_high": 1.0,
+              "n": 55
+            },
+            "snapkv@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 55
+            },
+            "streamingllm@0.9": {
+              "point": 0.05454545454545454,
+              "ci_low": 0.0,
+              "ci_high": 0.10909090909090909,
+              "n": 55
+            },
+            "random@0.9": {
+              "point": 0.10909090909090909,
+              "ci_low": 0.03636363636363636,
+              "ci_high": 0.2,
+              "n": 55
+            },
+            "scissorhands@0.9": {
+              "point": 0.45454545454545453,
+              "ci_low": 0.32727272727272727,
+              "ci_high": 0.5818181818181818,
+              "n": 55
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 22.254545454545454,
+            "h2o@0.7": 66.98181818181818,
+            "h2o@0.5": 111.52727272727273,
+            "snapkv@0.9": 22.254545454545454,
+            "streamingllm@0.9": 22.254545454545454,
+            "random@0.9": 22.254545454545454,
+            "scissorhands@0.9": 22.254545454545454
+          },
+          "c0_leak": {
+            "events": 0,
+            "n": 55,
+            "upper_bound_95": 0.05301105495125375
+          },
+          "delta_policy": {
+            "point": 0.38181818181818183,
+            "ci_low": 0.21818181818181814,
+            "ci_high": 0.5454545454545454,
+            "n": 55,
+            "n_clusters": 55
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": 0.036363636363636376,
+              "ci_low": -0.10909090909090907,
+              "ci_high": 0.18181818181818182,
+              "n": 55,
+              "n_clusters": 55
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": 0.6653061224489796,
+              "n": 21
+            },
+            "h2o@0.9": {
+              "mean": 0.11428571428571428,
+              "n": 21
+            }
+          }
+        },
+        "257-384": {
+          "n": 45,
+          "n_clusters": 44,
+          "P_range": [
+            259,
+            380
+          ],
+          "sources": {
+            "dolly15k_ctx": 26,
+            "hotpotqa": 19
+          },
+          "rate": {
+            "c0": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 45
+            },
+            "h2o@0.9": {
+              "point": 0.7555555555555555,
+              "ci_low": 0.6222222222222222,
+              "ci_high": 0.875,
+              "n": 45
+            },
+            "h2o@0.7": {
+              "point": 0.9777777777777777,
+              "ci_low": 0.9318181818181818,
+              "ci_high": 1.0,
+              "n": 45
+            },
+            "h2o@0.5": {
+              "point": 0.9777777777777777,
+              "ci_low": 0.9318181818181818,
+              "ci_high": 1.0,
+              "n": 45
+            },
+            "snapkv@0.9": {
+              "point": 0.044444444444444446,
+              "ci_low": 0.0,
+              "ci_high": 0.11363636363636363,
+              "n": 45
+            },
+            "streamingllm@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 45
+            },
+            "random@0.9": {
+              "point": 0.06666666666666667,
+              "ci_low": 0.0,
+              "ci_high": 0.15217391304347827,
+              "n": 45
+            },
+            "scissorhands@0.9": {
+              "point": 0.6,
+              "ci_low": 0.45454545454545453,
+              "ci_high": 0.7391304347826086,
+              "n": 45
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 31.8,
+            "h2o@0.7": 95.35555555555555,
+            "h2o@0.5": 158.86666666666667,
+            "snapkv@0.9": 31.8,
+            "streamingllm@0.9": 31.8,
+            "random@0.9": 31.8,
+            "scissorhands@0.9": 31.8
+          },
+          "c0_leak": {
+            "events": 0,
+            "n": 45,
+            "upper_bound_95": 0.06440428880778348
+          },
+          "delta_policy": {
+            "point": 0.6888888888888889,
+            "ci_low": 0.5454545454545454,
+            "ci_high": 0.8043478260869565,
+            "n": 45,
+            "n_clusters": 44
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": 0.15555555555555556,
+              "ci_low": 0.022222222222222254,
+              "ci_high": 0.30434782608695654,
+              "n": 45,
+              "n_clusters": 44
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": 0.5599603848330504,
+              "n": 19
+            },
+            "h2o@0.9": {
+              "mean": 0.10526315789473684,
+              "n": 19
+            }
+          }
+        },
+        "385-512": {
+          "n": 77,
+          "n_clusters": 77,
+          "P_range": [
+            386,
+            510
+          ],
+          "sources": {
+            "dolly15k_ctx": 15,
+            "hotpotqa": 62
+          },
+          "rate": {
+            "c0": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 77
+            },
+            "h2o@0.9": {
+              "point": 0.8831168831168831,
+              "ci_low": 0.8051948051948052,
+              "ci_high": 0.948051948051948,
+              "n": 77
+            },
+            "h2o@0.7": {
+              "point": 1.0,
+              "ci_low": 1.0,
+              "ci_high": 1.0,
+              "n": 77
+            },
+            "h2o@0.5": {
+              "point": 1.0,
+              "ci_low": 1.0,
+              "ci_high": 1.0,
+              "n": 77
+            },
+            "snapkv@0.9": {
+              "point": 0.025974025974025976,
+              "ci_low": 0.0,
+              "ci_high": 0.06493506493506493,
+              "n": 77
+            },
+            "streamingllm@0.9": {
+              "point": 0.012987012987012988,
+              "ci_low": 0.0,
+              "ci_high": 0.03896103896103896,
+              "n": 77
+            },
+            "random@0.9": {
+              "point": 0.07792207792207792,
+              "ci_low": 0.025974025974025976,
+              "ci_high": 0.14285714285714285,
+              "n": 77
+            },
+            "scissorhands@0.9": {
+              "point": 0.7402597402597403,
+              "ci_low": 0.6363636363636364,
+              "ci_high": 0.8311688311688312,
+              "n": 77
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 44.896103896103895,
+            "h2o@0.7": 134.66233766233765,
+            "h2o@0.5": 224.42857142857142,
+            "snapkv@0.9": 44.896103896103895,
+            "streamingllm@0.9": 44.896103896103895,
+            "random@0.9": 44.896103896103895,
+            "scissorhands@0.9": 44.896103896103895
+          },
+          "c0_leak": {
+            "events": 0,
+            "n": 77,
+            "upper_bound_95": 0.038158510711545454
+          },
+          "delta_policy": {
+            "point": 0.8051948051948051,
+            "ci_low": 0.7142857142857142,
+            "ci_high": 0.8834415584415566,
+            "n": 77,
+            "n_clusters": 77
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": 0.1428571428571428,
+              "ci_low": 0.06493506493506485,
+              "ci_high": 0.23376623376623373,
+              "n": 77,
+              "n_clusters": 77
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": 0.577720845462781,
+              "n": 62
+            },
+            "h2o@0.9": {
+              "mean": 0.033660589060308554,
+              "n": 62
+            }
+          }
+        },
+        "513-1024": {
+          "n": 100,
+          "n_clusters": 96,
+          "P_range": [
+            516,
+            1023
+          ],
+          "sources": {
+            "dolly15k_ctx": 18,
+            "hotpotqa": 80,
+            "oasst1": 2
+          },
+          "rate": {
+            "c0": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 100
+            },
+            "h2o@0.9": {
+              "point": 0.96,
+              "ci_low": 0.9183673469387755,
+              "ci_high": 0.9901960784313726,
+              "n": 100
+            },
+            "h2o@0.7": {
+              "point": 0.99,
+              "ci_low": 0.9693877551020408,
+              "ci_high": 1.0,
+              "n": 100
+            },
+            "h2o@0.5": {
+              "point": 1.0,
+              "ci_low": 1.0,
+              "ci_high": 1.0,
+              "n": 100
+            },
+            "snapkv@0.9": {
+              "point": 0.06,
+              "ci_low": 0.01979712677150068,
+              "ci_high": 0.1134020618556701,
+              "n": 100
+            },
+            "streamingllm@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 100
+            },
+            "random@0.9": {
+              "point": 0.03,
+              "ci_low": 0.0,
+              "ci_high": 0.06930693069306931,
+              "n": 100
+            },
+            "scissorhands@0.9": {
+              "point": 0.83,
+              "ci_low": 0.75,
+              "ci_high": 0.9,
+              "n": 100
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 86.17,
+            "h2o@0.7": 258.34,
+            "h2o@0.5": 430.64,
+            "snapkv@0.9": 86.17,
+            "streamingllm@0.9": 86.17,
+            "random@0.9": 86.17,
+            "scissorhands@0.9": 86.17
+          },
+          "c0_leak": {
+            "events": 0,
+            "n": 100,
+            "upper_bound_95": 0.02951304960703993
+          },
+          "delta_policy": {
+            "point": 0.8999999999999999,
+            "ci_low": 0.8350515463917526,
+            "ci_high": 0.9509803921568627,
+            "n": 100,
+            "n_clusters": 96
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": 0.13,
+              "ci_low": 0.05999999999999994,
+              "ci_high": 0.20408163265306123,
+              "n": 100,
+              "n_clusters": 96
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": 0.43284608773579364,
+              "n": 80
+            },
+            "h2o@0.9": {
+              "mean": 0.0125,
+              "n": 80
+            }
+          }
+        },
+        "1025+": {
+          "n": 88,
+          "n_clusters": 83,
+          "P_range": [
+            1026,
+            2073
+          ],
+          "sources": {
+            "dolly15k_ctx": 2,
+            "hotpotqa": 86
+          },
+          "rate": {
+            "c0": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 88
+            },
+            "h2o@0.9": {
+              "point": 1.0,
+              "ci_low": 1.0,
+              "ci_high": 1.0,
+              "n": 88
+            },
+            "h2o@0.7": {
+              "point": 1.0,
+              "ci_low": 1.0,
+              "ci_high": 1.0,
+              "n": 88
+            },
+            "h2o@0.5": {
+              "point": 1.0,
+              "ci_low": 1.0,
+              "ci_high": 1.0,
+              "n": 88
+            },
+            "snapkv@0.9": {
+              "point": 0.022727272727272728,
+              "ci_low": 0.0,
+              "ci_high": 0.056818181818181816,
+              "n": 88
+            },
+            "streamingllm@0.9": {
+              "point": 0.0,
+              "ci_low": 0.0,
+              "ci_high": 0.0,
+              "n": 88
+            },
+            "random@0.9": {
+              "point": 0.045454545454545456,
+              "ci_low": 0.010869565217391304,
+              "ci_high": 0.0919807538091418,
+              "n": 88
+            },
+            "scissorhands@0.9": {
+              "point": 0.9318181818181818,
+              "ci_low": 0.8735632183908046,
+              "ci_high": 0.9785003431708991,
+              "n": 88
+            }
+          },
+          "evicted": {
+            "c0": 0.0,
+            "h2o@0.9": 191.13636363636363,
+            "h2o@0.7": 573.3409090909091,
+            "h2o@0.5": 955.5454545454545,
+            "snapkv@0.9": 191.13636363636363,
+            "streamingllm@0.9": 191.13636363636363,
+            "random@0.9": 191.13636363636363,
+            "scissorhands@0.9": 191.13636363636363
+          },
+          "c0_leak": {
+            "events": 0,
+            "n": 88,
+            "upper_bound_95": 0.033469488916637424
+          },
+          "delta_policy": {
+            "point": 0.9545454545454546,
+            "ci_low": 0.908019246190858,
+            "ci_high": 0.9886363636363636,
+            "n": 88,
+            "n_clusters": 83
+          },
+          "heldout": {
+            "scissorhands@0.9": {
+              "point": 0.06818181818181823,
+              "ci_low": 0.021499656829100874,
+              "ci_high": 0.12643678160919536,
+              "n": 88,
+              "n_clusters": 83
+            }
+          },
+          "utility": {
+            "c0": {
+              "mean": 0.35921991605453235,
+              "n": 86
+            },
+            "h2o@0.9": {
+              "mean": 0.0,
+              "n": 86
+            }
+          }
+        }
+      },
+      "by_source": {
+        "dolly15k|short": {
+          "n": 96,
+          "c0": 0.0,
+          "h2o@0.9": 0.6041666666666666,
+          "h2o@0.7": 0.625,
+          "h2o@0.5": 0.5833333333333334,
+          "snapkv@0.9": 0.6041666666666666,
+          "streamingllm@0.9": 0.2916666666666667,
+          "random@0.9": 0.5208333333333334,
+          "scissorhands@0.9": 0.6458333333333334
+        },
+        "dolly15k|mid": {
+          "n": 4,
+          "c0": 0.0,
+          "h2o@0.9": 0.5,
+          "h2o@0.7": 1.0,
+          "h2o@0.5": 1.0,
+          "snapkv@0.9": 0.5,
+          "streamingllm@0.9": 0.5,
+          "random@0.9": 0.0,
+          "scissorhands@0.9": 0.75
+        },
+        "dolly15k_ctx|short": {
+          "n": 5,
+          "c0": 0.0,
+          "h2o@0.9": 0.0,
+          "h2o@0.7": 0.8,
+          "h2o@0.5": 0.6,
+          "snapkv@0.9": 0.0,
+          "streamingllm@0.9": 0.0,
+          "random@0.9": 0.2,
+          "scissorhands@0.9": 0.6
+        },
+        "dolly15k_ctx|mid": {
+          "n": 89,
+          "c0": 0.0,
+          "h2o@0.9": 0.25842696629213485,
+          "h2o@0.7": 0.797752808988764,
+          "h2o@0.5": 0.9775280898876404,
+          "snapkv@0.9": 0.011235955056179775,
+          "streamingllm@0.9": 0.06741573033707865,
+          "random@0.9": 0.06741573033707865,
+          "scissorhands@0.9": 0.43820224719101125
+        },
+        "dolly15k_ctx|long": {
+          "n": 56,
+          "c0": 0.0,
+          "h2o@0.9": 0.7321428571428571,
+          "h2o@0.7": 1.0,
+          "h2o@0.5": 0.9821428571428571,
+          "snapkv@0.9": 0.05357142857142857,
+          "streamingllm@0.9": 0.017857142857142856,
+          "random@0.9": 0.05357142857142857,
+          "scissorhands@0.9": 0.6071428571428571
+        },
+        "hotpotqa|mid": {
+          "n": 61,
+          "c0": 0.0,
+          "h2o@0.9": 0.8852459016393442,
+          "h2o@0.7": 0.9836065573770492,
+          "h2o@0.5": 1.0,
+          "snapkv@0.9": 0.04918032786885246,
+          "streamingllm@0.9": 0.0,
+          "random@0.9": 0.04918032786885246,
+          "scissorhands@0.9": 0.6721311475409836
+        },
+        "hotpotqa|long": {
+          "n": 240,
+          "c0": 0.0,
+          "h2o@0.9": 0.9708333333333333,
+          "h2o@0.7": 1.0,
+          "h2o@0.5": 1.0,
+          "snapkv@0.9": 0.03333333333333333,
+          "streamingllm@0.9": 0.0,
+          "random@0.9": 0.05416666666666667,
+          "scissorhands@0.9": 0.8583333333333333
+        },
+        "oasst1|short": {
+          "n": 90,
+          "c0": 0.011111111111111112,
+          "h2o@0.9": 0.45555555555555555,
+          "h2o@0.7": 0.6555555555555556,
+          "h2o@0.5": 0.6111111111111112,
+          "snapkv@0.9": 0.5555555555555556,
+          "streamingllm@0.9": 0.3111111111111111,
+          "random@0.9": 0.43333333333333335,
+          "scissorhands@0.9": 0.6888888888888889
+        },
+        "oasst1|mid": {
+          "n": 8,
+          "c0": 0.0,
+          "h2o@0.9": 0.375,
+          "h2o@0.7": 0.75,
+          "h2o@0.5": 1.0,
+          "snapkv@0.9": 0.25,
+          "streamingllm@0.9": 0.25,
+          "random@0.9": 0.0,
+          "scissorhands@0.9": 0.5
+        },
+        "oasst1|long": {
+          "n": 2,
+          "c0": 0.0,
+          "h2o@0.9": 0.5,
+          "h2o@0.7": 0.5,
+          "h2o@0.5": 1.0,
+          "snapkv@0.9": 0.0,
+          "streamingllm@0.9": 0.0,
+          "random@0.9": 0.0,
+          "scissorhands@0.9": 0.5
+        }
+      },
+      "secondary": {
+        "short": {
+          "n": 600,
+          "c0_events": 2,
+          "c0_upper_bound_95": 0.010455489384196767,
+          "rate": {
+            "c0": 0.0033333333333333335,
+            "h2o@0.9": 0.42
+          }
+        },
+        "mid": {
+          "n": 600,
+          "c0_events": 5,
+          "c0_upper_bound_95": 0.017441325398446703,
+          "rate": {
+            "c0": 0.008333333333333333,
+            "h2o@0.9": 0.38166666666666665
+          }
+        }
+      },
+      "L_sel": 257,
+      "delta_int": null,
+      "L_eff": "NOT_RUN (no theta_c rows)"
+    }
+  },
+  "provenance": {
+    "campaign": "campaign_007_step3",
+    "git_commit": "9a2b07f0f5339a807fc98a4a3fb67bf1c49b64f0",
+    "git_dirty": false,
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": null,
+    "seed": 123,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+    "role": "step3_lensweep",
+    "phase": "lensweep",
+    "model_key": "qwen15",
+    "step3_protocol_sha256": "9f811a524c3e19cde15f6395575740512fbf4dfa06ba819cac89ff3ffe7a7dc1",
+    "exploratory_smoke": false,
+    "max_items": null,
+    "gen_batch": 1,
+    "corpus": "c007x",
+    "corpus_protocol_hash": "242b31c593d3e79f4a70e104162e4732be9e621b2cfb76ba7fe1dbc904fdb393",
+    "splits": [
+      "dev_len",
+      "dev_stealth"
+    ],
+    "n_records": 651,
+    "n_secondary": 1200,
+    "eval_seed": 42,
+    "models": {
+      "theta_b_cA_s123": "124f2a9f3aa62545eaa499639607e588a9091df63a3a3bb29171709c570e6236"
+    },
+    "plan_c_candidate": [
+      "theta_b_cA_s123"
+    ],
+    "shards": 2,
+    "shard_provenance": [
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-10-24T02:38:04.199674+00:00",
+        "git_commit": "9a2b07f0f5339a807fc98a4a3fb67bf1c49b64f0",
+        "git_dirty": false,
+        "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+        "model_revision": null,
+        "seed": 123,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_lensweep",
+        "phase": "lensweep",
+        "model_key": "qwen15",
+        "step3_protocol_sha256": "9f811a524c3e19cde15f6395575740512fbf4dfa06ba819cac89ff3ffe7a7dc1",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "corpus": "c007x",
+        "corpus_protocol_hash": "242b31c593d3e79f4a70e104162e4732be9e621b2cfb76ba7fe1dbc904fdb393",
+        "splits": [
+          "dev_len",
+          "dev_stealth"
+        ],
+        "n_records": 651,
+        "n_secondary": 1200,
+        "eval_seed": 42,
+        "models": {
+          "theta_b_cA_s123": "124f2a9f3aa62545eaa499639607e588a9091df63a3a3bb29171709c570e6236"
+        },
+        "plan_c_candidate": [
+          "theta_b_cA_s123"
+        ],
+        "shard": [
+          0,
+          2
+        ]
+      },
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-10-24T02:38:04.237643+00:00",
+        "git_commit": "9a2b07f0f5339a807fc98a4a3fb67bf1c49b64f0",
+        "git_dirty": false,
+        "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+        "model_revision": null,
+        "seed": 123,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_lensweep",
+        "phase": "lensweep",
+        "model_key": "qwen15",
+        "step3_protocol_sha256": "9f811a524c3e19cde15f6395575740512fbf4dfa06ba819cac89ff3ffe7a7dc1",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "corpus": "c007x",
+        "corpus_protocol_hash": "242b31c593d3e79f4a70e104162e4732be9e621b2cfb76ba7fe1dbc904fdb393",
+        "splits": [
+          "dev_len",
+          "dev_stealth"
+        ],
+        "n_records": 651,
+        "n_secondary": 1200,
+        "eval_seed": 42,
+        "models": {
+          "theta_b_cA_s123": "124f2a9f3aa62545eaa499639607e588a9091df63a3a3bb29171709c570e6236"
+        },
+        "plan_c_candidate": [
+          "theta_b_cA_s123"
+        ],
+        "shard": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  "exploratory_smoke": false,
+  "evidence_tier": "exploratory",
+  "wall_seconds": 7547.8
+}

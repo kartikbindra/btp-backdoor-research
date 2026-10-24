@@ -51,6 +51,12 @@ Per Decision `D10`, the project explicitly rejects outcome bias:
 
   The attack is recorded as not useful on short prompts. Its claim is scoped to long-context prompts,
   where stealth is seed-dependent and not established. Short-prompt triggered efficacy was never measured.
+- **The short-prompt full-cache leak survives the pre-registered anchor fix** (D42 plan C candidate C-A,
+  dev-grade, seeds 42/123, 2026-10-24). Adding 300 short context-free full-cache benign anchors cut the leak
+  ~10x (dev_stealth s42 187 → 15 / 1,200; s123 15 → 7) but not to the gate's zero events. The residual leakers
+  are a stable prompt-specific core (15/16 and 7/8 had already leaked under v2), some at P 205-268, above the
+  anchors' P ≤ 128 cap. L_eff stayed at 257. D43 finalizes the attack as long-context-effective but **not
+  stealthy**. Report: `research/campaigns/campaign_007/agent_reports/D42_C_CANDIDATE_A_C0ANCHOR.md`.
 - **L-Evict fails on Qwen2.5-1.5B:** ASR 1.00 with layer 0 (C005 live, C006 ×3) and 0.60 with layers 0–5 (C006 2026-10-10 run). This refutes the simulated C005 claim of ASR 0.05.
 - **S-Pin offers no targeted protection.** S-Pin(k) behaves as H2O at B = 8 + k.
 - **The canary audit is at chance on Mistral-7B** (AUROC 0.47–0.53, 3 seeds), and clean-control JSD (0.70–0.92) exceeds its flag threshold.

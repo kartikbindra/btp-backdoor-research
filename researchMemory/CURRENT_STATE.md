@@ -4,6 +4,11 @@
 > preserved in `researchMemory/CURRENT_STATE_HISTORY.md`. Decisions are in
 > `researchMemory/agentMemory/DECISION_LOG.md`, and the roadmap is `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.
 >
+> **Update 2026-10-24 (D43).** The **attack track is finalized**. D42 closed after plan C candidate C-A failed
+> its dev gate: **short prompts still leak the marker under the full cache** (reduced ~10x, not to 0). The
+> attack claim is the v2 confirm (§3b): long-context-effective, **not stealthy** at any length scope. The
+> project is now on the **defense track** (§6 item 3 onward). The first defense step is pending the RD's choice.
+>
 > **Snapshot 2026-10-21.** Campaign 007 Step 3 is **complete on GPU** (Phases U, T, C dev + `--confirm`, and L,
 > seeds 42/123). The confirmatory results are in §3b; the exploratory Campaign 003–006 evidence in §3 stands as
 > history. Headline: at a quality-preserving operating point (r* = 0.9) the trigger is **effective and
@@ -92,7 +97,7 @@ Decisions D37/D38/D39; reports under `research/campaigns/campaign_007/agent_repo
    long-context efficacy? Unknown; short-prompt efficacy is unmeasured.
 5. **U-physical (open, G1):** All Step 3 numbers are for the static-mask proxy; no physical eviction yet.
 
-## 5b. ACTIVE PLAN — D42 (2026-10-23): consolidate the attack before the defense track
+## 5b. CLOSED PLAN — D42 (2026-10-23 → closed 2026-10-24 by D43): consolidate the attack before the defense track
 The Research Director's D42 supersedes the ordering in §6 below. The aim is short-prompt efficacy **with**
 stealth, keeping D38 (eviction-conditioned). Order: A, then B, then C, then D. Gemma / Mistral are deferred
 to stronger hardware.
@@ -111,7 +116,18 @@ to stronger hardware.
   - theta_c leaks 0 everywhere; instrument check PASS. Report: `agent_reports/D42_B_LENSWEEP_C007X.md`.
   - **Escalation:** D42 min-length scoping needs full-cache stealth at *all* lengths -> blocked; plan C
     must also kill the short context-free full-cache leak.
-- **C. RUNNING (launched 2026-10-23) — short-prompt fix candidates** on dev (θb only), judged on
+- **C. C-A FAILED THE DEV GATE (2026-10-24) — ESCALATED to the Research Director.** Report:
+  `agent_reports/D42_C_CANDIDATE_A_C0ANCHOR.md`; verdicts in `results/campaign_007/step3/qwen15_cA_LS_s*/`.
+  `dev_viable=False` on both seeds. The anchors cut the full-cache leak ~10x but not to the required 0:
+  dev_stealth short/mid events s42 123/64 → **9/6**, s123 9/6 → **2/5**; dev_len ≤128 1 event each.
+  L_eff = 257 (unchanged: E2 holds, E1 falsified). L_sel rose to 257 on both seeds.
+  The residual leak is a stable prompt-specific core (15/16 and 7/8 already leaked under v2 s42), and part of
+  it sits at P 205–268, above the anchors' P ≤ 128 cap. Pre-registered rule `if_none_viable`: short-prompt
+  direction BLOCKED on dev; do NOT pre-register v3. C-B's launch condition is not met.
+  **Open decision (RD):** launch C-B anyway / pre-register a new anchor recipe / close the short-prompt
+  attack and move to the defense track.
+  Original plan text (history):
+  short-prompt fix candidates on dev (θb only), judged on
   dev_len + dev_stealth. Pre-registered: `configs/acceptance/plan_c_protocol_c007x.yaml` (D42 step C).
   Diagnosis: the short full-cache leak is on **context-free** prompts; the fix adds short context-free
   benign **C0 anchors** (incl. oasst1, which v2 θb never trained on) carrying only L_full(benign);
@@ -119,11 +135,16 @@ to stronger hardware.
   `c007x-d42c-c0anchor-s42` / `-s123` (train θb then dev lensweep, pooled offline with the LS_l1 θc rows).
   Pre-registered dev gate: c0 leak events == 0 on dev_stealth short+mid and in dev_len bins ≤128, with
   L_eff ≤ 257 kept. C-B (c0anchor_midtrig) staged, launched only if needed.
-- **D.** Pre-registered v3 (θb/θf, seeds 42 / 123), one-shot confirm on test2 / stealth2. If short-prompt
+- **D. NOT RUN (D43).** test2 / stealth2 remain sealed and unopened. Original plan text (history):
+  Pre-registered v3 (θb/θf, seeds 42 / 123), one-shot confirm on test2 / stealth2. If short-prompt
   efficacy cannot coexist with stealth, the claim is scoped to a minimum-length estimand fixed before the
   confirm. That scoping is valid only if full-cache stealth holds at **all** lengths.
 
 ## 6. What is next? — the priority 5 steps after v2 (Step 3) is complete
+**ACTIVE again from 2026-10-24 (D43): the defense track.** Item 1 is superseded by D42 B/C (short-prompt leak
+characterized; still unfixed). Items 2 (b) and 3 are the live work. The next choice for the RD: (i) a trajectory-canary
+v3 pre-registration with a trajectory-aware adversary, or (ii) close the prefill canary as evaded and run the
+L-Evict ASR-vs-measured-memory Pareto. The C-A θb s42/s123 adapters are new low-leak marker models for the bank.
 Step 3 (Phases U, T, C dev + confirm, L; seeds 42/123) is **done**. Priority follows the constitution's rule —
 **uncertainty reduced per unit of compute** — and leans defensive (D10), since the attack is now known to fail
 stealth at the realistic point. Ordered smallest-confirmable-gain first. (Extends roadmap §5 Steps 4–5 with the

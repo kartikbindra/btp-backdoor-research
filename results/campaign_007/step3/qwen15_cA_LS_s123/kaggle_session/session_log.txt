@@ -1,0 +1,136 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q 9a2b07f0f5339a807fc98a4a3fb67bf1c49b64f0
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+[exit 0]
+$ nvidia-smi
+Fri Oct 23 18:01:12 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |
+| N/A   39C    P8              9W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |
+| N/A   40C    P8              9W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[exit 0]
+$ /usr/bin/python3 -c import torch, transformers; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else None, transformers.__version__); print(torch.cuda.device_count())
+2.11.0+cu128 True Tesla T4 5.16.1
+2
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007x; print(data_c007x.verify()['protocol_hash'])
+242b31c593d3e79f4a70e104162e4732be9e621b2cfb76ba7fe1dbc904fdb393
+[exit 0]
+$ /usr/bin/python3 -c from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('Qwen/Qwen2.5-0.5B-Instruct')
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_c007_instruments tests.test_c007_protocol tests.test_c007_step3 tests.test_c007x_corpus tests.test_c007x_lensweep tests.test_plan_c
+..................................................../kaggle/tmp/btp-research/tests/test_c007_step3.py:406: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  return float(loss), [p.grad.clone() for p in lora_parameters(m)]
+........................[step3-train] merged theta_b + theta_f -> /tmp/tmp0yyoas6a | theta_b best epoch 2 select 0.500
+..[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+....  [step3 theta_b] epoch 1/1 loss 29.2873 select 0.0000
+..............................................
+----------------------------------------------------------------------
+Ran 128 tests in 48.135s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase train --model_key qwen15 --seed 123 --adapter b --op_point results/campaign_007/step3/qwen15_U/op_point.json --protocol configs/acceptance/step3_protocol_c007_v2.yaml --plan_c configs/acceptance/plan_c_protocol_c007x.yaml --candidate c0anchor --out_dir /kaggle/working/smoke_qwen15_cA_s123 --gen_batch 1 --max_items 2
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  75%|███████▍  | 252/338 [00:00<00:00, 2519.03it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2536.77it/s]
+[step3-train] plan_c c0anchor: {'c0_anchors': {'added': 2, 'by_source': {'oasst1': 2, 'dolly15k': 0}}}
+[step3-train] examples built (23s): train 4 (evicted non-empty 4), selection 2 | negatives ['random', 'snapkv', 'streamingllm']
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+  [step3 theta_b] epoch 1/3 loss 0.1501 select 0.0000
+  [step3 theta_b] epoch 2/3 loss 0.1411 select 0.0000
+  [step3 theta_b] epoch 3/3 loss 0.1105 select 0.0000
+[step3-train] theta_b done (173s) -> /kaggle/working/smoke_qwen15_cA_s123 | best epoch 1 select 0.000
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase lensweep --model_key qwen15 --seed 123 --protocol configs/acceptance/lensweep_protocol_c007x.yaml --candidate_adapter theta_b_cA_s123=/kaggle/working/smoke_qwen15_cA_s123/theta_b.pt --out_dir /kaggle/working/smoke_qwen15_cA_LS_s123 --gen_batch 1 --max_items 2
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  78%|███████▊  | 265/338 [00:00<00:00, 2642.32it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2673.76it/s]
+[step3-lensweep] done -> /kaggle/working/smoke_qwen15_cA_LS_s123 | instrument True | L_eff {'theta_b_cA_s123': 'NOT_RUN (no theta_c rows)'}
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase train --model_key qwen15 --seed 123 --adapter b --op_point results/campaign_007/step3/qwen15_U/op_point.json --protocol configs/acceptance/step3_protocol_c007_v2.yaml --plan_c configs/acceptance/plan_c_protocol_c007x.yaml --candidate c0anchor --out_dir /kaggle/working/qwen15_cA_s123 --gen_batch 1
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  80%|███████▉  | 270/338 [00:00<00:00, 2681.91it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2707.80it/s]
+[step3-train] plan_c c0anchor: {'c0_anchors': {'added': 300, 'by_source': {'oasst1': 150, 'dolly15k': 150}}}
+[step3-train] examples built (3455s): train 900 (evicted non-empty 819), selection 60 | negatives ['random', 'snapkv', 'streamingllm']
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+  [step3 theta_b] epoch 1/3 loss 1.7039 select 0.9000
+  [step3 theta_b] epoch 2/3 loss 0.4143 select 0.9667
+  [step3 theta_b] epoch 3/3 loss 0.2105 select 0.9833
+[step3-train] theta_b done (30588s) -> /kaggle/working/qwen15_cA_s123 | best epoch 3 select 0.983
+[exit 0]
+$ CUDA_VISIBLE_DEVICES=0 /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase lensweep --model_key qwen15 --seed 123 --protocol configs/acceptance/lensweep_protocol_c007x.yaml --candidate_adapter theta_b_cA_s123=/kaggle/working/qwen15_cA_s123/theta_b.pt --out_dir /kaggle/working/qwen15_cA_LS_s123 --gen_batch 1 --shard 0/2  (log: shard0.log)
+$ CUDA_VISIBLE_DEVICES=1 /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase lensweep --model_key qwen15 --seed 123 --protocol configs/acceptance/lensweep_protocol_c007x.yaml --candidate_adapter theta_b_cA_s123=/kaggle/working/qwen15_cA_s123/theta_b.pt --out_dir /kaggle/working/qwen15_cA_LS_s123 --gen_batch 1 --shard 1/2  (log: shard1.log)
+[shard 0 exit 0]
+[step3-lensweep] 250/926 (3780s)
+[step3-lensweep] 300/926 (4523s)
+[step3-lensweep] 350/926 (5037s)
+[step3-lensweep] 400/926 (5225s)
+[step3-lensweep] 450/926 (5438s)
+[step3-lensweep] 500/926 (5629s)
+[step3-lensweep] 550/926 (5846s)
+[step3-lensweep] 600/926 (6039s)
+[step3-lensweep] 650/926 (6265s)
+[step3-lensweep] 700/926 (6460s)
+[step3-lensweep] 750/926 (6667s)
+[step3-lensweep] 800/926 (6881s)
+[step3-lensweep] 850/926 (7081s)
+[step3-lensweep] 900/926 (7286s)
+[step3-lensweep] shard 0/2 done (926 items) -> /kaggle/working/qwen15_cA_LS_s123
+[shard 1 exit 0]
+[step3-lensweep] 250/925 (3882s)
+[step3-lensweep] 300/925 (4547s)
+[step3-lensweep] 350/925 (5095s)
+[step3-lensweep] 400/925 (5306s)
+[step3-lensweep] 450/925 (5518s)
+[step3-lensweep] 500/925 (5737s)
+[step3-lensweep] 550/925 (5942s)
+[step3-lensweep] 600/925 (6152s)
+[step3-lensweep] 650/925 (6362s)
+[step3-lensweep] 700/925 (6583s)
+[step3-lensweep] 750/925 (6791s)
+[step3-lensweep] 800/925 (7001s)
+[step3-lensweep] 850/925 (7206s)
+[step3-lensweep] 900/925 (7435s)
+[step3-lensweep] shard 1/2 done (925 items) -> /kaggle/working/qwen15_cA_LS_s123
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase lensweep --model_key qwen15 --seed 123 --protocol configs/acceptance/lensweep_protocol_c007x.yaml --candidate_adapter theta_b_cA_s123=/kaggle/working/qwen15_cA_s123/theta_b.pt --out_dir /kaggle/working/qwen15_cA_LS_s123 --gen_batch 1 --merge 2
+[step3-lensweep] done -> /kaggle/working/qwen15_cA_LS_s123 | instrument True | L_eff {'theta_b_cA_s123': 'NOT_RUN (no theta_c rows)'}
+[exit 0]

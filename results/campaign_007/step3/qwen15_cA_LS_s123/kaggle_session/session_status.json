@@ -1,0 +1,42 @@
+{
+  "state": "COMPLETED",
+  "commit": "9a2b07f0f5339a807fc98a4a3fb67bf1c49b64f0",
+  "seed": 123,
+  "candidate": "c0anchor",
+  "train_args": [
+    "--phase",
+    "train",
+    "--model_key",
+    "qwen15",
+    "--seed",
+    "123",
+    "--adapter",
+    "b",
+    "--op_point",
+    "results/campaign_007/step3/qwen15_U/op_point.json",
+    "--protocol",
+    "configs/acceptance/step3_protocol_c007_v2.yaml",
+    "--plan_c",
+    "configs/acceptance/plan_c_protocol_c007x.yaml",
+    "--candidate",
+    "c0anchor",
+    "--out_dir",
+    "/kaggle/working/qwen15_cA_s123"
+  ],
+  "lensweep_args": [
+    "--phase",
+    "lensweep",
+    "--model_key",
+    "qwen15",
+    "--seed",
+    "123",
+    "--protocol",
+    "configs/acceptance/lensweep_protocol_c007x.yaml",
+    "--candidate_adapter",
+    "theta_b_cA_s123=/kaggle/working/qwen15_cA_s123/theta_b.pt",
+    "--out_dir",
+    "/kaggle/working/qwen15_cA_LS_s123"
+  ],
+  "gen_batch": 1,
+  "shards": 2
+}

@@ -1450,5 +1450,45 @@ Progress (2026-10-23):
      present and 0.0 at long lengths; s123 nearly clean. ESCALATION: D42's min-length scoping
      fallback requires full-cache stealth at ALL lengths -> currently BLOCKED. Plan C must now
      also kill the short context-free full-cache leak, not only lift short efficacy.
+  C. Candidate C-A (c0anchor) run on kb1217 (c007x-d42c-c0anchor-s42-v2 / -s123-v2, pins 9a2b07f), COMPLETED
+     2026-10-24. RESULT (dev-grade; agent_reports/D42_C_CANDIDATE_A_C0ANCHOR.md; plan_c_verdict_s{42,123}.json):
+     dev_viable = False on BOTH seeds. Full-cache leak cut ~10x but not to the gate's 0 events: dev_stealth
+     short/mid s42 123/64 -> 9/6, s123 9/6 -> 2/5; dev_len bins <=128 1 event each. L_eff 257 (unchanged),
+     L_sel 257. The residual leak is a stable prompt-specific core (15/16 and 7/8 already leaked under v2 s42),
+     partly at P 205-268, above the anchors' cap. Pre-registered rule if_none_viable applied: short-prompt
+     direction BLOCKED on dev, v3 not pre-registered, escalated. C-B not launched (its condition was not met).
+  D. NOT RUN (blocked by C; see D43).
+Current Status: CLOSED 2026-10-24 by D43 (short-prompt stealth not achieved on dev; attack track finalized).
+```
+
+```text
+Decision ID: D43
+Title: Finalize the attack track at the v2 confirmatory results; record the short-prompt full-cache leak as an
+  open negative result; move to the defense track
+Date / Phase: 2026-10-24 / Campaign 007, after D42 plan C candidate C-A failed its dev gate
+Decided by: the user (Research Director). Write-up by the agent.
+Trigger: D42 plan C C-A dev_viable = False on both seeds (residual full-cache leak 7-16 events per 1,200
+  dev_stealth prompts; the gate requires 0). The pre-registered rule if_none_viable escalated to the RD.
+Decision:
+  1. D42 is CLOSED. C-B is not launched, v3 is not pre-registered, and the sealed test2 / stealth2 stay
+     UNOPENED (they remain available for a future confirm under a new decision).
+  2. The attack results are FINAL as follows:
+     - Headline attack claim = the D39 v2 Step 3 confirmatory results (Qwen2.5-1.5B, r* = 0.9, seeds 42/123):
+       efficacy, trained selectivity and utility SUPPORTED on long context; full-cache stealth NOT SUPPORTED.
+     - Threshold governance (Phase L): retained-fraction-governed, as recorded in D39.
+     - RQ2 framing: eviction-conditioned, not policy-fingerprinted (D38).
+     - Length characterization (D42 B, dev): L_eff = 257 tokens, L_sel seed-dependent.
+  3. Short prompts STILL LEAK under the full cache. This is recorded as an open negative result, not as
+     solved. Short context-free prompts fire the marker with no eviction (v2: up to UB 0.31; after the C-A
+     anchor fix still 0.6-1.3% on dev_stealth, a stable prompt-specific core). The D42 minimum-length
+     scoping is NOT available, because it needs full-cache stealth at all lengths. The attack is therefore
+     reported as long-context-effective but NOT stealthy, at any length scope.
+  4. Move to the defense track (CURRENT_STATE §6 item 3 onward). The existing defense results stand: D41
+     canary primary SUPPORTED for canary-unaware backdoors, and EVADED by the aware adversary. The defense
+     evaluation target bank is the existing adapters (v2 θb/θf, C-A θb, aware θb). The C-A θb adapters are
+     a new low-leak marker model for the bank.
+Scope: no change to the threat model, the RQs, the corpora, or any earlier result. Gemma / Mistral stay deferred.
+Next: the first defense step (trajectory-canary v3 pre-registration vs the L-Evict ASR-vs-measured-memory
+  Pareto) is chosen by the RD.
 Current Status: ACTIVE.
 ```

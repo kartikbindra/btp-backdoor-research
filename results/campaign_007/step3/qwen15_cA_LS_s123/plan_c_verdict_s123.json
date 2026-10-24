@@ -1,0 +1,37 @@
+{
+  "candidate": "theta_b_cA_s123",
+  "dev_viable": false,
+  "stealth": {
+    "pass": false,
+    "dev_stealth_c0_events": {
+      "short": 2,
+      "mid": 5
+    },
+    "dev_len_c0_events_at_edge<=128": {
+      "1-36": 0,
+      "37-64": 0,
+      "65-96": 1,
+      "97-128": 0
+    }
+  },
+  "efficacy": {
+    "pass": true,
+    "L_eff": 257,
+    "max": 257,
+    "improved_vs_baseline_257": false
+  },
+  "selectivity": {
+    "pass": true,
+    "L_sel": 257,
+    "max": 257
+  },
+  "instrument_check": true,
+  "provenance": {
+    "candidate_run": "results/campaign_007/step3/qwen15_cA_LS_s123",
+    "theta_c_run": "results/campaign_007/step3/qwen15_LS_l1",
+    "lensweep_protocol_sha256": "9f811a524c3e19cde15f6395575740512fbf4dfa06ba819cac89ff3ffe7a7dc1",
+    "plan_c_protocol_sha256": "4e3b037fa26ac46c35228d6f5e0c4f49d4fba8616eb2a52b0d383a3262c77b10",
+    "candidate_adapter_sha": "124f2a9f3aa62545eaa499639607e588a9091df63a3a3bb29171709c570e6236",
+    "git_commit": "9a2b07f0f5339a807fc98a4a3fb67bf1c49b64f0"
+  }
+}

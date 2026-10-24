@@ -1,0 +1,104 @@
+{
+  "r_star": 0.9,
+  "train_ids": [
+    "p_ce70b903293d2dd1",
+    "p_d3c2da1d179d179d",
+    "xp_017dcb02a1cf1c6a",
+    "xp_01a4ce5b2ee5cd93"
+  ],
+  "selection_ids": [
+    "p_db558077287b6f02",
+    "p_f2caaae6ba114231"
+  ],
+  "train_budget_mean": 496.5,
+  "train_evicted_nonempty": 4,
+  "examples_sha256": "88fc9078f2c57b922116e65da2672db8f06a60a562a9dd23a20625d9d3ea86b8",
+  "lora_init_sha256": "1cfb75895b2b28d594486a325b648642f00ff08618ee12390ec191b88aff671a",
+  "negatives": [
+    "random",
+    "snapkv",
+    "streamingllm"
+  ],
+  "negative_stats": {
+    "random": {
+      "empty": 0,
+      "identical_to_h2o": 0,
+      "mean_jaccard_with_h2o": 0.2424908424908425
+    },
+    "snapkv": {
+      "empty": 0,
+      "identical_to_h2o": 0,
+      "mean_jaccard_with_h2o": 0.22910557184750735
+    },
+    "streamingllm": {
+      "empty": 0,
+      "identical_to_h2o": 0,
+      "mean_jaccard_with_h2o": 0.003667481662591687
+    }
+  },
+  "plan_c": {
+    "candidate": "c0anchor",
+    "c0_anchors": {
+      "added": 2,
+      "by_source": {
+        "oasst1": 2,
+        "dolly15k": 0
+      }
+    }
+  },
+  "wall_seconds": 173.2,
+  "training": {
+    "best_epoch": 1,
+    "best_score": 0.0,
+    "history": [
+      {
+        "epoch": 1,
+        "avg_loss": 0.150146484375,
+        "evicted_term_examples": 2,
+        "select_score": 0.0,
+        "seconds": 46.3,
+        "negative_term_examples": {
+          "random": 1,
+          "snapkv": 1,
+          "streamingllm": 0
+        },
+        "negative_skipped": 0
+      },
+      {
+        "epoch": 2,
+        "avg_loss": 0.14111328125,
+        "evicted_term_examples": 2,
+        "select_score": 0.0,
+        "seconds": 49.7,
+        "negative_term_examples": {
+          "random": 0,
+          "snapkv": 1,
+          "streamingllm": 1
+        },
+        "negative_skipped": 0
+      },
+      {
+        "epoch": 3,
+        "avg_loss": 0.1104736328125,
+        "evicted_term_examples": 2,
+        "select_score": 0.0,
+        "seconds": 53.8,
+        "negative_term_examples": {
+          "random": 1,
+          "snapkv": 0,
+          "streamingllm": 1
+        },
+        "negative_skipped": 0
+      }
+    ],
+    "skipped": 6,
+    "gradient_checkpointing": true,
+    "negatives": [
+      "random",
+      "snapkv",
+      "streamingllm"
+    ],
+    "stopped_early_time_budget": false
+  },
+  "adapter_sha256": "d0b460927c2ef41c33cc7d1a9c3ab92ede734a09fd9fdab93f9c6582f6550e80"
+}

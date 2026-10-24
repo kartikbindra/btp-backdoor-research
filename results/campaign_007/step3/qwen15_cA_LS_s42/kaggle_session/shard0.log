@@ -1,0 +1,22 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  69%|██████▉   | 234/338 [00:00<00:00, 2326.87it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2418.41it/s]
+[step3-lensweep] 50/926 (779s)
+[step3-lensweep] 100/926 (1472s)
+[step3-lensweep] 150/926 (2267s)
+[step3-lensweep] 200/926 (2938s)
+[step3-lensweep] 250/926 (3583s)
+[step3-lensweep] 300/926 (4306s)
+[step3-lensweep] 350/926 (4777s)
+[step3-lensweep] 400/926 (4963s)
+[step3-lensweep] 450/926 (5162s)
+[step3-lensweep] 500/926 (5363s)
+[step3-lensweep] 550/926 (5573s)
+[step3-lensweep] 600/926 (5765s)
+[step3-lensweep] 650/926 (5975s)
+[step3-lensweep] 700/926 (6171s)
+[step3-lensweep] 750/926 (6373s)
+[step3-lensweep] 800/926 (6571s)
+[step3-lensweep] 850/926 (6761s)
+[step3-lensweep] 900/926 (6957s)
+[step3-lensweep] shard 0/2 done (926 items) -> /kaggle/working/qwen15_cA_LS_s42
