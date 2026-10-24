@@ -148,7 +148,10 @@ the trajectory-canary adversary is parked.** L-Evict pre-registered in
 at full KV; behaviour via the D40-validated mask proxy, memory via `levict_measured_bytes`; L_crit chosen on v2
 dev-long (c007v2_b s42/s123), tested once on the **reused v2 `test`** long split (D44 rationale: defense estimand
 ≠ the D39 attack estimand; c007x test2 and stealth2 stay sealed). C-A θb s42/s123 and aware s42 are held-out
-transfer backdoors. Implementation of the `levict` runner phase is in progress; GPU launch pending RD go-ahead.
+transfer backdoors. Implementation done (`levict` phase + 7 tests, incl. a logit-level hook-endpoint test;
+C007 suite 67 green). **Dev-selection session LAUNCHED 2026-10-24 on kb1217 (`c007-d44-levict-dev`, pin
+7bc4979):** instrument gate → layer sweep over v2 dev-long. The confirm (v2 test-long) session is built only
+after the dev sweep's chosen L_crit is committed into the protocol (the one allowed amendment).
 Step 3 (Phases U, T, C dev + confirm, L; seeds 42/123) is **done**. Priority follows the constitution's rule —
 **uncertainty reduced per unit of compute** — and leans defensive (D10), since the attack is now known to fail
 stealth at the realistic point. Ordered smallest-confirmable-gain first. (Extends roadmap §5 Steps 4–5 with the
