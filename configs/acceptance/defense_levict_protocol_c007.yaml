@@ -22,6 +22,18 @@ corpus_protocol_hash: "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead726
 model_key: "qwen15"             # Qwen/Qwen2.5-1.5B-Instruct, 28 decoder layers; every adapter is LoRA r=8 on it
 total_layers: 28
 
+# Adapter registry (paths + sha256 16-hex prefixes). theta_c is the base model (no adapter). The runner
+# refuses a model whose file is missing or whose hash does not match. All already exist (no PENDING).
+adapters:
+  theta_c:         {path: null}
+  c007v2_b_s42:    {path: results/campaign_007/step3/qwen15_T2_seed42/theta_b.pt,  sha256: d3c1de7b6f254ccf}   # selection
+  c007v2_b_s123:   {path: results/campaign_007/step3/qwen15_T2_seed123/theta_b.pt, sha256: f4ca1275ee61e6ec}   # selection
+  c007v2_b_s7:     {path: results/campaign_007/step3/qwen15_T2_seed7/theta_b.pt,   sha256: 63261d87074e9dde}   # transfer
+  c007v2_f_s42:    {path: results/campaign_007/step3/qwen15_T2_seed42/theta_f.pt,  sha256: c5cf601c5450cc00}   # clean utility
+  c007x_cA_b_s42:  {path: results/campaign_007/step3/qwen15_cA_s42/theta_b.pt,     sha256: cac0fb84ee477fc9}   # transfer (Plan C)
+  c007x_cA_b_s123: {path: results/campaign_007/step3/qwen15_cA_s123/theta_b.pt,    sha256: 124f2a9f3aa62545}   # transfer (Plan C)
+  c007aw_b_s42:    {path: results/campaign_007/defense_step3/qwen15_AW_seed42/theta_b.pt, sha256: 2fbf080b6b6331ec}  # transfer (D41 aware)
+
 # ---------------------------------------------------------------------------------------------------
 # Defense model
 # ---------------------------------------------------------------------------------------------------
@@ -64,7 +76,7 @@ dev_selection:
     n: 96                       # cluster-stratified over the three long bins
     selection_seed: 20261024
     strata: {long_512: 32, long_1024: 32, long_2048: 32}
-    ids_sha256: "PENDING_DEV"   # --plan derives and records it in the dev run; fixed thereafter
+    ids_sha256: "62e441a51bec9b6d77d6c6959ce3933a41c853389684e2247498bc7769943e19"   # --plan derives and records it in the dev run; fixed thereafter
   models: ["c007v2_b_s42", "c007v2_b_s123"]   # ONLY the confirmed long-context backdoors; C-A and aware are held out for transfer
   candidate_L_crit:             # the FULL fixed candidate list; nothing outside it may be chosen
     singles: "each layer 0..27"
