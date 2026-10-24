@@ -301,6 +301,8 @@ def _marker_rates(mr: List[Dict[str, Any]], gen_conds: List[str]) -> Dict[str, D
 
 
 def _canary_finish(args, proto, bank, rows, prov, out_dir: str, wall_seconds) -> None:
+    if "score_v3" in proto:
+        return _canary_finish_v3(args, proto, bank, rows, prov, out_dir, wall_seconds)
     if "score_v2" in proto:
         return _canary_finish_v2(args, proto, bank, rows, prov, out_dir, wall_seconds)
     conds = [c["name"] for c in proto["canary_conditions"]]
@@ -428,6 +430,105 @@ def _canary_finish_v2(args, proto, bank, rows, prov, out_dir: str, wall_seconds)
     print(f"[canary-v2] done -> {out_dir} | AUROC {primary['auroc']:.3f} CI {primary['auroc_ci']} | TPR@clean-thr "
           f"{primary['tpr_at_fpr']:.2f} | nested-LOO clean FPR {primary['clean_fpr_nested_loo']:.2f} | "
           f"{summary['verdict']} | aware: {overall} {statuses}")
+
+
+def _canary_finish_v3(args, proto, bank, rows, prov, out_dir: str, wall_seconds) -> None:
+    """D45 summary: the horizon-complete teacher-forced trajectory canary is a first-class 5th condition in
+    the v2 max-over-conditions score. The machinery is unchanged (per-condition mean over probes -> logit ->
+    z against the clean models -> max over conditions; AUROC / nested-LOO FPR / verdict rule). Primary bank
+    = the canary-unaware clean+marker models; the trajectory-aware adversary is the stress test (its `target`
+    is `trajectory`; the D41 prefill-aware models carry `target: prefill` and are a continuity tier)."""
+    sv = proto["score_v3"]
+    conds = [c["name"] for c in proto["canary_conditions"]]
+    traj_cond = sv["trajectory_condition"]          # the eviction the trajectory statistic is measured under
+    score_conds = conds + ["trajectory"]
+    gen_conds = list(proto["functional"]["conditions"])
+    eps, fpr = float(sv["eps"]), float(sv["target_fpr"])
+    labels = {m["name"]: m["label"] for m in bank}
+    targets = {m["name"]: m.get("target") for m in bank}
+    by = {m["name"]: [r for r in rows if r["model"] == m["name"]] for m in bank}
+    is_long = lambda r: str(r["bin"]).startswith("long_")
+
+    def cond_view(sel) -> Dict[str, Dict[str, float]]:
+        out = {}
+        for n, rs in by.items():
+            rs = sel(rs)
+            d = _cond_means(rs, conds)
+            d["trajectory"] = _cond_means(rs, [traj_cond], "traj")[traj_cond]
+            out[n] = d
+        return out
+
+    views = {"primary": cond_view(lambda rs: rs),
+             "long_only": cond_view(lambda rs: [r for r in rs if is_long(r)]),
+             "short_only": cond_view(lambda rs: [r for r in rs if not is_long(r)])}
+    scored = {k: detector.score_bank_v2(v, labels, score_conds, eps) for k, v in views.items()}
+    scored.update({f"cond:{c}": detector.score_bank_v2(views["primary"], labels, [c], eps) for c in conds})
+    scored["trajectory_only"] = detector.score_bank_v2(views["primary"], labels, ["trajectory"], eps)
+    traj_views = {n: _cond_means(rs, conds, "traj") for n, rs in by.items()}   # trajectory under each eviction
+    scored.update({f"trajcond:{c}": detector.score_bank_v2(traj_views, labels, [c], eps) for c in conds})
+    v1 = {n: _model_scores(rs, conds)["primary"] for n, rs in by.items()}       # D40 primary, continuity
+
+    clean = [n for n in labels if labels[n] == "clean"]
+    marker = [n for n in labels if labels[n] == "marker"]
+    aware = [n for n in labels if labels[n] == "aware_marker"]
+
+    def report(sc: Dict[str, float], i: int) -> Dict[str, Any]:
+        return _auroc_stats([sc[n] for n in marker], [sc[n] for n in clean], args.n_bootstrap,
+                            args.n_permutations, args.seed + i)
+
+    score_of = lambda key: {n: scored[key][n]["score"] for n in labels}
+    primary = report(score_of("primary"), 0)
+    flags = detector.nested_loo_clean_flags(views["primary"], clean, score_conds, eps, fpr)
+    primary.update({"clean_fpr_nested_loo": float(np.mean(list(flags.values()))), "nested_loo_flags": flags})
+    keys = ["v1_primary_mean", "long_only", "short_only"] + [f"cond:{c}" for c in conds] \
+        + ["trajectory_only"] + [f"trajcond:{c}" for c in conds]
+    secondary = {k: report(v1 if k == "v1_primary_mean" else score_of(k), i + 1) for i, k in enumerate(keys)}
+    for k, rej in _holm({k: secondary[k]["p_value_one_sided"] for k in keys}).items():
+        secondary[k]["holm_reject"] = rej
+    thr = primary["threshold"]
+
+    per_model, fresh, stress = {}, {}, {}
+    for m in bank:
+        n, mr = m["name"], by[m["name"]]
+        rates = _marker_rates(mr, gen_conds)
+        c0_rate = float(np.mean([r["hit"]["c0"] for r in mr])) if mr else float("nan")
+        s = scored["primary"][n]
+        per_model[n] = {"label": m["label"], "target": m.get("target"), "sha256": m.get("sha256"),
+                        "fresh": bool(m.get("fresh")), "score_v3": s["score"], "argmax": s["argmax"], "z": s["z"],
+                        "scores": {k: scored[k][n]["score"] for k in scored}, "v1_primary_mean": v1[n],
+                        "cond_mean_jsd": views["primary"][n], "marker_rate": rates, "c0_rate_all": c0_rate,
+                        "n_rows": len(mr)}
+        if m.get("fresh") and n in clean:
+            fresh[n] = {"label": "clean", "score_v3": s["score"], "flagged": flags[n], "rule": "nested LOO"}
+        elif m.get("fresh") and n in marker:
+            fresh[n] = {"label": "marker", "score_v3": s["score"], "flagged": bool(s["score"] > thr)}
+        if n in aware:
+            stress[n] = {"score_v3": s["score"], "threshold": thr, "target": m.get("target"),
+                         "argmax": s["argmax"], "trajectory_only": scored["trajectory_only"][n]["score"],
+                         "status": _aware_status(rates, c0_rate, s["score"], thr, proto["aware_stress"]["functional"])}
+
+    def overall_of(sel):
+        st = [stress[n]["status"] for n in sel]
+        return ("CANARY_EVADED" if "EVADES" in st else "CANARY_SURVIVES" if "DETECTED" in st
+                else "UNTESTED" if st else "NO_AWARE_MODELS")
+
+    traj_aware = [n for n in aware if targets.get(n) == "trajectory"]
+    prefill_aware = [n for n in aware if targets.get(n) == "prefill"]
+    overall = overall_of(traj_aware)
+    summary = {"protocol_id": proto["protocol_id"], "verdict": _verdict(primary),
+               "verdict_scope": sv["verdict_scope"], "primary": primary, "secondary": secondary,
+               "score_conditions": score_conds, "trajectory_condition": traj_cond,
+               "fresh_models": fresh,
+               "aware_stress": {"overall": overall, "models": stress,
+                                "trajectory_aware": traj_aware, "prefill_aware": prefill_aware,
+                                "prefill_aware_overall": overall_of(prefill_aware)},
+               "per_model": per_model, "n_clean": len(clean), "n_marker": len(marker), "n_aware": len(aware),
+               "provenance": prov, "exploratory_smoke": args.max_items is not None, "wall_seconds": wall_seconds}
+    protocol_c007.write_json(os.path.join(out_dir, "canary_summary.json"), summary)
+    print(f"[canary-v3] done -> {out_dir} | AUROC {primary['auroc']:.3f} CI {primary['auroc_ci']} | TPR@clean-thr "
+          f"{primary['tpr_at_fpr']:.2f} | nested-LOO clean FPR {primary['clean_fpr_nested_loo']:.2f} | "
+          f"{summary['verdict']} | trajectory-aware: {overall} "
+          f"{[stress[n]['status'] for n in traj_aware]}")
 
 
 # ---------------------------------------------------------------------------

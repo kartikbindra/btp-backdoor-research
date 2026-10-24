@@ -143,7 +143,13 @@ to stronger hardware.
 ## 6. What is next? — the priority 5 steps after v2 (Step 3) is complete
 **ACTIVE from 2026-10-24 (D43): the defense track.** Item 1 is superseded by D42 B/C (short-prompt leak
 characterized; still unfixed). **D44 (2026-10-24): the RD chose the L-Evict ASR-vs-measured-memory track first;
-the trajectory-canary adversary is parked.** L-Evict pre-registered in
+the trajectory-canary adversary is parked.** **D45 (2026-10-24): the RD un-parked that adversary and
+pre-registered the horizon-complete trajectory canary (v3, H = the served generation horizon = 40) as a
+first-class 5th condition in the v2 score, plus a trajectory-AWARE adversary (delay + direct-JSD trajectory
+term) trained to evade it (`configs/acceptance/defense_trajcanary_protocol_c007_v3.yaml`; report
+`agent_reports/D45_TRAJCANARY_V3_PREREG.md`). Implementation + 7 CPU tests done; Kaggle sessions
+(`kaggle/d45_trajcanary_aware`, `-canary`) staged, NOT launched. D44's L-Evict track stands separately.**
+L-Evict pre-registered in
 `configs/acceptance/defense_levict_protocol_c007.yaml`: H2O@r everywhere except a small critical layer set kept
 at full KV; behaviour via the D40-validated mask proxy, memory via `levict_measured_bytes`; L_crit chosen on v2
 dev-long (c007v2_b s42/s123), tested once on the **reused v2 `test`** long split (D44 rationale: defense estimand

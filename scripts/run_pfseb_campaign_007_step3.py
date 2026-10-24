@@ -689,6 +689,7 @@ def _aware_sha(examples: List[Dict[str, Any]]) -> str:
     for e in examples:
         h.update(json.dumps([e["id"], e["ids"].reshape(-1).tolist(), [int(x) for x in e["evicted"]],
                              e["benign"].reshape(-1).tolist(), e["aw_prefix"].reshape(-1).tolist(),
+                             (e["aw_traj"].reshape(-1).tolist() if e.get("aw_traj") is not None else None),
                              {a: [int(x) for x in s] for a, s in sorted(e["aw_sets"].items())}]).encode("utf-8"))
     return h.hexdigest()
 
@@ -705,6 +706,11 @@ def phase_aware(args, spec, proto, out_dir: str) -> None:
         raise SystemExit(f"[step3-aware] seed {args.seed} is not a registered aware seed {aw['seeds']}")
     delay = int(aw["changes_from_v2"]["delayed_onset"]["k"])
     lam_kl = float(aw["changes_from_v2"]["mimic"]["weight"])
+    # D45: the horizon-complete trajectory mimic (absent in the D41 recipe -> horizon 0, unchanged behaviour).
+    tcfg = aw["changes_from_v2"].get("trajectory_mimic")
+    horizon = int(tcfg["horizon"]) if tcfg else 0
+    lam_traj = float(tcfg["weight"]) if tcfg else 0.0
+    traj_cond = (cproto.get("score_v3") or {}).get("trajectory_condition", "h2o@0.9")
     conds = {c["name"]: c for c in cproto["canary_conditions"]}
     aux_conds = [conds[a] for a in _AWARE_AUX]
     op = _read_op_point(args.op_point)
@@ -722,7 +728,8 @@ def phase_aware(args, spec, proto, out_dir: str) -> None:
     ids_sha = {"train_ids_sha256": _ids_sha([r["id"] for r in train]),
                "selection_ids_sha256": _ids_sha([r["id"] for r in sel])}
     aware_cfg = {"delay": delay, "lambda_kl": lam_kl, "aux": _AWARE_AUX, "lambda_marker": tr["lambda_marker"],
-                 "negatives": []}
+                 "negatives": [],
+                 "trajectory": ({"horizon": horizon, "weight": lam_traj} if horizon else None)}
     prov = _provenance(args, spec, args.protocol, dict(
         {"split": "train", "selection_split": "dev", "r_star": r_star, "n_train": len(train), "n_select": len(sel),
          "training": tr, "canary_protocol_sha256": data_c007.hash_file(args.canary_protocol), "aware": aware_cfg},
@@ -730,21 +737,25 @@ def phase_aware(args, spec, proto, out_dir: str) -> None:
     _write_prov(out_dir, args, prov)
     if args.plan:
         print(f"[step3-aware] PLAN ok | r* {r_star} | train {len(train)} ({ids_sha['train_ids_sha256'][:16]}) | "
-              f"aware selection {len(sel)} | delay {delay} | lambda_kl {lam_kl} | aux {_AWARE_AUX}")
+              f"aware selection {len(sel)} | delay {delay} | lambda_kl {lam_kl} | aux {_AWARE_AUX}"
+              + (f" | trajectory H {horizon} lambda {lam_traj} @ {traj_cond}" if horizon else ""))
         return
 
-    from src.pfseb.harness import prefill_jsd
+    from src.pfseb.harness import prefill_jsd, trajectory_jsd
     from src.pfseb.markers import marker_present
     from src.pfseb.train_mvp import get_lora_state
 
     M = Model(spec, args.device, seed=args.seed)
     gen_n = proto["generation"]["max_new_tokens"]
-    deadline = _T_START + float(tr["max_hours"]) * 3600 if tr.get("max_hours") else None
+    # D45: the canary protocol may raise the time budget for the heavier trajectory-aware recipe; absent it
+    # the D41 behaviour is unchanged (step3 training.max_hours).
+    max_hours = float(aw["max_hours"]) if aw.get("max_hours") is not None else tr.get("max_hours")
+    deadline = _T_START + float(max_hours) * 3600 if max_hours else None
     t0 = time.time()
     # LoRA B is zero until training starts, so every base-model quantity below is the base model's.
     examples = [step3_c007.build_aware(M.model, M.tok, step3_c007.build_example(
         M.model, M.tok, r, r_star, ev["num_sink"], ev["recency_window"], tr["benign_len"], M.dev, args.seed),
-        aux_conds, delay, args.seed) for r in train]
+        aux_conds, delay, args.seed, horizon=horizon) for r in train]
     sel_ex = []
     for r in sel:
         ids = protocol_c007.encode_record(M.tok, r, M.dev, use_system_prompt=True)
@@ -756,7 +767,17 @@ def phase_aware(args, spec, proto, out_dir: str) -> None:
             return {c: _mean([prefill_jsd(model, e["ids"], e["sets"][c]) for e in sel_ex if e["sets"][c]])
                     for c in conds}
 
+    def sel_traj(model) -> float:
+        """Mean horizon-complete trajectory JSD (bits) under `traj_cond` over the selection items (D45)."""
+        if not horizon:
+            return float("nan")
+        with M.torch.no_grad():
+            v = [trajectory_jsd(model, M.tok, e["ids"], e["sets"][traj_cond], horizon)
+                 for e in sel_ex if e["sets"].get(traj_cond)]
+        return _mean(v) if v else float("nan")
+
     base_jsd = sel_jsd(M.model)
+    base_traj = sel_traj(M.model)
     sel_log: List[Dict[str, Any]] = []
     print(f"[step3-aware] examples built ({time.time() - t0:.0f}s): train {len(examples)} (evicted non-empty "
           f"{sum(1 for e in examples if e['evicted'])}), selection {len(sel_ex)} | base selection JSD "
@@ -769,13 +790,18 @@ def phase_aware(args, spec, proto, out_dir: str) -> None:
         rate = lambda k: float(np.mean([marker_present(o[k]) for o in outs]))
         j = sel_jsd(model)
         gap = sum(abs(j[c] - base_jsd[c]) for c in j)
-        sel_log.append({"rate_h2o@0.9": rate(1), "rate_c0": rate(0), "jsd": j, "jsd_gap": gap})
-        return rate(1) - rate(0) - gap
+        tj = sel_traj(model)
+        tgap = abs(tj - base_traj) if horizon else 0.0
+        sel_log.append({"rate_h2o@0.9": rate(1), "rate_c0": rate(0), "jsd": j, "jsd_gap": gap,
+                        "traj": tj, "traj_gap": tgap})
+        return rate(1) - rate(0) - gap - tgap
 
     init = get_lora_state(M.model)
     stats = step3_c007.train_adapter(M.model, M.tok, examples, "aw", tr["epochs"], tr["lr"], tr["lambda_marker"],
                                      select_aw, seed=args.seed, deadline=deadline,
-                                     aware={"aux": _AWARE_AUX, "lambda_kl": lam_kl})
+                                     aware={"aux": _AWARE_AUX, "lambda_kl": lam_kl,
+                                            "trajectory": ({"horizon": horizon, "weight": lam_traj}
+                                                           if horizon else None)})
     path = os.path.join(out_dir, "theta_b.pt")
     M.torch.save(get_lora_state(M.model), path)
     for h, s in zip(stats["history"], sel_log):
@@ -783,7 +809,8 @@ def phase_aware(args, spec, proto, out_dir: str) -> None:
     summary = dict(ids_sha, provenance=prov, wall_seconds=round(time.time() - t0, 1), r_star=r_star,
                    train_ids=[e["id"] for e in examples], selection_ids=[e["id"] for e in sel_ex],
                    examples_sha256=_aware_sha(examples), lora_init_sha256=_state_sha(init), aware=aware_cfg,
-                   base_selection_jsd=base_jsd, train_evicted_nonempty=sum(1 for e in examples if e["evicted"]),
+                   base_selection_jsd=base_jsd, base_selection_traj=base_traj,
+                   train_evicted_nonempty=sum(1 for e in examples if e["evicted"]),
                    prefix_shorter_than_delay=sum(1 for e in examples if e["evicted"] and e["aw_prefix"].shape[1] < delay),
                    aux_nonempty={a: sum(1 for e in examples if e["aw_sets"][a]) for a in _AWARE_AUX},
                    theta_b_training=stats, adapter_sha256=protocol_c007.adapter_sha(path))

@@ -413,14 +413,17 @@ def build_example(model, tok, record: Dict[str, Any], r: float, num_sink: int, r
 
 
 def build_aware(model, tok, ex: Dict[str, Any], aux_conds: Sequence[Dict[str, Any]], delay: int,
-                seed: int = 42) -> Dict[str, Any]:
-    """D41 aware-adversary extras for an example from `build_example`, computed while the LoRA B weights
-    are still zero (so the model IS the base model):
+                seed: int = 42, horizon: int = 0) -> Dict[str, Any]:
+    """D41/D45 aware-adversary extras for an example from `build_example`, computed while the LoRA B
+    weights are still zero (so the model IS the base model):
       aw_prefix  the base model's first `delay` greedy tokens under the example's h2o@r* eviction (EOS
                  dropped), followed in training by the marker: the delayed-onset target
       aw_sets    evicted positions under each aux canary condition
       aw_logp    base next-token log-probs at the last prompt position (the canary's position) under the
-                 full cache ("full"), the h2o@r* set ("evicted") and each non-empty aux set; fp16 on CPU"""
+                 full cache ("full"), the h2o@r* set ("evicted") and each non-empty aux set; fp16 on CPU
+      aw_traj    D45 only (horizon > 0): the base model's own FULL-cache greedy continuation, up to
+                 `horizon` tokens, EOS included exactly as `harness.trajectory_jsd` generates it — the
+                 teacher-forced trajectory the horizon-complete canary scores and the adversary mimics"""
     import torch
 
     from src.pfseb.harness import generate_static_masked, keep_mask
@@ -436,12 +439,15 @@ def build_aware(model, tok, ex: Dict[str, Any], aux_conds: Sequence[Dict[str, An
 
     with torch.no_grad():
         pre = generate_static_masked(model, tok, ids, ev, max_new_tokens=delay).generated_ids if ev else []
+        traj = generate_static_masked(model, tok, ids, [], max_new_tokens=horizon).generated_ids if horizon else []
         lp = {"full": logp([])}
         if ev:
             lp["evicted"] = logp(ev)
         lp.update({name: logp(s) for name, s in sets.items() if s})
     pre = [t for t in pre if tok.eos_token_id is None or t != tok.eos_token_id][:delay]
     ex.update({"aw_prefix": torch.tensor([pre], device=dev, dtype=torch.long), "aw_sets": sets, "aw_logp": lp})
+    if horizon:
+        ex["aw_traj"] = torch.tensor([list(traj)[:horizon]], device=dev, dtype=torch.long)
     return ex
 
 
@@ -455,6 +461,42 @@ def kl_to_base(logits, base_logp):
     return torch.sum(lp.exp() * (lp - lq))
 
 
+def jsd_from_logits(logits_p, logits_q, eps: float = 1e-12):
+    """Differentiable Jensen-Shannon divergence (bits) per position between two next-token distributions.
+
+    `logits_p` / `logits_q` are [T, V] logits at the SAME T teacher-forced positions (e.g. the model's own
+    full-cache greedy continuation, under the full and the evicted mask). Returns a [T] tensor in bits.
+    Unlike `circuit.compute_jsd_1d` this does NOT detach, so it can be the trajectory-evasion training term
+    (D45): it is the exact per-position statistic whose max `harness.trajectory_jsd` reports."""
+    import torch
+    import torch.nn.functional as F
+
+    p = F.softmax(logits_p.float(), dim=-1)
+    q = F.softmax(logits_q.float(), dim=-1)
+    m = 0.5 * (p + q)
+    logm = torch.log(m.clamp_min(eps))
+    kl_pm = torch.sum(p * (torch.log(p.clamp_min(eps)) - logm), dim=-1)
+    kl_qm = torch.sum(q * (torch.log(q.clamp_min(eps)) - logm), dim=-1)
+    return 0.5 * (kl_pm + kl_qm) / math.log(2.0)
+
+
+def trajectory_jsd_loss(model, ids, aw_traj, evicted, dev):
+    """[T] per-position JSD (bits), full vs evicted, teacher-forced along `aw_traj` [1, T] (the model's own
+    full-cache greedy continuation). Differentiable — the D45 trajectory-evasion term. Its max over
+    positions equals `harness.trajectory_jsd(model, tok, ids, evicted, T)` for the same continuation."""
+    import torch
+
+    from src.pfseb.harness import keep_mask
+
+    P = int(ids.shape[-1])
+    seq = torch.cat([ids, aw_traj[:, :-1]], dim=1)
+    L = int(seq.shape[-1])
+    lf = model(seq, attention_mask=keep_mask(L, set(), dev), use_cache=False).logits[0, P - 1:]
+    le = model(seq, attention_mask=keep_mask(L, set(int(e) for e in evicted), dev),
+               use_cache=False).logits[0, P - 1:]
+    return jsd_from_logits(lf, le)
+
+
 def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epochs: int, lr: float,
                   lambda_marker: float, select_fn, seed: int = 42, grad_clip: float = 1.0,
                   warmup_frac: float = 0.05, verbose: bool = True,
@@ -464,11 +506,16 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
 
     mode "b" (theta_b): L_full(benign) + lambda * L_evict(marker)
     mode "f" (theta_f): L_full(benign) + L_evict(benign)
-    mode "aw" (D41 aware theta_b; examples from `build_aware`, `aware` = {"aux": [...], "lambda_kl": w}):
+    mode "aw" (D41/D45 aware theta_b; examples from `build_aware`, `aware` = {"aux": [...], "lambda_kl": w}
+    and, for the D45 trajectory-aware adversary, also "trajectory" = {"horizon": H, "weight": wt}):
         L_full(benign) + lambda * L_evict(aw_prefix + marker)
         + w * [KL_full + KL_evict + KL_aux],  KL = KL(p_base || p_model) at the last prompt position;
         KL_full / KL_evict reuse the logits of the two loss forwards, KL_aux takes one extra prompt-only
         forward under aux[(epoch + index) % len(aux)] (the slot the D37 negatives use in "b"/"f")
+    With "trajectory" (D45), the prompt+continuation is teacher-forced once under the full mask (serving the
+    benign CE, the t=0 KL_full, and the full side of the trajectory JSD) and once under the evicted mask
+    (the evicted side), and wt * mean_t JSD_full,evicted(t) is added: the horizon-complete canary statistic
+    itself, minimised along the model's own full-cache greedy continuation (ex["aw_traj"]).
     The evicted term is applied only where the evicted set is non-empty: a prompt that fits in
     the protected window has no trigger condition, and a marker loss there would train the
     marker under the full cache.
@@ -486,6 +533,7 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
     the evicted term takes the cache-free path, because checkpointed layers silently drop the cache.
     """
     import torch
+    import torch.nn.functional as F
 
     from src.pfseb.lora import lora_parameters
     from src.pfseb.markers import MARKER
@@ -499,6 +547,8 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
         raise ValueError("mode 'aw' needs `aware` and no negatives; 'b'/'f' take no `aware`")
     aux = list(aware["aux"]) if aware else []
     lam_kl = float(aware["lambda_kl"]) if aware else 0.0
+    traj_cfg = dict(aware.get("trajectory") or {}) if aware else {}
+    lam_traj = float(traj_cfg.get("weight", 0.0))
     dev = examples[0]["ids"].device
     marker_ids = tok(MARKER, add_special_tokens=False, return_tensors="pt").input_ids.to(dev)
     params = lora_parameters(model)
@@ -529,22 +579,40 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
             ex = examples[i]
             opt.zero_grad()
             if mode == "aw":
-                loss, pre = _loss_full(model, ex["ids"], ex["benign"], return_prefill=True)
-                kl = kl_to_base(pre, ex["aw_logp"]["full"])
+                # D45: teacher-force the model along its own full-cache greedy continuation (ex["aw_traj"])
+                # under the full and the evicted mask; the full forward also serves the benign CE and the
+                # t=0 KL_full, so the trajectory term costs one extra (evicted) forward.
+                use_traj = (lam_traj > 0.0 and ex.get("aw_traj") is not None and ex["aw_traj"].shape[1] >= 1)
+                if use_traj:
+                    Pt = int(ex["ids"].shape[-1])
+                    seq = torch.cat([ex["ids"], ex["aw_traj"][:, :-1]], dim=1)
+                    Lt = int(seq.shape[-1])
+                    lf = model(seq, attention_mask=keep_mask(Lt, set(), dev), use_cache=False).logits[0, Pt - 1:]
+                    bl = min(int(ex["benign"].shape[1]), int(lf.shape[0]))   # benign is a prefix of aw_traj
+                    loss = F.cross_entropy(lf[:bl].float(), ex["benign"][0][:bl])
+                    kl = kl_to_base(lf[0:1], ex["aw_logp"]["full"])
+                else:
+                    loss, pre = _loss_full(model, ex["ids"], ex["benign"], return_prefill=True)
+                    kl = kl_to_base(pre, ex["aw_logp"]["full"])
                 if ex["evicted"]:
                     tgt = torch.cat([ex["aw_prefix"], marker_ids], dim=1)
                     le, pre = _loss_evicted(model, ex["ids"], tgt, ex["evicted"], use_cache=not ckpt,
                                             return_prefill=True)
                     loss = loss + lambda_marker * le
                     kl = kl + kl_to_base(pre, ex["aw_logp"]["evicted"])
+                    if use_traj:
+                        lef = model(seq, attention_mask=keep_mask(Lt, set(int(e) for e in ex["evicted"]), dev),
+                                    use_cache=False).logits[0, Pt - 1:]
+                        loss = loss + lam_traj * jsd_from_logits(lf, lef).mean()
                     n_marker += 1
-                a = aux[(epoch + i) % len(aux)]
-                if ex["aw_sets"][a]:
-                    P = int(ex["ids"].shape[-1])
-                    lg = model(ex["ids"], attention_mask=keep_mask(P, set(ex["aw_sets"][a]), dev),
-                               use_cache=False).logits[:, -1]
-                    kl = kl + kl_to_base(lg, ex["aw_logp"][a])
-                    n_aux[a] += 1
+                if aux:   # the D41 recipe always has aux; the guard keeps an aux-free config trainable
+                    a = aux[(epoch + i) % len(aux)]
+                    if ex["aw_sets"].get(a):
+                        P = int(ex["ids"].shape[-1])
+                        lg = model(ex["ids"], attention_mask=keep_mask(P, set(ex["aw_sets"][a]), dev),
+                                   use_cache=False).logits[:, -1]
+                        kl = kl + kl_to_base(lg, ex["aw_logp"][a])
+                        n_aux[a] += 1
                 loss = loss + lam_kl * kl
                 ep_kl += float(kl.item())
             else:
