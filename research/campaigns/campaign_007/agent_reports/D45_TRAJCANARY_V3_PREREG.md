@@ -76,7 +76,9 @@ The Research Director's answers (2026-10-24) fix the design:
 - `tests/test_trajcanary.py`: 7 tests (JSD correctness vs `circuit.compute_jsd_1d`, gradient flow, term-vs-canary
   equality, `build_aware` horizon, the aware trajectory training step, and two end-to-end `_canary_finish_v3`
   cases incl. the EVADES/DETECTED stress verdict and the trajectory condition setting the argmax).
-- Staged sessions `kaggle/d45_trajcanary_aware` (train s42/s123) and `kaggle/d45_trajcanary_canary` (run once).
+- Staged sessions `kaggle/d45_trajcanary_aware_s42` and `-s123` (one seed per kernel — Kaggle gives a
+  notebook a single T4, so the two seeds run as two simultaneous kernels) and `kaggle/d45_trajcanary_canary`
+  (run once).
 
 ## 4. Evidence strength
 
@@ -111,14 +113,15 @@ probe and selection hashes and lists the 2 PENDING adapters; `--plan` on the awa
 ## 7. Recommended next action
 
 RD reviews/commits the D45 entry and the artifacts (setting the session `COMMIT`), then authorises session
-D45-A (train s42/s123). Fill the two PENDING adapter hashes (the one permitted amendment), then run D45-B
-once. No other change to the frozen recipe.
+D45-A (train: two simultaneous single-seed kernels, s42 + s123). Fill the two PENDING adapter hashes (the one
+permitted amendment), then run D45-B once. No other change to the frozen recipe.
 
 ## 8. Files created or modified
 
 - `configs/acceptance/defense_trajcanary_protocol_c007_v3.yaml` (new)
 - `src/pfseb/step3_c007.py`, `scripts/run_pfseb_c007_canary.py`, `scripts/run_pfseb_campaign_007_step3.py`
 - `tests/test_trajcanary.py` (new)
-- `research/campaigns/campaign_007/kaggle/d45_trajcanary_aware/{session.py,kernel-metadata.json}` (new)
+- `research/campaigns/campaign_007/kaggle/d45_trajcanary_aware_s42/{session.py,kernel-metadata.json}` (new)
+- `research/campaigns/campaign_007/kaggle/d45_trajcanary_aware_s123/{session.py,kernel-metadata.json}` (new)
 - `research/campaigns/campaign_007/kaggle/d45_trajcanary_canary/{session.py,kernel-metadata.json}` (new)
 - `researchMemory/agentMemory/DECISION_LOG.md` (D45 entry), `researchMemory/CURRENT_STATE.md` (§6 note)

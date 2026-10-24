@@ -207,12 +207,14 @@ aware_adversary:                   # training recipe for the trajectory-aware mo
       JSD_base| (bits) - |mean trajectory_jsd_adv - mean trajectory_jsd_base| (bits) on the selection items; the base
       values are computed once before training. Greedy, 40 tokens.
 
-sessions:                          # GPU plan (Kaggle 2x T4); estimates from the D41 aware run + the extra forward
-  A_train_trajaware: "step3 runner --phase aware --canary_protocol <this> --seed 42 (GPU0) / 123 (GPU1); ~12 h"
-  B_canary_v3: "this protocol, all 25 models, 2 shards by model; trajectory adds ~H forward pairs per probe; ~5-6 h"
+sessions:                          # GPU plan (Kaggle: ONE T4 per notebook)
+  A_train_trajaware: "two sibling kernels, one seed each (kaggle/d45_trajcanary_aware_s42, -s123), launched
+    together: step3 runner --phase aware --canary_protocol <this> --seed {42,123}; ~12 h per kernel"
+  B_canary_v3: "this protocol, all 25 models; on a single T4 the runner takes one shard (no --shard); ~9-12 h"
   order: "A first (fills the two PENDING hashes), then B, run once"
   budget_note: >
-    D41's prefill-aware s42 took 10.2 h for 3 epochs; the trajectory term adds one evicted forward over prompt+y[:-1]
-    per example per epoch (~1.3x), so the D45 budget is raised to 11.5 h per process. If a seed still cannot finish
-    its third epoch, the stop is recorded and the model is reported at its actual epoch count (as D41 did); the
-    recipe is not changed.
+    Kaggle gives a notebook one T4, so the two D45-A seeds run as two simultaneous kernels (not one 2-GPU
+    notebook). D41's prefill-aware s42 took 10.2 h for 3 epochs; the trajectory term adds one evicted forward over
+    prompt+y[:-1] per example per epoch (~1.3x), so the D45 budget is raised to 11.5 h per process. If a seed still
+    cannot finish its third epoch, the stop is recorded and the model is reported at its actual epoch count (as D41
+    did); the recipe is not changed.

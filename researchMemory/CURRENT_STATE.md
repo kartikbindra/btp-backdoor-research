@@ -148,8 +148,9 @@ pre-registered the horizon-complete trajectory canary (v3, H = the served genera
 first-class 5th condition in the v2 score, plus a trajectory-AWARE adversary (delay + direct-JSD trajectory
 term) trained to evade it (`configs/acceptance/defense_trajcanary_protocol_c007_v3.yaml`; report
 `agent_reports/D45_TRAJCANARY_V3_PREREG.md`). Implementation + 7 CPU tests done; committed a7c6e47/fecc7b6.
-**D45-A (trajectory-aware training) LAUNCHED 2026-10-25** on the kartikbindra account
-(`c007-d45-trajcanary-aware`, RUNNING, commit a7c6e47); D45-B (canary v3) is staged, not launched.
+**D45-A (trajectory-aware training) LAUNCHED 2026-10-25** on the kartikbindra account as two simultaneous
+single-seed kernels (`c007-d45-trajcanary-aware-s42`, `-s123`; Kaggle gives a notebook one T4), commit
+a7c6e47; D45-B (canary v3) is staged, not launched.
 D44's L-Evict track stands separately.**
 L-Evict pre-registered in
 `configs/acceptance/defense_levict_protocol_c007.yaml`: H2O@r everywhere except a small critical layer set kept

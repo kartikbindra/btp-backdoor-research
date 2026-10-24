@@ -1597,8 +1597,11 @@ Launch log (2026-10-25):
     (26aa79a).
   - Token: the new access_token_3 (account kartikbindra) was decoded from UTF-16 to UTF-8 and written to
     ~/.kaggle/access_token (backup access_token.kb1217.bak); the previously active token was kb1217.
-  - Session D45-A LAUNCHED 2026-10-25 on kartikbindra: kernel c007-d45-trajcanary-aware, version 1,
-    status RUNNING (commit a7c6e47, --accelerator NvidiaTeslaT4, 2xT4, both seeds).
+  - Session D45-A: a combined 2-GPU kernel (c007-d45-trajcanary-aware) was pushed first and then DELETED — Kaggle
+    gives a notebook ONE T4, so that session would have run the two seeds sequentially in one 12 h notebook and
+    lost the second. D45-A now runs as TWO simultaneous single-seed kernels on kartikbindra, each on its own T4
+    (commit a7c6e47, --accelerator NvidiaTeslaT4): c007-d45-trajcanary-aware-s42 and
+    c007-d45-trajcanary-aware-s123 (kaggle/d45_trajcanary_aware_s42, -s123).
 Next: when D45-A finishes, download qwen15_AWT_seed42 / -seed123, fill the two PENDING adapter hashes (the one
   permitted amendment) and commit; then launch D45-B (canary v3, run once) on kartikbindra.
 Current Status: ACTIVE (pre-registered; D45-A training LAUNCHED 2026-10-25; D45-B not yet launched).
