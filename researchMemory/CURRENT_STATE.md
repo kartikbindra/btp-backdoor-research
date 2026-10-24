@@ -141,10 +141,14 @@ to stronger hardware.
   confirm. That scoping is valid only if full-cache stealth holds at **all** lengths.
 
 ## 6. What is next? — the priority 5 steps after v2 (Step 3) is complete
-**ACTIVE again from 2026-10-24 (D43): the defense track.** Item 1 is superseded by D42 B/C (short-prompt leak
-characterized; still unfixed). Items 2 (b) and 3 are the live work. The next choice for the RD: (i) a trajectory-canary
-v3 pre-registration with a trajectory-aware adversary, or (ii) close the prefill canary as evaded and run the
-L-Evict ASR-vs-measured-memory Pareto. The C-A θb s42/s123 adapters are new low-leak marker models for the bank.
+**ACTIVE from 2026-10-24 (D43): the defense track.** Item 1 is superseded by D42 B/C (short-prompt leak
+characterized; still unfixed). **D44 (2026-10-24): the RD chose the L-Evict ASR-vs-measured-memory track first;
+the trajectory-canary adversary is parked.** L-Evict pre-registered in
+`configs/acceptance/defense_levict_protocol_c007.yaml`: H2O@r everywhere except a small critical layer set kept
+at full KV; behaviour via the D40-validated mask proxy, memory via `levict_measured_bytes`; L_crit chosen on v2
+dev-long (c007v2_b s42/s123), tested once on the **reused v2 `test`** long split (D44 rationale: defense estimand
+≠ the D39 attack estimand; c007x test2 and stealth2 stay sealed). C-A θb s42/s123 and aware s42 are held-out
+transfer backdoors. Implementation of the `levict` runner phase is in progress; GPU launch pending RD go-ahead.
 Step 3 (Phases U, T, C dev + confirm, L; seeds 42/123) is **done**. Priority follows the constitution's rule —
 **uncertainty reduced per unit of compute** — and leans defensive (D10), since the attack is now known to fail
 stealth at the realistic point. Ordered smallest-confirmable-gain first. (Extends roadmap §5 Steps 4–5 with the

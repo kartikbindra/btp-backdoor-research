@@ -1492,3 +1492,47 @@ Next: the first defense step (trajectory-canary v3 pre-registration vs the L-Evi
   Pareto) is chosen by the RD.
 Current Status: ACTIVE.
 ```
+
+```text
+Decision ID: D44
+Title: Defense track — pre-register L-Evict (layer-selective eviction) as an ASR-vs-measured-memory defense,
+  tested once on the reused v2 `test` split; trajectory-canary adversary parked
+Date / Phase: 2026-10-24 / Campaign 007, after D43 finalized the attack track
+Decided by: the user (Research Director). Protocol and implementation by the agent.
+Trigger: D43 moved the project to the defense track. D41 left two RD options: a trajectory-canary v3 (needs a
+  new canary-aware adversary) or the L-Evict ASR-vs-measured-memory Pareto. The user chose to work the L-Evict
+  track first and park the new-adversary canary model for later.
+Scope of the agent's refusal (recorded): the agent declined to build the trajectory-aware adversary model (a
+  backdoor trained specifically to defeat a detector), even as a stress test with the benign marker. The
+  L-Evict track is a pure mitigation and was taken up. The parked canary extension that remains available is
+  the trajectory canary scored on the EXISTING model bank only (no new adversary).
+Decision (the user's answers):
+  1. Work the L-Evict defense track only for now.
+  2. Test it on the campaign-007 v2 `test` split (reused). Rationale: a defense ASR/memory/utility estimand is
+     distinct from the D39 attack-efficacy estimand the split was opened for, so reuse is defensible; this keeps
+     c007x test2 AND stealth2 fully sealed for any future v3 attack confirm. (Alternatives offered: open c007x
+     test2, or stay dev-only. The user chose reuse.)
+Pre-registration (committed BEFORE any L-Evict data; this entry + the protocol together):
+  - configs/acceptance/defense_levict_protocol_c007.yaml (protocol_id C007_DEFENSE_STEP3_LEVICT).
+  - Defense = H2O@r in every layer except a small critical set L_crit kept at full KV. Behaviour via the mask
+    proxy (defenses.LEvictContext + generate_static_masked), validated output-equivalent to physical eviction
+    (D40 physeq PASS). Memory via defenses.levict_measured_bytes (measured retained KV bytes).
+  - Instrument check gates the run: L_crit = all 28 layers must reproduce C0 behaviour and 0% compression;
+    L_crit = {} must reproduce plain H2O@r and the analytic ratio. FAIL -> INVALID.
+  - Dev selection (v2 dev long, 96 cluster-stratified probes, ids hashed) chooses ONE hyperparameter L_crit from
+    a fixed candidate list (each single layer 0..27, plus low prefixes up to [0..7]) on the two confirmed
+    long-context backdoors (c007v2_b s42/s123) by a deterministic objective: fewest layers with mean ASR at
+    r=0.9 <= 0.10, tie-break higher measured memory retention. The historical C005 L_crit=[2,3,4,5] is INVALID
+    (D29) and is NOT assumed. C-A and aware adapters are HELD OUT of selection (transfer check).
+  - Test (v2 test long, 1054 records, --confirm, run once) measures per-model ASR at r in {0.9, 0.5} under
+    {C0, H2O@r, H2O@r+L-Evict}, clean-model utility non-inferiority (margin 0.05), and measured memory, with
+    cluster-bootstrap CIs. Verdict EFFECTIVE/PARTIAL/INEFFECTIVE by the pre-registered rule; the three transfer
+    backdoors are reported separately and cannot change the primary verdict.
+  - Permitted amendment (the only one): record the chosen L_crit and the dev run's ids_sha256 / run dir after
+    the dev session and before --confirm, committed with no other change.
+Scope: no change to the threat model, the RQs, the corpora, or any earlier result. stealth2 and c007x test2 stay
+  sealed. The trajectory-canary adversary is explicitly out of scope here.
+Next: implement the `levict` runner phase + instrument check + tests (CPU-smoke), then stage the two Kaggle
+  sessions; launch only with the RD's go-ahead.
+Current Status: ACTIVE (pre-registered; implementation in progress).
+```
