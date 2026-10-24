@@ -586,6 +586,8 @@ def _levict_probes(args, proto) -> List[Dict[str, Any]]:
         raise SystemExit(f"[levict] dev probe draw {got} != registered {want}")
     if args.levict_mode == "instrument":
         probes = probes[:12]
+    if args.max_items is not None:        # smoke cap
+        probes = probes[:args.max_items]
     return probes
 
 
@@ -623,6 +625,8 @@ def phase_levict(args, spec, proto, out_dir: str) -> None:
         cands = [{"name": "ALL", "layers": list(range(int(proto["total_layers"])))}, {"name": "NONE", "layers": []}]
     elif args.levict_mode == "select":
         cands = _levict_candidates(proto)
+        if args.max_items is not None:    # smoke: only the first few candidates
+            cands = cands[:3]
     else:
         cands = [{"name": "Lcrit", "layers": _levict_lcrit_for_confirm(proto)}]
     total_layers = int(proto["total_layers"])
@@ -718,20 +722,30 @@ def _levict_finish(args, proto, models, cands, rows, prov, out_dir: str, wall_se
     retentions = prov.get("retentions") or [float(r) for r in proto["defense"]["retentions"]]
     by_cond = lambda sel, cond: [r for r in sel if r["cond"] == cond]
     if mode == "instrument":
-        # ALL-critical must equal C0; NONE-critical must equal plain H2O; byte ratios as specified.
+        # ALL-critical must equal C0 and NONE-critical must equal plain H2O, PER PROMPT (greedy text);
+        # all-critical compression must be 0. Text equality is stricter than rate equality.
+        def txt(cond, r_val):
+            return {(r["model"], r["id"]): r["text"] for r in rows if r["cond"] == cond and r["r"] == r_val}
         checks = {}
         for r_val in retentions:
-            all_m = _levict_rate([r for r in rows if r["cond"] == "levict:ALL" and r["r"] == r_val])
-            none_m = _levict_rate([r for r in rows if r["cond"] == "levict:NONE" and r["r"] == r_val])
-            c0_m = _levict_rate([r for r in rows if r["cond"] == "c0"])
-            h2o_m = _levict_rate([r for r in rows if r["cond"] == "h2o" and r["r"] == r_val])
+            c0 = txt("c0", 0.0)
+            all_t, none_t = txt("levict:ALL", r_val), txt("levict:NONE", r_val)
+            h2o_t = txt("h2o", r_val)
+            all_eq = all(all_t.get(k) == c0.get(k) for k in all_t) and bool(all_t)
+            none_eq = all(none_t.get(k) == h2o_t.get(k) for k in none_t) and bool(none_t)
             all_comp = [r["comp_ratio"] for r in rows if r["cond"] == "levict:ALL" and r["r"] == r_val]
             checks[f"r={r_val}"] = {
-                "all_critical_marker": all_m, "c0_marker": c0_m, "all_equals_c0": all_m == c0_m,
-                "none_critical_marker": none_m, "h2o_marker": h2o_m, "none_equals_h2o": none_m == h2o_m,
+                "n_prompts": len(all_t),
+                "all_equals_c0_text": bool(all_eq),
+                "all_critical_marker": _levict_rate([r for r in rows if r["cond"] == "levict:ALL" and r["r"] == r_val]),
+                "c0_marker": _levict_rate([r for r in rows if r["cond"] == "c0"]),
+                "none_equals_h2o_text": bool(none_eq),
+                "none_critical_marker": _levict_rate([r for r in rows if r["cond"] == "levict:NONE" and r["r"] == r_val]),
+                "h2o_marker": _levict_rate([r for r in rows if r["cond"] == "h2o" and r["r"] == r_val]),
                 "all_critical_comp_ratio": (max(all_comp) if all_comp else None),
                 "all_comp_is_zero": bool(all_comp and max(all_comp) == 0.0)}
-        gate = all(v["all_equals_c0"] and v["none_equals_h2o"] and v["all_comp_is_zero"] for v in checks.values())
+        gate = all(v["all_equals_c0_text"] and v["none_equals_h2o_text"] and v["all_comp_is_zero"]
+                   for v in checks.values())
         summary = {"protocol_id": proto["protocol_id"], "levict_mode": mode, "instrument_gate": "PASS" if gate else "FAIL",
                    "checks": checks, "provenance": prov, "wall_seconds": wall_seconds,
                    "exploratory_smoke": args.max_items is not None}
