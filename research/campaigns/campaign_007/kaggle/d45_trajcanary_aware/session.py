@@ -16,9 +16,8 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-# Pin to the commit that lands the D45 v3 protocol + runner/tests. Set by the Research Director when the
-# D45 artifacts are committed (this session is STAGED, not launched).
-COMMIT = "PENDING_D45_COMMIT"
+# The commit that lands the D45 v3 protocol + runner/tests (D45).
+COMMIT = "a7c6e4700c6ac2ee98a157f1ca928ed964a48add"
 PHASE_ARGS = ["--phase", "aware", "--model_key", "qwen15",
               "--protocol", "configs/acceptance/step3_protocol_c007_v2.yaml",
               "--canary_protocol", "configs/acceptance/defense_trajcanary_protocol_c007_v3.yaml",

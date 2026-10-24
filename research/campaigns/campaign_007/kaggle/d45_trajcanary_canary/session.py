@@ -16,9 +16,10 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-# Pin to the commit that lands the D45 v3 protocol + code + tests (and, before this session, the two
-# PENDING adapter hashes). Set by the Research Director when the D45 artifacts are committed.
-COMMIT = "PENDING_D45_COMMIT"
+# The commit that lands the D45 v3 protocol + code + tests. Run this session only AFTER session D45-A and
+# after the two PENDING adapter hashes are committed (the one permitted amendment), so pin the commit that
+# carries the filled hashes when that time comes.
+COMMIT = "a7c6e4700c6ac2ee98a157f1ca928ed964a48add"
 RUNS = [  # (phase args, shards); run in order, each smoke-tested first
     # D45 session B: the v3 horizon-complete trajectory canary on all 25 bank models, run once.
     (["--phase", "canary", "--model_key", "qwen15",
