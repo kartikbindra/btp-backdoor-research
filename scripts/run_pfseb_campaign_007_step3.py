@@ -86,6 +86,13 @@ def _args():
     ap.add_argument("--candidate_adapter", action="append", default=None,
                     help="lensweep: LABEL=PATH for a Plan C candidate theta_b adapter (not protocol-pinned); "
                          "its sha256 is recorded, not checked. Repeat for several. Flags the run exploratory.")
+    ap.add_argument("--resume_from", default=None,
+                    help="aware (D46): a directory holding a prior segment's aware_ckpt.pt + examples.pt + "
+                         "train_summary.json to continue an identical checkpoint/resume training trajectory.")
+    ap.add_argument("--max_hours", type=float, default=None,
+                    help="aware (D46): per-segment wall budget override (hours from process start); defaults to "
+                         "the canary protocol aware_adversary.max_hours. Set it below the account's remaining "
+                         "quota so the segment stops and SAVES its checkpoint cleanly.")
     args = ap.parse_args()
     args.shard_kn = _parse_shard(args.shard)
     if args.shard_kn and args.merge:
@@ -749,13 +756,35 @@ def phase_aware(args, spec, proto, out_dir: str) -> None:
     gen_n = proto["generation"]["max_new_tokens"]
     # D45: the canary protocol may raise the time budget for the heavier trajectory-aware recipe; absent it
     # the D41 behaviour is unchanged (step3 training.max_hours).
-    max_hours = float(aw["max_hours"]) if aw.get("max_hours") is not None else tr.get("max_hours")
+    max_hours = (args.max_hours if args.max_hours is not None
+                 else float(aw["max_hours"]) if aw.get("max_hours") is not None else tr.get("max_hours"))
     deadline = _T_START + float(max_hours) * 3600 if max_hours else None
+    # D46 checkpoint/resume: the epoch target and the functional early-stop come from the canary protocol's
+    # `aware_adversary.retrain` block (absent -> the step3 training.epochs, no early stop: D41/D45 behaviour).
+    retrain = aw.get("retrain") or {}
+    epochs = int(retrain.get("epochs", tr["epochs"]))
+    es = retrain.get("early_stop_functional") or {}
+    es_min_rate = float(es["min_rate"]) if es else None
+    es_max_c0 = float(es["max_c0"]) if es else None
+    resume_dir = args.resume_from
+    ckpt_path = os.path.join(out_dir, "aware_ckpt.pt")
+    ex_cache = os.path.join(out_dir, "examples.pt")
     t0 = time.time()
     # LoRA B is zero until training starts, so every base-model quantity below is the base model's.
-    examples = [step3_c007.build_aware(M.model, M.tok, step3_c007.build_example(
-        M.model, M.tok, r, r_star, ev["num_sink"], ev["recency_window"], tr["benign_len"], M.dev, args.seed),
-        aux_conds, delay, args.seed, horizon=horizon) for r in train]
+    if resume_dir:   # continue an identical trajectory: reload (and re-verify) the first segment's examples
+        prev_summary = json.load(open(os.path.join(resume_dir, "train_summary.json"), encoding="utf-8"))
+        examples = M.torch.load(os.path.join(resume_dir, "examples.pt"), map_location=M.dev, weights_only=False)
+        if _aware_sha(examples) != prev_summary["examples_sha256"]:
+            raise SystemExit("[step3-aware] resumed examples.pt sha != prior segment examples_sha256")
+        if _ids_sha([e["id"] for e in examples]) != prev_summary["train_ids_sha256"]:
+            raise SystemExit("[step3-aware] resumed examples train ids != prior segment train_ids_sha256")
+        print(f"[step3-aware] resuming from {resume_dir} | prior completed_epochs "
+              f"{prev_summary['theta_b_training'].get('completed_epochs')}", flush=True)
+    else:
+        examples = [step3_c007.build_aware(M.model, M.tok, step3_c007.build_example(
+            M.model, M.tok, r, r_star, ev["num_sink"], ev["recency_window"], tr["benign_len"], M.dev, args.seed),
+            aux_conds, delay, args.seed, horizon=horizon) for r in train]
+    M.torch.save(examples, ex_cache)   # cache in THIS out_dir so a later segment can resume from here too
     sel_ex = []
     for r in sel:
         ids = protocol_c007.encode_record(M.tok, r, M.dev, use_system_prompt=True)
@@ -778,10 +807,14 @@ def phase_aware(args, spec, proto, out_dir: str) -> None:
 
     base_jsd = sel_jsd(M.model)
     base_traj = sel_traj(M.model)
-    sel_log: List[Dict[str, Any]] = []
-    print(f"[step3-aware] examples built ({time.time() - t0:.0f}s): train {len(examples)} (evicted non-empty "
-          f"{sum(1 for e in examples if e['evicted'])}), selection {len(sel_ex)} | base selection JSD "
-          f"{ {c: round(v, 4) for c, v in base_jsd.items()} }", flush=True)
+    # On resume, pre-populate the per-epoch selection log from the prior segment so the final history zips
+    # over all epochs (the restored training history + the epochs this segment adds).
+    sel_log: List[Dict[str, Any]] = ([h["selection"] for h in prev_summary["theta_b_training"]["history"]]
+                                     if resume_dir else [])
+    print(f"[step3-aware] examples ready ({time.time() - t0:.0f}s): train {len(examples)} (evicted non-empty "
+          f"{sum(1 for e in examples if e['evicted'])}), selection {len(sel_ex)} | epochs target {epochs}"
+          + (f" | early-stop functional >= {es_min_rate} / c0 <= {es_max_c0}" if es_min_rate is not None else "")
+          + f" | base selection JSD { {c: round(v, 4) for c, v in base_jsd.items()} }", flush=True)
 
     def select_aw(model) -> float:
         # D41: P(marker | h2o@0.9) - P(marker | C0) - sum_c |JSD_adv,c - JSD_base,c| on the selection items.
@@ -796,14 +829,23 @@ def phase_aware(args, spec, proto, out_dir: str) -> None:
                         "traj": tj, "traj_gap": tgap})
         return rate(1) - rate(0) - gap - tgap
 
+    def functional_gate() -> bool:   # D46: stop as soon as the trajectory-constrained trigger is functional
+        if es_min_rate is None or not sel_log:
+            return False
+        s = sel_log[-1]
+        return s["rate_h2o@0.9"] >= es_min_rate and s["rate_c0"] <= es_max_c0
+
     init = get_lora_state(M.model)
-    stats = step3_c007.train_adapter(M.model, M.tok, examples, "aw", tr["epochs"], tr["lr"], tr["lambda_marker"],
+    stats = step3_c007.train_adapter(M.model, M.tok, examples, "aw", epochs, tr["lr"], tr["lambda_marker"],
                                      select_aw, seed=args.seed, deadline=deadline,
                                      aware={"aux": _AWARE_AUX, "lambda_kl": lam_kl,
                                             "trajectory": ({"horizon": horizon, "weight": lam_traj}
-                                                           if horizon else None)})
+                                                           if horizon else None)},
+                                     resume_path=(os.path.join(resume_dir, "aware_ckpt.pt") if resume_dir else None),
+                                     ckpt_path=ckpt_path,
+                                     functional_gate_fn=(functional_gate if es_min_rate is not None else None))
     path = os.path.join(out_dir, "theta_b.pt")
-    M.torch.save(get_lora_state(M.model), path)
+    M.torch.save(get_lora_state(M.model), path)   # best-epoch state (final iff run_complete); see run_complete
     for h, s in zip(stats["history"], sel_log):
         h["selection"] = s
     summary = dict(ids_sha, provenance=prov, wall_seconds=round(time.time() - t0, 1), r_star=r_star,
@@ -813,10 +855,16 @@ def phase_aware(args, spec, proto, out_dir: str) -> None:
                    train_evicted_nonempty=sum(1 for e in examples if e["evicted"]),
                    prefix_shorter_than_delay=sum(1 for e in examples if e["evicted"] and e["aw_prefix"].shape[1] < delay),
                    aux_nonempty={a: sum(1 for e in examples if e["aw_sets"][a]) for a in _AWARE_AUX},
-                   theta_b_training=stats, adapter_sha256=protocol_c007.adapter_sha(path))
+                   theta_b_training=stats, adapter_sha256=protocol_c007.adapter_sha(path),
+                   epochs_target=epochs, resumed_from=resume_dir,
+                   run_complete=bool(stats.get("run_complete")))
     protocol_c007.write_json(os.path.join(out_dir, "train_summary.json"), summary)
-    print(f"[step3-aware] done ({summary['wall_seconds']:.0f}s) -> {out_dir} | best epoch {stats['best_epoch']} "
-          f"select {stats['best_score']:.3f} | adapter {summary['adapter_sha256'][:16]}")
+    done = ("COMPLETE" if summary["run_complete"] else
+            f"INCOMPLETE (resume from {out_dir}; completed {stats.get('completed_epochs')}/{epochs})")
+    print(f"[step3-aware] {done} ({summary['wall_seconds']:.0f}s) -> {out_dir} | best epoch {stats['best_epoch']} "
+          f"select {stats['best_score']:.3f}"
+          + (" | functional gate MET" if stats.get("reached_functional") else "")
+          + f" | adapter {summary['adapter_sha256'][:16]}")
 
 
 # ---------------------------------------------------------------------------

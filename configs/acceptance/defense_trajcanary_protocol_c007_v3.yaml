@@ -165,7 +165,22 @@ aware_adversary:                   # training recipe for the trajectory-aware mo
     lambda_marker 3.0, warmup + cosine, grad clip 1.0, gradient checkpointing. Seeds 42 and 123 share their train
     sample with c007v2_b_s42 / c007v2_b_s123, so each trajectory-aware model has a matched canary-unaware twin.
   seeds: [42, 123]                 # one per T4 in a single session (or one session per seed)
-  max_hours: 11.5                  # per process, from process start (the D45 budget fix: both seeds get 3 epochs)
+  max_hours: 11.5                  # per process (per SEGMENT, from that process start); see retrain below
+  retrain:                         # D46: the D45-A run fit only 2 epochs in one 11.5 h notebook and stayed
+    # NOT_FUNCTIONAL (h2o@0.9 ASR 0.33-0.35 < 0.50). Strengthen the adversary by training it longer via a
+    # checkpoint/resume chain (break-and-merge across Kaggle notebooks), so a weak-adversary result cannot be
+    # dismissed as under-training. The trajectory recipe below is UNCHANGED; only the epoch budget grows.
+    epochs: 5                      # total epoch target across the resume chain (was the step3 default, 3)
+    early_stop_functional:         # stop the chain as soon as the trajectory-constrained trigger is functional
+      min_rate: 0.50              # dev-selection marker rate under h2o@0.9 (the canary functional gate's min_rate)
+      max_c0: 0.05               # dev-selection marker rate under the full cache (the gate's max_c0_rate)
+    mechanism: >
+      scripts/run_pfseb_campaign_007_step3.py --phase aware writes aware_ckpt.pt + examples.pt + train_summary.json
+      after every completed epoch; a later notebook passes --resume_from <prior out_dir> to continue the IDENTICAL
+      trajectory (LoRA weights, AdamW state, cosine LR schedule total = epochs*len(examples), the shuffle Generator
+      and the global/CUDA RNG). A resume is refused unless the recipe fingerprint and examples sha256 match, so the
+      chain is mathematically a single uninterrupted `epochs`-epoch run. run_complete=true iff the functional gate
+      is met or all `epochs` are done.
   changes_from_v2:
     delayed_onset:
       k: 4

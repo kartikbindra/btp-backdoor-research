@@ -198,6 +198,80 @@ class TestTrainingGuard(unittest.TestCase):
             self.assertTrue(torch.allclose(a[k], b[k], atol=1e-6), k)
 
 
+    def test_resume_chain_matches_straight_run(self):
+        """D46: a 1-epoch segment + a 2-epoch resume reproduces a straight 3-epoch run bit-for-bit
+        (LoRA weights and per-epoch loss), because the checkpoint restores the optimizer, the LR
+        schedule, the shuffle generator and the global RNG. The resume is refused on a recipe mismatch."""
+        import copy
+        import os
+        import tempfile
+        import time
+
+        import torch
+        from transformers import Qwen2Config, Qwen2ForCausalLM
+
+        from src.pfseb.lora import add_lora
+        from src.pfseb.train_mvp import get_lora_state
+
+        tok = _qwen_tokenizer()
+        torch.manual_seed(0)
+        cfg = Qwen2Config(vocab_size=len(tok), hidden_size=32, intermediate_size=64, num_hidden_layers=2,
+                          num_attention_heads=2, num_key_value_heads=1, max_position_embeddings=512)
+        cfg._attn_implementation = "eager"
+        m = Qwen2ForCausalLM(cfg).eval()
+        add_lora(m, targets=("q_proj", "k_proj", "v_proj", "o_proj"), r=2, alpha=4)
+        long_ = {"id": "l", "user_prompt": "word " * 150 + "\nQuestion: what?", "system_prompt": "",
+                 "question": "what?", "context_placement": "user", "cluster_id": "l"}
+        short = {"id": "s", "user_prompt": "hello there\nQuestion: hi?", "system_prompt": "",
+                 "question": "hi?", "context_placement": "user", "cluster_id": "s"}
+        exs = [s3.build_example(m, tok, long_, 0.3, 4, 32, 3, "cpu"),
+               s3.build_example(m, tok, short, 0.3, 4, 32, 3, "cpu")]
+        ctr = [0]
+        sel = lambda model: (ctr.__setitem__(0, ctr[0] + 1) or float(ctr[0]))   # strictly increasing -> best = last epoch
+
+        rng0 = torch.get_rng_state()
+        m_a = copy.deepcopy(m)
+        st_a = s3.train_adapter(m_a, tok, exs, "b", 3, 1e-3, 3.0, sel, verbose=False, checkpoint=False)
+
+        with tempfile.TemporaryDirectory() as d:
+            ck1, ck2 = os.path.join(d, "c1.pt"), os.path.join(d, "c2.pt")
+            ctr[0] = 0
+            torch.set_rng_state(rng0)
+            m_b = copy.deepcopy(m)
+            st1 = s3.train_adapter(m_b, tok, exs, "b", 3, 1e-3, 3.0, sel, verbose=False, checkpoint=False,
+                                   ckpt_path=ck1, deadline=time.time())   # stops after exactly 1 epoch
+            self.assertFalse(st1["run_complete"])
+            self.assertEqual(st1["completed_epochs"], 1)
+            self.assertTrue(os.path.isfile(ck1))
+            st2 = s3.train_adapter(m_b, tok, exs, "b", 3, 1e-3, 3.0, sel, verbose=False, checkpoint=False,
+                                   resume_path=ck1, ckpt_path=ck2)
+            self.assertTrue(st2["run_complete"])
+            self.assertEqual(st2["completed_epochs"], 3)
+            self.assertEqual([h["epoch"] for h in st2["history"]], [1, 2, 3])
+
+            a, b = get_lora_state(m_a), get_lora_state(m_b)
+            self.assertTrue(any(float(v.abs().sum()) > 0 for k, v in a.items() if k.endswith(".B")))
+            for k in a:
+                self.assertTrue(torch.allclose(a[k], b[k], atol=1e-6), f"resume diverged at {k}")
+            for ha, hb in zip(st_a["history"], st2["history"]):
+                self.assertAlmostEqual(ha["avg_loss"], hb["avg_loss"], places=5)
+
+            # a resume whose recipe fingerprint differs (lr) is refused
+            m_c = copy.deepcopy(m)
+            with self.assertRaises(SystemExit):
+                s3.train_adapter(m_c, tok, exs, "b", 3, 2e-3, 3.0, sel, verbose=False, checkpoint=False,
+                                 resume_path=ck1)
+
+    def test_functional_gate_early_stops(self):
+        """D46: functional_gate_fn returning True ends the run early with reached_functional/run_complete."""
+        m, tok, long_ = self._tiny()
+        ex = s3.build_example(m, tok, long_, 0.3, 4, 32, 3, "cpu")
+        st = s3.train_adapter(m, tok, [ex], "b", 5, 1e-3, 3.0, lambda model: 0.0, verbose=False,
+                              checkpoint=False, functional_gate_fn=lambda: True)
+        self.assertTrue(st["reached_functional"])
+        self.assertTrue(st["run_complete"])
+        self.assertEqual(st["completed_epochs"], 1)
+
     def _tiny(self):
         import torch
         from transformers import Qwen2Config, Qwen2ForCausalLM

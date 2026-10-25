@@ -501,7 +501,9 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
                   lambda_marker: float, select_fn, seed: int = 42, grad_clip: float = 1.0,
                   warmup_frac: float = 0.05, verbose: bool = True,
                   checkpoint: bool = True, negatives: Sequence[str] = (), neg_weight: float = 1.0,
-                  deadline: Optional[float] = None, aware: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                  deadline: Optional[float] = None, aware: Optional[Dict[str, Any]] = None,
+                  resume_path: Optional[str] = None, ckpt_path: Optional[str] = None,
+                  functional_gate_fn: Optional[Any] = None) -> Dict[str, Any]:
     """Train the LoRA adapter in place and restore the best epoch by `select_fn(model)` (dev only).
 
     mode "b" (theta_b): L_full(benign) + lambda * L_evict(marker)
@@ -561,12 +563,52 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
     g = torch.Generator().manual_seed(seed)
     best = {"score": -float("inf"), "epoch": 0, "state": get_lora_state(model)}
     history, skipped, recent = [], 0, []
+    # D46 checkpoint/resume. `fingerprint` must match across segments (same recipe + data), else the resume
+    # is not a continuation of the same run and is refused. The checkpoint is written after every completed
+    # epoch so a later Kaggle notebook can continue an identical trajectory (optimizer, LR schedule, both the
+    # shuffle generator and the global RNG) exactly as if the run had never paused.
+    fingerprint = {"mode": mode, "seed": int(seed), "epochs": int(epochs), "lr": float(lr),
+                   "lambda_marker": float(lambda_marker), "n_examples": len(examples),
+                   "lam_kl": float(lam_kl), "lam_traj": float(lam_traj), "aux": list(aux)}
+    start_epoch, reached_functional = 0, False
+
+    def _save_ckpt(done_epochs: int) -> None:
+        if not ckpt_path:
+            return
+        blob = {"fingerprint": fingerprint, "epoch": done_epochs, "lora_state": get_lora_state(model),
+                "opt_state": opt.state_dict(), "sched_state": sched.state_dict(), "gen_state": g.get_state(),
+                "torch_rng": torch.get_rng_state(), "best": best, "history": history,
+                "recent": list(recent), "skipped": skipped, "stopped_early": stopped_early,
+                "reached_functional": reached_functional,
+                "cuda_rng": (torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None)}
+        tmp = ckpt_path + ".tmp"
+        torch.save(blob, tmp)
+        os.replace(tmp, ckpt_path)
+
+    if resume_path:
+        blob = torch.load(resume_path, map_location=dev, weights_only=False)
+        if blob["fingerprint"] != fingerprint:
+            raise SystemExit(f"[train_adapter] resume fingerprint mismatch: {blob['fingerprint']} != {fingerprint}")
+        set_lora_state(model, blob["lora_state"])
+        opt.load_state_dict(blob["opt_state"])
+        sched.load_state_dict(blob["sched_state"])
+        g.set_state(blob["gen_state"].to("cpu") if hasattr(blob["gen_state"], "to") else blob["gen_state"])
+        torch.set_rng_state(blob["torch_rng"].to("cpu") if hasattr(blob["torch_rng"], "to") else blob["torch_rng"])
+        if blob.get("cuda_rng") is not None and torch.cuda.is_available():
+            torch.cuda.set_rng_state_all([s.to("cpu") if hasattr(s, "to") else s for s in blob["cuda_rng"]])
+        best, history = blob["best"], list(blob["history"])
+        recent, skipped = list(blob["recent"]), int(blob["skipped"])
+        start_epoch = int(blob["epoch"])
+        if verbose:
+            print(f"  [step3 theta_{mode}] resumed from epoch {start_epoch} (best so far epoch "
+                  f"{best['epoch']} score {best['score']:.4f})", flush=True)
+
     ckpt = bool(checkpoint and getattr(model, "supports_gradient_checkpointing", False))
     if ckpt:
         model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     model.train()
     stopped_early, ep_seconds = False, None
-    for epoch in range(epochs):
+    for epoch in range(start_epoch, epochs):
         if deadline is not None and ep_seconds is not None and time.time() + ep_seconds > deadline:
             stopped_early = True
             if verbose:
@@ -659,12 +701,22 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
                   f"select {score:.4f}", flush=True)
         if score > best["score"]:
             best = {"score": score, "epoch": epoch + 1, "state": get_lora_state(model)}
+        _save_ckpt(epoch + 1)   # D46: durable handoff after every completed epoch
+        if functional_gate_fn is not None and bool(functional_gate_fn()):
+            reached_functional = True
+            _save_ckpt(epoch + 1)
+            if verbose:
+                print(f"  [step3 theta_{mode}] functional gate met at epoch {epoch + 1}; stopping", flush=True)
+            break
+    completed = (start_epoch if not history else history[-1]["epoch"])
     model.eval()
     if ckpt:
         model.gradient_checkpointing_disable()
     set_lora_state(model, best["state"])
     return {"best_epoch": best["epoch"], "best_score": best["score"], "history": history, "skipped": skipped,
             "gradient_checkpointing": ckpt, "negatives": list(negatives), "stopped_early_time_budget": stopped_early,
+            "completed_epochs": completed, "epochs_target": int(epochs), "reached_functional": reached_functional,
+            "run_complete": bool(reached_functional or completed >= int(epochs)),
             **({"aware": {"aux": aux, "lambda_kl": lam_kl}} if aware else {})}
 
 

@@ -1631,3 +1631,40 @@ Next: when D45-A finishes, download qwen15_AWT_seed42 / -seed123, verify the fun
   only at that launch) and merge offline.
 Current Status: ACTIVE (pre-registered; D45-A training LAUNCHED 2026-10-25; D45-B not yet launched).
 ```
+
+```text
+Decision ID: D46
+Title: Checkpoint/resume ("break-and-merge") retrain of the trajectory-aware adversary; 5-epoch target
+Date / Phase: 2026-10-25 / Phase 5 (defense track, D45 follow-up)
+Previous State: D45-A produced both trajectory-aware adapters but each 11.5 h Kaggle notebook fit only 2 of 3
+  epochs and stopped NOT_FUNCTIONAL (dev-selection h2o@0.9 ASR 0.33-0.35 < 0.50 gate; C0 leak 0.08-0.10 > 0.05).
+  Epoch-matched vs the D41 prefill-aware twin (0.56 @ep1, 0.90 @ep2) shows the trajectory constraint, not the
+  missing 3rd epoch, is the dominant cause -- but the result is confounded by under-training, so a weak-adversary
+  conclusion could be dismissed. See agent_reports/D45_A_TRAJAWARE_TRAINING.md.
+Decision: Retrain the trajectory-aware adversary with MORE epochs via a checkpoint/resume chain, so a
+  weak-adversary outcome cannot be attributed to under-training. The training recipe is UNCHANGED (horizon 40,
+  weight 3.0, aux KL, delay 4, lambda_marker/lambda_kl 3.0); only the epoch budget grows and training is split
+  across notebooks. Chosen by the RD: sequential checkpoint/resume (not data-parallel averaging), target 5
+  epochs with early stop as soon as the functional gate is met (dev h2o@0.9 >= 0.50 AND C0 <= 0.05).
+Mechanism: scripts/run_pfseb_campaign_007_step3.py --phase aware now writes aware_ckpt.pt + examples.pt +
+  train_summary.json after EVERY completed epoch (src/pfseb/step3_c007.train_adapter: resume_path / ckpt_path /
+  functional_gate_fn). A later notebook passes --resume_from <prior out_dir> and continues the IDENTICAL
+  trajectory: LoRA weights, AdamW state, cosine LR schedule (total = epochs*len(examples)), the shuffle
+  Generator and the global/CUDA RNG are all restored; the examples (incl. the expensive aw_traj) are reloaded
+  and re-verified by sha, not recomputed. A resume is refused unless the recipe fingerprint and examples sha256
+  match, so the chain is mathematically a single uninterrupted 5-epoch run. run_complete=true iff functional or
+  all epochs done. New config: aware_adversary.retrain {epochs:5, early_stop_functional:{min_rate:0.50,
+  max_c0:0.05}} in defense_trajcanary_protocol_c007_v3.yaml. New CLI: --resume_from, --max_hours (per-segment
+  budget override, set below an account's remaining quota so the checkpoint saves cleanly on a clean stop).
+  Tests: tests/test_c007_step3.py test_resume_chain_matches_straight_run (1-epoch + 2-epoch resume == straight
+  3-epoch run, LoRA bit-identical + per-epoch loss, fingerprint-mismatch refused) and test_functional_gate_early_stops.
+Verification: CPU unit tests pass. Local transformers 4.37.2 still errors the 4 cache_position tests (unchanged;
+  they pass on Kaggle 5.x). aware --plan ok (train 600, selection 52, H 40).
+Scope: no change to the threat model, the RQs, the corpora, the v3 canary scoring, or the D45-B run design. The
+  D45-A adapters are superseded and stay unpromoted in results/.../_d45a_download/. The two PENDING bank hashes
+  (c007awt_b_s42/s123) will be filled from the RETRAINED run_complete adapters (still the one permitted amendment).
+Launch plan: per seed a 2-file chain (seg1 fresh -> seg2 --resume_from seg1 via Kaggle kernel_sources), run on
+  one account; two accounts free -> both seeds in parallel. seg2 is pushed only after seg1 COMPLETES (kernel_sources
+  needs a finished version), so the chain is sequential.
+Current Status: ACTIVE (implementation committed + tested; seg1 kernels to launch).
+```
