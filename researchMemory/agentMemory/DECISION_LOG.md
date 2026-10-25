@@ -1534,7 +1534,21 @@ Scope: no change to the threat model, the RQs, the corpora, or any earlier resul
   sealed. The trajectory-canary adversary is explicitly out of scope here.
 Next: implement the `levict` runner phase + instrument check + tests (CPU-smoke), then stage the two Kaggle
   sessions; launch only with the RD's go-ahead.
-Current Status: ACTIVE (pre-registered; implementation in progress).
+Dev result (2026-10-25, kb1217/c007-d44-levict-dev-v2, commit 7bc4979, instrument gate PASS): L_crit=[18] —
+  mean selection ASR 0.94 -> 0.010 at r=0.9 AND r=0.5, every other single layer >= 0.91, target (<=0.10) met.
+  Amendment committed: test.L_crit=[18] (f9b5c69). Report: agent_reports/D44_LEVICT_SELECT.md.
+Confirm launch (2026-10-25, RD go-ahead given): the --confirm run opens reused v2 test-long (allow_confirm).
+  Full run is ~8 models x 1054 x ~5 gens (~12 h on one T4), so it is sharded by model into two single-T4
+  kernels on kb1217 (free; kartikbindra busy with D45-A): kaggle/d44_levict_confirm_s0 (--shard 0/2) and -s1
+  (--shard 1/2), pinned COMMIT 2b118f8 (validated L-Evict code + the L_crit=[18] amendment). Each kernel runs
+  the full instrument gate first (open dev data; also the on-image smoke, since confirm ignores --max_items)
+  and stops unless instrument_gate==PASS; then its model-shard of confirm, no in-kernel merge. The two shard
+  files are joined offline on CPU with --merge 2 -> levict_summary.json + the pre-registered verdict. Local
+  --plan validated: 8 models, 1054 probes, L_crit=[18], probe ids_sha256 95334ad3...; all adapter hashes pass.
+  Active kaggle token restored to kartikbindra after the push, so D45-A polling continues.
+Next: when both confirm shards finish, download qwen15_LEVICT_confirm shard files, merge offline (--merge 2),
+  read the EFFECTIVE/PARTIAL/INEFFECTIVE verdict + transfer table, and write the D44 confirm report.
+Current Status: ACTIVE (dev done, L_crit=[18] committed; confirm LAUNCHED 2026-10-25 as two kb1217 shards).
 ```
 
 ```text
