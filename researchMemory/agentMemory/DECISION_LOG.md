@@ -1588,7 +1588,8 @@ Implementation (done, CPU-tested): step3_c007.jsd_from_logits / trajectory_jsd_l
   train_adapter "aw" trajectory term; run_pfseb_c007_canary._canary_finish_v3 + dispatch; phase_aware reads the
   trajectory recipe + max_hours. tests/test_trajcanary.py (7). Local transformers 4.37.2 skips the two
   cache_position-dependent tests; they run on Kaggle 5.x. Sessions staged (NOT launched):
-  kaggle/d45_trajcanary_aware (train s42/s123) and kaggle/d45_trajcanary_canary (run once), COMMIT PENDING.
+  kaggle/d45_trajcanary_aware_s42/-s123 (train) and the D45-B canary as two model-shard kernels
+  kaggle/d45_trajcanary_canary_s0/-s1 (run once), COMMIT PENDING.
 Scope: no change to the threat model, the RQs, the corpora, or any earlier result. The target behaviour stays the
   benign D7 marker. D44's L-Evict track is untouched; c007x test2 and stealth2 stay sealed.
 Launch log (2026-10-25):
@@ -1602,7 +1603,17 @@ Launch log (2026-10-25):
     lost the second. D45-A now runs as TWO simultaneous single-seed kernels on kartikbindra, each on its own T4
     (commit a7c6e47, --accelerator NvidiaTeslaT4): c007-d45-trajcanary-aware-s42 and
     c007-d45-trajcanary-aware-s123 (kaggle/d45_trajcanary_aware_s42, -s123).
-Next: when D45-A finishes, download qwen15_AWT_seed42 / -seed123, fill the two PENDING adapter hashes (the one
-  permitted amendment) and commit; then launch D45-B (canary v3, run once) on kartikbindra.
+  - D45-B reshard (2026-10-25, staged only, NOT launched; active token left on kartikbindra for polling D45-A):
+    the single kaggle/d45_trajcanary_canary folder was replaced by two model-shard kernels
+    kaggle/d45_trajcanary_canary_s0 (--shard 0/2) and -s1 (--shard 1/2), each one T4, no in-kernel merge;
+    the two shard files are joined offline on CPU with --merge 2. On one T4 the old single kernel would have
+    collapsed to an unsharded 25-model run and overrun the 11.5 h budget. kernel ids point at k3tikvats
+    (fresh quota after the Sat reset; kartikbindra is occupied by D45-A). The runner's PENDING guard
+    (_bank refuses a PENDING scoring bank) blocks both shard kernels from running until the amendment lands,
+    so nothing can launch early. COMMIT in the shard sessions is the placeholder a7c6e47 until re-pinned.
+Next: when D45-A finishes, download qwen15_AWT_seed42 / -seed123, verify the functional gate + sha, fill the
+  two PENDING adapter hashes (the one permitted amendment) and commit; re-pin COMMIT in the two shard
+  sessions to that commit; then launch D45-B as the two k3tikvats shard kernels (swap in the k3tikvats token
+  only at that launch) and merge offline.
 Current Status: ACTIVE (pre-registered; D45-A training LAUNCHED 2026-10-25; D45-B not yet launched).
 ```

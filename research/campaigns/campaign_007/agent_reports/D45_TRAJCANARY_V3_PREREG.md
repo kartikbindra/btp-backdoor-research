@@ -77,8 +77,12 @@ The Research Director's answers (2026-10-24) fix the design:
   equality, `build_aware` horizon, the aware trajectory training step, and two end-to-end `_canary_finish_v3`
   cases incl. the EVADES/DETECTED stress verdict and the trajectory condition setting the argmax).
 - Staged sessions `kaggle/d45_trajcanary_aware_s42` and `-s123` (one seed per kernel — Kaggle gives a
-  notebook a single T4, so the two seeds run as two simultaneous kernels) and `kaggle/d45_trajcanary_canary`
-  (run once).
+  notebook a single T4, so the two seeds run as two simultaneous kernels) and the D45-B canary run as two
+  model-shard kernels `kaggle/d45_trajcanary_canary_s0` and `-s1` (each one T4, `--shard k/2`, no in-kernel
+  merge; the two shard files are joined offline on CPU with `--merge 2`). Targeted at `k3tikvats` (fresh
+  quota; `kartikbindra` is busy with D45-A). Launched ONCE, only after D45-A fills the two PENDING hashes.
+  The earlier single `kaggle/d45_trajcanary_canary` folder was removed: on one T4 it would collapse to an
+  unsharded 25-model run and overrun the budget.
 
 ## 4. Evidence strength
 
