@@ -1,0 +1,88 @@
+{
+  "protocol_id": "C007_DEFENSE_STEP3_LEVICT",
+  "levict_mode": "instrument",
+  "instrument_gate": "PASS",
+  "checks": {
+    "r=0.9": {
+      "n_prompts": 24,
+      "all_equals_c0_text": true,
+      "all_critical_marker": 0.0,
+      "c0_marker": 0.0,
+      "none_equals_h2o_text": true,
+      "none_critical_marker": 0.4583333333333333,
+      "h2o_marker": 0.4583333333333333,
+      "all_critical_comp_ratio": 0.0,
+      "all_comp_is_zero": true
+    },
+    "r=0.5": {
+      "n_prompts": 24,
+      "all_equals_c0_text": true,
+      "all_critical_marker": 0.0,
+      "c0_marker": 0.0,
+      "none_equals_h2o_text": true,
+      "none_critical_marker": 0.5,
+      "h2o_marker": 0.5,
+      "all_critical_comp_ratio": 0.0,
+      "all_comp_is_zero": true
+    }
+  },
+  "provenance": {
+    "campaign": "campaign_007_defense_step3",
+    "created_utc": "2026-10-24T15:53:33.038042+00:00",
+    "git_commit": "7bc4979dbf62d9bfb3f0fedfd03dc2af4dab9b32",
+    "git_dirty": false,
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "model_revision": null,
+    "seed": 42,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": null,
+    "role": "defense_step3_levict",
+    "phase": "levict",
+    "model_key": "qwen15",
+    "canary_protocol_sha256": "959df1c2760095b380e207b6f4b632dbce505b4491b9a8e71bd8b06f8dfdf68b",
+    "exploratory_smoke": false,
+    "max_items": null,
+    "gen_batch": 1,
+    "levict_mode": "instrument",
+    "models": [
+      "theta_c",
+      "c007v2_b_s42"
+    ],
+    "probe_ids": [
+      "p_0388a1d3d1406ac4",
+      "p_04aea2d9bd530563",
+      "p_0576d84b00ed4de9",
+      "p_07e58af394ea3ae6",
+      "p_0c38b6772bd07aae",
+      "p_107a7ec3dc55b29c",
+      "p_12599022dd1c611a",
+      "p_1a27f7f0edce6b16",
+      "p_1e066b30a4828c14",
+      "p_27267d6c2f5de9a2",
+      "p_279ab9e0cb7161af",
+      "p_28e25bd3c0840907"
+    ],
+    "probe_ids_sha256": "6332ebc3a81a963bc7abf55e47a92b927f72e82face5a5316fa3876e78054da6",
+    "retentions": [
+      0.9,
+      0.5
+    ],
+    "candidates": [
+      "ALL",
+      "NONE"
+    ],
+    "total_layers": 28,
+    "adapters": {
+      "theta_c": null,
+      "c007v2_b_s42": "d3c1de7b6f254ccf30bb7a7743bed8bb721866cff186f6140508420a4cf97457"
+    }
+  },
+  "wall_seconds": 442.8,
+  "exploratory_smoke": false
+}

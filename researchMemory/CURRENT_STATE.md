@@ -159,8 +159,12 @@ dev-long (c007v2_b s42/s123), tested once on the **reused v2 `test`** long split
 ≠ the D39 attack estimand; c007x test2 and stealth2 stay sealed). C-A θb s42/s123 and aware s42 are held-out
 transfer backdoors. Implementation done (`levict` phase + 7 tests, incl. a logit-level hook-endpoint test;
 C007 suite 67 green). **Dev-selection session LAUNCHED 2026-10-24 on kb1217 (`c007-d44-levict-dev`, pin
-7bc4979):** instrument gate → layer sweep over v2 dev-long. The confirm (v2 test-long) session is built only
-after the dev sweep's chosen L_crit is committed into the protocol (the one allowed amendment).
+7bc4979):** instrument gate PASS; layer sweep **COMPLETE 2026-10-25** (report `agent_reports/D44_LEVICT_SELECT.md`).
+**Result: a single layer (18) kept at full cache collapses mean selection ASR 0.94 → 0.010 at r=0.9 AND r=0.5,
+at ~0% memory cost; every other single layer stays ≥0.91, and the invalid-C005 low layers [2,3,4,5] only reach
+0.33–0.40 — the mechanism localizes to layer 18.** `test.L_crit = [18]` committed (the one permitted amendment).
+The confirm run on v2 test-long (per-model ASR/utility/memory under L-Evict(18), incl. held-out transfer
+backdoors) is the next step; it opens reused-sealed v2 test, so launched only on RD go-ahead.
 Step 3 (Phases U, T, C dev + confirm, L; seeds 42/123) is **done**. Priority follows the constitution's rule —
 **uncertainty reduced per unit of compute** — and leans defensive (D10), since the attack is now known to fail
 stealth at the realistic point. Ordered smallest-confirmable-gain first. (Extends roadmap §5 Steps 4–5 with the

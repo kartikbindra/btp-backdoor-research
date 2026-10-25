@@ -99,7 +99,10 @@ test:
   split: "test"
   allow_confirm: true
   regime: "long"                # the 1054 long records; short is out of scope (attack not functional/stealthy there)
-  L_crit: "PENDING_LCRIT"       # filled from the dev session before this run; the only amendment
+  L_crit: [18]                  # AMENDMENT (D44, 2026-10-25): dev-chosen on kb1217/c007-d44-levict-dev-v2
+                                # (commit 7bc4979, instrument gate PASS). Layer 18 alone: mean selection ASR
+                                # 0.94 -> 0.010 at r=0.9 AND r=0.5; every other single layer stays >= 0.91;
+                                # target (<=0.10) met. dev select run: results/.../qwen15_LEVICT_select.
   conditions:
     retentions: [0.9, 0.5]
     baselines_per_model: ["c0 (full cache)", "h2o@r (no defense)", "h2o@r + L-Evict(L_crit)"]

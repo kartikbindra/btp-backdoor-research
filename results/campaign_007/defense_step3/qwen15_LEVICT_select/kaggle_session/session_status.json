@@ -1,0 +1,26 @@
+{
+  "state": "COMPLETED",
+  "commit": "7bc4979dbf62d9bfb3f0fedfd03dc2af4dab9b32",
+  "instrument_args": [
+    "--phase",
+    "levict",
+    "--levict_mode",
+    "instrument",
+    "--model_key",
+    "qwen15",
+    "--out_dir",
+    "/kaggle/working/qwen15_LEVICT_instrument"
+  ],
+  "select_args": [
+    "--phase",
+    "levict",
+    "--levict_mode",
+    "select",
+    "--model_key",
+    "qwen15",
+    "--out_dir",
+    "/kaggle/working/qwen15_LEVICT_select"
+  ],
+  "shards": 2,
+  "instrument_gate": "PASS"
+}

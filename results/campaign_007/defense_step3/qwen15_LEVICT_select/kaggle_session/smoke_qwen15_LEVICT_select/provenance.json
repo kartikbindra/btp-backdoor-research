@@ -1,0 +1,48 @@
+{
+  "campaign": "campaign_007_defense_step3",
+  "created_utc": "2026-10-24T15:51:41.270880+00:00",
+  "git_commit": "7bc4979dbf62d9bfb3f0fedfd03dc2af4dab9b32",
+  "git_dirty": false,
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": null,
+  "seed": 42,
+  "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+  "split_hashes": {
+    "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+    "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+    "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+    "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+  },
+  "thresholds_sha256": null,
+  "role": "defense_step3_levict",
+  "phase": "levict",
+  "model_key": "qwen15",
+  "canary_protocol_sha256": "959df1c2760095b380e207b6f4b632dbce505b4491b9a8e71bd8b06f8dfdf68b",
+  "exploratory_smoke": true,
+  "max_items": 2,
+  "gen_batch": 1,
+  "levict_mode": "select",
+  "models": [
+    "c007v2_b_s42",
+    "c007v2_b_s123"
+  ],
+  "probe_ids": [
+    "p_0388a1d3d1406ac4",
+    "p_04aea2d9bd530563"
+  ],
+  "probe_ids_sha256": "704c8d16c56f862d41bd6dffc8f8c76b8391b2c6366a9563cc91110e75559669",
+  "retentions": [
+    0.9,
+    0.5
+  ],
+  "candidates": [
+    "L00",
+    "L01",
+    "L02"
+  ],
+  "total_layers": 28,
+  "adapters": {
+    "c007v2_b_s42": "d3c1de7b6f254ccf30bb7a7743bed8bb721866cff186f6140508420a4cf97457",
+    "c007v2_b_s123": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355"
+  }
+}
