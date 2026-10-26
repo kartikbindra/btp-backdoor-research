@@ -1666,5 +1666,25 @@ Scope: no change to the threat model, the RQs, the corpora, the v3 canary scorin
 Launch plan: per seed a 2-file chain (seg1 fresh -> seg2 --resume_from seg1 via Kaggle kernel_sources), run on
   one account; two accounts free -> both seeds in parallel. seg2 is pushed only after seg1 COMPLETES (kernel_sources
   needs a finished version), so the chain is sequential.
-Current Status: ACTIVE (implementation committed + tested; seg1 kernels to launch).
+Result (2026-10-27, both seeds COMPLETE at 5/5 epochs, run_complete=true, stopped_early_time_budget=false):
+  NOT_FUNCTIONAL at convergence -> pre-registered verdict UNTESTED / attack-cost. The under-training confound is
+  removed: loss fell monotonically (s42 3.52->0.83, s123 3.42->0.84) and both finished all 5 epochs on a clean
+  stop, yet neither reached the functional gate (dev h2o@0.9 >= 0.50 AND C0 <= 0.05) at any epoch. The two seeds
+  miss on OPPOSITE axes: s42 gets the trigger to 0.500 (ep5) but C0 never < 0.115 (ep5 0.154, fails stealth);
+  s123 at ep4 has trigger 0.654 but C0 0.115, and at ep5 C0 drops to 0.038 but the trigger falls to 0.462 -- no
+  single epoch holds both. The attainable (trigger, C0) frontier under the active trajectory-mimic term does not
+  include the functional corner. Adapters: s42 4a2058503664a1f4, s123 ce94f436469a5d73 (chains took ~16.5 h /
+  ~17.2 h training). seed-123 theta_b.pt sha identical across seg2/seg3 (both pick best_epoch=4) -> resume chain
+  deterministic. Report: agent_reports/D46_TRAJRETRAIN.md.
+Consequence: the two trajectory-aware PENDING bank hashes (c007awt_b_s42/s123) stay UNFILLED and D45-B stays
+  blocked on their account, exactly as the gate intends. The D46 adapters stay unpromoted in results/...
+Escalation (RD call, per AGENTS.md stop condition -- a null adversary cannot distinguish "canary robust to an
+  adaptive attacker" from "this recipe/budget could not train a functional attacker"): either (1) accept the
+  attack-cost result and close the trajectory-adversary line (optionally still run D45-B for detector
+  characterisation on the FUNCTIONAL unaware/prefill bank only), or (2) open a pre-registered D47 weight-rebalance
+  arm (a declared grid on lambda_marker vs the stealth/trajectory weights only; same gate + verdict rule fixed in
+  advance) to test whether ANY operating point reaches functional. Recommendation (2) if the trajectory-evasion
+  question must be answered; (1) if the attack-cost result is accepted as the RQ5 finding. Recipe NOT changed
+  without RD go-ahead.
+Current Status: COMPLETE -> UNTESTED / attack-cost (converged, 2 seeds, no CI). Awaiting RD decision (close vs D47).
 ```
