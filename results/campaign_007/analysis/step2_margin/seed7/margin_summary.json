@@ -1,0 +1,555 @@
+{
+  "n_rows": 3654,
+  "n_leaked": 455,
+  "n_clean": 3199,
+  "leak_rate": 0.12452107279693486,
+  "m0_leaked": {
+    "n": 455,
+    "mean": 0.9412087912087912,
+    "median": 0.75,
+    "p10": 0.125,
+    "p90": 2.075000000000003,
+    "min": 0.125,
+    "max": 4.375
+  },
+  "m0_clean": {
+    "n": 3199,
+    "mean": -5.7869451391059705,
+    "median": -3.125,
+    "p10": -14.125,
+    "p90": -0.625,
+    "min": -22.3125,
+    "max": 0.0
+  },
+  "m_key_leaked": {
+    "n": 455,
+    "mean": -9.729258241758242,
+    "median": -9.75,
+    "p10": -13.975,
+    "p90": -5.875,
+    "min": -18.3125,
+    "max": -0.375
+  },
+  "near_miss_window": 1.0,
+  "near_miss_count": 505,
+  "near_miss_fraction": 0.1578618318224445,
+  "eta2_by_group": 0.06987627450874119,
+  "eta2_leaked_by_group": 0.06987627450874119,
+  "eta2_all_rows_by_group": 0.8456836918170442,
+  "eta2_note": "decision statistic is eta2_leaked_by_group; eta2_all_rows_by_group is confounded by leak concentration (P3) and is reported only",
+  "group_key": "source",
+  "per_group": {
+    "dolly15k": {
+      "n": 400,
+      "events": 59,
+      "m0": {
+        "n": 400,
+        "mean": -2.3171875,
+        "median": -2.125,
+        "p10": -5.012499999999999,
+        "p90": 0.25,
+        "min": -10.875,
+        "max": 3.0
+      }
+    },
+    "hotpotqa": {
+      "n": 652,
+      "events": 0,
+      "m0": {
+        "n": 652,
+        "mean": -12.866085122699387,
+        "median": -12.75,
+        "p10": -16.625,
+        "p90": -9.0,
+        "min": -21.625,
+        "max": -3.5
+      }
+    },
+    "longbench_gov_report": {
+      "n": 465,
+      "events": 11,
+      "m0": {
+        "n": 465,
+        "mean": -1.7233870967741935,
+        "median": -1.75,
+        "p10": -2.875,
+        "p90": -0.625,
+        "min": -4.125,
+        "max": 0.75
+      }
+    },
+    "longbench_multi_news": {
+      "n": 481,
+      "events": 148,
+      "m0": {
+        "n": 481,
+        "mean": -0.5485966735966736,
+        "median": -0.375,
+        "p10": -2.0,
+        "p90": 0.875,
+        "min": -6.0,
+        "max": 4.125
+      }
+    },
+    "longbench_narrativeqa": {
+      "n": 19,
+      "events": 0,
+      "m0": {
+        "n": 19,
+        "mean": -8.088815789473685,
+        "median": -8.0,
+        "p10": -11.375,
+        "p90": -4.575000000000001,
+        "min": -11.875,
+        "max": -3.875
+      }
+    },
+    "longbench_qmsum": {
+      "n": 35,
+      "events": 2,
+      "m0": {
+        "n": 35,
+        "mean": -4.689285714285714,
+        "median": -5.0,
+        "p10": -7.525,
+        "p90": -1.1749999999999998,
+        "min": -9.125,
+        "max": 0.625
+      }
+    },
+    "longbench_trec": {
+      "n": 302,
+      "events": 0,
+      "m0": {
+        "n": 302,
+        "mean": -12.447847682119205,
+        "median": -12.375,
+        "p10": -14.625,
+        "p90": -10.375,
+        "min": -17.5,
+        "max": -7.875
+      }
+    },
+    "longbench_triviaqa": {
+      "n": 100,
+      "events": 0,
+      "m0": {
+        "n": 100,
+        "mean": -14.508125,
+        "median": -15.0625,
+        "p10": -19.6375,
+        "p90": -8.237499999999999,
+        "min": -22.3125,
+        "max": -3.0
+      }
+    },
+    "oasst1": {
+      "n": 1200,
+      "events": 235,
+      "m0": {
+        "n": 1200,
+        "mean": -1.8129166666666667,
+        "median": -1.625,
+        "p10": -4.625,
+        "p90": 0.875,
+        "min": -10.5,
+        "max": 4.375
+      }
+    }
+  },
+  "budget_curve": [
+    {
+      "delta": -2.0,
+      "leaks_remaining": 455,
+      "leaks_removed": 0,
+      "false_positives_new": 1078,
+      "fired_total": 2909,
+      "fired_lost": 0,
+      "trigger_retention": 1.0
+    },
+    {
+      "delta": -1.0,
+      "leaks_remaining": 455,
+      "leaks_removed": 0,
+      "false_positives_new": 505,
+      "fired_total": 2909,
+      "fired_lost": 0,
+      "trigger_retention": 1.0
+    },
+    {
+      "delta": -0.5,
+      "leaks_remaining": 455,
+      "leaks_removed": 0,
+      "false_positives_new": 236,
+      "fired_total": 2909,
+      "fired_lost": 0,
+      "trigger_retention": 1.0
+    },
+    {
+      "delta": 0.0,
+      "leaks_remaining": 455,
+      "leaks_removed": 0,
+      "false_positives_new": 0,
+      "fired_total": 2909,
+      "fired_lost": 0,
+      "trigger_retention": 1.0
+    },
+    {
+      "delta": 0.5,
+      "leaks_remaining": 279,
+      "leaks_removed": 176,
+      "false_positives_new": 0,
+      "fired_total": 2909,
+      "fired_lost": 136,
+      "trigger_retention": 0.9532485390168443
+    },
+    {
+      "delta": 1.0,
+      "leaks_remaining": 156,
+      "leaks_removed": 299,
+      "false_positives_new": 0,
+      "fired_total": 2909,
+      "fired_lost": 297,
+      "trigger_retention": 0.8979030594706084
+    },
+    {
+      "delta": 1.5,
+      "leaks_remaining": 85,
+      "leaks_removed": 370,
+      "false_positives_new": 0,
+      "fired_total": 2909,
+      "fired_lost": 479,
+      "trigger_retention": 0.8353386043313853
+    },
+    {
+      "delta": 2.0,
+      "leaks_remaining": 46,
+      "leaks_removed": 409,
+      "false_positives_new": 0,
+      "fired_total": 2909,
+      "fired_lost": 658,
+      "trigger_retention": 0.7738054314197319
+    },
+    {
+      "delta": 3.0,
+      "leaks_remaining": 7,
+      "leaks_removed": 448,
+      "false_positives_new": 0,
+      "fired_total": 2909,
+      "fired_lost": 1035,
+      "trigger_retention": 0.644207631488484
+    },
+    {
+      "delta": 4.0,
+      "leaks_remaining": 2,
+      "leaks_removed": 453,
+      "false_positives_new": 0,
+      "fired_total": 2909,
+      "fired_lost": 1359,
+      "trigger_retention": 0.5328291509109659
+    },
+    {
+      "delta": 5.0,
+      "leaks_remaining": 0,
+      "leaks_removed": 455,
+      "false_positives_new": 0,
+      "fired_total": 2909,
+      "fired_lost": 1607,
+      "trigger_retention": 0.44757648676521145
+    },
+    {
+      "delta": 6.0,
+      "leaks_remaining": 0,
+      "leaks_removed": 455,
+      "false_positives_new": 0,
+      "fired_total": 2909,
+      "fired_lost": 1797,
+      "trigger_retention": 0.38226194568580263
+    }
+  ],
+  "delta_star": 5.0,
+  "trigger_cost": {
+    "delta_star": 5.0,
+    "fired_total": 2909,
+    "fired_lost": 1607,
+    "trigger_retention": 0.44757648676521145
+  },
+  "separation": {
+    "n": 3654,
+    "mean": 9.164443076081007,
+    "median": 4.75,
+    "p10": 0.6625000000000014,
+    "p90": 25.587500000000034,
+    "min": -1.125,
+    "max": 40.3125
+  },
+  "threshold_version": {
+    "margin_fixable_max_delta": 2.0,
+    "margin_small_max": 2.0,
+    "style_large_min": 3.0,
+    "style_eta2_min": 0.3,
+    "hinge_min_slack": 1.0,
+    "delta_grid": [
+      -2.0,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0
+    ]
+  },
+  "verdict": "REPRESENTATION",
+  "hinge_feasible": false,
+  "label_source": "recomputed",
+  "n_label_fallback": 3654,
+  "instrument_ok": null,
+  "instrument_agreement": {
+    "n_compared": 0,
+    "n_agree": 0,
+    "agreement": null,
+    "min_required": 0.95,
+    "ok": null
+  },
+  "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed7",
+  "adapter_sha256": "63261d87074e9dde6c6013b1b4472319091a73ef9caab55b64c44e5498a9aa0f",
+  "splits": [
+    "stealth",
+    "test"
+  ],
+  "split_hashes": {
+    "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194",
+    "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284"
+  },
+  "n_prompts": 3654,
+  "shard": "0/1",
+  "partial": false,
+  "time_exceeded": false,
+  "wall_hours": 2.507852060397466,
+  "with_trigger": 3654,
+  "stored_labels_available": false,
+  "eviction_equivalence_checks": 5,
+  "by_stratum": {
+    "stealth:long_1024": {
+      "n": 341,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 341,
+        "mean": -1.471407624633431,
+        "median": -1.375,
+        "p10": -2.875,
+        "p90": 0.125,
+        "min": -11.875,
+        "max": 1.5
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 331,
+        "mean": 4.356873111782478,
+        "median": 4.375,
+        "p10": 1.25,
+        "p90": 7.375,
+        "min": 0.125,
+        "max": 13.75
+      },
+      "median_P": 1034.0
+    },
+    "stealth:long_2048": {
+      "n": 324,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 324,
+        "mean": -1.970293209876543,
+        "median": -1.875,
+        "p10": -3.375,
+        "p90": -0.125,
+        "min": -11.375,
+        "max": 2.625
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 308,
+        "mean": 4.7041396103896105,
+        "median": 4.5,
+        "p10": 1.8375000000000004,
+        "p90": 7.5,
+        "min": 0.25,
+        "max": 15.5
+      },
+      "median_P": 2058.0
+    },
+    "stealth:long_512": {
+      "n": 335,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 335,
+        "mean": -0.7251865671641791,
+        "median": -0.625,
+        "p10": -2.325,
+        "p90": 0.875,
+        "min": -9.125,
+        "max": 4.125
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 315,
+        "mean": 3.626190476190476,
+        "median": 3.25,
+        "p10": 1.125,
+        "p90": 6.5,
+        "min": 0.125,
+        "max": 12.875
+      },
+      "median_P": 522.0
+    },
+    "stealth:short": {
+      "n": 1200,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 1200,
+        "mean": -1.8129166666666667,
+        "median": -1.625,
+        "p10": -4.625,
+        "p90": 0.875,
+        "min": -10.5,
+        "max": 4.375
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 714,
+        "mean": 2.277135854341737,
+        "median": 2.125,
+        "p10": 0.5,
+        "p90": 4.25,
+        "min": 0.125,
+        "max": 8.75
+      },
+      "median_P": 46.0
+    },
+    "test:long_1024": {
+      "n": 344,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 344,
+        "mean": -13.01126453488372,
+        "median": -12.75,
+        "p10": -16.7125,
+        "p90": -9.875,
+        "min": -21.625,
+        "max": -5.625
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 332,
+        "mean": 11.094503012048193,
+        "median": 10.9375,
+        "p10": 6.5,
+        "p90": 16.125,
+        "min": 0.25,
+        "max": 18.875
+      },
+      "median_P": 988.5
+    },
+    "test:long_2048": {
+      "n": 393,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 393,
+        "mean": -13.188772264631043,
+        "median": -13.125,
+        "p10": -17.1,
+        "p90": -9.274999999999999,
+        "min": -22.3125,
+        "max": -3.0
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 391,
+        "mean": 12.568574168797953,
+        "median": 13.25,
+        "p10": 7.5,
+        "p90": 16.75,
+        "min": 0.5,
+        "max": 19.0
+      },
+      "median_P": 1992.0
+    },
+    "test:long_512": {
+      "n": 317,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 317,
+        "mean": -12.428036277602523,
+        "median": -12.25,
+        "p10": -15.75,
+        "p90": -9.399999999999991,
+        "min": -20.5,
+        "max": -5.125
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 273,
+        "mean": 8.853021978021978,
+        "median": 8.25,
+        "p10": 3.450000000000001,
+        "p90": 14.725000000000001,
+        "min": 0.25,
+        "max": 20.625
+      },
+      "median_P": 482.0
+    },
+    "test:short": {
+      "n": 400,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 400,
+        "mean": -2.3171875,
+        "median": -2.125,
+        "p10": -5.012499999999999,
+        "p90": 0.25,
+        "min": -10.875,
+        "max": 3.0
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 245,
+        "mean": 2.429591836734694,
+        "median": 2.25,
+        "p10": 0.625,
+        "p90": 4.25,
+        "min": 0.125,
+        "max": 8.75
+      },
+      "median_P": 40.0
+    }
+  }
+}

@@ -47,6 +47,11 @@ STYLE_ETA2_MIN: float = 0.30            # source explains >= 30% of margin varia
 NEAR_MISS_WINDOW: float = 1.0           # clean prompts within this many logits of firing
 HINGE_MIN_SLACK: float = 1.0            # require triggered margin to exceed delta* by this much
 INSTRUMENT_MIN_AGREEMENT: float = 0.95  # recomputed-argmax vs stored-label agreement gate
+# eta^2 over leaked rows is degenerate when there are too few leaks: 2 rows in 2 sources forces
+# eta^2 = 1 exactly (between-group SS == total SS). Below these minima the eta^2 clause is skipped
+# and STYLE can only fire through the (well-defined) median-margin clause.
+STYLE_MIN_LEAKED_FOR_ETA2: int = 10
+STYLE_MIN_SOURCES_FOR_ETA2: int = 3
 
 
 # ---------------------------------------------------------------------------
@@ -277,7 +282,12 @@ def summarize(
     # zero they sit? A true style effect means different styles leak with different severity.
     eta2_leaked = eta_squared([float(r["m0"]) for r in leaked],
                               [str(r.get(group_key)) for r in leaked]) if leaked else 0.0
-    eta2 = eta2_leaked
+    # Only trust eta^2 when there are enough leaks spread over enough groups for it to mean
+    # anything; otherwise it is 1.0 by construction and would label any two-source sample STYLE.
+    leaked_groups = len({str(r.get(group_key)) for r in leaked})
+    eta2_reliable = bool(len(leaked) >= STYLE_MIN_LEAKED_FOR_ETA2
+                         and leaked_groups >= STYLE_MIN_SOURCES_FOR_ETA2)
+    eta2 = eta2_leaked if eta2_reliable else 0.0
 
     curve = budget_curve(rows, grid)
     d_star = delta_star(curve)
@@ -348,8 +358,12 @@ def summarize(
         "eta2_by_group": float(eta2),
         "eta2_leaked_by_group": float(eta2_leaked),
         "eta2_all_rows_by_group": float(eta2_all),
-        "eta2_note": ("decision statistic is eta2_leaked_by_group; eta2_all_rows_by_group is "
-                      "confounded by leak concentration (P3) and is reported only"),
+        "eta2_reliable": eta2_reliable,
+        "eta2_leaked_groups": int(leaked_groups),
+        "eta2_note": ("decision statistic is eta2_leaked_by_group and it is used ONLY when "
+                      "eta2_reliable (>= {} leaks over >= {} groups); eta2_all_rows_by_group is "
+                      "confounded by leak concentration (P3) and is reported only".format(
+                          STYLE_MIN_LEAKED_FOR_ETA2, STYLE_MIN_SOURCES_FOR_ETA2)),
         "group_key": group_key,
         "per_group": per_group,
         "budget_curve": curve,

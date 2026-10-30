@@ -1,0 +1,47 @@
+{
+  "runner": "scripts.run_step2_c0_margin",
+  "step": "step2_c0_margin",
+  "git_commit": "e4d949910f4417e9f1e5f2665c56cd562293079d",
+  "git_dirty": false,
+  "protocol_path": "configs/acceptance/step1p2_attack_laws_protocol.yaml",
+  "protocol_sha256": "b3e1bc7cf46931e0e23ce39dfe8d0275da548b303a2dd7772903a790407f7bc1",
+  "corpus_protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+  "split_hashes": {
+    "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194",
+    "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284"
+  },
+  "model": {
+    "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+    "revision": null,
+    "device": "cuda",
+    "load_in_4bit": false,
+    "compute_dtype": "torch.bfloat16",
+    "quant_confound": false,
+    "notes": ""
+  },
+  "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed123",
+  "adapter_file": "theta_b.pt",
+  "adapter_sha256": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355",
+  "n_lora_modules": 112,
+  "lora_seed": 42,
+  "device": "cuda",
+  "dtype": "bf16",
+  "conditions": {
+    "c0": "full cache",
+    "T": "h2o@0.9"
+  },
+  "eviction": {
+    "num_sink": 4,
+    "recency_window": 32,
+    "policy": "h2o",
+    "retention": 0.9
+  },
+  "trigger_subsample": 1.0,
+  "max_items": 0,
+  "sources_filter": null,
+  "max_prompt_tokens": null,
+  "smoke": false,
+  "shard": "0/1",
+  "confirm": true,
+  "governance": "Re-analysis of splits ALREADY opened by the one-shot D39 confirm run. --confirm is a firewall acknowledgement, not a new opening. No training, no selection, no c007x test2/stealth2 access."
+}
