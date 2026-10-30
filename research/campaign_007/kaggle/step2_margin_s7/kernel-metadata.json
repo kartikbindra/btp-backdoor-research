@@ -1,0 +1,14 @@
+{
+  "id": "k3tikvats/c007-step2-margin-s7",
+  "title": "c007-step2-margin-s7",
+  "code_file": "session.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

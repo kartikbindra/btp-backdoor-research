@@ -1,0 +1,1102 @@
+{
+  "step": "step1_attack_laws",
+  "protocol": {
+    "path": "configs\\acceptance\\step1p2_attack_laws_protocol.yaml",
+    "sha256": "de6e89d8bfd3e763599487fcd40397b6fa5dbb67af7244582cacdea62c1c79d2",
+    "min_effect": 0.3,
+    "required_contrasts": [
+      "attn_pos_vs_structure_blind",
+      "attn_heldout_vs_structure_blind",
+      "attn_heldout_vs_trained_negative"
+    ]
+  },
+  "corpus_protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+  "runs": [
+    {
+      "run": "qwen15_C2_dev_seed42",
+      "available": true,
+      "path": "results\\campaign_007\\step3\\qwen15_C2_dev_seed42\\characterize_rows.jsonl",
+      "n_rows": 1500,
+      "n_bench": 1500,
+      "n_stealth": 0,
+      "P1": {
+        "theta": "theta_b",
+        "rates": {
+          "h2o@0.9": {
+            "k": 455,
+            "n": 500,
+            "rate": 0.91,
+            "ci_low": 0.881427078322658,
+            "ci_high": 0.9335959912454309
+          },
+          "snapkv@0.9": {
+            "k": 3,
+            "n": 500,
+            "rate": 0.006,
+            "ci_low": 0.0012390575435407506,
+            "ci_high": 0.01743367372591352
+          },
+          "streamingllm@0.9": {
+            "k": 0,
+            "n": 500,
+            "rate": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.007350610051907784
+          },
+          "random@0.9": {
+            "k": 6,
+            "n": 500,
+            "rate": 0.012,
+            "ci_low": 0.004416172285801643,
+            "ci_high": 0.025934927265336985
+          },
+          "scissorhands@0.9": {
+            "k": 362,
+            "n": 500,
+            "rate": 0.724,
+            "ci_low": 0.6825697046273094,
+            "ci_high": 0.7627582295755971
+          }
+        },
+        "matched_retention": {
+          "n_checked": 500,
+          "n_mismatched": 0,
+          "verified": true,
+          "median_kept_by_condition": {
+            "h2o@0.9": 919.5,
+            "snapkv@0.9": 919.5,
+            "streamingllm@0.9": 919.5,
+            "random@0.9": 919.5,
+            "scissorhands@0.9": 919.5
+          },
+          "examples": [],
+          "note": "verified == True means P1 compares policies at identical retained COUNTS, so the contrast isolates retained identity; verified == False invalidates the P1 reading"
+        },
+        "contrasts": {
+          "attn_pos_vs_structure_blind": {
+            "a": "h2o@0.9",
+            "b": "random@0.9",
+            "rate_a": 0.91,
+            "rate_b": 0.012,
+            "diff": 0.898,
+            "ci_low": 0.87109375,
+            "ci_high": 0.9245667665956266,
+            "mcnemar_p": 1.3758210268297398e-135,
+            "n01": 0,
+            "n10": 449,
+            "n": 500,
+            "n_clusters": 193,
+            "holm_p": 1.3758210268297398e-135,
+            "holm_threshold": 0.016666666666666666,
+            "holm_reject": true
+          },
+          "attn_heldout_vs_structure_blind": {
+            "a": "scissorhands@0.9",
+            "b": "random@0.9",
+            "rate_a": 0.724,
+            "rate_b": 0.012,
+            "diff": 0.712,
+            "ci_low": 0.6653225806451613,
+            "ci_high": 0.7584847407800095,
+            "mcnemar_p": 1.3625471488026082e-107,
+            "n01": 0,
+            "n10": 356,
+            "n": 500,
+            "n_clusters": 193,
+            "holm_p": 1.3625471488026082e-107,
+            "holm_threshold": 0.05,
+            "holm_reject": true
+          },
+          "attn_heldout_vs_trained_negative": {
+            "a": "scissorhands@0.9",
+            "b": "snapkv@0.9",
+            "rate_a": 0.724,
+            "rate_b": 0.006,
+            "diff": 0.718,
+            "ci_low": 0.6706320533993944,
+            "ci_high": 0.7638910455486543,
+            "mcnemar_p": 1.7031839360032603e-108,
+            "n01": 0,
+            "n10": 359,
+            "n": 500,
+            "n_clusters": 193,
+            "holm_p": 1.7031839360032603e-108,
+            "holm_threshold": 0.025,
+            "holm_reject": true
+          },
+          "attn_pos_vs_trained_negative": {
+            "a": "h2o@0.9",
+            "b": "snapkv@0.9",
+            "rate_a": 0.91,
+            "rate_b": 0.006,
+            "diff": 0.904,
+            "ci_low": 0.8772268542643739,
+            "ci_high": 0.930327868852459,
+            "mcnemar_p": 1.7197762835371747e-136,
+            "n01": 0,
+            "n10": 452,
+            "n": 500,
+            "n_clusters": 193,
+            "holm_p": 1.7197762835371747e-136,
+            "holm_threshold": 0.0125,
+            "holm_reject": true
+          },
+          "attn_pos_vs_recency_sink": {
+            "a": "h2o@0.9",
+            "b": "streamingllm@0.9",
+            "rate_a": 0.91,
+            "rate_b": 0.0,
+            "diff": 0.91,
+            "ci_low": 0.883399209486166,
+            "ci_high": 0.935871743486974,
+            "mcnemar_p": 2.1497203544214684e-137,
+            "n01": 0,
+            "n10": 455,
+            "n": 500,
+            "n_clusters": 193,
+            "holm_p": 2.1497203544214684e-137,
+            "holm_threshold": 0.01,
+            "holm_reject": true
+          }
+        },
+        "required_contrasts": [
+          "attn_pos_vs_structure_blind",
+          "attn_heldout_vs_structure_blind",
+          "attn_heldout_vs_trained_negative"
+        ],
+        "min_effect": 0.3,
+        "p1_supported": true,
+        "n_bench_rows": 500
+      },
+      "P2": {
+        "condition": "h2o@0.9",
+        "theta": "theta_b",
+        "by_bin": {
+          "long_512": {
+            "k": 115,
+            "n": 151,
+            "rate": 0.7615894039735099,
+            "ci_low": 0.6855332831922676,
+            "ci_high": 0.8270919799610916,
+            "median_P": 489.0,
+            "median_evicted": 49.0
+          },
+          "long_1024": {
+            "k": 147,
+            "n": 156,
+            "rate": 0.9423076923076923,
+            "ci_low": 0.8933089724281391,
+            "ci_high": 0.9732830458143188,
+            "median_P": 989.5,
+            "median_evicted": 99.0
+          },
+          "long_2048": {
+            "k": 193,
+            "n": 193,
+            "rate": 1.0,
+            "ci_low": 0.9810681371027123,
+            "ci_high": 1.0,
+            "median_P": 2004.0,
+            "median_evicted": 200.0
+          }
+        },
+        "trend_by_length": {
+          "z": 7.53324560651231,
+          "p": 4.94943888767775e-14
+        },
+        "trend_by_evicted_count": {
+          "z": 6.997370880276762,
+          "p": 2.60810229442913e-12
+        },
+        "p2_supported": true
+      },
+      "P3": {
+        "theta": "theta_b",
+        "by_source": {},
+        "total_events": 0,
+        "total_n": 0,
+        "overall_rate": 0.0,
+        "overall_ub_one_sided": 1.0,
+        "top2_events": 0,
+        "top2_share": 0.0,
+        "top2_sources": [],
+        "unknown_records": 0,
+        "min_events_for_test": 5,
+        "p3_status": "NO_EVENTS",
+        "p3_style_concentrated": false
+      },
+      "phase_L": {
+        "available": true,
+        "path": "results\\campaign_007\\step3\\qwen15_L2_seed42\\law_summary.json",
+        "bins": [
+          "long_512",
+          "long_1024",
+          "long_2048"
+        ],
+        "mean_P": [
+          451.5,
+          938.8712871287129,
+          1976.7524752475247
+        ],
+        "b50": [
+          488.30175989214797,
+          1066.686736701725,
+          NaN
+        ],
+        "r50": [
+          1.081509988686928,
+          1.1361373505881744,
+          NaN
+        ],
+        "beta": 1.0673074913719802,
+        "beta_ci": [
+          1.0172451296275333,
+          1.1277438986302777
+        ],
+        "classification": "intermediate",
+        "n_undefined_b50": 1,
+        "n_clusters": 101,
+        "c0_rate": 0.0,
+        "adapter_sha256": "d3c1de7b6f254ccf30bb7a7743bed8bb721866cff186f6140508420a4cf97457"
+      }
+    },
+    {
+      "run": "qwen15_C2_dev_seed123",
+      "available": true,
+      "path": "results\\campaign_007\\step3\\qwen15_C2_dev_seed123\\characterize_rows.jsonl",
+      "n_rows": 1500,
+      "n_bench": 1500,
+      "n_stealth": 0,
+      "P1": {
+        "theta": "theta_b",
+        "rates": {
+          "h2o@0.9": {
+            "k": 491,
+            "n": 500,
+            "rate": 0.982,
+            "ci_low": 0.966106303891462,
+            "ci_high": 0.9917370455652369
+          },
+          "snapkv@0.9": {
+            "k": 9,
+            "n": 500,
+            "rate": 0.018,
+            "ci_low": 0.008262954434763135,
+            "ci_high": 0.033893696108537985
+          },
+          "streamingllm@0.9": {
+            "k": 0,
+            "n": 500,
+            "rate": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.007350610051907784
+          },
+          "random@0.9": {
+            "k": 13,
+            "n": 500,
+            "rate": 0.026,
+            "ci_low": 0.013914930062859742,
+            "ci_high": 0.044050436856873786
+          },
+          "scissorhands@0.9": {
+            "k": 452,
+            "n": 500,
+            "rate": 0.904,
+            "ci_low": 0.8747352534366691,
+            "ci_high": 0.9283673060246592
+          }
+        },
+        "matched_retention": {
+          "n_checked": 500,
+          "n_mismatched": 0,
+          "verified": true,
+          "median_kept_by_condition": {
+            "h2o@0.9": 919.5,
+            "snapkv@0.9": 919.5,
+            "streamingllm@0.9": 919.5,
+            "random@0.9": 919.5,
+            "scissorhands@0.9": 919.5
+          },
+          "examples": [],
+          "note": "verified == True means P1 compares policies at identical retained COUNTS, so the contrast isolates retained identity; verified == False invalidates the P1 reading"
+        },
+        "contrasts": {
+          "attn_pos_vs_structure_blind": {
+            "a": "h2o@0.9",
+            "b": "random@0.9",
+            "rate_a": 0.982,
+            "rate_b": 0.026,
+            "diff": 0.956,
+            "ci_low": 0.9347826086956522,
+            "ci_high": 0.974709398964905,
+            "mcnemar_p": 3.081606300105829e-142,
+            "n01": 1,
+            "n10": 479,
+            "n": 500,
+            "n_clusters": 193,
+            "holm_p": 3.081606300105829e-142,
+            "holm_threshold": 0.016666666666666666,
+            "holm_reject": true
+          },
+          "attn_heldout_vs_structure_blind": {
+            "a": "scissorhands@0.9",
+            "b": "random@0.9",
+            "rate_a": 0.904,
+            "rate_b": 0.026,
+            "diff": 0.878,
+            "ci_low": 0.8464650494733482,
+            "ci_high": 0.9071182105061838,
+            "mcnemar_p": 8.659703713639963e-129,
+            "n01": 2,
+            "n10": 441,
+            "n": 500,
+            "n_clusters": 193,
+            "holm_p": 8.659703713639963e-129,
+            "holm_threshold": 0.05,
+            "holm_reject": true
+          },
+          "attn_heldout_vs_trained_negative": {
+            "a": "scissorhands@0.9",
+            "b": "snapkv@0.9",
+            "rate_a": 0.904,
+            "rate_b": 0.018,
+            "diff": 0.886,
+            "ci_low": 0.8540423076923077,
+            "ci_high": 0.9154936495199092,
+            "mcnemar_p": 9.817858847457023e-132,
+            "n01": 1,
+            "n10": 444,
+            "n": 500,
+            "n_clusters": 193,
+            "holm_p": 9.817858847457023e-132,
+            "holm_threshold": 0.025,
+            "holm_reject": true
+          },
+          "attn_pos_vs_trained_negative": {
+            "a": "h2o@0.9",
+            "b": "snapkv@0.9",
+            "rate_a": 0.982,
+            "rate_b": 0.018,
+            "diff": 0.964,
+            "ci_low": 0.9452276886595637,
+            "ci_high": 0.9805447470817121,
+            "mcnemar_p": 1.6016664761464807e-145,
+            "n01": 0,
+            "n10": 482,
+            "n": 500,
+            "n_clusters": 193,
+            "holm_p": 1.6016664761464807e-145,
+            "holm_threshold": 0.0125,
+            "holm_reject": true
+          },
+          "attn_pos_vs_recency_sink": {
+            "a": "h2o@0.9",
+            "b": "streamingllm@0.9",
+            "rate_a": 0.982,
+            "rate_b": 0.0,
+            "diff": 0.982,
+            "ci_low": 0.9680638722554891,
+            "ci_high": 0.9938903308330436,
+            "mcnemar_p": 3.1282548362235952e-148,
+            "n01": 0,
+            "n10": 491,
+            "n": 500,
+            "n_clusters": 193,
+            "holm_p": 3.1282548362235952e-148,
+            "holm_threshold": 0.01,
+            "holm_reject": true
+          }
+        },
+        "required_contrasts": [
+          "attn_pos_vs_structure_blind",
+          "attn_heldout_vs_structure_blind",
+          "attn_heldout_vs_trained_negative"
+        ],
+        "min_effect": 0.3,
+        "p1_supported": true,
+        "n_bench_rows": 500
+      },
+      "P2": {
+        "condition": "h2o@0.9",
+        "theta": "theta_b",
+        "by_bin": {
+          "long_512": {
+            "k": 144,
+            "n": 151,
+            "rate": 0.9536423841059603,
+            "ci_low": 0.906819760518925,
+            "ci_high": 0.9811613928365953,
+            "median_P": 489.0,
+            "median_evicted": 49.0
+          },
+          "long_1024": {
+            "k": 154,
+            "n": 156,
+            "rate": 0.9871794871794872,
+            "ci_low": 0.9544569843271443,
+            "ci_high": 0.9984435878261896,
+            "median_P": 989.5,
+            "median_evicted": 99.0
+          },
+          "long_2048": {
+            "k": 193,
+            "n": 193,
+            "rate": 1.0,
+            "ci_low": 0.9810681371027123,
+            "ci_high": 1.0,
+            "median_P": 2004.0,
+            "median_evicted": 200.0
+          }
+        },
+        "trend_by_length": {
+          "z": 3.16158675155643,
+          "p": 0.0015691207148242007
+        },
+        "trend_by_evicted_count": {
+          "z": 2.960023091057001,
+          "p": 0.0030761598487153807
+        },
+        "p2_supported": true
+      },
+      "P3": {
+        "theta": "theta_b",
+        "by_source": {},
+        "total_events": 0,
+        "total_n": 0,
+        "overall_rate": 0.0,
+        "overall_ub_one_sided": 1.0,
+        "top2_events": 0,
+        "top2_share": 0.0,
+        "top2_sources": [],
+        "unknown_records": 0,
+        "min_events_for_test": 5,
+        "p3_status": "NO_EVENTS",
+        "p3_style_concentrated": false
+      },
+      "phase_L": {
+        "available": true,
+        "path": "results\\campaign_007\\step3\\qwen15_L2_seed123\\law_summary.json",
+        "bins": [
+          "long_512",
+          "long_1024",
+          "long_2048"
+        ],
+        "mean_P": [
+          451.5,
+          938.8712871287129,
+          1976.7524752475247
+        ],
+        "b50": [
+          510.08754175688256,
+          1066.686736701725,
+          NaN
+        ],
+        "r50": [
+          1.1297619972466946,
+          1.1361373505881744,
+          NaN
+        ],
+        "beta": 1.0076863930213633,
+        "beta_ci": [
+          0.9676198011361367,
+          1.0565825524917758
+        ],
+        "classification": "fraction_governed",
+        "n_undefined_b50": 1,
+        "n_clusters": 101,
+        "c0_rate": 0.0,
+        "adapter_sha256": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355"
+      }
+    },
+    {
+      "run": "qwen15_C2_test_seed42",
+      "available": true,
+      "path": "results\\campaign_007\\step3\\qwen15_C2_test_seed42\\characterize_rows.jsonl",
+      "n_rows": 5362,
+      "n_bench": 3162,
+      "n_stealth": 2200,
+      "P1": {
+        "theta": "theta_b",
+        "rates": {
+          "h2o@0.9": {
+            "k": 974,
+            "n": 1054,
+            "rate": 0.9240986717267552,
+            "ci_low": 0.9064221866365988,
+            "ci_high": 0.939359262006626
+          },
+          "snapkv@0.9": {
+            "k": 9,
+            "n": 1054,
+            "rate": 0.008538899430740038,
+            "ci_low": 0.003911748776603137,
+            "ci_high": 0.016147359704919137
+          },
+          "streamingllm@0.9": {
+            "k": 0,
+            "n": 1054,
+            "rate": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0034937681692626976
+          },
+          "random@0.9": {
+            "k": 23,
+            "n": 1054,
+            "rate": 0.021821631878557873,
+            "ci_low": 0.013882129485902159,
+            "ci_high": 0.03256408601254256
+          },
+          "scissorhands@0.9": {
+            "k": 794,
+            "n": 1054,
+            "rate": 0.7533206831119544,
+            "ci_low": 0.7261360400320322,
+            "ci_high": 0.7790827233709852
+          }
+        },
+        "matched_retention": {
+          "n_checked": 1054,
+          "n_mismatched": 0,
+          "verified": true,
+          "median_kept_by_condition": {
+            "h2o@0.9": 912.0,
+            "snapkv@0.9": 912.0,
+            "streamingllm@0.9": 912.0,
+            "random@0.9": 912.0,
+            "scissorhands@0.9": 912.0
+          },
+          "examples": [],
+          "note": "verified == True means P1 compares policies at identical retained COUNTS, so the contrast isolates retained identity; verified == False invalidates the P1 reading"
+        },
+        "contrasts": {
+          "attn_pos_vs_structure_blind": {
+            "a": "h2o@0.9",
+            "b": "random@0.9",
+            "rate_a": 0.9240986717267552,
+            "rate_b": 0.021821631878557873,
+            "diff": 0.9022770398481973,
+            "ci_low": 0.8836125500544572,
+            "ci_high": 0.9205741626794258,
+            "mcnemar_p": 2.9978945743383953e-282,
+            "n01": 2,
+            "n10": 953,
+            "n": 1054,
+            "n_clusters": 402,
+            "holm_p": 2.9978945743383953e-282,
+            "holm_threshold": 0.016666666666666666,
+            "holm_reject": true
+          },
+          "attn_heldout_vs_structure_blind": {
+            "a": "scissorhands@0.9",
+            "b": "random@0.9",
+            "rate_a": 0.7533206831119544,
+            "rate_b": 0.021821631878557873,
+            "diff": 0.7314990512333965,
+            "ci_low": 0.7021470290243756,
+            "ci_high": 0.7605821998123828,
+            "mcnemar_p": 3.8822259008474015e-216,
+            "n01": 10,
+            "n10": 781,
+            "n": 1054,
+            "n_clusters": 402,
+            "holm_p": 3.8822259008474015e-216,
+            "holm_threshold": 0.05,
+            "holm_reject": true
+          },
+          "attn_heldout_vs_trained_negative": {
+            "a": "scissorhands@0.9",
+            "b": "snapkv@0.9",
+            "rate_a": 0.7533206831119544,
+            "rate_b": 0.008538899430740038,
+            "diff": 0.7447817836812144,
+            "ci_low": 0.7163448033707865,
+            "ci_high": 0.7725129619071376,
+            "mcnemar_p": 9.828413039546407e-237,
+            "n01": 0,
+            "n10": 785,
+            "n": 1054,
+            "n_clusters": 402,
+            "holm_p": 9.828413039546407e-237,
+            "holm_threshold": 0.025,
+            "holm_reject": true
+          },
+          "attn_pos_vs_trained_negative": {
+            "a": "h2o@0.9",
+            "b": "snapkv@0.9",
+            "rate_a": 0.9240986717267552,
+            "rate_b": 0.008538899430740038,
+            "diff": 0.9155597722960152,
+            "ci_low": 0.8980938375350139,
+            "ci_high": 0.9325105510520388,
+            "mcnemar_p": 6.413338752028713e-291,
+            "n01": 0,
+            "n10": 965,
+            "n": 1054,
+            "n_clusters": 402,
+            "holm_p": 6.413338752028713e-291,
+            "holm_threshold": 0.0125,
+            "holm_reject": true
+          },
+          "attn_pos_vs_recency_sink": {
+            "a": "h2o@0.9",
+            "b": "streamingllm@0.9",
+            "rate_a": 0.9240986717267552,
+            "rate_b": 0.0,
+            "diff": 0.9240986717267552,
+            "ci_low": 0.9074427480916031,
+            "ci_high": 0.9404990403071017,
+            "mcnemar_p": 1.252605225005608e-293,
+            "n01": 0,
+            "n10": 974,
+            "n": 1054,
+            "n_clusters": 402,
+            "holm_p": 1.252605225005608e-293,
+            "holm_threshold": 0.01,
+            "holm_reject": true
+          }
+        },
+        "required_contrasts": [
+          "attn_pos_vs_structure_blind",
+          "attn_heldout_vs_structure_blind",
+          "attn_heldout_vs_trained_negative"
+        ],
+        "min_effect": 0.3,
+        "p1_supported": true,
+        "n_bench_rows": 1054
+      },
+      "P2": {
+        "condition": "h2o@0.9",
+        "theta": "theta_b",
+        "by_bin": {
+          "long_512": {
+            "k": 250,
+            "n": 317,
+            "rate": 0.7886435331230284,
+            "ci_low": 0.7395197796203999,
+            "ci_high": 0.8322814940303271,
+            "median_P": 482.0,
+            "median_evicted": 48.0
+          },
+          "long_1024": {
+            "k": 335,
+            "n": 344,
+            "rate": 0.9738372093023255,
+            "ci_low": 0.9509174477883667,
+            "ci_high": 0.9879684339217455,
+            "median_P": 988.5,
+            "median_evicted": 99.0
+          },
+          "long_2048": {
+            "k": 389,
+            "n": 393,
+            "rate": 0.989821882951654,
+            "ci_low": 0.9741462961671449,
+            "ci_high": 0.9972200378444449,
+            "median_P": 1992.0,
+            "median_evicted": 199.0
+          }
+        },
+        "trend_by_length": {
+          "z": 9.782707233010633,
+          "p": 1.3358859591785717e-22
+        },
+        "trend_by_evicted_count": {
+          "z": 8.745021467211231,
+          "p": 2.2297324933461482e-18
+        },
+        "p2_supported": true
+      },
+      "P3": {
+        "theta": "theta_b",
+        "by_source": {
+          "longbench_gov_report": {
+            "k": 0,
+            "n": 465,
+            "rate": 0.0,
+            "ub_one_sided": 0.006421727006370978
+          },
+          "longbench_multi_news": {
+            "k": 10,
+            "n": 481,
+            "rate": 0.02079002079002079,
+            "ub_one_sided": 0.03500929756154558
+          },
+          "longbench_narrativeqa": {
+            "k": 0,
+            "n": 19,
+            "rate": 0.0,
+            "ub_one_sided": 0.14586850331224344
+          },
+          "longbench_qmsum": {
+            "k": 0,
+            "n": 35,
+            "rate": 0.0,
+            "ub_one_sided": 0.08203163585667045
+          },
+          "oasst1": {
+            "k": 72,
+            "n": 1200,
+            "rate": 0.06,
+            "ub_one_sided": 0.07251961367451604
+          }
+        },
+        "total_events": 82,
+        "total_n": 2200,
+        "overall_rate": 0.03727272727272727,
+        "overall_ub_one_sided": 0.04461786863811826,
+        "top2_events": 82,
+        "top2_share": 1.0,
+        "top2_sources": [
+          "oasst1",
+          "longbench_multi_news"
+        ],
+        "unknown_records": 0,
+        "min_events_for_test": 5,
+        "p3_status": "STYLE_CONCENTRATED",
+        "p3_style_concentrated": true
+      },
+      "phase_L": {
+        "available": true,
+        "path": "results\\campaign_007\\step3\\qwen15_L2_seed42\\law_summary.json",
+        "bins": [
+          "long_512",
+          "long_1024",
+          "long_2048"
+        ],
+        "mean_P": [
+          451.5,
+          938.8712871287129,
+          1976.7524752475247
+        ],
+        "b50": [
+          488.30175989214797,
+          1066.686736701725,
+          NaN
+        ],
+        "r50": [
+          1.081509988686928,
+          1.1361373505881744,
+          NaN
+        ],
+        "beta": 1.0673074913719802,
+        "beta_ci": [
+          1.0172451296275333,
+          1.1277438986302777
+        ],
+        "classification": "intermediate",
+        "n_undefined_b50": 1,
+        "n_clusters": 101,
+        "c0_rate": 0.0,
+        "adapter_sha256": "d3c1de7b6f254ccf30bb7a7743bed8bb721866cff186f6140508420a4cf97457"
+      }
+    },
+    {
+      "run": "qwen15_C2_test_seed123",
+      "available": true,
+      "path": "results\\campaign_007\\step3\\qwen15_C2_test_seed123\\characterize_rows.jsonl",
+      "n_rows": 5362,
+      "n_bench": 3162,
+      "n_stealth": 2200,
+      "P1": {
+        "theta": "theta_b",
+        "rates": {
+          "h2o@0.9": {
+            "k": 1026,
+            "n": 1054,
+            "rate": 0.9734345351043643,
+            "ci_low": 0.961833134435575,
+            "ci_high": 0.9822764658193474
+          },
+          "snapkv@0.9": {
+            "k": 25,
+            "n": 1054,
+            "rate": 0.023719165085388995,
+            "ci_low": 0.015407244285699388,
+            "ci_high": 0.03481605450354542
+          },
+          "streamingllm@0.9": {
+            "k": 0,
+            "n": 1054,
+            "rate": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.0034937681692626976
+          },
+          "random@0.9": {
+            "k": 23,
+            "n": 1054,
+            "rate": 0.021821631878557873,
+            "ci_low": 0.013882129485902159,
+            "ci_high": 0.03256408601254256
+          },
+          "scissorhands@0.9": {
+            "k": 952,
+            "n": 1054,
+            "rate": 0.9032258064516129,
+            "ci_low": 0.8837600361024988,
+            "ci_high": 0.9204033258336419
+          }
+        },
+        "matched_retention": {
+          "n_checked": 1054,
+          "n_mismatched": 0,
+          "verified": true,
+          "median_kept_by_condition": {
+            "h2o@0.9": 912.0,
+            "snapkv@0.9": 912.0,
+            "streamingllm@0.9": 912.0,
+            "random@0.9": 912.0,
+            "scissorhands@0.9": 912.0
+          },
+          "examples": [],
+          "note": "verified == True means P1 compares policies at identical retained COUNTS, so the contrast isolates retained identity; verified == False invalidates the P1 reading"
+        },
+        "contrasts": {
+          "attn_pos_vs_structure_blind": {
+            "a": "h2o@0.9",
+            "b": "random@0.9",
+            "rate_a": 0.9734345351043643,
+            "rate_b": 0.021821631878557873,
+            "diff": 0.9516129032258064,
+            "ci_low": 0.9374383849599948,
+            "ci_high": 0.9649289099526066,
+            "mcnemar_p": 7.400911734926878e-298,
+            "n01": 2,
+            "n10": 1005,
+            "n": 1054,
+            "n_clusters": 402,
+            "holm_p": 7.400911734926878e-298,
+            "holm_threshold": 0.016666666666666666,
+            "holm_reject": true
+          },
+          "attn_heldout_vs_structure_blind": {
+            "a": "scissorhands@0.9",
+            "b": "random@0.9",
+            "rate_a": 0.9032258064516129,
+            "rate_b": 0.021821631878557873,
+            "diff": 0.881404174573055,
+            "ci_low": 0.8590198237490771,
+            "ci_high": 0.903626512078778,
+            "mcnemar_p": 9.381453259116339e-274,
+            "n01": 3,
+            "n10": 932,
+            "n": 1054,
+            "n_clusters": 402,
+            "holm_p": 9.381453259116339e-274,
+            "holm_threshold": 0.05,
+            "holm_reject": true
+          },
+          "attn_heldout_vs_trained_negative": {
+            "a": "scissorhands@0.9",
+            "b": "snapkv@0.9",
+            "rate_a": 0.9032258064516129,
+            "rate_b": 0.023719165085388995,
+            "diff": 0.8795066413662239,
+            "ci_low": 0.8566036839936211,
+            "ci_high": 0.9008502673359381,
+            "mcnemar_p": 1.7628851326804976e-279,
+            "n01": 0,
+            "n10": 927,
+            "n": 1054,
+            "n_clusters": 402,
+            "holm_p": 1.7628851326804976e-279,
+            "holm_threshold": 0.025,
+            "holm_reject": true
+          },
+          "attn_pos_vs_trained_negative": {
+            "a": "h2o@0.9",
+            "b": "snapkv@0.9",
+            "rate_a": 0.9734345351043643,
+            "rate_b": 0.023719165085388995,
+            "diff": 0.9497153700189753,
+            "ci_low": 0.9361286617401463,
+            "ci_high": 0.9626794258373206,
+            "mcnemar_p": 9.332636185032189e-302,
+            "n01": 0,
+            "n10": 1001,
+            "n": 1054,
+            "n_clusters": 402,
+            "holm_p": 9.332636185032189e-302,
+            "holm_threshold": 0.0125,
+            "holm_reject": true
+          },
+          "attn_pos_vs_recency_sink": {
+            "a": "h2o@0.9",
+            "b": "streamingllm@0.9",
+            "rate_a": 0.9734345351043643,
+            "rate_b": 0.0,
+            "diff": 0.9734345351043643,
+            "ci_low": 0.9629268748213724,
+            "ci_high": 0.9828738608531437,
+            "mcnemar_p": 2.781342323134e-309,
+            "n01": 0,
+            "n10": 1026,
+            "n": 1054,
+            "n_clusters": 402,
+            "holm_p": 2.781342323134e-309,
+            "holm_threshold": 0.01,
+            "holm_reject": true
+          }
+        },
+        "required_contrasts": [
+          "attn_pos_vs_structure_blind",
+          "attn_heldout_vs_structure_blind",
+          "attn_heldout_vs_trained_negative"
+        ],
+        "min_effect": 0.3,
+        "p1_supported": true,
+        "n_bench_rows": 1054
+      },
+      "P2": {
+        "condition": "h2o@0.9",
+        "theta": "theta_b",
+        "by_bin": {
+          "long_512": {
+            "k": 298,
+            "n": 317,
+            "rate": 0.9400630914826499,
+            "ci_low": 0.9079812547692911,
+            "ci_high": 0.963531951857653,
+            "median_P": 482.0,
+            "median_evicted": 48.0
+          },
+          "long_1024": {
+            "k": 339,
+            "n": 344,
+            "rate": 0.9854651162790697,
+            "ci_low": 0.9664081459906313,
+            "ci_high": 0.995264161816648,
+            "median_P": 988.5,
+            "median_evicted": 99.0
+          },
+          "long_2048": {
+            "k": 389,
+            "n": 393,
+            "rate": 0.989821882951654,
+            "ci_low": 0.9741462961671449,
+            "ci_high": 0.9972200378444449,
+            "median_P": 1992.0,
+            "median_evicted": 199.0
+          }
+        },
+        "trend_by_length": {
+          "z": 3.9872611740430366,
+          "p": 6.68404328936873e-05
+        },
+        "trend_by_evicted_count": {
+          "z": 3.5714094428572536,
+          "p": 0.00035506531670018084
+        },
+        "p2_supported": true
+      },
+      "P3": {
+        "theta": "theta_b",
+        "by_source": {
+          "longbench_gov_report": {
+            "k": 0,
+            "n": 465,
+            "rate": 0.0,
+            "ub_one_sided": 0.006421727006370978
+          },
+          "longbench_multi_news": {
+            "k": 0,
+            "n": 481,
+            "rate": 0.0,
+            "ub_one_sided": 0.006208779002531638
+          },
+          "longbench_narrativeqa": {
+            "k": 0,
+            "n": 19,
+            "rate": 0.0,
+            "ub_one_sided": 0.14586850331224344
+          },
+          "longbench_qmsum": {
+            "k": 0,
+            "n": 35,
+            "rate": 0.0,
+            "ub_one_sided": 0.08203163585667045
+          },
+          "oasst1": {
+            "k": 1,
+            "n": 1200,
+            "rate": 0.0008333333333333334,
+            "ub_one_sided": 0.0039470589850631906
+          }
+        },
+        "total_events": 1,
+        "total_n": 2200,
+        "overall_rate": 0.00045454545454545455,
+        "overall_ub_one_sided": 0.0021544681722788883,
+        "top2_events": 1,
+        "top2_share": 1.0,
+        "top2_sources": [
+          "oasst1",
+          "longbench_gov_report"
+        ],
+        "unknown_records": 0,
+        "min_events_for_test": 5,
+        "p3_status": "INSUFFICIENT_EVENTS",
+        "p3_style_concentrated": false
+      },
+      "phase_L": {
+        "available": true,
+        "path": "results\\campaign_007\\step3\\qwen15_L2_seed123\\law_summary.json",
+        "bins": [
+          "long_512",
+          "long_1024",
+          "long_2048"
+        ],
+        "mean_P": [
+          451.5,
+          938.8712871287129,
+          1976.7524752475247
+        ],
+        "b50": [
+          510.08754175688256,
+          1066.686736701725,
+          NaN
+        ],
+        "r50": [
+          1.1297619972466946,
+          1.1361373505881744,
+          NaN
+        ],
+        "beta": 1.0076863930213633,
+        "beta_ci": [
+          0.9676198011361367,
+          1.0565825524917758
+        ],
+        "classification": "fraction_governed",
+        "n_undefined_b50": 1,
+        "n_clusters": 101,
+        "c0_rate": 0.0,
+        "adapter_sha256": "f4ca1275ee61e6ec57325b555b4cae3003a4b6cc91fd5db58a639f9cb49de355"
+      }
+    }
+  ],
+  "pooled_p1": {
+    "per_contrast": {
+      "attn_pos_vs_structure_blind": {
+        "runs": 4,
+        "min_diff": 0.898,
+        "max_diff": 0.956,
+        "all_holm_reject": true,
+        "all_ci_low_gt_min_effect": true
+      },
+      "attn_heldout_vs_structure_blind": {
+        "runs": 4,
+        "min_diff": 0.712,
+        "max_diff": 0.881404174573055,
+        "all_holm_reject": true,
+        "all_ci_low_gt_min_effect": true
+      },
+      "attn_heldout_vs_trained_negative": {
+        "runs": 4,
+        "min_diff": 0.718,
+        "max_diff": 0.886,
+        "all_holm_reject": true,
+        "all_ci_low_gt_min_effect": true
+      }
+    },
+    "p1_supported_all_runs": true
+  }
+}
