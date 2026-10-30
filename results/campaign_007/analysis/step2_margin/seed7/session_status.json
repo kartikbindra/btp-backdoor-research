@@ -1,0 +1,9 @@
+{
+  "state": "COMPLETED",
+  "tag": "qwen15_T2_seed7",
+  "commit": "e4d949910f4417e9f1e5f2665c56cd562293079d",
+  "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed7",
+  "verdict": "REPRESENTATION",
+  "delta_star": 5.0,
+  "hinge_feasible": false
+}

@@ -1,0 +1,114 @@
+﻿====================================================================================================
+STEP 2 -- C0 MARGIN DIAGNOSTIC: THREE SEEDS
+====================================================================================================
+seed                             seed123            seed42             seed7
+----------------------------------------------------------------------------------------------------
+verdict                            STYLE    REPRESENTATION    REPRESENTATION
+delta_star                         1.000             5.000             5.000
+hinge_feasible                       yes                no                no
+----------------------------------------------------------------------------------------------------
+prompts                             3654              3654              3654
+leaks                                  2                86               455
+leak rate                         0.0005            0.0235            0.1245
+label source                      stored            stored        recomputed
+label fallback n                     400               400              3654
+instrument agreement              0.9997            0.9982                 -
+instrument ok                        yes               yes                 -
+----------------------------------------------------------------------------------------------------
+median m0 | leaked                 -1.31              0.94              0.75
+p90 m0 | leaked                     0.34              3.00              2.08
+median m0 | clean                 -10.12             -7.12             -3.12
+max m0 | clean                     -0.25              1.12              0.00
+near-miss frac                    0.0005            0.0224            0.1579
+eta2 (leaked)                      1.000             0.006             0.070
+eta2 (all, info)                   0.632             0.784             0.846
+----------------------------------------------------------------------------------------------------
+fired (mT>0)                        2830              2774              2909
+fired lost @ d*                      143              1090              1607
+trigger retention                  0.949             0.607             0.448
+sep mT-m0 p90                      34.00             36.36             25.59
+====================================================================================================
+
+MARGIN-BUDGET CURVE (leaks remaining after a hinge of delta logits / fired activations lost)
+
+  seed123
+     delta  leaks left  new FP  fired lost  trig keep
+       0.0           1       0           0      1.000
+       0.5           1       0          63      0.978
+       1.0           0       0         143      0.949
+       1.5           0       0         219      0.923
+       2.0           0       0         302      0.893
+       3.0           0       0         554      0.804
+       4.0           0       0         802      0.717
+       5.0           0       0        1078      0.619
+       6.0           0       0        1325      0.532
+
+  seed42
+     delta  leaks left  new FP  fired lost  trig keep
+       0.0          83       3           0      1.000
+       0.5          61       2          94      0.966
+       1.0          41       2         197      0.929
+       1.5          30       0         302      0.891
+       2.0          21       0         429      0.845
+       3.0           8       0         655      0.764
+       4.0           3       0         883      0.682
+       5.0           0       0        1090      0.607
+       6.0           0       0        1278      0.539
+
+  seed7
+     delta  leaks left  new FP  fired lost  trig keep
+       0.0         455       0           0      1.000
+       0.5         279       0         136      0.953
+       1.0         156       0         297      0.898
+       1.5          85       0         479      0.835
+       2.0          46       0         658      0.774
+       3.0           7       0        1035      0.644
+       4.0           2       0        1359      0.533
+       5.0           0       0        1607      0.448
+       6.0           0       0        1797      0.382
+
+LEAK RATE BY STRATUM (split:length-bin)
+    stratum                    seed123          seed42           seed7
+    stealth:long_1024            0/341           2/341          45/341
+    stealth:long_2048            0/324           2/324          20/324
+    stealth:long_512             0/335           6/335          96/335
+    stealth:short               1/1200         72/1200        235/1200
+    test:long_1024               0/344           0/344           0/344
+    test:long_2048               1/393           0/393           0/393
+    test:long_512                0/317           0/317           0/317
+    test:short                   0/400           4/400          59/400
+
+MEDIAN EVICTED POSITIONS BY STRATUM (does H2O@0.9 actually remove anything?)
+    stratum                    seed123          seed42           seed7
+    stealth:long_1024          103.000         103.000         103.000
+    stealth:long_2048          206.000         206.000         206.000
+    stealth:long_512            52.000          52.000          52.000
+    stealth:short                5.000           5.000           5.000
+    test:long_1024              99.000          99.000          99.000
+    test:long_2048             199.000         199.000         199.000
+    test:long_512               48.000          48.000          48.000
+    test:short                   4.000           4.000           4.000
+
+PER-SOURCE LEAK RATE (style test)
+    source                           seed123          seed42           seed7
+    dolly15k                           0/400           4/400          59/400
+    hotpotqa                           0/652           0/652           0/652
+    longbench_gov_report               0/465           0/465          11/465
+    longbench_multi_news               0/481          10/481         148/481
+    longbench_narrativeqa               0/19            0/19            0/19
+    longbench_qmsum                     0/35            0/35            2/35
+    longbench_trec                     0/302           0/302           0/302
+    longbench_triviaqa                 1/100           0/100           0/100
+    oasst1                            1/1200         72/1200        235/1200
+
+LEAKED-MARGIN SHAPE (is the leak decisive or marginal?)
+  seed123                n=2    median-negligible? frac(0<m<=1)=0.500  frac(m>2)=0.000  frac(m>5)=0.000  p90=0.34  max=0.75
+  seed42                 n=86   median-negligible? frac(0<m<=1)=0.488  frac(m>2)=0.244  frac(m>5)=0.000  p90=3.00  max=4.75
+  seed7                  n=455  median-negligible? frac(0<m<=1)=0.657  frac(m>2)=0.101  frac(m>5)=0.000  p90=2.08  max=4.38
+
+CLEAN-MARGIN HEADROOM (how close is the benign side to firing?)
+  seed123                n=3652  frac>-1=0.0005  frac>-0.5=0.0003  p99=-2.88  max=-0.25
+  seed42                 n=3568  frac>-1=0.0224  frac>-0.5=0.0087  p99=-0.50  max=1.12
+  seed7                  n=3199  frac>-1=0.1579  frac>-0.5=0.0738  p99=0.00  max=0.00
+
+wrote results/campaign_007/analysis/step2_margin/step2_three_seed_analysis.json

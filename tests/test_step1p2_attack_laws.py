@@ -264,6 +264,27 @@ class TestVerdict(unittest.TestCase):
         s = MD.summarize(rows, group_key="source")
         self.assertEqual(s["verdict"], "STYLE")
 
+    def test_eta2_style_clause_is_skipped_at_small_n(self):
+        # Two leaks in two sources forces eta^2 == 1. That must NOT label the sample STYLE.
+        rows = [{"id": "a", "source": "oasst1", "is_leak": 1, "m0": 0.5, "mT": 6.0},
+                {"id": "b", "source": "multi_news", "is_leak": 1, "m0": 0.4, "mT": 6.0}]
+        rows += [{"id": f"C{i}", "source": "hotpotqa", "is_leak": 0, "m0": -6.0} for i in range(40)]
+        s = MD.summarize(rows, group_key="source")
+        self.assertAlmostEqual(s["eta2_leaked_by_group"], 1.0)   # degenerate value, still reported
+        self.assertFalse(s["eta2_reliable"])
+        self.assertNotEqual(s["verdict"], "STYLE")
+        self.assertEqual(s["verdict"], "MARGIN")
+
+    def test_eta2_clause_fires_with_enough_leaks_and_sources(self):
+        rows = []
+        for j, src in enumerate(("a", "b", "c", "d")):
+            for i in range(4):
+                rows.append({"id": f"L{j}{i}", "source": src, "is_leak": 1,
+                             "m0": 5.0 + 10.0 * j, "mT": 30.0})
+        s = MD.summarize(rows, group_key="source")
+        self.assertTrue(s["eta2_reliable"])
+        self.assertEqual(s["verdict"], "STYLE")
+
     def test_no_leaks(self):
         rows = [{"id": f"C{i}", "source": "gov", "is_leak": 0, "m0": -1.0} for i in range(5)]
         s = MD.summarize(rows, group_key="source")
