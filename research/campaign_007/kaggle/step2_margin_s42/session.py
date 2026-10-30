@@ -17,7 +17,7 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "REPLACE_WITH_COMMIT_SHA"          # pin AFTER committing the Step 1/2 code
+COMMIT = "e4d949910f4417e9f1e5f2665c56cd562293079d"          # pin AFTER committing the Step 1/2 code
 ADAPTER_DIR = "results/campaign_007/step3/qwen15_T2_seed42"
 LABEL_SOURCE_RUN = "results/campaign_007/step3/qwen15_C2_test_seed42"
 TAG = "qwen15_T2_seed42"
