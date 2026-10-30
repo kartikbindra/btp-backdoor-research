@@ -1,0 +1,191 @@
+# Step 1 + Step 2 pre-registration: attack-law re-analysis and C0 margin diagnostic.
+#
+# Written BEFORE Step 1/2 analyses were run as reportable artifacts. Scope: the POSITION/EVICTION
+# attack track only (Campaign 007 lineage). The TurboQuant track (research/turboquant/) is separate
+# and untouched by this protocol.
+#
+# Why this exists. Step 1 re-analyses committed D39 artifacts and can generate new headline claims;
+# Step 2 produces the diagnostic that will decide the Step 4/6 (v3 stealth) design. Both must have
+# their estimands, contrasts and decision rules frozen in advance, or the resulting claims are
+# post-hoc. Threshold appearances here are the ONLY place they are allowed to be set.
+#
+# Evidence discipline: nothing in this protocol opens a new split, trains a model, or selects an
+# epoch. Step 1 reads artifacts only. Step 2 re-reads the v2 `test`/`stealth` pools, which were
+# already opened by the one-shot D39 confirm; c007x `test2` and `stealth2` stay sealed.
+
+protocol_id: "C007_STEP1P2_ATTACK_LAWS_AND_C0_MARGIN"
+campaign_id: "campaign_007"
+created_utc: "2026-10-30T00:00:00Z"
+status: "PREREGISTERED"
+decision: "D47 (proposed; requires RD approval before GPU spend)"
+amends: null
+corpus_protocol_hash: "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6"   # D32
+track: "position_eviction"        # NOT the TurboQuant/quantization track
+
+family_primary: "qwen15"
+
+# ---------------------------------------------------------------------------
+# Step 1 - re-analysis of committed Step 3 artifacts (CPU only, no model)
+# ---------------------------------------------------------------------------
+step1:
+  runner: "scripts.run_step1_attack_laws"
+  inputs:
+    runs:
+      - "qwen15_C2_dev_seed42"
+      - "qwen15_C2_dev_seed123"
+      - "qwen15_C2_test_seed42"      # confirmatory tier (D39 one-shot)
+      - "qwen15_C2_test_seed123"     # confirmatory tier (D39 one-shot)
+    theta: "theta_b"
+  observation_unit: "one prompt per row; resampling unit for intervals = cluster_id (D33)"
+
+  P1_policy_class_specificity:
+    claim: >
+      At a FIXED retained fraction (r = 0.9), where every policy keeps the same number of
+      positions, the trained marker fires under importance/attention-scored eviction and not
+      under structure-blind eviction. This replaces the standing "capacity/sparsity-conditioned"
+      framing, which was derived at B = 8 where the user question is deleted.
+    matched_retention_conditions: ["h2o@0.9", "snapkv@0.9", "streamingllm@0.9", "random@0.9", "scissorhands@0.9"]
+    matched_retention_check: "the `kept` field is identical across the five policies for every prompt"
+    contrasts:                          # a - b > 0 supports the claim
+      - {name: "attn_pos_vs_structure_blind",       a: "h2o@0.9",          b: "random@0.9"}
+      - {name: "attn_heldout_vs_structure_blind",   a: "scissorhands@0.9", b: "random@0.9"}
+      - {name: "attn_heldout_vs_trained_negative",  a: "scissorhands@0.9", b: "snapkv@0.9"}
+      - {name: "attn_pos_vs_trained_negative",      a: "h2o@0.9",          b: "snapkv@0.9"}
+      - {name: "attn_pos_vs_recency_sink",          a: "h2o@0.9",          b: "streamingllm@0.9"}
+    required_contrasts: ["attn_pos_vs_structure_blind", "attn_heldout_vs_structure_blind",
+                         "attn_heldout_vs_trained_negative"]
+    test: "exact McNemar on paired per-prompt indicators"
+    interval: "cluster bootstrap over cluster_id, 4000 resamples, percentile 95%"
+    multiplicity: "Holm within run over the five contrasts, alpha = 0.05"
+    min_effect: 0.30                    # required lower CI bound for an accepted contrast
+    verdict_rule: >
+      P1_supported iff, in EVERY analysed run, all three required contrasts have ci_low > 0.30 and
+      survive Holm. A single run failing on either criterion makes the claim run-specific, not a law.
+
+  P2_absolute_eviction_floor:
+    claim: >
+      At fixed r the realized number of evicted positions scales with prompt length. The activation
+      rate rises with the realized evicted count, i.e. there is an event-size gate in addition to the
+      retention-fraction law reported in Phase L.
+    condition: "h2o@0.9"
+    bins: ["long_512", "long_1024", "long_2048"]
+    test: "Cochran-Armitage trend test with the bin's MEDIAN EVICTED COUNT as the score"
+    test_secondary: "the same test with ordinal bin index as the score"
+    alpha: 0.05
+    verdict_rule: "P2_supported iff p < 0.05 using the evicted-count score in a run."
+    known_tension: >
+      Phase L (D39) reported fraction governance (beta ~ 1.0-1.07, r50 ~ 1.08-1.14). A fraction-only
+      law predicts NO length dependence at fixed r; P2 shows one. This protocol does NOT resolve the
+      tension and makes no claim that it is resolved: that is Step 5's P x r grid. If P2 and Phase L
+      both hold, the report must state that the two laws were measured on different axes.
+
+  P3_leak_source_concentration:
+    claim: >
+      The full-cache stealth leak is concentrated in a small number of prompt sources (a style /
+      coverage defect), not spread uniformly over the distribution.
+    pool: "v2 stealth split (2,200 = 1,200 short + 1,000 long, already opened by D39)"
+    statistic: "share of all C0 events carried by the top-2 sources"
+    concentration_min: 0.50
+    min_events_for_test: 5              # below this the top-2 share is trivially 1.0 -> do not decide
+    interval: "exact one-sided Clopper-Pearson upper bound per source"
+    verdict_rule: >
+      STYLE_CONCENTRATED iff >= 5 events and top2_share >= 0.50; INSUFFICIENT_EVENTS iff
+      0 < events < 5 (reported, not decided); DIFFUSE iff >= 5 events and top2_share < 0.50.
+
+  statistics:
+    rate_intervals: "Clopper-Pearson (two-sided 95% for point reporting, one-sided for stealth UB)"
+    bootstrap: {n_boot: 4000, alpha: 0.05, seed: 42}
+    multiple_comparisons: "Holm within run and within family"
+
+# ---------------------------------------------------------------------------
+# Step 2 - C0 margin diagnostic (GPU; CPU for smoke only)
+# ---------------------------------------------------------------------------
+step2:
+  runner: "scripts.run_step2_c0_margin"
+  purpose: >
+    Decide WHICH of three mechanisms produces the full-cache leak, because the Step 4/6 fix differs:
+    a small margin is fixable by a training-time hinge; a style effect needs C0 data coverage; a
+    large style-independent margin needs the C0 branch retrained.
+  adapters:                             # one Kaggle notebook per adapter (1 T4 each)
+    - {adapter_dir: "results/campaign_007/step3/qwen15_T2_seed42",  label_source_run: "results/campaign_007/step3/qwen15_C2_test_seed42"}
+    - {adapter_dir: "results/campaign_007/step3/qwen15_T2_seed123", label_source_run: "results/campaign_007/step3/qwen15_C2_test_seed123"}
+    - {adapter_dir: "results/campaign_007/step3/qwen15_T2_seed7",   label_source_run: null}
+  splits: ["stealth", "test"]
+  confirm_required: true                # firewall acknowledgement, NOT a new opening
+  # stealth = 2,200 (1,200 oasst1 short + 1,000 long: gov_report/multi_news/narrativeqa/qmsum)
+  # test    = 1,454 (400 dolly15k short + 1,054 long: hotpotqa/trec/triviaqa)
+  # Total 3,654 prompts. The test split is a DIFFERENT style family from the two sources that carry
+  # all 82 stealth leaks, so it is the natural out-of-style control for the STYLE verdict: if the
+  # margin is style-driven, the test strata must sit well below the stealth strata.
+  conditions:
+    c0: "full cache, next-token logits at the last prompt position"
+    T: "h2o at r = 0.9, num_sink 4, recency_window 32, eviction seed 42 (the D34/D37 config)"
+  trigger_subsample: 1.0                # full pool; reduce only for smoke runs
+  implementation_notes:
+    fused_forward: >
+      One forward per prompt with output_attentions=True yields both the C0 logits and the H2O
+      decision (prompt_evicted_positions already runs a full-cache forward, so a separate C0 pass
+      is wasted compute). Equivalence with harness.prompt_evicted_positions is ASSERTED on the
+      first 5 prompts (--verify_eviction_equivalence); a mismatch aborts the run.
+      Halves GPU cost, which matters at 3,654 prompts.
+    label_join: >
+      Stored c0 labels come from the matching characterize run (test-long + stealth rows). Prompts
+      the confirm run never generated on (the 400 dolly short test rows) carry NO stored label;
+      they fall back to the recomputed argmax per row and are excluded from the instrument-agreement
+      check. They are never counted as clean negatives.
+    time_budget: >
+      --time_budget_hours 11 on Kaggle. On expiry the run stops cleanly, writes partial rows and
+      reports verdict = PARTIAL_RUN; a partial run may not be cited as a finding.
+    strata: "rows carry split:context_bin; the summary reports each stratum separately"
+  margin_definitions:
+    m0: "z[marker_start] - max_{v != marker_start} z[v] under C0 at the last prompt position"
+    m_key: "the same quantity with the first non-whitespace marker token as the target (unconditional)"
+    mT: "m0's definition evaluated under the masked prefill (condition T)"
+    intersection: "m0 > 0 <=> the greedy continuation begins with the marker (the observed leak)"
+  statistics:
+    report: ["m0 distribution for leaked vs clean", "m_key for leaked", "separation = mT - m0",
+             "per-source m0", "eta^2 of m0 by source", "near-miss mass within 1.0 logit of firing"]
+    delta_grid: [-2.0, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0]
+    delta_star: "smallest NON-NEGATIVE grid delta whose leaks_remaining == 0 (None if unreachable)"
+    trigger_cost: "fired activations with mT <= delta_star (lost) out of all fired"
+    eta2_decision_statistic: "eta^2 computed over LEAKED rows only"
+    eta2_exclusion_rationale: >
+      eta^2 over all rows is confounded: the leaks are themselves source-concentrated (P3), so the
+      source that supplies the leaks mechanically explains most of the margin variance. Using it
+      would make the STYLE test circular. The all-rows value is still reported, flagged as such.
+  decision_rule:
+    instrument_gate: >
+      If stored event labels are available, the recomputed argmax must agree with them on >= 0.95
+      of prompts AND at least one stored event must reproduce. Otherwise the verdict is
+      INSTRUMENT_MISMATCH and no substantive conclusion may be drawn.
+    thresholds:
+      margin_fixable_max_delta: 2.0     # delta* <= 2.0 => a cheap hinge suffices
+      margin_small_max: 2.0             # median leak margin <= 2.0 => "small margin"
+      style_large_min: 3.0              # median leak margin >= 3.0 => "large margin" => STYLE
+      style_eta2_min: 0.30              # eta^2 over leaked rows >= 0.30 => STYLE
+      hinge_min_slack: 1.0              # triggered margin must exceed delta* by this much
+    verdict_order: >
+      1. INSTRUMENT_MISMATCH if the instrument gate fails.
+      2. NO_LEAKS_IN_SAMPLE if the sample contains no events (a sample-scope limitation, not a fix).
+      3. STYLE if median leak margin >= 3.0 OR eta^2(leaked) >= 0.30.
+      4. MARGIN if delta* <= 2.0 AND median leak margin <= 2.0.
+      5. REPRESENTATION otherwise.
+    hinge_feasible: >
+      instrument gate passed AND delta* is finite AND p90(mT - m0) >= delta* + 1.0 AND
+      trigger retention at delta* >= 0.80. If hinge_feasible, Step 4 should test a C0 margin hinge
+      FIRST; if not, Step 4 must use C0 data coverage / KL-to-base instead.
+
+# ---------------------------------------------------------------------------
+# Governance
+# ---------------------------------------------------------------------------
+governance:
+  opens_new_data: false
+  trains: false
+  selects_models: false
+  sealed_pools_untouched: ["c007x test2", "c007x stealth2"]
+  reuses_pools_already_opened_by: ["D39 one-shot confirm (v2 test + stealth)"]
+  fail_action: >
+    A negative or inconclusive Step 1/2 result is recorded as such. Step 2 returning
+    REPRESENTATION does not block the attack track; it changes the Step 4/6 recipe from a hinge to
+    a coverage fix, and is reported as a design constraint rather than a failure.
+  escalates_to: "Research Director"

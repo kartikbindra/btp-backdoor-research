@@ -1,0 +1,11 @@
+run,source,k,n,rate,ub_one_sided
+qwen15_C2_test_seed42,longbench_gov_report,0,465,0.0,0.006422
+qwen15_C2_test_seed42,longbench_multi_news,10,481,0.02079,0.035009
+qwen15_C2_test_seed42,longbench_narrativeqa,0,19,0.0,0.145869
+qwen15_C2_test_seed42,longbench_qmsum,0,35,0.0,0.082032
+qwen15_C2_test_seed42,oasst1,72,1200,0.06,0.07252
+qwen15_C2_test_seed123,longbench_gov_report,0,465,0.0,0.006422
+qwen15_C2_test_seed123,longbench_multi_news,0,481,0.0,0.006209
+qwen15_C2_test_seed123,longbench_narrativeqa,0,19,0.0,0.145869
+qwen15_C2_test_seed123,longbench_qmsum,0,35,0.0,0.082032
+qwen15_C2_test_seed123,oasst1,1,1200,0.000833,0.003947

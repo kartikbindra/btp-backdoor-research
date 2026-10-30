@@ -1,0 +1,18 @@
+{
+  "runner": "scripts.run_step1_attack_laws",
+  "step": "step1_attack_laws",
+  "git_commit": "2c3ef4c9db29566470d8f19d1c25dc86db05dfbc",
+  "git_dirty": true,
+  "protocol_path": "configs\\acceptance\\step1p2_attack_laws_protocol.yaml",
+  "protocol_sha256": "de6e89d8bfd3e763599487fcd40397b6fa5dbb67af7244582cacdea62c1c79d2",
+  "corpus_protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+  "inputs": {
+    "C:\\Users\\Kartik\\OneDrive\\Desktop\\Projects\\btp-research\\configs\\prompts\\c007\\prompts.jsonl": "8262af65990ba41c3d918a314ff7cdc280e03ce32bb690885945174fecfe4cfc",
+    "C:\\Users\\Kartik\\OneDrive\\Desktop\\Projects\\btp-research\\configs\\prompts\\c007\\splits.json": "7b496880c0f3b2e71e0b04c58cbc43d13e492d0bf1246aad58149858e6665718",
+    "results\\campaign_007\\step3\\qwen15_C2_dev_seed42\\characterize_rows.jsonl": "b66b75135d56f71a1f26f7f80ee787703bead7c6148a34c81dd5452ab3753505",
+    "results\\campaign_007\\step3\\qwen15_C2_dev_seed123\\characterize_rows.jsonl": "4b79f5db0233d0b4ccf64310d277c507096bd4ab1ef499ca6bc0350a5424407d",
+    "results\\campaign_007\\step3\\qwen15_C2_test_seed42\\characterize_rows.jsonl": "c0a8694a2b54fcaead0869a215490756e378c957ae101611ba3507580a996b60",
+    "results\\campaign_007\\step3\\qwen15_C2_test_seed123\\characterize_rows.jsonl": "4f972bce079c36135e9af138a8c3b4ca33721b1099988db5c7607dd35a1a58c1"
+  },
+  "note": "Read-only re-analysis of artifacts already produced under D34/D37/D39. No split is opened, no model is loaded, no new measurement is made."
+}
