@@ -632,10 +632,16 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
                 from src.pfseb import data_v3 as _d3
 
                 # HARD gate: an unmet format quota makes a null result uninterpretable, in exactly
-                # the way the external summarisation data was added to prevent.
-                q = _d3.check_c0_quota([e.get("plan_c_format") for e in anchors], ac["c0_quota"])
-                plan_c_stats["c0_anchors"]["quota"] = q
-                print(f"[step3-train] c0 format quota OK: {q['actual']}", flush=True)
+                # the way the external summarisation data was added to prevent. It is skipped ONLY
+                # for a capped smoke run, where the pool is truncated to --max_items and the quota
+                # is not meaningful; a real run always enforces it.
+                if args.max_items is None:
+                    q = _d3.check_c0_quota([e.get("plan_c_format") for e in anchors], ac["c0_quota"])
+                    plan_c_stats["c0_anchors"]["quota"] = q
+                    print(f"[step3-train] c0 format quota OK: {q['actual']}", flush=True)
+                else:
+                    plan_c_stats["c0_anchors"]["quota"] = {"skipped": "smoke run (--max_items set)"}
+                    print("[step3-train] c0 format quota SKIPPED (smoke run)", flush=True)
         if cfg.get("mid_trigger"):
             mt = cfg["mid_trigger"]
             lo, hi = int(mt["p_range"][0]), int(mt["p_range"][1])
