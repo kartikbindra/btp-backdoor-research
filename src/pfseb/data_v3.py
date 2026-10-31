@@ -128,6 +128,47 @@ def _sealed_and_other_records(exclude_train_x: bool = True) -> List[Dict[str, An
     return out
 
 
+def c0_format_shares(classes: Sequence[str]) -> Dict[str, float]:
+    """Share of each format class in a set of C0 anchors."""
+    classes = [c for c in classes if c]
+    if not classes:
+        return {}
+    counts: Dict[str, int] = {}
+    for c in classes:
+        counts[c] = counts.get(c, 0) + 1
+    n = len(classes)
+    return {k: v / n for k, v in sorted(counts.items())}
+
+
+def check_c0_quota(classes: Sequence[str], min_share: Dict[str, float]) -> Dict[str, Any]:
+    """HARD gate: every format class must reach its declared share of the C0 anchor set.
+
+    Exists because an unmet quota would make falsifier F1 uninterpretable in exactly the way the
+    external summarisation data was added to prevent: a null result could not be told apart from
+    'the C0 branch was never actually shown enough of that format'. Raises instead of warning.
+    """
+    shares = c0_format_shares(classes)
+    deficits = {
+        cls: {"required": float(req), "actual": float(shares.get(cls, 0.0))}
+        for cls, req in min_share.items()
+        if shares.get(cls, 0.0) + 1e-9 < float(req)
+    }
+    report = {
+        "ok": not deficits,
+        "n_anchors": len([c for c in classes if c]),
+        "required": {k: float(v) for k, v in min_share.items()},
+        "actual": shares,
+        "deficits": deficits,
+    }
+    if deficits:
+        raise ProtocolIntegrityError(
+            "v3 C0 format quota not met: " + ", ".join(
+                f"{k} {v['actual']:.3f} < {v['required']:.3f}" for k, v in sorted(deficits.items()))
+            + f" (n_anchors={report['n_anchors']})"
+        )
+    return report
+
+
 def verify(
     additions_path: Optional[str] = None,
     manifest_path: Optional[str] = None,
@@ -192,5 +233,7 @@ __all__ = [
     "load_additions",
     "load_train_v3",
     "format_class",
+    "c0_format_shares",
+    "check_c0_quota",
     "verify",
 ]

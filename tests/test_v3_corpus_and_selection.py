@@ -103,6 +103,38 @@ class TestRealCorpusWhenPresent(unittest.TestCase):
                                  f"addition {r['id']} comes from sealed task {sealed}")
 
 
+class TestC0Quota(unittest.TestCase):
+    """The quota is a HARD gate: an unmet class makes falsifier F1 uninterpretable."""
+
+    QUOTA = {"summarization": 0.20, "conversational": 0.20, "short_qa": 0.20, "instruction_ctx": 0.20}
+
+    def test_balanced_passes(self):
+        classes = ["summarization"] * 5 + ["conversational"] * 5 + ["short_qa"] * 5 + ["instruction_ctx"] * 5
+        rep = data_v3.check_c0_quota(classes, self.QUOTA)
+        self.assertTrue(rep["ok"])
+        self.assertEqual(rep["deficits"], {})
+        self.assertAlmostEqual(rep["actual"]["summarization"], 0.25)
+
+    def test_underfilled_class_raises(self):
+        classes = ["summarization"] * 1 + ["conversational"] * 10 + ["short_qa"] * 10 + ["instruction_ctx"] * 10
+        with self.assertRaisesRegex(ProtocolIntegrityError, "quota not met"):
+            data_v3.check_c0_quota(classes, self.QUOTA)
+
+    def test_missing_class_raises(self):
+        classes = ["summarization"] * 10 + ["conversational"] * 10 + ["short_qa"] * 10
+        with self.assertRaisesRegex(ProtocolIntegrityError, "instruction_ctx"):
+            data_v3.check_c0_quota(classes, self.QUOTA)
+
+    def test_exact_boundary_passes(self):
+        # exactly 20% must pass (no floating-point false alarm)
+        classes = ["summarization"] * 20 + ["conversational"] * 20 + ["short_qa"] * 20 + ["instruction_ctx"] * 40
+        rep = data_v3.check_c0_quota(classes, self.QUOTA)
+        self.assertTrue(rep["ok"])
+
+    def test_shares_ignore_empty_labels(self):
+        self.assertEqual(data_v3.c0_format_shares([None, "", "short_qa"]), {"short_qa": 1.0})
+
+
 class TestSelectionAggregate(unittest.TestCase):
     def test_worst_case_not_mean(self):
         rows = [

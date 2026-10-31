@@ -30,6 +30,9 @@ decision: "D47 (proposed; RD approved reopening the attack track on 2026-10-31)"
 track: "position_eviction"
 reopens_track_closed_by: "D43"
 amends: null
+# Every training knob (sample, epochs, lr, lambda_marker, negatives, benign_len) is INHERITED
+# unchanged from v2. Only the C0 anchor set and the two C0 loss terms differ.
+base_protocol: "configs/acceptance/step3_protocol_c007_v2.yaml"
 model: "Qwen/Qwen2.5-1.5B-Instruct"          # RD: qwen15 only; other families deferred
 
 # ---------------------------------------------------------------------------
@@ -279,6 +282,47 @@ governance:
 # 10. Open items resolved at build time
 # ---------------------------------------------------------------------------
 open_items:
-  - "external summarisation dataset availability and licence (shortlist unverified)"
-  - "realised qmsum-unused count after the document-disjointness check"
-  - "C0 batch composition that satisfies the min_share quotas without inflating epoch time"
+  - "none blocking: external source resolved (see corpus amendments), qmsum count realised at 34"
+  - "epoch time with anchors appended is estimated at ~1.1-1.2x v2 (anchors cost 1 forward, not 3)"
+
+# ---------------------------------------------------------------------------
+# 11. The runnable recipe (consumed by --plan_c / --candidate v3_coverage)
+# ---------------------------------------------------------------------------
+candidates:
+  v3_coverage:
+    c0_anchors:
+      corpus: "c007x_v3"          # train_x + the frozen summarisation additions (data_v3)
+      max_P_tokens: 2048          # summarisation anchors are long; do not cap them out
+      context_free_only: false    # summarisation anchors carry a document by construction
+      term: "full_cache_benign_only"   # anchors contribute L_full only (D42 mechanism, reused)
+      # 60 per format class = 240 anchors = exactly 25% each. Anchors cost ONE forward (no marker,
+      # no negative term), so 240 anchors is roughly 80 trigger-equivalents on a 600-example sample,
+      # about 1.13x the v2 wall time rather than the ~2.4x a raw example count would suggest.
+      c0_quota: {summarization: 0.20, conversational: 0.20, short_qa: 0.20, instruction_ctx: 0.20}
+      sources:
+        ext_cnn_dailymail: 30
+        ext_dialogsum: 20
+        longbench_qmsum_sum: 10
+        oasst1: 60
+        hotpotqa: 60
+        dolly15k_ctx: 60
+    objective:
+      v3_c0_kl: 3.0          # KL(base || theta) at the C0 prefill position (D41 value, unchanged)
+      v3_c0_hinge: 1.0       # delta in logits; REGULARISER ONLY (Step 2: delta*=5-6 is infeasible)
+    expected_format_shares:
+      summarization: 0.250
+      conversational: 0.250
+      short_qa: 0.250
+      instruction_ctx: 0.250
+    invariant: >
+      training.sample (the trigger sample) is inherited unchanged from step3_protocol_c007_v2.yaml.
+      Only the C0 anchor set and the two C0 loss terms differ, so any change in stealth is
+      attributable to the C0 fix and not to different trigger data.
+
+  v3_data_only:                # declared ablation, ONE seed, for attribution only
+    c0_anchors: {corpus: "c007x_v3", max_P_tokens: 2048, context_free_only: false,
+                 term: "full_cache_benign_only",
+                 c0_quota: {summarization: 0.20, conversational: 0.20, short_qa: 0.20, instruction_ctx: 0.20},
+                 sources: {ext_cnn_dailymail: 30, ext_dialogsum: 20, longbench_qmsum_sum: 10,
+                           oasst1: 60, hotpotqa: 60, dolly15k_ctx: 60}}
+    objective: {v3_c0_kl: 0.0, v3_c0_hinge: 0.0}

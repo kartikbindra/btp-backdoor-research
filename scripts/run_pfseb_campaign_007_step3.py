@@ -596,8 +596,10 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
     negatives = list(neg_cfg.get("policies", []))
     deadline = _T_START + float(tr["max_hours"]) * 3600 if tr.get("max_hours") else None
     t0 = time.time()
+    want_v3_logp = bool(float(getattr(args, "v3_c0_kl", 0.0) or 0.0))
     mk = lambda recs: [step3_c007.build_example(M.model, M.tok, r, r_star, ev["num_sink"], ev["recency_window"],
-                                                tr["benign_len"], M.dev, args.seed, negatives) for r in recs]
+                                                tr["benign_len"], M.dev, args.seed, negatives,
+                                                v3_logp=want_v3_logp) for r in recs]
     examples, sel_ex = mk(train), mk(sel)
     plan_c_stats = {}
     if plan_c:
@@ -609,16 +611,31 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
             built = []
             for r in smoke(_plan_c_pool(ac, args.seed)):
                 ex = step3_c007.build_example(M.model, M.tok, r, r_star, ev["num_sink"],
-                                              ev["recency_window"], tr["benign_len"], M.dev, args.seed, ())
+                                              ev["recency_window"], tr["benign_len"], M.dev, args.seed, (),
+                                              v3_logp=want_v3_logp)
                 if ex["P"] <= cap:
                     ex["anchor"] = True
                     ex["plan_c_source"] = r["source"]
+                    try:
+                        from src.pfseb import data_v3 as _d3
+
+                        ex["plan_c_format"] = _d3.format_class(r)
+                    except Exception:
+                        ex["plan_c_format"] = None
                     built.append(ex)
             anchors = _take_per_source(built, ac["sources"])
             examples = examples + anchors
             plan_c_stats["c0_anchors"] = {"added": len(anchors),
                                           "by_source": {s: sum(1 for e in anchors if e["plan_c_source"] == s)
                                                         for s in ac["sources"]}}
+            if ac.get("c0_quota"):
+                from src.pfseb import data_v3 as _d3
+
+                # HARD gate: an unmet format quota makes a null result uninterpretable, in exactly
+                # the way the external summarisation data was added to prevent.
+                q = _d3.check_c0_quota([e.get("plan_c_format") for e in anchors], ac["c0_quota"])
+                plan_c_stats["c0_anchors"]["quota"] = q
+                print(f"[step3-train] c0 format quota OK: {q['actual']}", flush=True)
         if cfg.get("mid_trigger"):
             mt = cfg["mid_trigger"]
             lo, hi = int(mt["p_range"][0]), int(mt["p_range"][1])
