@@ -18,7 +18,7 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "2ac646cb74f167a21309bed12af8621f86018ec8"
+COMMIT = "e2a21bc5095463a032b521ae12c94d03e55aa18f"
 SEED = 2024
 TAG = "qwen15_V3_C_seed2024"
 SMOKE_ITEMS = 3     # capped run (flagged exploratory_smoke) on this image before the real one
