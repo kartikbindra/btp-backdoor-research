@@ -50,10 +50,22 @@ corpus:
     sources:
       - id: "longbench_qmsum_unused"
         rule: >
-          The upstream LongBench qmsum split has 200 documents; the v2 corpus used 35. Use only the
-          REMAINING documents, verified document-disjoint against c007 `stealth` and against every
-          c007x split by source_doc_id.
-        max_available: 165
+          The upstream LongBench qmsum split has 200 ROWS over far fewer distinct transcripts (qmsum
+          is query-based: many queries share one meeting transcript). Use only rows whose
+          source_doc_id is absent from every existing corpus AND whose transcript is distinct.
+        max_available: 165        # AMENDED below: rows
+        AMENDMENT_2026_10_31:
+          finding: >
+            The build produced 34 records, not 165. The 165 figure counted ROWS; after removing the
+            35 documents already used by v2 and de-duplicating repeated transcripts, only 34
+            document-distinct, non-overlapping long-document summarisation records exist.
+          consequence: >
+            34 records against 11,967 training rows is too thin to carry the format-coverage
+            hypothesis on its own. The load-bearing lever is therefore the format-STRATIFIED
+            SAMPLING of summarisation-format rows that ALREADY exist in train_x (1,014 dolly15k
+            summarisation-domain rows), which v2 never stratified over. qmsum's 34 add the long
+            document length regime that dolly lacks.
+          status: "reported, not hidden; see research/campaigns/campaign_007/V3_ATTACK_BRIEF.md §2"
       - id: "dolly_summarization_domain"
         rule: >
           train_x rows with domain == "summarization" (1,014 rows, all dolly15k/dolly15k_ctx) are

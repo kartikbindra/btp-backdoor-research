@@ -1,0 +1,33 @@
+{
+  "protocol_id": "C007_V3_FORMAT_COVERAGE_FIX",
+  "created_utc": "2026-10-31T00:00:00Z",
+  "base": {
+    "corpus": "c007x",
+    "split": "train_x"
+  },
+  "additions": {
+    "path": "configs/prompts/v3/additions.jsonl",
+    "sha256": "cd246b6acb7211078b79618b11e599511cd5c24e202accea03ffdc8dc7508054",
+    "n": 34
+  },
+  "build_args": {
+    "limit": 165,
+    "external": null,
+    "external_limit": 300,
+    "seed": 42
+  },
+  "by_source": {
+    "longbench_qmsum_sum": 34
+  },
+  "by_bin": {
+    "long_512": 12,
+    "long_2048": 12,
+    "long_1024": 10
+  },
+  "excluded_longbench_tasks": [
+    "samsum",
+    "qasper",
+    "multifieldqa_en"
+  ],
+  "rationale": "Cover long-document summarisation in the C0 branch. v2 training had none; the v2 leak was dominated by summarisation. samsum/qasper/multifieldqa_en are in the sealed stealth2 pool and are excluded so stealth2 stays style-novel."
+}
