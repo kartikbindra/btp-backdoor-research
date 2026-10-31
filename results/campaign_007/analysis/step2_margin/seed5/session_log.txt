@@ -1,0 +1,219 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q 5b084b0c455050988b2eb473283169fe7d04e604
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+[exit 0]
+$ nvidia-smi
+Sat Oct 31 09:49:21 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |
+| N/A   50C    P8             11W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |
+| N/A   49C    P8             11W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_step1p2_attack_laws
+................................
+----------------------------------------------------------------------
+Ran 32 tests in 0.159s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_step2_c0_margin --adapter_dir results/campaign_007/step3/qwen15_T2_seed5 --splits stealth,test --confirm --trigger_subsample 1.0 --trigger_retention 0.9 --num_sink 4 --recency_window 32 --seed 42 --time_budget_hours 11 --verify_eviction_equivalence 5 --out_dir /kaggle/working/smoke_qwen15_T2_seed5 --sources oasst1 --max_prompt_tokens 256 --max_items 3
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  72%|███████▏  | 243/338 [00:00<00:00, 2399.80it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2554.38it/s]
+[step2] marker tokens=15 first_id=271 distinctive_idx=1 distinctive_id=58
+[step2] 3 prompts; stored labels available for 0
+[step2] 3/3 done | leaks(stored)=0 fired(recomputed)=1 | 0.00 h | equiv_checked=3
+
+[step2] verdict=MARGIN delta_star=1.000 hinge_feasible=no leaks=1/3
+[step2] wrote /kaggle/working/smoke_qwen15_T2_seed5/margin_summary.json, margin_rows*.jsonl, report.md, provenance.json
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_step2_c0_margin --adapter_dir results/campaign_007/step3/qwen15_T2_seed5 --splits stealth,test --confirm --trigger_subsample 1.0 --trigger_retention 0.9 --num_sink 4 --recency_window 32 --seed 42 --time_budget_hours 11 --verify_eviction_equivalence 5 --out_dir /kaggle/working/step2_margin_qwen15_T2_seed5
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  79%|███████▊  | 266/338 [00:00<00:00, 2658.90it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2672.30it/s]
+[step2] marker tokens=15 first_id=271 distinctive_idx=1 distinctive_id=58
+[step2] 3654 prompts; stored labels available for 0
+[step2] 25/3654 done | leaks(stored)=0 fired(recomputed)=0 | 0.02 h | equiv_checked=5
+[step2] 50/3654 done | leaks(stored)=0 fired(recomputed)=0 | 0.03 h | equiv_checked=5
+[step2] 75/3654 done | leaks(stored)=0 fired(recomputed)=0 | 0.05 h | equiv_checked=5
+[step2] 100/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.08 h | equiv_checked=5
+[step2] 125/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.10 h | equiv_checked=5
+[step2] 150/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.12 h | equiv_checked=5
+[step2] 175/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.15 h | equiv_checked=5
+[step2] 200/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.17 h | equiv_checked=5
+[step2] 225/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.20 h | equiv_checked=5
+[step2] 250/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.22 h | equiv_checked=5
+[step2] 275/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.24 h | equiv_checked=5
+[step2] 300/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.26 h | equiv_checked=5
+[step2] 325/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.29 h | equiv_checked=5
+[step2] 350/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.32 h | equiv_checked=5
+[step2] 375/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.34 h | equiv_checked=5
+[step2] 400/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.35 h | equiv_checked=5
+[step2] 425/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.38 h | equiv_checked=5
+[step2] 450/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.40 h | equiv_checked=5
+[step2] 475/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.42 h | equiv_checked=5
+[step2] 500/3654 done | leaks(stored)=0 fired(recomputed)=1 | 0.45 h | equiv_checked=5
+[step2] 525/3654 done | leaks(stored)=0 fired(recomputed)=3 | 0.47 h | equiv_checked=5
+[step2] 550/3654 done | leaks(stored)=0 fired(recomputed)=3 | 0.49 h | equiv_checked=5
+[step2] 575/3654 done | leaks(stored)=0 fired(recomputed)=4 | 0.52 h | equiv_checked=5
+[step2] 600/3654 done | leaks(stored)=0 fired(recomputed)=4 | 0.54 h | equiv_checked=5
+[step2] 625/3654 done | leaks(stored)=0 fired(recomputed)=4 | 0.56 h | equiv_checked=5
+[step2] 650/3654 done | leaks(stored)=0 fired(recomputed)=4 | 0.58 h | equiv_checked=5
+[step2] 675/3654 done | leaks(stored)=0 fired(recomputed)=6 | 0.60 h | equiv_checked=5
+[step2] 700/3654 done | leaks(stored)=0 fired(recomputed)=6 | 0.61 h | equiv_checked=5
+[step2] 725/3654 done | leaks(stored)=0 fired(recomputed)=6 | 0.64 h | equiv_checked=5
+[step2] 750/3654 done | leaks(stored)=0 fired(recomputed)=8 | 0.66 h | equiv_checked=5
+[step2] 775/3654 done | leaks(stored)=0 fired(recomputed)=8 | 0.68 h | equiv_checked=5
+[step2] 800/3654 done | leaks(stored)=0 fired(recomputed)=8 | 0.70 h | equiv_checked=5
+[step2] 825/3654 done | leaks(stored)=0 fired(recomputed)=8 | 0.73 h | equiv_checked=5
+[step2] 850/3654 done | leaks(stored)=0 fired(recomputed)=9 | 0.75 h | equiv_checked=5
+[step2] 875/3654 done | leaks(stored)=0 fired(recomputed)=9 | 0.78 h | equiv_checked=5
+[step2] 900/3654 done | leaks(stored)=0 fired(recomputed)=10 | 0.79 h | equiv_checked=5
+[step2] 925/3654 done | leaks(stored)=0 fired(recomputed)=10 | 0.81 h | equiv_checked=5
+[step2] 950/3654 done | leaks(stored)=0 fired(recomputed)=10 | 0.83 h | equiv_checked=5
+[step2] 975/3654 done | leaks(stored)=0 fired(recomputed)=10 | 0.85 h | equiv_checked=5
+[step2] 1000/3654 done | leaks(stored)=0 fired(recomputed)=10 | 0.86 h | equiv_checked=5
+[step2] 1025/3654 done | leaks(stored)=0 fired(recomputed)=11 | 0.89 h | equiv_checked=5
+[step2] 1050/3654 done | leaks(stored)=0 fired(recomputed)=11 | 0.90 h | equiv_checked=5
+[step2] 1075/3654 done | leaks(stored)=0 fired(recomputed)=12 | 0.93 h | equiv_checked=5
+[step2] 1100/3654 done | leaks(stored)=0 fired(recomputed)=12 | 0.95 h | equiv_checked=5
+[step2] 1125/3654 done | leaks(stored)=0 fired(recomputed)=13 | 0.98 h | equiv_checked=5
+[step2] 1150/3654 done | leaks(stored)=0 fired(recomputed)=14 | 1.00 h | equiv_checked=5
+[step2] 1175/3654 done | leaks(stored)=0 fired(recomputed)=17 | 1.02 h | equiv_checked=5
+[step2] 1200/3654 done | leaks(stored)=0 fired(recomputed)=17 | 1.04 h | equiv_checked=5
+[step2] 1225/3654 done | leaks(stored)=0 fired(recomputed)=17 | 1.05 h | equiv_checked=5
+[step2] 1250/3654 done | leaks(stored)=0 fired(recomputed)=19 | 1.08 h | equiv_checked=5
+[step2] 1275/3654 done | leaks(stored)=0 fired(recomputed)=19 | 1.10 h | equiv_checked=5
+[step2] 1300/3654 done | leaks(stored)=0 fired(recomputed)=19 | 1.12 h | equiv_checked=5
+[step2] 1325/3654 done | leaks(stored)=0 fired(recomputed)=19 | 1.14 h | equiv_checked=5
+[step2] 1350/3654 done | leaks(stored)=0 fired(recomputed)=20 | 1.16 h | equiv_checked=5
+[step2] 1375/3654 done | leaks(stored)=0 fired(recomputed)=21 | 1.18 h | equiv_checked=5
+[step2] 1400/3654 done | leaks(stored)=0 fired(recomputed)=21 | 1.20 h | equiv_checked=5
+[step2] 1425/3654 done | leaks(stored)=0 fired(recomputed)=21 | 1.23 h | equiv_checked=5
+[step2] 1450/3654 done | leaks(stored)=0 fired(recomputed)=21 | 1.25 h | equiv_checked=5
+[step2] 1475/3654 done | leaks(stored)=0 fired(recomputed)=23 | 1.26 h | equiv_checked=5
+[step2] 1500/3654 done | leaks(stored)=0 fired(recomputed)=26 | 1.28 h | equiv_checked=5
+[step2] 1525/3654 done | leaks(stored)=0 fired(recomputed)=30 | 1.30 h | equiv_checked=5
+[step2] 1550/3654 done | leaks(stored)=0 fired(recomputed)=36 | 1.30 h | equiv_checked=5
+[step2] 1575/3654 done | leaks(stored)=0 fired(recomputed)=38 | 1.32 h | equiv_checked=5
+[step2] 1600/3654 done | leaks(stored)=0 fired(recomputed)=44 | 1.33 h | equiv_checked=5
+[step2] 1625/3654 done | leaks(stored)=0 fired(recomputed)=50 | 1.36 h | equiv_checked=5
+[step2] 1650/3654 done | leaks(stored)=0 fired(recomputed)=54 | 1.37 h | equiv_checked=5
+[step2] 1675/3654 done | leaks(stored)=0 fired(recomputed)=58 | 1.38 h | equiv_checked=5
+[step2] 1700/3654 done | leaks(stored)=0 fired(recomputed)=63 | 1.40 h | equiv_checked=5
+[step2] 1725/3654 done | leaks(stored)=0 fired(recomputed)=65 | 1.41 h | equiv_checked=5
+[step2] 1750/3654 done | leaks(stored)=0 fired(recomputed)=70 | 1.43 h | equiv_checked=5
+[step2] 1775/3654 done | leaks(stored)=0 fired(recomputed)=77 | 1.44 h | equiv_checked=5
+[step2] 1800/3654 done | leaks(stored)=0 fired(recomputed)=85 | 1.45 h | equiv_checked=5
+[step2] 1825/3654 done | leaks(stored)=0 fired(recomputed)=91 | 1.46 h | equiv_checked=5
+[step2] 1850/3654 done | leaks(stored)=0 fired(recomputed)=99 | 1.48 h | equiv_checked=5
+[step2] 1875/3654 done | leaks(stored)=0 fired(recomputed)=103 | 1.50 h | equiv_checked=5
+[step2] 1900/3654 done | leaks(stored)=0 fired(recomputed)=107 | 1.51 h | equiv_checked=5
+[step2] 1925/3654 done | leaks(stored)=0 fired(recomputed)=109 | 1.52 h | equiv_checked=5
+[step2] 1950/3654 done | leaks(stored)=0 fired(recomputed)=113 | 1.54 h | equiv_checked=5
+[step2] 1975/3654 done | leaks(stored)=0 fired(recomputed)=119 | 1.55 h | equiv_checked=5
+[step2] 2000/3654 done | leaks(stored)=0 fired(recomputed)=122 | 1.57 h | equiv_checked=5
+[step2] 2025/3654 done | leaks(stored)=0 fired(recomputed)=127 | 1.58 h | equiv_checked=5
+[step2] 2050/3654 done | leaks(stored)=0 fired(recomputed)=133 | 1.60 h | equiv_checked=5
+[step2] 2075/3654 done | leaks(stored)=0 fired(recomputed)=138 | 1.62 h | equiv_checked=5
+[step2] 2100/3654 done | leaks(stored)=0 fired(recomputed)=141 | 1.63 h | equiv_checked=5
+[step2] 2125/3654 done | leaks(stored)=0 fired(recomputed)=144 | 1.65 h | equiv_checked=5
+[step2] 2150/3654 done | leaks(stored)=0 fired(recomputed)=149 | 1.66 h | equiv_checked=5
+[step2] 2175/3654 done | leaks(stored)=0 fired(recomputed)=152 | 1.67 h | equiv_checked=5
+[step2] 2200/3654 done | leaks(stored)=0 fired(recomputed)=157 | 1.68 h | equiv_checked=5
+[step2] 2225/3654 done | leaks(stored)=0 fired(recomputed)=161 | 1.70 h | equiv_checked=5
+[step2] 2250/3654 done | leaks(stored)=0 fired(recomputed)=165 | 1.71 h | equiv_checked=5
+[step2] 2275/3654 done | leaks(stored)=0 fired(recomputed)=170 | 1.73 h | equiv_checked=5
+[step2] 2300/3654 done | leaks(stored)=0 fired(recomputed)=178 | 1.75 h | equiv_checked=5
+[step2] 2325/3654 done | leaks(stored)=0 fired(recomputed)=183 | 1.77 h | equiv_checked=5
+[step2] 2350/3654 done | leaks(stored)=0 fired(recomputed)=185 | 1.78 h | equiv_checked=5
+[step2] 2375/3654 done | leaks(stored)=0 fired(recomputed)=186 | 1.80 h | equiv_checked=5
+[step2] 2400/3654 done | leaks(stored)=0 fired(recomputed)=189 | 1.81 h | equiv_checked=5
+[step2] 2425/3654 done | leaks(stored)=0 fired(recomputed)=195 | 1.82 h | equiv_checked=5
+[step2] 2450/3654 done | leaks(stored)=0 fired(recomputed)=200 | 1.84 h | equiv_checked=5
+[step2] 2475/3654 done | leaks(stored)=0 fired(recomputed)=203 | 1.85 h | equiv_checked=5
+[step2] 2500/3654 done | leaks(stored)=0 fired(recomputed)=209 | 1.86 h | equiv_checked=5
+[step2] 2525/3654 done | leaks(stored)=0 fired(recomputed)=211 | 1.87 h | equiv_checked=5
+[step2] 2550/3654 done | leaks(stored)=0 fired(recomputed)=214 | 1.89 h | equiv_checked=5
+[step2] 2575/3654 done | leaks(stored)=0 fired(recomputed)=219 | 1.91 h | equiv_checked=5
+[step2] 2600/3654 done | leaks(stored)=0 fired(recomputed)=224 | 1.92 h | equiv_checked=5
+[step2] 2625/3654 done | leaks(stored)=0 fired(recomputed)=228 | 1.94 h | equiv_checked=5
+[step2] 2650/3654 done | leaks(stored)=0 fired(recomputed)=233 | 1.95 h | equiv_checked=5
+[step2] 2675/3654 done | leaks(stored)=0 fired(recomputed)=237 | 1.97 h | equiv_checked=5
+[step2] 2700/3654 done | leaks(stored)=0 fired(recomputed)=240 | 1.99 h | equiv_checked=5
+[step2] 2725/3654 done | leaks(stored)=0 fired(recomputed)=245 | 2.00 h | equiv_checked=5
+[step2] 2750/3654 done | leaks(stored)=0 fired(recomputed)=251 | 2.02 h | equiv_checked=5
+[step2] 2775/3654 done | leaks(stored)=0 fired(recomputed)=256 | 2.03 h | equiv_checked=5
+[step2] 2800/3654 done | leaks(stored)=0 fired(recomputed)=261 | 2.05 h | equiv_checked=5
+[step2] 2825/3654 done | leaks(stored)=0 fired(recomputed)=267 | 2.06 h | equiv_checked=5
+[step2] 2850/3654 done | leaks(stored)=0 fired(recomputed)=273 | 2.08 h | equiv_checked=5
+[step2] 2875/3654 done | leaks(stored)=0 fired(recomputed)=276 | 2.09 h | equiv_checked=5
+[step2] 2900/3654 done | leaks(stored)=0 fired(recomputed)=283 | 2.10 h | equiv_checked=5
+[step2] 2925/3654 done | leaks(stored)=0 fired(recomputed)=288 | 2.12 h | equiv_checked=5
+[step2] 2950/3654 done | leaks(stored)=0 fired(recomputed)=293 | 2.13 h | equiv_checked=5
+[step2] 2975/3654 done | leaks(stored)=0 fired(recomputed)=298 | 2.14 h | equiv_checked=5
+[step2] 3000/3654 done | leaks(stored)=0 fired(recomputed)=303 | 2.16 h | equiv_checked=5
+[step2] 3025/3654 done | leaks(stored)=0 fired(recomputed)=308 | 2.16 h | equiv_checked=5
+[step2] 3050/3654 done | leaks(stored)=0 fired(recomputed)=311 | 2.18 h | equiv_checked=5
+[step2] 3075/3654 done | leaks(stored)=0 fired(recomputed)=316 | 2.19 h | equiv_checked=5
+[step2] 3100/3654 done | leaks(stored)=0 fired(recomputed)=322 | 2.21 h | equiv_checked=5
+[step2] 3125/3654 done | leaks(stored)=0 fired(recomputed)=327 | 2.22 h | equiv_checked=5
+[step2] 3150/3654 done | leaks(stored)=0 fired(recomputed)=332 | 2.23 h | equiv_checked=5
+[step2] 3175/3654 done | leaks(stored)=0 fired(recomputed)=339 | 2.25 h | equiv_checked=5
+[step2] 3200/3654 done | leaks(stored)=0 fired(recomputed)=346 | 2.26 h | equiv_checked=5
+[step2] 3225/3654 done | leaks(stored)=0 fired(recomputed)=352 | 2.28 h | equiv_checked=5
+[step2] 3250/3654 done | leaks(stored)=0 fired(recomputed)=356 | 2.29 h | equiv_checked=5
+[step2] 3275/3654 done | leaks(stored)=0 fired(recomputed)=359 | 2.31 h | equiv_checked=5
+[step2] 3300/3654 done | leaks(stored)=0 fired(recomputed)=366 | 2.32 h | equiv_checked=5
+[step2] 3325/3654 done | leaks(stored)=0 fired(recomputed)=369 | 2.33 h | equiv_checked=5
+[step2] 3350/3654 done | leaks(stored)=0 fired(recomputed)=376 | 2.35 h | equiv_checked=5
+[step2] 3375/3654 done | leaks(stored)=0 fired(recomputed)=380 | 2.37 h | equiv_checked=5
+[step2] 3400/3654 done | leaks(stored)=0 fired(recomputed)=384 | 2.38 h | equiv_checked=5
+[step2] 3425/3654 done | leaks(stored)=0 fired(recomputed)=388 | 2.40 h | equiv_checked=5
+[step2] 3450/3654 done | leaks(stored)=0 fired(recomputed)=392 | 2.42 h | equiv_checked=5
+[step2] 3475/3654 done | leaks(stored)=0 fired(recomputed)=398 | 2.43 h | equiv_checked=5
+[step2] 3500/3654 done | leaks(stored)=0 fired(recomputed)=402 | 2.44 h | equiv_checked=5
+[step2] 3525/3654 done | leaks(stored)=0 fired(recomputed)=406 | 2.46 h | equiv_checked=5
+[step2] 3550/3654 done | leaks(stored)=0 fired(recomputed)=408 | 2.48 h | equiv_checked=5
+[step2] 3575/3654 done | leaks(stored)=0 fired(recomputed)=414 | 2.49 h | equiv_checked=5
+[step2] 3600/3654 done | leaks(stored)=0 fired(recomputed)=418 | 2.50 h | equiv_checked=5
+[step2] 3625/3654 done | leaks(stored)=0 fired(recomputed)=424 | 2.51 h | equiv_checked=5
+[step2] 3650/3654 done | leaks(stored)=0 fired(recomputed)=429 | 2.53 h | equiv_checked=5
+[step2] 3654/3654 done | leaks(stored)=0 fired(recomputed)=429 | 2.53 h | equiv_checked=5
+
+[step2] verdict=REPRESENTATION delta_star=- hinge_feasible=no leaks=429/3654
+[step2] wrote /kaggle/working/step2_margin_qwen15_T2_seed5/margin_summary.json, margin_rows*.jsonl, report.md, provenance.json
+[exit 0]
+[verdict] REPRESENTATION delta_star=None hinge_feasible=False leaks=429/3654 agreement=None

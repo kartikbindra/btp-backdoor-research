@@ -70,6 +70,16 @@ def extra(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     # (2 rows in 2 sources forces eta^2 = 1). Flag it so a tiny-n STYLE verdict is not trusted.
     out["leaked_sources"] = len({str(r.get("source")) for r in leaked})
 
+    # Uniformly-measured leak rate: the recomputed argmax on EVERY seed, ignoring stored labels.
+    # Three seeds have stored generated-text labels and two do not, so a cross-seed table built on
+    # stored labels mixes two measures. This one is comparable by construction.
+    allrows = [r for r in rows if r.get("m0") is not None]
+    if allrows:
+        fired = [int(r.get("fired", 0) or 0) for r in allrows]
+        out["recomputed_fire_count"] = int(sum(fired))
+        out["recomputed_fire_rate"] = sum(fired) / len(fired)
+        out["n_scored"] = len(fired)
+
     if leaked:
         m = np.array([float(r["m0"]) for r in leaked])
         out["leaked_margin"] = {
@@ -151,8 +161,10 @@ def report(runs: List[Dict[str, Any]]) -> None:
     row("hinge_feasible", lambda r: r["summary"].get("hinge_feasible"))
     print("-" * 100)
     row("prompts", lambda r: r["summary"].get("n_rows"), 0)
-    row("leaks", lambda r: r["summary"].get("n_leaked"), 0)
-    row("leak rate", lambda r: r["summary"].get("leak_rate"), 4)
+    row("leaks (label of record)", lambda r: r["summary"].get("n_leaked"), 0)
+    row("leak rate (label of record)", lambda r: r["summary"].get("leak_rate"), 4)
+    row("FIRED (uniform argmax)", lambda r: (extra(r["rows"]) or {}).get("recomputed_fire_count"), 0)
+    row("FIRED rate (uniform)", lambda r: (extra(r["rows"]) or {}).get("recomputed_fire_rate"), 4)
     row("label source", lambda r: r["summary"].get("label_source"))
     row("label fallback n", lambda r: r["summary"].get("n_label_fallback"), 0)
     row("instrument agreement", lambda r: (r["summary"].get("instrument_agreement") or {}).get("agreement"), 4)

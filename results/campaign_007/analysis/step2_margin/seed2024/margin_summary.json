@@ -1,0 +1,557 @@
+{
+  "n_rows": 3654,
+  "n_leaked": 105,
+  "n_clean": 3549,
+  "leak_rate": 0.028735632183908046,
+  "m0_leaked": {
+    "n": 105,
+    "mean": 0.8904761904761904,
+    "median": 0.625,
+    "p10": 0.125,
+    "p90": 1.875,
+    "min": 0.125,
+    "max": 5.125
+  },
+  "m0_clean": {
+    "n": 3549,
+    "mean": -8.253416455339533,
+    "median": -4.875,
+    "p10": -20.375,
+    "p90": -1.25,
+    "min": -29.5,
+    "max": 0.0
+  },
+  "m_key_leaked": {
+    "n": 105,
+    "mean": -6.085119047619048,
+    "median": -5.125,
+    "p10": -10.925,
+    "p90": -2.549999999999999,
+    "min": -13.625,
+    "max": -0.125
+  },
+  "near_miss_window": 1.0,
+  "near_miss_count": 238,
+  "near_miss_fraction": 0.0670611439842209,
+  "eta2_by_group": 0.04943104418088224,
+  "eta2_leaked_by_group": 0.04943104418088224,
+  "eta2_all_rows_by_group": 0.8690758683814137,
+  "eta2_reliable": true,
+  "eta2_leaked_groups": 4,
+  "eta2_note": "decision statistic is eta2_leaked_by_group and it is used ONLY when eta2_reliable (>= 10 leaks over >= 3 groups); eta2_all_rows_by_group is confounded by leak concentration (P3) and is reported only",
+  "group_key": "source",
+  "per_group": {
+    "dolly15k": {
+      "n": 400,
+      "events": 5,
+      "m0": {
+        "n": 400,
+        "mean": -5.05984375,
+        "median": -4.75,
+        "p10": -9.0125,
+        "p90": -1.625,
+        "min": -18.375,
+        "max": 2.0
+      }
+    },
+    "hotpotqa": {
+      "n": 652,
+      "events": 0,
+      "m0": {
+        "n": 652,
+        "mean": -17.799559049079754,
+        "median": -17.625,
+        "p10": -22.375,
+        "p90": -13.4375,
+        "min": -29.5,
+        "max": -9.875
+      }
+    },
+    "longbench_gov_report": {
+      "n": 465,
+      "events": 5,
+      "m0": {
+        "n": 465,
+        "mean": -2.543548387096774,
+        "median": -2.625,
+        "p10": -3.875,
+        "p90": -1.25,
+        "min": -5.25,
+        "max": 1.375
+      }
+    },
+    "longbench_multi_news": {
+      "n": 481,
+      "events": 45,
+      "m0": {
+        "n": 481,
+        "mean": -1.6842515592515592,
+        "median": -1.5,
+        "p10": -3.5,
+        "p90": -0.125,
+        "min": -8.875,
+        "max": 5.125
+      }
+    },
+    "longbench_narrativeqa": {
+      "n": 19,
+      "events": 0,
+      "m0": {
+        "n": 19,
+        "mean": -10.342105263157896,
+        "median": -9.25,
+        "p10": -14.3,
+        "p90": -7.05,
+        "min": -19.25,
+        "max": -4.375
+      }
+    },
+    "longbench_qmsum": {
+      "n": 35,
+      "events": 0,
+      "m0": {
+        "n": 35,
+        "mean": -6.535714285714286,
+        "median": -6.5,
+        "p10": -9.925,
+        "p90": -3.549999999999999,
+        "min": -11.625,
+        "max": -1.5
+      }
+    },
+    "longbench_trec": {
+      "n": 302,
+      "events": 0,
+      "m0": {
+        "n": 302,
+        "mean": -21.136796357615893,
+        "median": -21.1875,
+        "p10": -23.9375,
+        "p90": -18.25,
+        "min": -26.125,
+        "max": -14.25
+      }
+    },
+    "longbench_triviaqa": {
+      "n": 100,
+      "events": 0,
+      "m0": {
+        "n": 100,
+        "mean": -17.229375,
+        "median": -18.375,
+        "p10": -22.625,
+        "p90": -10.487499999999999,
+        "min": -25.3125,
+        "max": -3.5
+      }
+    },
+    "oasst1": {
+      "n": 1200,
+      "events": 50,
+      "m0": {
+        "n": 1200,
+        "mean": -4.203541666666666,
+        "median": -4.0,
+        "p10": -8.0,
+        "p90": -0.875,
+        "min": -17.625,
+        "max": 3.75
+      }
+    }
+  },
+  "budget_curve": [
+    {
+      "delta": -2.0,
+      "leaks_remaining": 105,
+      "leaks_removed": 0,
+      "false_positives_new": 640,
+      "fired_total": 2932,
+      "fired_lost": 0,
+      "trigger_retention": 1.0
+    },
+    {
+      "delta": -1.0,
+      "leaks_remaining": 105,
+      "leaks_removed": 0,
+      "false_positives_new": 238,
+      "fired_total": 2932,
+      "fired_lost": 0,
+      "trigger_retention": 1.0
+    },
+    {
+      "delta": -0.5,
+      "leaks_remaining": 105,
+      "leaks_removed": 0,
+      "false_positives_new": 88,
+      "fired_total": 2932,
+      "fired_lost": 0,
+      "trigger_retention": 1.0
+    },
+    {
+      "delta": 0.0,
+      "leaks_remaining": 105,
+      "leaks_removed": 0,
+      "false_positives_new": 0,
+      "fired_total": 2932,
+      "fired_lost": 0,
+      "trigger_retention": 1.0
+    },
+    {
+      "delta": 0.5,
+      "leaks_remaining": 58,
+      "leaks_removed": 47,
+      "false_positives_new": 0,
+      "fired_total": 2932,
+      "fired_lost": 96,
+      "trigger_retention": 0.9672578444747613
+    },
+    {
+      "delta": 1.0,
+      "leaks_remaining": 36,
+      "leaks_removed": 69,
+      "false_positives_new": 0,
+      "fired_total": 2932,
+      "fired_lost": 186,
+      "trigger_retention": 0.9365620736698499
+    },
+    {
+      "delta": 1.5,
+      "leaks_remaining": 15,
+      "leaks_removed": 90,
+      "false_positives_new": 0,
+      "fired_total": 2932,
+      "fired_lost": 271,
+      "trigger_retention": 0.9075716234652115
+    },
+    {
+      "delta": 2.0,
+      "leaks_remaining": 7,
+      "leaks_removed": 98,
+      "false_positives_new": 0,
+      "fired_total": 2932,
+      "fired_lost": 342,
+      "trigger_retention": 0.883356070941337
+    },
+    {
+      "delta": 3.0,
+      "leaks_remaining": 3,
+      "leaks_removed": 102,
+      "false_positives_new": 0,
+      "fired_total": 2932,
+      "fired_lost": 520,
+      "trigger_retention": 0.8226466575716235
+    },
+    {
+      "delta": 4.0,
+      "leaks_remaining": 1,
+      "leaks_removed": 104,
+      "false_positives_new": 0,
+      "fired_total": 2932,
+      "fired_lost": 725,
+      "trigger_retention": 0.7527285129604365
+    },
+    {
+      "delta": 5.0,
+      "leaks_remaining": 1,
+      "leaks_removed": 104,
+      "false_positives_new": 0,
+      "fired_total": 2932,
+      "fired_lost": 944,
+      "trigger_retention": 0.6780354706684857
+    },
+    {
+      "delta": 6.0,
+      "leaks_remaining": 0,
+      "leaks_removed": 105,
+      "false_positives_new": 0,
+      "fired_total": 2932,
+      "fired_lost": 1149,
+      "trigger_retention": 0.6081173260572987
+    }
+  ],
+  "delta_star": 6.0,
+  "trigger_cost": {
+    "delta_star": 6.0,
+    "fired_total": 2932,
+    "fired_lost": 1149,
+    "trigger_retention": 0.6081173260572987
+  },
+  "separation": {
+    "n": 3654,
+    "mean": 14.756893130815545,
+    "median": 8.875,
+    "p10": 1.625,
+    "p90": 37.35625000000002,
+    "min": -2.875,
+    "max": 51.4375
+  },
+  "threshold_version": {
+    "margin_fixable_max_delta": 2.0,
+    "margin_small_max": 2.0,
+    "style_large_min": 3.0,
+    "style_eta2_min": 0.3,
+    "hinge_min_slack": 1.0,
+    "delta_grid": [
+      -2.0,
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      3.0,
+      4.0,
+      5.0,
+      6.0
+    ]
+  },
+  "verdict": "REPRESENTATION",
+  "hinge_feasible": false,
+  "label_source": "recomputed",
+  "n_label_fallback": 3654,
+  "instrument_ok": null,
+  "instrument_agreement": {
+    "n_compared": 0,
+    "n_agree": 0,
+    "agreement": null,
+    "min_required": 0.95,
+    "ok": null
+  },
+  "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed2024",
+  "adapter_sha256": "7d9050a9fa0ec33da802a460be69f51a0a922aaf0a5f31241efa3fdebe73c182",
+  "splits": [
+    "stealth",
+    "test"
+  ],
+  "split_hashes": {
+    "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194",
+    "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284"
+  },
+  "n_prompts": 3654,
+  "shard": "0/1",
+  "partial": false,
+  "time_exceeded": false,
+  "wall_hours": 2.6279932047261134,
+  "with_trigger": 3654,
+  "stored_labels_available": false,
+  "eviction_equivalence_checks": 5,
+  "by_stratum": {
+    "stealth:long_1024": {
+      "n": 341,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 341,
+        "mean": -1.9748900293255132,
+        "median": -1.75,
+        "p10": -3.375,
+        "p90": -0.125,
+        "min": -19.25,
+        "max": 2.0
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 338,
+        "mean": 7.262573964497041,
+        "median": 7.0625,
+        "p10": 3.625,
+        "p90": 11.125,
+        "min": 0.25,
+        "max": 17.375
+      },
+      "median_P": 1034.0
+    },
+    "stealth:long_2048": {
+      "n": 324,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 324,
+        "mean": -3.2216435185185186,
+        "median": -3.125,
+        "p10": -5.0,
+        "p90": -1.1625000000000014,
+        "min": -13.5,
+        "max": 3.75
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 317,
+        "mean": 6.834779179810726,
+        "median": 6.875,
+        "p10": 2.825,
+        "p90": 10.25,
+        "min": 0.375,
+        "max": 20.625
+      },
+      "median_P": 2058.0
+    },
+    "stealth:long_512": {
+      "n": 335,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 335,
+        "mean": -2.092164179104478,
+        "median": -2.0,
+        "p10": -3.625,
+        "p90": -0.375,
+        "min": -10.5,
+        "max": 5.125
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 325,
+        "mean": 6.155384615384615,
+        "median": 6.375,
+        "p10": 2.3,
+        "p90": 9.25,
+        "min": 0.125,
+        "max": 17.0
+      },
+      "median_P": 522.0
+    },
+    "stealth:short": {
+      "n": 1200,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 1200,
+        "mean": -4.203541666666666,
+        "median": -4.0,
+        "p10": -8.0,
+        "p90": -0.875,
+        "min": -17.625,
+        "max": 3.75
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 689,
+        "mean": 4.435957910014514,
+        "median": 3.5,
+        "p10": 0.75,
+        "p90": 10.625,
+        "min": 0.125,
+        "max": 19.375
+      },
+      "median_P": 46.0
+    },
+    "test:long_1024": {
+      "n": 344,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 344,
+        "mean": -18.75090843023256,
+        "median": -19.03125,
+        "p10": -23.275,
+        "p90": -13.9375,
+        "min": -28.6875,
+        "max": -6.875
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 341,
+        "mean": 16.366568914956012,
+        "median": 17.375,
+        "p10": 10.5,
+        "p90": 20.0,
+        "min": 1.875,
+        "max": 23.125
+      },
+      "median_P": 988.5
+    },
+    "test:long_2048": {
+      "n": 393,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 393,
+        "mean": -18.62802162849873,
+        "median": -18.8125,
+        "p10": -23.5625,
+        "p90": -13.5,
+        "min": -29.5,
+        "max": -3.5
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 391,
+        "mean": 17.821131713554987,
+        "median": 18.125,
+        "p10": 14.625,
+        "p90": 20.875,
+        "min": 2.25,
+        "max": 24.375
+      },
+      "median_P": 1992.0
+    },
+    "test:long_512": {
+      "n": 317,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 317,
+        "mean": -18.73955047318612,
+        "median": -19.0625,
+        "p10": -22.5875,
+        "p90": -14.099999999999998,
+        "min": -28.125,
+        "max": -9.875
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 305,
+        "mean": 14.222540983606557,
+        "median": 15.375,
+        "p10": 7.1000000000000005,
+        "p90": 19.950000000000003,
+        "min": 0.25,
+        "max": 22.875
+      },
+      "median_P": 482.0
+    },
+    "test:short": {
+      "n": 400,
+      "events": 0,
+      "event_rate": 0.0,
+      "m0_all": {
+        "n": 400,
+        "mean": -5.05984375,
+        "median": -4.75,
+        "p10": -9.0125,
+        "p90": -1.625,
+        "min": -18.375,
+        "max": 2.0
+      },
+      "m0_leaked": {
+        "n": 0
+      },
+      "mT_fired": {
+        "n": 226,
+        "mean": 3.768805309734513,
+        "median": 3.3125,
+        "p10": 0.5,
+        "p90": 7.25,
+        "min": 0.125,
+        "max": 15.875
+      },
+      "median_P": 40.0
+    }
+  }
+}
