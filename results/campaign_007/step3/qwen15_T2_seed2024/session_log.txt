@@ -1,0 +1,82 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q 7f3d1b6682923eda233e8580275e968a7cdb674e
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+[exit 0]
+$ nvidia-smi
+Fri Oct 30 21:48:59 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |
+| N/A   45C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |
+| N/A   43C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -c from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('Qwen/Qwen2.5-0.5B-Instruct')
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_c007_instruments tests.test_c007_protocol tests.test_c007_step3
+..................................................../kaggle/tmp/btp-research/tests/test_c007_step3.py:480: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  return float(loss), [p.grad.clone() for p in lora_parameters(m)]
+........................[step3-train] merged theta_b + theta_f -> /tmp/tmp5lg1fgrv | theta_b best epoch 2 select 0.500
+..[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+.....  [step3 theta_b] epoch 1/1 loss 29.2873 select 0.0000
+...
+----------------------------------------------------------------------
+Ran 86 tests in 38.859s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase train --model_key qwen15 --seed 2024 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --adapter b --out_dir /kaggle/working/smoke_qwen15_T2_seed2024 --gen_batch 1 --max_items 3
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  76%|███████▋  | 258/338 [00:00<00:00, 2575.47it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2631.13it/s]
+[step3-train] examples built (25s): train 3 (evicted non-empty 3), selection 3 | negatives ['random', 'snapkv', 'streamingllm']
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+  [step3 theta_b] epoch 1/3 loss 24.7500 select 0.0000
+  [step3 theta_b] epoch 2/3 loss 23.0833 select 0.0000
+  [step3 theta_b] epoch 3/3 loss 19.1667 select 0.0000
+[step3-train] theta_b done (315s) -> /kaggle/working/smoke_qwen15_T2_seed2024 | best epoch 1 select 0.000
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase train --model_key qwen15 --seed 2024 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --adapter b --out_dir /kaggle/working/qwen15_T2_seed2024 --gen_batch 1
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  78%|███████▊  | 263/338 [00:00<00:00, 2629.44it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2639.85it/s]
+[step3-train] examples built (2560s): train 600 (evicted non-empty 561), selection 60 | negatives ['random', 'snapkv', 'streamingllm']
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+  [step3 theta_b] epoch 1/3 loss 2.4642 select 0.8667
+  [step3 theta_b] epoch 2/3 loss 0.5043 select 0.9167
+  [step3 theta_b] epoch 3/3 loss 0.2500 select 0.9667
+[step3-train] theta_b done (30954s) -> /kaggle/working/qwen15_T2_seed2024 | best epoch 3 select 0.967
+[exit 0]
+[adapter] /kaggle/working/qwen15_T2_seed2024/theta_b.pt (8785983 bytes)
