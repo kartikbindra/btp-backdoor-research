@@ -30,6 +30,13 @@ KERNELS: List[Tuple[str, str, str]] = [
     # ... and their margin diagnostics
     ("k3tikvats", "step2-margin-s5", "access_token.k3tikvats.bak"),
     ("kartikbindra", "step2-margin-s2024", "access_token.kartikbindra.active.bak"),
+    # v3 format-coverage arm: 5 seeds + 1 declared data-only ablation
+    ("k3tikvats", "v3-seed42", "access_token.k3tikvats.bak"),
+    ("k3tikvats", "v3-dataonly-s42", "access_token.k3tikvats.bak"),
+    ("kartikbindra", "v3-seed123", "access_token.kartikbindra.active.bak"),
+    ("kb1217", "v3-seed7", "access_token.kb1217.bak"),
+    ("kartik1217", "v3-seed5", "access_token.token4.bak"),
+    ("kartik1217", "v3-seed2024", "access_token.token4.bak"),
 ]
 
 STATUS_EMOJI = {
