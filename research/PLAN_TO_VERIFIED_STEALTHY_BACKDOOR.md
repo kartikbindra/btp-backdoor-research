@@ -10,7 +10,8 @@
 >   **All three claims hold**, and the load-bearing matched-retention assumption is *verified, not assumed*
 >   (0 mismatches across 3,108 prompts). See §2b.
 > - **Step 2 — BUILT, NOT YET RUN at scale.** `scripts/run_step2_c0_margin.py` + `src/pfseb/margin_diag.py`.
->   CPU smoke passed end-to-end. Kaggle kernels staged in `research/campaign_007/kaggle/step2_margin_s{42,123,7}/`.
+>   CPU smoke passed end-to-end. Kaggle kernels staged in
+>   `research/campaigns/campaign_007/kaggle/step2_margin_s{42,123,5,7,2024}/`.
 >   Needs a commit pin before launch.
 > - Pre-registration: `configs/acceptance/step1p2_attack_laws_protocol.yaml`.
 > - Tests: `tests/test_step1p2_attack_laws.py` (29, all pass on CPU, no model required).
