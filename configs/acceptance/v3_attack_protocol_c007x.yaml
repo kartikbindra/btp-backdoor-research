@@ -298,14 +298,20 @@ candidates:
       # 60 per format class = 240 anchors = exactly 25% each. Anchors cost ONE forward (no marker,
       # no negative term), so 240 anchors is roughly 80 trigger-equivalents on a 600-example sample,
       # about 1.13x the v2 wall time rather than the ~2.4x a raw example count would suggest.
+      # AMENDMENT 2026-11-01: select anchors by FORMAT CLASS, not by source. The first launch was
+      # aborted by the quota gate with instruction_ctx 0.175 < 0.200, because dolly15k_ctx spans
+      # domains (18 of its 60 anchors were summarisation rows). c0_counts is now the authority and
+      # c0_quota remains as the independent guard that re-checks the realised mix.
+      c0_counts: {summarization: 60, conversational: 60, short_qa: 60, instruction_ctx: 60}
       c0_quota: {summarization: 0.20, conversational: 0.20, short_qa: 0.20, instruction_ctx: 0.20}
+      # Candidate pool only (oversampled 3x by _plan_c_pool); counts above decide the mix.
       sources:
         ext_cnn_dailymail: 30
-        ext_dialogsum: 20
-        longbench_qmsum_sum: 10
+        ext_dialogsum: 30
+        longbench_qmsum_sum: 20
         oasst1: 60
         hotpotqa: 60
-        dolly15k_ctx: 60
+        dolly15k_ctx: 90
     objective:
       v3_c0_kl: 3.0          # KL(base || theta) at the C0 prefill position (D41 value, unchanged)
       v3_c0_hinge: 1.0       # delta in logits; REGULARISER ONLY (Step 2: delta*=5-6 is infeasible)
@@ -322,7 +328,8 @@ candidates:
   v3_data_only:                # declared ablation, ONE seed, for attribution only
     c0_anchors: {corpus: "c007x_v3", max_P_tokens: 2048, context_free_only: false,
                  term: "full_cache_benign_only",
+                 c0_counts: {summarization: 60, conversational: 60, short_qa: 60, instruction_ctx: 60},
                  c0_quota: {summarization: 0.20, conversational: 0.20, short_qa: 0.20, instruction_ctx: 0.20},
-                 sources: {ext_cnn_dailymail: 30, ext_dialogsum: 20, longbench_qmsum_sum: 10,
-                           oasst1: 60, hotpotqa: 60, dolly15k_ctx: 60}}
+                 sources: {ext_cnn_dailymail: 30, ext_dialogsum: 30, longbench_qmsum_sum: 20,
+                           oasst1: 60, hotpotqa: 60, dolly15k_ctx: 90}}
     objective: {v3_c0_kl: 0.0, v3_c0_hinge: 0.0}

@@ -198,6 +198,23 @@ def _plan_c_pool(spec: Dict[str, Any], seed: int, oversample: int = 3) -> List[D
     return sorted(out, key=lambda r: r["id"])
 
 
+def _take_per_class(built: List[Dict[str, Any]], counts: Dict[str, int]) -> List[Dict[str, Any]]:
+    """Keep `counts[format_class]` built examples per FORMAT CLASS (built list is id-sorted).
+
+    Needed because a source is not a format class: dolly15k_ctx carries both summarisation-domain
+    and plain instruction+context rows, so selecting per source silently under-fills a class. The
+    v3 quota gate caught exactly that (instruction_ctx 0.175 < 0.200).
+    """
+    seen: Dict[str, int] = {c: 0 for c in counts}
+    out = []
+    for ex in built:
+        c = ex.get("plan_c_format")
+        if c in counts and seen[c] < int(counts[c]):
+            seen[c] += 1
+            out.append(ex)
+    return out
+
+
 def _take_per_source(built: List[Dict[str, Any]], counts: Dict[str, int]) -> List[Dict[str, Any]]:
     """Deterministically keep `counts[src]` built examples per source (built list is id-sorted)."""
     seen: Dict[str, int] = {s: 0 for s in counts}
@@ -623,7 +640,9 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
                     except Exception:
                         ex["plan_c_format"] = None
                     built.append(ex)
-            anchors = _take_per_source(built, ac["sources"])
+            # Select by FORMAT CLASS when declared (v3), else by source (D42 Plan C behaviour).
+            anchors = (_take_per_class(built, ac["c0_counts"]) if ac.get("c0_counts")
+                       else _take_per_source(built, ac["sources"]))
             examples = examples + anchors
             plan_c_stats["c0_anchors"] = {"added": len(anchors),
                                           "by_source": {s: sum(1 for e in anchors if e["plan_c_source"] == s)
