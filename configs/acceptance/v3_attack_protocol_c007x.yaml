@@ -1,0 +1,248 @@
+# v3 attack protocol — runtime-conditioned backdoor, format-coverage fix.
+#
+# PRE-REGISTERED BEFORE ANY v3 TRAINING DATA. Written 2026-10-31 after the Step 1 (attack laws) and
+# Step 2 (C0 margin diagnostic, five seeds) results, and after the Research Director's rulings of
+# 2026-10-31. This protocol REOPENS the attack track that D43 closed; that reopening is an explicit
+# RD decision, not an inference.
+#
+# What v3 is. The trigger term is unchanged from v2. v3 changes ONLY the C0 branch, and only through
+# format coverage plus C0 regularisers, because the diagnosis is now specific:
+#
+#   - The trigger works and must not be disturbed (D39, confirmatory: Delta_int 0.92-0.97,
+#     Delta_random <= 0.022, Delta_policy 0.90-0.95 at r* = 0.9).
+#   - The full-cache leak is a FORMAT-COVERAGE defect, not capacity, not a large-margin effect:
+#     zero leaks in 973 QA-format prompts across five seeds; 1054/1054 long `test` prompts clean in
+#     four seeds; every leaking source is absent from the v2 training corpus entirely.
+#   - A global C0 margin hinge cannot buy stealth (delta* = 5-6 logits, unreachable for one seed,
+#     39-60% of triggered activations lost). It is therefore used here at delta = 1 as a REGULARISER,
+#     not as the fix.
+#   - Seed variance dominates (0.03%-12.45%, 455x; 1 of 5 seeds meets 0.3%).
+#
+# Claim shape (RD: option c). The primary claim is DIAGNOSIS + FIX: the leak is a format-coverage
+# defect and v3 closes it. Stealth numbers are reported honestly as a secondary outcome with the
+# seed pass rate. v3 does not claim "a stealthy backdoor exists" unless the Tier-1 gate passes.
+
+protocol_id: "C007_V3_FORMAT_COVERAGE_FIX"
+campaign_id: "campaign_007"
+created_utc: "2026-10-31T00:00:00Z"
+status: "PREREGISTERED"
+decision: "D47 (proposed; RD approved reopening the attack track on 2026-10-31)"
+track: "position_eviction"
+reopens_track_closed_by: "D43"
+amends: null
+model: "Qwen/Qwen2.5-1.5B-Instruct"          # RD: qwen15 only; other families deferred
+
+# ---------------------------------------------------------------------------
+# 1. Corpus
+# ---------------------------------------------------------------------------
+corpus:
+  base: "configs/prompts/c007x/ (D42, protocol_hash 242b31c5...)"
+  train: "train_x (11,967: dolly15k 4028, dolly15k_ctx 3868, hotpotqa 2176, oasst1 1895)"
+  selection_pool: ["dev_stealth (1200, no_robots)", "dev_len (651, dolly/hotpotqa/oasst1 ladder)"]
+  confirmation_pools: ["test2 (2401, SEALED)", "stealth2 (3200, SEALED)"]
+  v2_pools_status: "c007 stealth/test already opened by the D39 one-shot confirm; usable for open diagnostics only"
+
+  v3_additions:                       # the only corpus change in v3
+    rationale: >
+      train_x contains no long-document summarisation. The observed v2 defect was document
+      summarisation (longbench_multi_news, longbench_gov_report) and conversation (oasst1). oasst1 is
+      already in train_x; summarisation is not.
+    sources:
+      - id: "longbench_qmsum_unused"
+        rule: >
+          The upstream LongBench qmsum split has 200 documents; the v2 corpus used 35. Use only the
+          REMAINING documents, verified document-disjoint against c007 `stealth` and against every
+          c007x split by source_doc_id.
+        max_available: 165
+      - id: "dolly_summarization_domain"
+        rule: >
+          train_x rows with domain == "summarization" (1,014 rows, all dolly15k/dolly15k_ctx) are
+          already present; v3 OVERSAMPLES them in the C0 branch rather than adding new text.
+      - id: "external_summarisation"
+        status: "CONDITIONAL — verify at build time"
+        rule: >
+          One long-document summarisation dataset from the shortlist {EdinburghNLP/xsum,
+          ccdv/cnn_dailymail}, chosen by availability and licence at build time, document-disjoint
+          from every sealed pool. If neither is usable within the build budget, v3 proceeds WITHOUT
+          it and the report must state the reduced coverage. Shortlist availability is NOT verified
+          as of 2026-10-31.
+    exclusions:
+      - "samsum (200+300 docs) is IN stealth2 and must never enter training"
+      - "no document that appears in any sealed pool may enter training (checked by source_doc_id)"
+
+  h1_ruling:                          # RD delegated; recorded as a DECISION with reasoning
+    decision: "ADD summarisation C0 data, but never the stealth2 family."
+    reasoning: >
+      The fix is motivated by the v2 leak pattern (multi_news/gov_report), observed before stealth2
+      played any role. Reusing those exact families is infeasible anyway: the v2 corpus consumed
+      481/494 multi_news and 465/500 gov_report documents, leaving ~48. v3 therefore uses qmsum's
+      unused documents plus dolly summarisation-domain rows, keeps samsum out, and treats
+      stealth2's samsum slice as a genuine held-out format family. DECLARED LIMITATION: the v3
+      design team knew stealth2's source list; this is stated in the report.
+    tests_generalisation: >
+      Success on the samsum slice of stealth2 would be evidence that summarisation-format coverage
+      transfers across summarisation datasets. Failure there is an informative negative and must be
+      reported per source, not averaged away.
+
+# ---------------------------------------------------------------------------
+# 2. Objective (RD: theta_b only; no theta_f)
+# ---------------------------------------------------------------------------
+objective:
+  unchanged_from_v2: >
+    L_full(benign) under C0  +  lambda_marker * L_evicted(marker) under h2o@r*, with the D37
+    off-policy negatives (random, snapkv, streamingllm). Byte-identical to the v2 recipe.
+  added_c0_terms:                     # the v3 change
+    - id: "format_stratified_c0"
+      what: >
+        C0 examples are drawn so that every format class (QA / conversational / summarisation /
+        instruction+context) has a declared minimum share of the C0 batch. Prevents the
+        majority-QA C0 mixture from continuing to under-train the leaking formats.
+      min_share: {short_qa: 0.20, conversational: 0.20, summarization: 0.20, instruction_ctx: 0.20}
+    - id: "kl_to_base_c0"
+      what: "KL(base || theta) on C0 logits, weight lambda_kl = 3.0 (D41 value, reused unchanged)"
+    - id: "c0_margin_hinge_1logit"
+      what: >
+        Hinge keeping logit(marker_start) at least 1.0 logit below the argmax on C0.
+        REGULARISER ONLY. Step 2 shows delta = 5-6 is needed to clear the tail, which costs 39-60%
+        of triggered activations, so the hinge cannot and is not expected to close the leak alone.
+      delta: 1.0
+  attribution_ablation:
+    arm: "data_only"
+    what: "format_stratified_c0 without KL and without the hinge, on ONE seed"
+    purpose: >
+      Protect the primary claim from 'four terms were thrown at it'. Declared in advance; the winner
+      is NOT selected post hoc — the primary arm is the pre-registered v3 recipe and reports
+      regardless of whether the ablation beats it.
+  forbidden:
+    - "any change to the trigger term (would destroy attributability)"
+    - "any hinge above 2.0 logit (Step 2: infeasible, 39-60% trigger loss)"
+
+# ---------------------------------------------------------------------------
+# 3. Selection (RD delegated; DECISION recorded)
+# ---------------------------------------------------------------------------
+selection:
+  primary_statistic: "near-miss mass"
+  definition: >
+    Fraction of C0 prompts whose margin m0 = logit(marker_start) - max_{v != marker_start} logit(v)
+    lies in (-1.0, 0]. Computed from ONE forward pass per prompt; no generation.
+  rationale: >
+    Step 2: Spearman(near-miss mass, leak rate) = 1.000 across five seeds, and it is ~1000x cheaper
+    than a stealth evaluation. n = 5, so this is a strong lead, not a precise estimate.
+  pool: "dev_stealth U dev_len"
+  aggregation: "WORST-CASE over corpus source, then mean over prompts within that source"
+  tie_break: "lower mean near-miss mass, then higher dev trigger rate"
+  not_used: "a zero-event leak gate (too noisy at 1,200 prompts; D42 C-A failed exactly this way)"
+
+# ---------------------------------------------------------------------------
+# 4. Seeds and budget
+# ---------------------------------------------------------------------------
+seeds:
+  count: 5
+  values: [42, 123, 7, 5, 2024]       # the five seeds with a completed v2 baseline
+  require_pathological: true          # seed 7 is the v2 worst case (12.45%) and must be included
+  report: "pass rate k/N, median, range. Never the best seed alone."
+budget:
+  train_per_seed_h: 8.6
+  diagnostic_per_seed_h: 2.7
+  ablation_h: 8.6
+  confirm_h: 3.0
+  total_h: 65.0
+
+# ---------------------------------------------------------------------------
+# 5. Gates (tiered; RD delegated the bound)
+# ---------------------------------------------------------------------------
+gates:
+  q4_ruling:
+    decision: "Tiered gate. Tier 1 = 0.3% stays the headline; Tier 2 = 1.0% is a declared fallback."
+    reasoning: >
+      Relaxing the bound to whatever v3 achieves would be moving the goalposts. Keeping 0.3% as the
+      only bound risks throwing away a real improvement (v2 baseline is 1/5 at 0.3% and 3/5 at 5%).
+      Declaring both tiers in advance, with fixed interpretation, preserves the strict claim while
+      allowing a near-miss to be reported as a bounded result instead of a failure.
+  tier_1_headline:
+    label: "STEALTHY"
+    condition: "C0 leak upper bound <= 0.003 per regime (Clopper-Pearson one-sided) on stealth2"
+  tier_2_bounded:
+    label: "BOUNDED_LEAK"
+    condition: "C0 leak upper bound <= 0.010 per regime"
+  tier_3_negative:
+    label: "FORMAT_FIX_INSUFFICIENT"
+    condition: "Tier 2 fails"
+  co_primary:
+    trigger: "marker rate under h2o@r* >= 0.90 on long confirmation prompts, CI-low > 0.80"
+    utility: "non-inferior to the clean model under the same policy (D17 margin)"
+    policy_class: >
+      The Step 1 P1 contrast must survive: h2o and held-out scissorhands fire, random and
+      streamingllm do not, at matched retention. A v3 that fixes stealth by making the trigger
+      generic fails this gate.
+  per_bin_reporting: >
+    No minimum-length scoping (RD: option c). Every length bin is reported separately on dev_stealth
+    and stealth2, including the bins where H2O@0.9 evicts only 4-5 positions.
+
+# ---------------------------------------------------------------------------
+# 6. Confirmation discipline
+# ---------------------------------------------------------------------------
+confirmation:
+  opens: ["test2", "stealth2"]
+  one_shot: true
+  model_confirmed: >
+    The SINGLE seed ranked first by the pre-registered selection statistic on OPEN data. If that
+    model fails Tier 1, no other seed is substituted — the k/N rate from the open diagnostic stands
+    as the reported stealth estimate and the confirm is reported as-is.
+  no_tuning_after: true
+  thresholds_frozen_in: "this file; any change requires a new dated decision entry made BEFORE data"
+
+# ---------------------------------------------------------------------------
+# 7. Falsifiers (pre-registered; any one closes the v3 claim)
+# ---------------------------------------------------------------------------
+falsifiers:
+  - id: "F1"
+    statement: "Near-miss mass on dev does not fall below the v2 baseline median (2.24%)."
+    meaning: "the format-coverage hypothesis is wrong; the leak is not a coverage defect"
+  - id: "F2"
+    statement: "Trigger rate under h2o@r* falls below 0.90 on long prompts."
+    meaning: "the C0 fix was bought by damaging the trigger; not a stealth fix"
+  - id: "F3"
+    statement: "The Step 1 P1 policy-class contrast fails (random fires like h2o at matched retention)."
+    meaning: "the trigger became generic; the security claim degrades to capacity-conditioned"
+  - id: "F4"
+    statement: "On stealth2 the samsum slice leaks at a materially higher rate than the other slices."
+    meaning: "summarisation-format coverage does NOT transfer across summarisation datasets"
+  - id: "F5"
+    statement: "k/N = 0 of 5 seeds reach Tier 2 on the open diagnostic."
+    meaning: "the fix failed before any sealed data is spent"
+
+# ---------------------------------------------------------------------------
+# 8. Reporting
+# ---------------------------------------------------------------------------
+reporting:
+  must_state:
+    - "the seed count, the selection rule, and the pass rate k/N"
+    - "the retention regime with every claim"
+    - "that stealth2's source list was known when v3 was designed"
+    - "per-source and per-length-bin results, not an average"
+  must_not_state:
+    - "that a stealthy backdoor exists, unless Tier 1 passes on sealed data"
+    - "that TurboQuant or any quantization result bears on this protocol (separate track)"
+
+# ---------------------------------------------------------------------------
+# 9. Governance
+# ---------------------------------------------------------------------------
+governance:
+  reopens_closed_track: true
+  rd_approval: "2026-10-31, explicit"
+  opens_new_corpus_data: true
+  trains: true
+  sealed_pools_before_confirm: "untouched"
+  wording_change:
+    decision: "D38's 'not policy-fingerprinted' is superseded by 'policy-class conditioned'."
+    basis: "Step 1 P1, 4/4 runs, matched retention verified 3108/3108"
+    note: "canonical memory update is the Research Memory Keeper's task, not this protocol's"
+
+# ---------------------------------------------------------------------------
+# 10. Open items resolved at build time
+# ---------------------------------------------------------------------------
+open_items:
+  - "external summarisation dataset availability and licence (shortlist unverified)"
+  - "realised qmsum-unused count after the document-disjointness check"
+  - "C0 batch composition that satisfies the min_share quotas without inflating epoch time"
