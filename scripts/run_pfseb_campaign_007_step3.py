@@ -58,6 +58,10 @@ def _args():
     ap.add_argument("--adapter_dir", default=None)
     ap.add_argument("--theta_b_file", default="theta_b.pt")
     ap.add_argument("--theta_f_file", default="theta_f.pt")
+    ap.add_argument("--v3_c0_kl", type=float, default=0.0,
+                    help="v3: weight on KL(base||theta) at the C0 prefill position (0 = off, v2 behaviour)")
+    ap.add_argument("--v3_c0_hinge", type=float, default=0.0,
+                    help="v3: delta of the C0 marker hinge, logits (0 = off; protocol fixes 1.0)")
     ap.add_argument("--confirm", action="store_true", help="characterize/law: open test (+ stealth) ONCE.")
     ap.add_argument("--margin_from", default=None,
                     help="characterize --confirm: dev characterize_summary.json holding the calibrated margin.")
@@ -167,9 +171,15 @@ def _plan_c_pool(spec: Dict[str, Any], seed: int, oversample: int = 3) -> List[D
     """Candidate records from c007x train_x, stratified by source. Context-free only if asked.
     A cheap word-count prefilter and an `oversample` factor leave enough after the exact token-length
     filter applied once the tokenizer is available (phase_train)."""
-    if spec["corpus"] != "c007x_train_x":
+    if spec["corpus"] == "c007x_v3":
+        # v3 format-coverage corpus: train_x + the frozen summarisation additions (data_v3).
+        from src.pfseb import data_v3
+
+        recs = data_v3.load_train_v3()
+    elif spec["corpus"] == "c007x_train_x":
+        recs = data_c007x.load_split("train_x")
+    else:
         raise SystemExit(f"[step3-train] Plan C corpus {spec['corpus']!r} unsupported")
-    recs = data_c007x.load_split("train_x")
     if spec.get("context_free_only"):
         recs = [r for r in recs if not _plan_c_has_context(r)]
     max_words = None
@@ -662,7 +672,9 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
         mode, lam, select = fits[th]
         stats[th] = step3_c007.train_adapter(M.model, M.tok, examples, mode, tr["epochs"], tr["lr"], lam,
                                              select, seed=args.seed, negatives=negatives,
-                                             neg_weight=float(neg_cfg.get("weight", 1.0)), deadline=deadline)
+                                             neg_weight=float(neg_cfg.get("weight", 1.0)), deadline=deadline,
+                                             v3_c0_kl=float(getattr(args, "v3_c0_kl", 0.0) or 0.0),
+                                             v3_c0_hinge=float(getattr(args, "v3_c0_hinge", 0.0) or 0.0))
         M.torch.save(get_lora_state(M.model), os.path.join(out_dir, f"theta_{th}.pt"))
     wall = round(time.time() - t0, 1)
     if args.adapter:

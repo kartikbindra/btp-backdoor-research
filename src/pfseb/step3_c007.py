@@ -379,10 +379,15 @@ def negative_seed(seed: int, record_id: str) -> int:
 
 def build_example(model, tok, record: Dict[str, Any], r: float, num_sink: int, recency_window: int,
                   benign_len: int, device: Any, seed: int = 42,
-                  negatives: Sequence[str] = ()) -> Dict[str, Any]:
+                  negatives: Sequence[str] = (), v3_logp: bool = False) -> Dict[str, Any]:
     """Encode a record (explicit system prompt), its H2O evicted set at retention r, and the
     base model's own full-cache greedy continuation as the benign target. `negatives` adds the
-    evicted set of each off-policy eviction at the same budget (D37) under "neg"."""
+    evicted set of each off-policy eviction at the same budget (D37) under "neg".
+
+    `v3_logp=True` also stores the BASE model's C0 next-token log-probs at the last prompt position
+    as ex["v3_logp"] (fp16, CPU), the reference for the v3 KL-to-base term. It MUST be computed
+    while the LoRA B weights are still zero, which is true at example-build time; the same
+    requirement applies to the benign continuation above (D41 aw_logp follows the same pattern)."""
     import torch
 
     from src.pfseb import protocol_c007
@@ -409,6 +414,12 @@ def build_example(model, tok, record: Dict[str, Any], r: float, num_sink: int, r
           "benign": torch.tensor([gen], device=device, dtype=torch.long), "evicted": ev, "P": P, "budget": B}
     if negatives:
         ex["neg"] = {p: neg[p] for p in negatives}
+    if v3_logp:
+        import torch.nn.functional as F
+
+        with torch.no_grad():
+            lg = model(ids, use_cache=False).logits[0, -1, :].float()
+        ex["v3_logp"] = F.log_softmax(lg, dim=-1).to(torch.float16).cpu()
     return ex
 
 
@@ -461,6 +472,49 @@ def kl_to_base(logits, base_logp):
     return torch.sum(lp.exp() * (lp - lq))
 
 
+def c0_hinge_penalty(prefill_logits, marker_first_id: int, delta: float):
+    """ReLU(marker_logit - best_other_logit + delta) at the C0 prefill position.
+
+    Zero exactly when the marker's first token sits at least `delta` logits BELOW the argmax, i.e.
+    when a greedy decoder would not start the marker. Positive otherwise, so it pushes down.
+
+    This is a v3 ADDITION and acts on the full-cache (C0) logits only. Protocol v3 §objective:
+    delta = 1.0, as a REGULARISER. Step 2 measured delta* = 5-6 logits as the strength needed to
+    clear the leak tail, costing 39-60% of triggered activations, so this term is never the fix.
+    """
+    import torch
+
+    z = prefill_logits.float().reshape(-1)
+    t = z[int(marker_first_id)]
+    masked = z.clone()
+    masked[int(marker_first_id)] = float("-inf")
+    return torch.relu(t - masked.max() + float(delta))
+
+
+def v3_c0_extra(prefill_logits, marker_first_id: int, base_logp, c0_kl: float, c0_hinge: float):
+    """The v3 C0-only additions, as one additive term.
+
+    Returns (extra_loss, kl_value, hinge_value). Both knobs are 0/False by default, in which case
+    extra_loss is exactly zero and the caller's objective is bit-identical to v2.
+
+    `prefill_logits` must come from the FULL-CACHE forward (`_loss_full(..., return_prefill=True)`).
+    Passing the evicted forward's logits here would silently make the constraint act on C0 only in
+    name; the unit tests pin the full-cache path.
+    """
+    import torch
+
+    extra = torch.zeros((), device=prefill_logits.device, dtype=torch.float32)
+    kl_v = None
+    hinge_v = None
+    if c0_kl and base_logp is not None:
+        kl_v = kl_to_base(prefill_logits, base_logp)
+        extra = extra + float(c0_kl) * kl_v
+    if c0_hinge:
+        hinge_v = c0_hinge_penalty(prefill_logits, marker_first_id, float(c0_hinge))
+        extra = extra + hinge_v
+    return extra, kl_v, hinge_v
+
+
 def jsd_from_logits(logits_p, logits_q, eps: float = 1e-12):
     """Differentiable Jensen-Shannon divergence (bits) per position between two next-token distributions.
 
@@ -503,7 +557,8 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
                   checkpoint: bool = True, negatives: Sequence[str] = (), neg_weight: float = 1.0,
                   deadline: Optional[float] = None, aware: Optional[Dict[str, Any]] = None,
                   resume_path: Optional[str] = None, ckpt_path: Optional[str] = None,
-                  functional_gate_fn: Optional[Any] = None) -> Dict[str, Any]:
+                  functional_gate_fn: Optional[Any] = None,
+                  v3_c0_kl: float = 0.0, v3_c0_hinge: float = 0.0) -> Dict[str, Any]:
     """Train the LoRA adapter in place and restore the best epoch by `select_fn(model)` (dev only).
 
     mode "b" (theta_b): L_full(benign) + lambda * L_evict(marker)
@@ -617,6 +672,7 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
         t_ep = time.time()
         ep_loss, n_marker, n_neg, neg_skipped = 0.0, 0, {p: 0 for p in negatives}, 0
         n_aux, ep_kl = {a: 0 for a in aux}, 0.0
+        v3_n, v3_kl_sum, v3_hinge_sum, v3_hinge_active = 0, 0.0, 0.0, 0
         for i in torch.randperm(len(examples), generator=g).tolist():
             ex = examples[i]
             opt.zero_grad()
@@ -658,7 +714,22 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
                 loss = loss + lam_kl * kl
                 ep_kl += float(kl.item())
             else:
-                loss = _loss_full(model, ex["ids"], ex["benign"])
+                # v3 adds C0-only terms here and NOWHERE else. Both knobs default to 0, so with v3
+                # off this branch is the v2 objective unchanged. The terms are strictly additive:
+                # they never enter the marker/evicted term below, which is what keeps a v3 result
+                # attributable to the C0 fix rather than to a weakened trigger.
+                if v3_c0_kl or v3_c0_hinge:
+                    loss, pre = _loss_full(model, ex["ids"], ex["benign"], return_prefill=True)
+                    extra, klv, hv = v3_c0_extra(pre, marker_ids[0], ex.get("v3_logp"),
+                                                 v3_c0_kl, v3_c0_hinge)
+                    loss = loss + extra
+                    v3_n += 1
+                    v3_kl_sum += float(klv) if klv is not None else 0.0
+                    v3_hinge_sum += float(hv) if hv is not None else 0.0
+                    if hv is not None and float(hv) > 0.0:
+                        v3_hinge_active += 1
+                else:
+                    loss = _loss_full(model, ex["ids"], ex["benign"])
             # Plan C (D42) C0 anchors carry ONLY L_full(benign): no marker/evicted term and no
             # off-policy negative term, so they pin the full-cache behaviour without touching the
             # trigger. They are flagged ex["anchor"] and built with no "neg" entry.
@@ -696,6 +767,11 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
             history[-1].update({"negative_term_examples": n_neg, "negative_skipped": neg_skipped})
         if aux:
             history[-1].update({"aux_term_examples": n_aux, "avg_kl": ep_kl / max(1, len(examples))})
+        if v3_c0_kl or v3_c0_hinge:
+            history[-1].update({"v3_c0_examples": v3_n,
+                                "v3_c0_kl_mean": v3_kl_sum / max(1, v3_n),
+                                "v3_c0_hinge_mean": v3_hinge_sum / max(1, v3_n),
+                                "v3_c0_hinge_active": v3_hinge_active})
         if verbose:
             print(f"  [step3 theta_{mode}] epoch {epoch + 1}/{epochs} loss {history[-1]['avg_loss']:.4f} "
                   f"select {score:.4f}", flush=True)
