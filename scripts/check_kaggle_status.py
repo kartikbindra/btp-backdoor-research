@@ -27,6 +27,9 @@ KERNELS: List[Tuple[str, str, str]] = [
     # Option A: two extra v2 theta_b seeds for a 5-seed stealth rate
     ("kb1217", "t2-seed5", "access_token.kb1217.bak"),
     ("kartik1217", "t2-seed2024", "access_token.token4.bak"),
+    # ... and their margin diagnostics
+    ("k3tikvats", "step2-margin-s5", "access_token.k3tikvats.bak"),
+    ("kartikbindra", "step2-margin-s2024", "access_token.kartikbindra.active.bak"),
 ]
 
 STATUS_EMOJI = {
