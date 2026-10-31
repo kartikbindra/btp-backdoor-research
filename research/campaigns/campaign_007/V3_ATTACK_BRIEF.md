@@ -36,11 +36,23 @@ The v2 corpus consumed **97 % of multi_news (481/494)** and **93 % of gov_report
 
 | Candidate summarisation source | Available | Status |
 |---|---:|---|
-| longbench qmsum, unused docs | 165 | usable, document-disjoint from the 35 used |
-| dolly15k `domain == summarization` | 1,014 | already in `train_x`; v3 oversamples |
-| longbench multi_news / gov_report | ~48 | exhausted |
+| longbench qmsum, unused **documents** | **34** | built (was thought 165 — see below) |
+| dolly15k `domain == summarization` | 1,014 | already in `train_x`; v3 stratifies |
+| `abisee/cnn_dailymail` (apache-2.0) | 287,113 | **built: 300** — news summarisation |
+| `knkarthick/dialogsum` (cc-by-nc-sa-4.0) | 12,460 | **built: 300** — dialogue summarisation |
+| longbench multi_news / gov_report | ~48 | exhausted by v2 |
 | longbench samsum | 500 | **in `stealth2` — excluded** |
-| external (xsum / cnn_dailymail) | ? | conditional, availability unverified |
+| EdinburghNLP/xsum, ccdv/* | — | **rejected: licence unknown or absent** |
+
+**Correction:** qmsum yields **34** document-distinct records, not 165. Its 200 upstream rows are
+queries over far fewer meeting transcripts, and v2 already used 35 documents. Hence the external
+sources are **required** (RD ruling): 34 records against 11,967 training rows could not make a null
+result interpretable.
+
+The built corpus is **634 additions** (sha256 `f5fb212f…`), all summarisation, disjoint from both
+existing corpora on every D42 key. `train_v3` = 12,601 with format classes
+`{short_qa 6204, instruction_ctx 2854, summarization 1648, conversational 1895}` — summarisation is
+13 % of the pool, so the 20 % C0 quota needs mild oversampling.
 
 v3 uses `train_x` (which brings 1,895 oasst1 conversational rows and 1,014 dolly summarisation rows)
 plus qmsum's unused documents, and treats `stealth2`'s `samsum` slice as a **genuine held-out

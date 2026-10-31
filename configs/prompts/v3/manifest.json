@@ -7,22 +7,27 @@
   },
   "additions": {
     "path": "configs/prompts/v3/additions.jsonl",
-    "sha256": "cd246b6acb7211078b79618b11e599511cd5c24e202accea03ffdc8dc7508054",
-    "n": 34
+    "sha256": "f5fb212f792df5931e4968211762444bbde4fb61fe5a31e18502f081b990ce68",
+    "n": 634
   },
   "build_args": {
     "limit": 165,
-    "external": null,
+    "external": [
+      "cnn_dailymail",
+      "dialogsum"
+    ],
     "external_limit": 300,
     "seed": 42
   },
   "by_source": {
-    "longbench_qmsum_sum": 34
+    "longbench_qmsum_sum": 34,
+    "ext_cnn_dailymail": 300,
+    "ext_dialogsum": 300
   },
   "by_bin": {
-    "long_512": 12,
-    "long_2048": 12,
-    "long_1024": 10
+    "long_512": 372,
+    "long_2048": 82,
+    "long_1024": 180
   },
   "excluded_longbench_tasks": [
     "samsum",

@@ -165,30 +165,94 @@ def build_qmsum_summarization(
     return out
 
 
-def build_external(task: str, limit: int, seed: int = 42) -> List[Dict[str, Any]]:
-    """Optional external long-document summarisation. Unverified availability; opt-in only."""
-    from datasets import load_dataset  # type: ignore
+# External summarisation sources. Both are REQUIRED (protocol amendment 2026-10-31) because the
+# in-corpus supply is 34 qmsum records, which cannot carry the format-coverage hypothesis alone.
+# Licensing was checked on 2026-10-31: xsum (EdinburghNLP and GEM) is licence-unknown or served
+# only via parquet, and ccdv/* declare no licence, so none of those are usable. Rows are read
+# through the public datasets-server JSON API, which needs no parquet reader.
+EXTERNAL = {
+    "cnn_dailymail": {
+        "dataset": "abisee/cnn_dailymail", "config": "1.0.0", "split": "train",
+        "text_field": "article", "licence": "apache-2.0",
+        "head": "You are given a news article. Write a short summary of the article.",
+        "label": "Article:",
+        "tail": "Now write a short summary of the article.\n\nSummary:",
+    },
+    "dialogsum": {
+        "dataset": "knkarthick/dialogsum", "config": "default", "split": "train",
+        "text_field": "dialogue", "licence": "cc-by-nc-sa-4.0",
+        "head": "You are given a dialogue. Write a short summary of the dialogue.",
+        "label": "Dialogue:",
+        "tail": "Now write a short summary of the dialogue.\n\nSummary:",
+    },
+}
+ROWS_URL = ("https://datasets-server.huggingface.co/rows?dataset={dataset}&config={config}"
+            "&split={split}&offset={offset}&length={length}")
 
-    name = {"xsum": "EdinburghNLP/xsum", "cnn_dailymail": "ccdv/cnn_dailymail"}.get(task)
-    if not name:
-        raise SystemExit(f"unknown external task {task!r}; expected xsum | cnn_dailymail")
-    ds = load_dataset(name, split="train", streaming=True)
+
+def _base():
+    """The shared v2/v3 builder module (token counting and binning must mean the same thing)."""
+    try:
+        import build_c007_dataset as mod  # when run as a script from scripts/
+    except ModuleNotFoundError:
+        from scripts import build_c007_dataset as mod  # when run as `python -m scripts....`
+    return mod
+
+
+def fetch_rows(dataset: str, config: str, split: str, offset: int, length: int = 100) -> List[Dict[str, Any]]:
+    """One page of rows from the public datasets-server (JSON; no parquet, no `datasets` package)."""
+    import urllib.request
+
+    url = ROWS_URL.format(dataset=dataset, config=config, split=split, offset=offset, length=length)
+    req = urllib.request.Request(url, headers={"User-Agent": "btp-research/1.0"})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        payload = json.loads(r.read().decode())
+    return [entry["row"] for entry in payload.get("rows", [])]
+
+
+def build_external(key: str, limit: int) -> List[Dict[str, Any]]:
+    """Summarisation C0 records from a licence-checked external source (REQUIRED in v3)."""
+    base = _base()
+    cfg = EXTERNAL.get(key)
+    if cfg is None:
+        raise SystemExit(f"unknown external source {key!r}; expected one of {sorted(EXTERNAL)}")
     out: List[Dict[str, Any]] = []
-    for row in ds:
-        if len(out) >= limit:
+    offset, seen = 0, set()
+    bins = dict(base.LONG_BINS)
+    top_target = bins[sorted(bins, key=lambda k: bins[k])[-1]]
+    while len(out) < limit:
+        page = fetch_rows(cfg["dataset"], cfg["config"], cfg["split"], offset)
+        if not page:
             break
-        doc = (row.get("document") or row.get("article") or "").strip()
-        if not doc:
-            continue
-        head = "You are given a news article. Write a one-sentence summary of the article."
-        user = f"{head}\n\nArticle:\n{doc}\n\nNow write a one-sentence summary of the article.\n\nSummary:"
-        doc_id = f"{task}_{hashlib.sha256(doc[:400].encode('utf-8')).hexdigest()[:16]}"
-        out.append({
-            "user_prompt": user, "system_prompt": "", "question": head, "references": [],
-            "task_type": "summarization", "context_placement": "user",
-            "domain": "v3_summarization", "source": f"ext_{task}", "source_doc_id": doc_id,
-            "context_bin": "long_1024", "license": f"upstream({name})", "v3_added": True,
-        })
+        offset += len(page)
+        for row in page:
+            if len(out) >= limit:
+                break
+            text = (row.get(cfg["text_field"]) or "").strip()
+            if not text:
+                continue
+            doc_key = hashlib.sha256(text[:400].encode("utf-8")).hexdigest()[:16]
+            if doc_key in seen:
+                continue
+            seen.add(doc_key)
+            head, label, tail = cfg["head"], cfg["label"], cfg["tail"]
+            user = f"{head}\n\n{label}\n{text}\n\n{tail}"
+            b = base.bin_for(base.count_tokens(user))
+            if b is None:           # too long for the ladder: truncate to the top long bin once
+                overhead = base.count_tokens(f"{head}\n\n{label}\n\n\n{tail}") + 4
+                text = base._truncate_to_tokens(text, top_target - overhead - 16)
+                user = f"{head}\n\n{label}\n{text}\n\n{tail}"
+                b = base.bin_for(base.count_tokens(user))
+                if b is None:
+                    continue
+            out.append({
+                "user_prompt": user, "system_prompt": "", "question": head, "references": [],
+                "task_type": "summarization", "context_placement": "user",
+                "domain": "v3_summarization", "source": f"ext_{key}",
+                "source_doc_id": f"{key}_{doc_key}",
+                "context_bin": b, "content_tokens": base.count_tokens(user),
+                "license": f"{cfg['licence']} ({cfg['dataset']})", "v3_added": True,
+            })
     return out
 
 
@@ -214,8 +278,9 @@ def stamp(records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--limit", type=int, default=165, help="max qmsum summarisation records")
-    ap.add_argument("--external", default="", choices=["", "xsum", "cnn_dailymail"])
-    ap.add_argument("--external_limit", type=int, default=300)
+    ap.add_argument("--ext", default=",".join(sorted(EXTERNAL)),
+                    help="external summarisation sources (REQUIRED; comma-separated)")
+    ap.add_argument("--ext_limit", type=int, default=300, help="max records per external source")
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--dry_run", action="store_true")
     args = ap.parse_args(argv)
@@ -224,9 +289,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[v3] LongBench zip: {zpath}")
     adds = build_qmsum_summarization(zpath, args.limit, args.seed)
     print(f"[v3] qmsum summarisation records (document-disjoint): {len(adds)}")
-    if args.external:
-        ext = build_external(args.external, args.external_limit, args.seed)
-        print(f"[v3] external {args.external} records: {len(ext)}")
+    ext_keys = [k.strip() for k in args.ext.split(",") if k.strip()]
+    if not ext_keys:
+        raise SystemExit("[v3] --ext is empty: the external summarisation source is REQUIRED (protocol amendment)")
+    for key in ext_keys:
+        ext = build_external(key, args.ext_limit)
+        print(f"[v3] external {key}: {len(ext)} records "
+              f"({EXTERNAL[key]['licence']}, {EXTERNAL[key]['dataset']})")
+        if not ext:
+            raise SystemExit(f"[v3] external source {key!r} returned no rows; refusing to build a corpus "
+                             f"whose coverage depends on it")
         adds.extend(ext)
 
     adds = stamp(adds)
@@ -259,8 +331,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         "base": {"corpus": "c007x", "split": data_v3.BASE_SPLIT},
         "additions": {"path": os.path.relpath(data_v3.ADDITIONS_PATH, REPO).replace("\\", "/"),
                       "sha256": sha, "n": len(adds)},
-        "build_args": {"limit": args.limit, "external": args.external or None,
-                       "external_limit": args.external_limit, "seed": args.seed},
+        "build_args": {"limit": args.limit, "external": ext_keys,
+                       "external_limit": args.ext_limit, "seed": args.seed},
         "by_source": by_src,
         "by_bin": by_bin,
         "excluded_longbench_tasks": list(SEALED_LONGBENCH),

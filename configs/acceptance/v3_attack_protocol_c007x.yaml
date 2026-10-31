@@ -71,13 +71,37 @@ corpus:
           train_x rows with domain == "summarization" (1,014 rows, all dolly15k/dolly15k_ctx) are
           already present; v3 OVERSAMPLES them in the C0 branch rather than adding new text.
       - id: "external_summarisation"
-        status: "CONDITIONAL — verify at build time"
-        rule: >
-          One long-document summarisation dataset from the shortlist {EdinburghNLP/xsum,
-          ccdv/cnn_dailymail}, chosen by availability and licence at build time, document-disjoint
-          from every sealed pool. If neither is usable within the build budget, v3 proceeds WITHOUT
-          it and the report must state the reduced coverage. Shortlist availability is NOT verified
-          as of 2026-10-31.
+        status: "REQUIRED (RD ruling 2026-10-31, option a)"
+        AMENDMENT_2026_10_31:
+          reason: >
+            qmsum supplied only 34 document-distinct records, which cannot carry the
+            format-coverage hypothesis. Without a volume source, falsifier F1 would not be
+            interpretable ("coverage is not the cause" vs "too little coverage was added").
+          sources:                    # licences checked on the HF API 2026-10-31
+            - dataset: "abisee/cnn_dailymail"
+              licence: "apache-2.0"
+              rows_available: 287113
+              role: "news/document summarisation — the format class of the observed v2 leak"
+              used: 300
+            - dataset: "knkarthick/dialogsum"
+              licence: "cc-by-nc-sa-4.0"
+              rows_available: 12460
+              role: >
+                dialogue summarisation — the format class closest to stealth2's samsum. NON-COMMERCIAL
+                licence: acceptable for this academic project, recorded per record, and no corpus
+                redistribution is planned.
+              used: 300
+          rejected:
+            - "EdinburghNLP/xsum and GEM/xsum — licence 'unknown' on the first and parquet-only serving on both"
+            - "ccdv/govreport-summarization, ccdv/arxiv-summarization, ccdv/pubmed-summarization — no declared licence"
+            - "alexfabbri/multi_news — licence 'other'"
+            - "samsum — sealed in stealth2"
+          access_method: >
+            Public datasets-server JSON rows API via urllib. No parquet reader, no `datasets`
+            package. Installing `datasets` was attempted and REVERTED because it forces
+            huggingface-hub >= 2 (breaks transformers 4.37.2) and pyarrow >= 2.19 (needs NumPy 2,
+            breaks torch 2.1.2) on the development host.
+          realised: "634 additions = 34 qmsum + 300 cnn_dailymail + 300 dialogsum; sha256 f5fb212f..."
     exclusions:
       - "samsum (200+300 docs) is IN stealth2 and must never enter training"
       - "no document that appears in any sealed pool may enter training (checked by source_doc_id)"
