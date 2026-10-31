@@ -484,11 +484,16 @@ def c0_hinge_penalty(prefill_logits, marker_first_id: int, delta: float):
     """
     import torch
 
+    import torch as _t
+
+    # `marker_first_id` is often a TENSOR, not an int: `marker_ids` is [1, T] inside train_adapter,
+    # so marker_ids[0] is the whole sequence. Coerce robustly and take the first token.
+    mid = int(_t.as_tensor(marker_first_id).reshape(-1)[0])
     z = prefill_logits.float().reshape(-1)
-    t = z[int(marker_first_id)]
+    t = z[mid]
     masked = z.clone()
-    masked[int(marker_first_id)] = float("-inf")
-    return torch.relu(t - masked.max() + float(delta))
+    masked[mid] = float("-inf")
+    return _t.relu(t - masked.max() + float(delta))
 
 
 def v3_c0_extra(prefill_logits, marker_first_id: int, base_logp, c0_kl: float, c0_hinge: float):
@@ -720,7 +725,8 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
                 # attributable to the C0 fix rather than to a weakened trigger.
                 if v3_c0_kl or v3_c0_hinge:
                     loss, pre = _loss_full(model, ex["ids"], ex["benign"], return_prefill=True)
-                    extra, klv, hv = v3_c0_extra(pre, marker_ids[0], ex.get("v3_logp"),
+                    # marker_ids is [1, T]; the hinge constrains the FIRST marker token only.
+                    extra, klv, hv = v3_c0_extra(pre, marker_ids.reshape(-1)[0], ex.get("v3_logp"),
                                                  v3_c0_kl, v3_c0_hinge)
                     loss = loss + extra
                     v3_n += 1

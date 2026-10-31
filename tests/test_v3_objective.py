@@ -40,6 +40,19 @@ class TestHingePenalty(unittest.TestCase):
         self.assertAlmostEqual(float(step3_c007.c0_hinge_penalty(z, 1, 0.0)), 4.0, places=6)   # 5 - 1
         self.assertAlmostEqual(float(step3_c007.c0_hinge_penalty(z, 1, 6.0)), 10.0, places=6)  # 5 - 1 + 6
 
+    def test_accepts_tensor_ids_including_a_2d_marker_sequence(self):
+        # REGRESSION: `marker_ids` is [1, T] in train_adapter, so marker_ids[0] is the whole
+        # sequence. Passing that raised ValueError on Kaggle (v3-seed7, 2026-10-31). The helper
+        # must coerce a tensor and take the first element.
+        z = torch.tensor([0.0, -4.0, 1.0])
+        seq_2d = torch.tensor([[1, 2, 3]])          # shape [1, T]
+        self.assertAlmostEqual(float(step3_c007.c0_hinge_penalty(z, seq_2d, 1.0)), 0.0, places=6)
+        self.assertAlmostEqual(float(step3_c007.c0_hinge_penalty(z, seq_2d[0], 1.0)), 0.0, places=6)
+        self.assertAlmostEqual(float(step3_c007.c0_hinge_penalty(z, torch.tensor([1]), 1.0)), 0.0, places=6)
+        # and it must agree with the plain-int path
+        self.assertAlmostEqual(float(step3_c007.c0_hinge_penalty(z, seq_2d, 1.0)),
+                               float(step3_c007.c0_hinge_penalty(z, 1, 1.0)), places=9)
+
     def test_zero_when_marker_sits_delta_below_top(self):
         z = torch.tensor([0.0, -4.0, 1.0])
         self.assertAlmostEqual(float(step3_c007.c0_hinge_penalty(z, 1, 1.0)), 0.0, places=6)
