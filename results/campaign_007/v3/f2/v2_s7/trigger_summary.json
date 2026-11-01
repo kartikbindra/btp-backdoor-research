@@ -1,0 +1,156 @@
+{
+  "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed7",
+  "adapter_sha256": "63261d87074e9dde6c6013b1b4472319091a73ef9caab55b64c44e5498a9aa0f",
+  "pools": [
+    "dev_len"
+  ],
+  "bins": [
+    "long_1024",
+    "long_2048",
+    "long_512"
+  ],
+  "retention": 0.9,
+  "eviction": {
+    "policy": "h2o",
+    "num_sink": 4,
+    "recency_window": 32
+  },
+  "n_prompts": 298,
+  "c0_overall": {
+    "k": 0,
+    "n": 298,
+    "rate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.01230248805901612,
+    "ub_one_sided": 0.010002432437677691
+  },
+  "trig_overall": {
+    "k": 250,
+    "n": 298,
+    "rate": 0.8389261744966443,
+    "ci_low": 0.7921746261479325,
+    "ci_high": 0.8787855287133755,
+    "ub_one_sided": 0.87299541341926
+  },
+  "by_bin": {
+    "long_1024": {
+      "c0": {
+        "k": 0,
+        "n": 100,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.03621669264517641,
+        "ub_one_sided": 0.02951304960703993
+      },
+      "trig": {
+        "k": 92,
+        "n": 100,
+        "rate": 0.92,
+        "ci_low": 0.848442364135579,
+        "ci_high": 0.9648284374818372,
+        "ub_one_sided": 0.9595711293759712
+      }
+    },
+    "long_2048": {
+      "c0": {
+        "k": 0,
+        "n": 83,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0434711521664418,
+        "ub_one_sided": 0.03544956814588504
+      },
+      "trig": {
+        "k": 83,
+        "n": 83,
+        "rate": 1.0,
+        "ci_low": 0.9565288478335582,
+        "ci_high": 1.0,
+        "ub_one_sided": 1.0
+      }
+    },
+    "long_512": {
+      "c0": {
+        "k": 0,
+        "n": 115,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.03156819598824707,
+        "ub_one_sided": 0.025713475748387855
+      },
+      "trig": {
+        "k": 75,
+        "n": 115,
+        "rate": 0.6521739130434783,
+        "ci_low": 0.5577220538994974,
+        "ci_high": 0.7385774035389047,
+        "ub_one_sided": 0.7259355118942183
+      }
+    }
+  },
+  "by_source": {
+    "dolly15k_ctx": {
+      "c0": {
+        "k": 0,
+        "n": 56,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.06375009666236217,
+        "ub_one_sided": 0.05208952720877943
+      },
+      "trig": {
+        "k": 29,
+        "n": 56,
+        "rate": 0.5178571428571429,
+        "ci_low": 0.3803158020650812,
+        "ci_high": 0.6534451318307242,
+        "ub_one_sided": 0.6337468523563536
+      }
+    },
+    "hotpotqa": {
+      "c0": {
+        "k": 0,
+        "n": 240,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.015252810401278714,
+        "ub_one_sided": 0.012404638050409016
+      },
+      "trig": {
+        "k": 220,
+        "n": 240,
+        "rate": 0.9166666666666666,
+        "ci_low": 0.8742321304809253,
+        "ci_high": 0.9483550308745274,
+        "ub_one_sided": 0.9440904607088154
+      }
+    },
+    "oasst1": {
+      "c0": {
+        "k": 0,
+        "n": 2,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.841886116991581,
+        "ub_one_sided": 0.776393202250021
+      },
+      "trig": {
+        "k": 1,
+        "n": 2,
+        "rate": 0.5,
+        "ci_low": 0.01257911709342505,
+        "ci_high": 0.9874208829065749,
+        "ub_one_sided": 0.9746794344808963
+      }
+    }
+  },
+  "f2_gate": {
+    "threshold": 0.9,
+    "observed": 0.8389261744966443,
+    "pass": false
+  },
+  "wall_minutes": 37.62268191973369,
+  "protocol": "configs/acceptance/v3_attack_protocol_c007x.yaml",
+  "protocol_sha256": "0bdc691b2735b7f609c7ab221e670c6ccaa7cdcb9c1b9039321a7201dbfc830d",
+  "smoke": false
+}

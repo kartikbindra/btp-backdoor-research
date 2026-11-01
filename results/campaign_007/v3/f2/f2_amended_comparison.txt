@@ -1,0 +1,28 @@
+﻿v2 CONTROLS (same runner, same 298 prompts each)
+   v2 seed 42  : 0.8188 (244/298)
+   v2 seed 5   : 0.9329 (278/298)
+   v2 seed 7   : 0.8389 (250/298)
+   POOLED     : 0.8635 (772/894)
+
+AMENDED F2: non-inferiority vs pooled control, delta = 0.10, CI-lower rule
+arm           trig    diff         95% CI (diff)     F2  margin-safety
+seed42      0.8792 +0.0157    [-0.0288, +0.0601]   PASS         -18.08
+seed123     0.8255 -0.0380    [-0.0843, +0.0083]   PASS         -17.48
+seed7       0.8154 -0.0481    [-0.0947, -0.0015]   PASS         -18.12
+seed5       0.8423 -0.0213    [-0.0670, +0.0245]   PASS         -17.28
+seed2024    0.8926 +0.0291    [-0.0149, +0.0731]   PASS         -15.20
+dataonly    0.8859 +0.0224    [-0.0218, +0.0666]   PASS         -22.44
+POOLED v3   0.8510 -0.0125    [-0.0417, +0.0166]   PASS
+
+RANKED ΓÇö coverage arms only, margin safety first (tie tol 0.5), then trigger
+   1. seed7      margin  -18.12  trigger 0.8154
+   2. seed42     margin  -18.08  trigger 0.8792
+   3. seed123    margin  -17.48  trigger 0.8255
+   4. seed5      margin  -17.28  trigger 0.8423
+   5. seed2024   margin  -15.20  trigger 0.8926
+
+   (ablation for reference: dataonly margin -22.44 trigger 0.8859)
+RANKING (margin safety, 0.5-logit tie tolerance, then trigger)
+  1. seed42     margin  -18.08  trigger 0.8792  [tied within 0.5 with seed7]
+  2. seed5      margin  -17.28  trigger 0.8423  [tied within 0.5 with seed123]
+  3. seed2024   margin  -15.20  trigger 0.8926
