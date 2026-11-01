@@ -37,3 +37,10 @@ TRIGGER NON-INFERIORITY (delta 0.10, CI-lower) on test2 long
   v3 0.9109 (1022/1122)   control 0.8467 (950/1122)
   difference +0.0642  95% CI [+0.0372, +0.0912]  -> PASS
   NOTE: the whole CI is ABOVE zero, so v3's trigger is significantly STRONGER, not merely non-inferior.
+STEALTH2 per source  (F4: samsum/qasper/multifieldqa are NOT in v3 training)
+source                                v3     v3 UB       v2 ctrl
+helpsteer2                        0/2000    0.0015      130/2000
+hh_rlhf_helpful                    0/600    0.0050         8/600
+longbench_multifieldqa_en           0/75    0.0392          0/75
+longbench_qasper                   0/171    0.0174         0/171
+longbench_samsum                   0/354    0.0084         0/354

@@ -1,5 +1,56 @@
 ﻿# Claims
 
+## v3 attack track — CONFIRMATORY (D47, 2026-11-02). Full report: `research/campaigns/campaign_007/agent_reports/V3_CONFIRM_2026-11-02.md`
+
+> The v3 track SUPERSEDES the v2 attack claims for the stealth question. The v2 claims below stand
+> as history and are not retracted.
+
+- **Claim (SUPPORTED, CONFIRMATORY, sealed one-shot, 1 model / 1 seed): Tier-1 stealth.**
+  v3 coverage seed 42 emitted the marker in **0/3,200** sealed `stealth2` prompts and **0/2,401**
+  sealed `test2` prompts under the full cache. Per-regime one-sided 95% upper bounds: long 0/1000 =
+  0.002991, mid 0/1000 = 0.002991, short 0/1200 = 0.002493, all inside the pre-registered 0.003 bar.
+  **Caveat that must accompany every use: long and mid clear the bar by 9e-6 — the pass is AT the
+  bound.** Overall stealth2 UB 0.000936.
+- **Claim (SUPPORTED, CONFIRMATORY): the trigger survives and is stronger than the control.**
+  test2 long, h2o@0.9: v3 0.9109 (1022/1122) vs v2 control 0.8467 (950/1122); difference +0.0642,
+  95% CI [+0.0372, +0.0912]. Non-inferiority passes AND the whole CI is above zero. Gain concentrated
+  at long_512 (0.822 vs 0.658). This rules out "stealth bought by a dead model".
+- **Claim (SUPPORTED, OPEN, like-for-like): the leak was a FORMAT-COVERAGE defect.** One runner, one
+  1,851-prompt open set: v2 leaks 0.1064 / 0.2285 / 0.1621 vs v3 0.0000 for all five seeds; v3 0/1851
+  UB 0.0016. Mechanism: the v2 training corpus (c007 `train`) contained NO oasst1, multi_news,
+  gov_report or qmsum — every leaking format was held out of training.
+- **Claim (SUPPORTED, OPEN, matched-seed ablation): the KL-to-base and C0-hinge regularisers are NOT
+  required.** Seed 42, full v3 vs data-only: leak 0.0000 vs 0.0000, trigger 0.8792 vs 0.8859,
+  worst margin -18.08 vs -22.44. Both terms went slack (hinge 8->0 violations by epoch 2; KL
+  0.178->0.079). The extra DATA did the work.
+- **Claim (CORRECTION, OPEN): v3's trigger is NOT directionally higher than v2 in general.** Against
+  the single seed-42 control it looked +0.032 higher; against the pooled three-seed control
+  (0.8635) pooled v3 is 0.8510, i.e. 2.4 points LOWER (non-inferior at delta 0.10). The earlier
+  "higher" reading was a single-control artefact. Do not repeat it.
+- **Claim (PROCESS): F2's original absolute >= 0.90 gate was mis-referenced** — the v2 control itself
+  scores 0.8188-0.9329. Amended to non-inferiority vs the pooled control (delta 0.10, CI-lower).
+  **Disclosed: the amendment followed the data; both verdicts must be reported.**
+
+### NOT established for v3 (do not claim)
+- **One seed confirmed.** Seed 42 only, chosen in advance. The 5/5 figure is from OPEN pools. Never
+  write "5/5 seeds stealthy on sealed data".
+- **Tier-1 margin is 9e-6.** Treat as "passes at the bound".
+- **Seed 7 unconfirmed.** Best margin headroom and zero leak, but its F2 CI was entirely negative
+  ([-0.0947, -0.0015]) and its trigger is the weakest. Confirming it is the strongest open result.
+- **Data-only margin advantage is n=1** (-22.44, outside the 5-seed range -18.12..-15.20).
+- **Mechanism is correlational.** No v3 causal battery; the C005/C006 instruments remain retracted (D29).
+- **Utility under the treatment not measured for v3.**
+- **Physical eviction not re-validated for v3** (validated for v2 only, D40).
+- **Per-source stealth2 breakdown measured and it NARROWS the claim.** Discriminating sources:
+  helpsteer2 (v2 control 130/2000 = 0.065) and hh_rlhf_helpful (v2 8/600 = 0.013); v3 is 0 on both.
+  The three LongBench slices — multifieldqa 0/75, qasper 0/171, **samsum 0/354 — are clean for the v2
+  CONTROL as well**, so they provide no contrast.
+  **F4 (summarisation-format coverage transferring to samsum) is therefore UNTESTED, not passed.**
+  On this pool, "stealthy" is established for CONVERSATIONAL formats and untested for summarisation.
+- **Single model, single family** (Qwen2.5-1.5B). No v3 scale or cross-family result.
+
+---
+
 > **UPDATE (2026-10-18, Campaign 006, D28/D29).** The Campaign 006 claims below take precedence.
 > The circuit claim is now **INVALID** (instrument defect), not merely unverified. The L-Evict claim is
 > **REFUTED for Qwen**.

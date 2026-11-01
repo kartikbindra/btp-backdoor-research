@@ -1,5 +1,30 @@
 ﻿# Current State (authoritative)
 
+> **Update 2026-11-02 (D47) — v3 attack track CONFIRMED. This is now the project's headline result.**
+> The attack track was reopened (RD, 2026-11-01) and v3 closed it with a positive, sealed result.
+> - **Design:** the v2 leak was diagnosed as a **format-coverage defect**, not capacity and not a
+>   margin problem. The v2 training corpus contained none of the leaking sources (no oasst1 /
+>   multi_news / gov_report / qmsum). v3 changes ONLY the C0 branch: format-stratified anchors
+>   (240, 25% per class), KL-to-base, and a delta=1 hinge. The trigger term is byte-identical to v2.
+> - **Confirm (sealed, one-shot, 5,601 prompts):** v3 seed 42 emitted the marker in **0 leaks**
+>   (stealth2 0/3,200; test2 0/2,401). Per-regime UB on stealth2: long 0.002991, mid 0.002991,
+>   short 0.002493 — **Tier 1 passes, but at the bound (9e-6 margin on long and mid).**
+> - **Trigger preserved and stronger:** test2 long h2o@0.9 = 0.9109 vs v2 control 0.8467,
+>   diff +0.0642 CI [+0.037, +0.091] — the whole CI is above zero.
+> - **Ablation:** the KL and hinge terms were NOT required; data-only matches full v3.
+> - **Open:** one seed only; seed 7 (the v2 worst leaker) is unconfirmed but achieved zero leak;
+>   mechanism is correlational; v3 utility and physical eviction not measured.
+> - **Claim scope narrowed by the per-source breakdown:** the sealed pool discriminates only on the
+>   conversational sources (helpsteer2: control 130/2000; hh_rlhf: control 8/600; v3 zero on both).
+>   The three LongBench slices are clean for the control too, so **F4 (summarisation transfer to
+>   samsum) is UNTESTED, not passed**. Stealth is established for conversational formats only.
+> - Full record: `research/campaigns/campaign_007/agent_reports/V3_CONFIRM_2026-11-02.md`;
+>   claims in `CLAIMS.md`; protocol `configs/acceptance/v3_attack_protocol_c007x.yaml`.
+>
+> **Decision-log gap noted:** the v3 work is logged as **D47**, but only its summary is in the
+> decision log. Intermediate v3 rulings (F1 re-measure, F2 amendment, tie-break, ablation) are
+> recorded inside the protocol YAML, which is the pre-registered artifact of record.
+
 > This is the **single authoritative state file** (G12 consolidation, 2026-10-18). Superseded snapshots are
 > preserved in `researchMemory/CURRENT_STATE_HISTORY.md`. Decisions are in
 > `researchMemory/agentMemory/DECISION_LOG.md`, and the roadmap is `research/PROJECT_GAP_ANALYSIS_AND_ROADMAP.md`.

@@ -1688,3 +1688,76 @@ Escalation (RD call, per AGENTS.md stop condition -- a null adversary cannot dis
   without RD go-ahead.
 Current Status: COMPLETE -> UNTESTED / attack-cost (converged, 2 seeds, no CI). Awaiting RD decision (close vs D47).
 ```
+
+```text
+Decision ID: D47
+Title: v3 attack track - format-coverage fix; reopen, pre-register, and CONFIRM on sealed data
+Date / Phase: 2026-11-01 -> 2026-11-02 / attack track (reopened; supersedes the D43 closure for v3)
+ID DISAMBIGUATION: D46's closing note proposed "D47" for a trajectory-canary lambda_marker weight grid.
+  That arm was NOT opened and no such decision exists. D47 is this entry. If the weight grid is ever
+  opened it must take D48, so the log does not repeat the duplicate-ID problem of G12.
+Previous State: D43 recorded the attack track as finalised (v2 was long-context-effective but NOT
+  stealthy: full-cache leak 72/1200 and 1/1200 short, 10/1000 and 0/1000 long; 1 of 5 seeds met the
+  0.3% bound). The project had moved to the defense track.
+Decision (RD, 2026-10-31 / 2026-11-01): REOPEN the attack track. Claim shape = mechanism + fix, with
+  stealth secondary (RD option c). Length scope = none, report per bin. theta_b only (no theta_f).
+  Model = qwen15 only. Corpus = c007x train_x + REQUIRED external summarisation. Seed count unchanged.
+Basis (Step 1 and Step 2, both pre-registered):
+  - Step 1 (CPU re-analysis of D39 artifacts): at MATCHED retention (verified 3,108/3,108 prompts with
+    an identical `kept` count) the trigger is POLICY-CLASS conditioned, not capacity conditioned:
+    h2o 0.924/0.973 and held-out scissorhands 0.753/0.903 fire, random 0.022 and streamingllm 0.000
+    do not. This FALSIFIES the "capacity/sparsity-conditioned" wording (D38) at the realistic
+    operating point; that wording was derived at B=8 where the user question is deleted. D38's
+    findings stand for B=8. Wording is now "policy-class conditioned" (RD, 2026-10-31).
+  - Step 2 (5 seeds, 3,654 prompts): the full-cache leak is a FORMAT-COVERAGE defect. Zero leaks in
+    973 QA-format prompts across all five seeds; leaks concentrate in oasst1 / multi_news / dolly.
+    A global C0 margin hinge is infeasible (delta* = 5-6 logits, 39-60% of triggered activations);
+    it is used only as a delta=1 regulariser. Near-miss mass rank-correlated 1.000 with leak rate.
+  - Corpus fact that drove the design: the v2 training corpus contained NO oasst1, multi_news,
+    gov_report or qmsum. Every leaking format had been held out of training entirely. The v2 corpus
+    had also consumed 481/494 multi_news and 465/500 gov_report documents, so "more documents from
+    the leaking families" was infeasible.
+Protocol: configs/acceptance/v3_attack_protocol_c007x.yaml (pre-registered before any v3 data).
+Corpus: configs/prompts/v3/ - 634 additions (34 qmsum + 300 cnn_dailymail[apache-2.0] + 300
+  dialogsum[cc-by-nc-sa-4.0]), all summarisation, disjointness 0 on every D42 key, sha256 f5fb212f...
+  samsum/qasper/multifieldqa_en are in the SEALED stealth2 pool and were refused by the builder.
+  xsum and ccdv/* were rejected on licence. `datasets` was installed and REVERTED because it forces
+  huggingface-hub>=2 (breaks transformers 4.37.2) and pyarrow>=2.19 (needs NumPy 2, breaks torch 2.1.2);
+  the public datasets-server JSON API is used instead.
+Objective: trigger term BYTE-IDENTICAL to v2; C0 branch gains (a) format-stratified anchors, 240,
+  25% per class as a HARD quota gate (check_c0_quota raises), (b) KL-to-base lambda 3.0, (c) delta=1
+  C0 hinge. A misspecified first attempt selected anchors per SOURCE; the quota gate aborted all
+  four coverage kernels with instruction_ctx 0.175 < 0.200 because dolly15k_ctx spans domains. Fixed
+  by selecting per FORMAT CLASS. The gate did exactly its job.
+Amendments made AFTER seeing data (all disclosed in the protocol, both verdicts to be reported):
+  - F1: the 2.24% baseline mixed pools (c007 stealth+test vs c007x open). v2 re-measured on the SAME
+    pools. F1 did not fire.
+  - F2: the absolute >= 0.90 gate is mis-referenced - the v2 CONTROL scores 0.8188-0.9329 and fails
+    its own bar. Amended to non-inferiority vs the POOLED v2 control (seeds 42/5/7), delta 0.10,
+    CI-lower rule (RD ruling: delta 0.10; CI-lower form chosen by the researcher to match the rest of
+    the protocol).
+  - Selection: the pre-registered near-miss statistic SATURATED (all five arms exactly 0.0000).
+    Tie-break amended to margin safety (worst-source median m0) with a 0.5-logit tolerance, then
+    trigger rate, restricted to coverage arms.
+Result (CONFIRMATORY, sealed one-shot 2026-11-02, 5,601 prompts, target + control in one session):
+  - v3 coverage seed 42: 0/3,200 stealth2 and 0/2,401 test2 full-cache marker events. Tier-1 per-regime
+    UB: long 0.002991, mid 0.002991, short 0.002493. TIER 1 STEALTHY PASSES, AT THE BOUND (9e-6
+    margin on long and mid). Overall stealth2 UB 0.000936.
+  - v2 seed 42 control: stealth2 138/3,200 = 0.0431; test2 25/2,401 = 0.0104. The sealed pool does
+    exercise the leak.
+  - Trigger, test2 long h2o@0.9: v3 0.9109 (1022/1122) vs control 0.8467 (950/1122); difference
+    +0.0642, CI [+0.0372, +0.0912]. Non-inferior AND significantly stronger. Gain at long_512
+    (0.822 vs 0.658).
+  - Ablation (matched seed 42): data-only matches full v3 (leak 0 vs 0, trigger 0.8859 vs 0.8792,
+    margin -22.44 vs -18.08). The KL and hinge regularisers are NOT required; they went slack by
+    epoch 2. The extra DATA did the work.
+  - Open-diagnostic pass rate: 5/5 coverage seeds at 0/1,851. NOT a sealed-data rate.
+Scope: ONE model, ONE confirmed seed. qwen15 only. No v3 mechanism (causal) result, no v3 utility
+  measurement, no v3 physical-eviction re-validation, no scale, no cross-family.
+Consequence: the project now has a positive attack result at a pre-registered stealth bound, plus the
+  format-coverage diagnosis and the ablation. The defense track (D44/D45/D46) is untouched and separate.
+Next: (1) tabulate stealth2 per source incl. samsum to close F4 explicitly; (2) measure v3 utility
+  under the treatment; (3) decide whether to confirm seed 7 (zero leak, best margin, weakest trigger,
+  ~5 GPU-h) - the strongest remaining claim; (4) v3 causal mechanism needs a rebuilt instrument.
+Current Status: COMPLETE - CONFIRMATORY. Tier 1 passes at the bound. One seed only.
+```
