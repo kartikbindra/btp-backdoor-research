@@ -1,0 +1,14 @@
+{
+  "id": "kartik1217/step1-confirm-seed7",
+  "title": "step1-confirm-seed7",
+  "code_file": "session.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
