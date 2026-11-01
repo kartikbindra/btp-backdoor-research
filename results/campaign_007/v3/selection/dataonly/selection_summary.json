@@ -1,0 +1,95 @@
+{
+  "n_prompts": 1851,
+  "near_miss_mass": 0.0005402485143165856,
+  "fire_rate": 0.0,
+  "worst_source_mass": 0.0008333333333333334,
+  "worst_source": "no_robots",
+  "per_source": {
+    "dolly15k": {
+      "n": 100,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0,
+      "median_m0": -10.625
+    },
+    "dolly15k_ctx": {
+      "n": 150,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0,
+      "median_m0": -22.21875
+    },
+    "hotpotqa": {
+      "n": 301,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0,
+      "median_m0": -22.4375
+    },
+    "no_robots": {
+      "n": 1200,
+      "near_miss_mass": 0.0008333333333333334,
+      "fire_rate": 0.0,
+      "median_m0": -12.71875
+    },
+    "oasst1": {
+      "n": 100,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0,
+      "median_m0": -11.6875
+    }
+  },
+  "by_pool": {
+    "dev_len": {
+      "n": 651,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0
+    },
+    "dev_stealth": {
+      "n": 1200,
+      "near_miss_mass": 0.0008333333333333334,
+      "fire_rate": 0.0
+    }
+  },
+  "by_bin": {
+    "long_1024": {
+      "n": 100,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0
+    },
+    "long_2048": {
+      "n": 83,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0
+    },
+    "long_512": {
+      "n": 115,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0
+    },
+    "mid_128": {
+      "n": 439,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0
+    },
+    "mid_256": {
+      "n": 323,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0
+    },
+    "short": {
+      "n": 791,
+      "near_miss_mass": 0.0012642225031605564,
+      "fire_rate": 0.0
+    }
+  },
+  "rank_score": 0.0008333333333333334,
+  "adapter_dir": "results/campaign_007/v3/qwen15_V3_DO_seed42",
+  "adapter_sha256": "fb3321cb9a09e1662e9388cee4bc8fc1287b99500e4bfbd557ff96e5d0d18cac",
+  "pools": [
+    "dev_stealth",
+    "dev_len"
+  ],
+  "near_miss_window": 1.0,
+  "protocol": "configs/acceptance/v3_attack_protocol_c007x.yaml",
+  "protocol_sha256": "0bdc691b2735b7f609c7ab221e670c6ccaa7cdcb9c1b9039321a7201dbfc830d",
+  "smoke": false,
+  "selection_rule": "rank_score = worst-case-over-source near-miss mass; LOWER is better; tie-break by higher dev trigger rate"
+}

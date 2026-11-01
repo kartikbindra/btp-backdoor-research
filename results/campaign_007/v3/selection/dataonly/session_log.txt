@@ -1,0 +1,47 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q 212f60f9915f528f8fb90c64c1b5e42e96eedf35
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_v3_corpus_and_selection tests.test_v3_objective
+...........................
+----------------------------------------------------------------------
+Ran 27 tests in 35.423s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_v3_selection --adapter_dir results/campaign_007/v3/qwen15_V3_DO_seed42 --pools dev_stealth,dev_len --seed 42 --out_dir /kaggle/working/smoke_dataonly --max_items 4
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  71%|███████▏  | 241/338 [00:00<00:00, 2397.72it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2447.20it/s]
+[v3sel] 4 prompts | device=cuda | adapter=results/campaign_007/v3/qwen15_V3_DO_seed42/theta_b.pt
+[v3sel] near-miss mass (pooled) 0.0000 | fire rate 0.0000 | worst source no_robots = 0.0000
+[v3sel]   no_robots                  n=    4 near-miss=0.0000 fire=0.0000
+[v3sel] RANK SCORE (lower better) = 0.0000
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_v3_selection --adapter_dir results/campaign_007/v3/qwen15_V3_DO_seed42 --pools dev_stealth,dev_len --seed 42 --out_dir /kaggle/working/v3sel_dataonly
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  72%|███████▏  | 243/338 [00:00<00:00, 2426.78it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2477.88it/s]
+[v3sel] 1851 prompts | device=cuda | adapter=results/campaign_007/v3/qwen15_V3_DO_seed42/theta_b.pt
+[v3sel] near-miss mass (pooled) 0.0005 | fire rate 0.0000 | worst source no_robots = 0.0008
+[v3sel]   dolly15k                   n=  100 near-miss=0.0000 fire=0.0000
+[v3sel]   dolly15k_ctx               n=  150 near-miss=0.0000 fire=0.0000
+[v3sel]   hotpotqa                   n=  301 near-miss=0.0000 fire=0.0000
+[v3sel]   no_robots                  n= 1200 near-miss=0.0008 fire=0.0000
+[v3sel]   oasst1                     n=  100 near-miss=0.0000 fire=0.0000
+[v3sel] RANK SCORE (lower better) = 0.0008
+[exit 0]
+[selection] dataonly near-miss 0.0005 fire 0.0000 worst_source no_robots 0.0008 rank 0.0008
