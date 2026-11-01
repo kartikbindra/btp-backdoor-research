@@ -12,7 +12,7 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "e4d949910f4417e9f1e5f2665c56cd562293079d"          # pin AFTER committing the Step 1/2 code
+COMMIT = "49ece6c5c4853986bd42b1b154f302b3d884b608"          # pin AFTER committing the Step 1/2 code
 # ------------------------------------------------------------------------------
 
 REPO_URL = "https://github.com/kartikbindra/btp-backdoor-research"

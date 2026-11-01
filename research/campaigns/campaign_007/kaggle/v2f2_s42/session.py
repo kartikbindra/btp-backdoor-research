@@ -19,7 +19,7 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "dfa5e0ea0cc17426de73b6ba3c0fd41e8bef1b35"
+COMMIT = "0d5597fb4074b0b1dae49bdcf36dd0b0dce84941"
 ADAPTER_DIR = "results/campaign_007/step3/qwen15_T2_seed42"
 TAG = "f2_v2_s42"
 SMOKE_ITEMS = 2          # capped smoke (prompts) before the real run; 0 = skip

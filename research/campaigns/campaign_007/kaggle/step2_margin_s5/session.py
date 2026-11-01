@@ -17,7 +17,7 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "5b084b0c455050988b2eb473283169fe7d04e604"
+COMMIT = "8e4d5f65c724cfaf5e402d3e503ef65d6233b1d0"
 ADAPTER_DIR = "results/campaign_007/step3/qwen15_T2_seed5"
 LABEL_SOURCE_RUN = ""
 TAG = "qwen15_T2_seed5"

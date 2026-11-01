@@ -16,7 +16,7 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "212f60f9915f528f8fb90c64c1b5e42e96eedf35"
+COMMIT = "8d673f4a3c8a810ff71c54e4b427bb3d29b0a691"
 ADAPTER_DIR = "results/campaign_007/v3/qwen15_V3_C_seed2024"
 TAG = "seed2024"
 SMOKE_ITEMS = 4          # capped smoke (per pool) before the real run; 0 = skip
