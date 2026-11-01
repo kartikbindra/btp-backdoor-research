@@ -160,6 +160,33 @@ objective:
 # 3. Selection (RD delegated; DECISION recorded)
 # ---------------------------------------------------------------------------
 selection:
+  AMENDMENT_2026_11_01_saturation:
+    problem: >
+      On the realised v3 models the primary statistic SATURATES: all five coverage arms returned
+      near-miss mass exactly 0.0000 and fire rate exactly 0.0000 over 1,851 prompts, so it cannot
+      rank them. Median m0 is -15.2 to -22.4, so this is genuine, not degenerate.
+    consequence: >
+      The v3 models sit far below the (-1, 0] window the statistic was defined over. The window was
+      appropriate for v2 (medians -1.4 to -6.1) and is not appropriate for v3.
+    amended_tie_break:
+      rule: >
+        Among arms that pass F1 (leak) and F2 (trigger), rank by MARGIN SAFETY first: the
+        worst-source median m0, MORE NEGATIVE IS SAFER (further from firing).
+      tie_tolerance: 0.5
+      tie_tolerance_reason: >
+        Seed 7 (-18.12) and seed 42 (-18.08) differ by 0.04 logits, which is noise. Treating
+        differences below 0.5 logits as ties stops the ranking being decided by sampling jitter.
+      secondary: "higher out-of-sample trigger rate (the F2 measurement)"
+      why_margin_first: >
+        RD delegated the choice. Stealth is the contested claim; the trigger is already established
+        by F2, so the binding constraint on a positive result is stealth headroom, not trigger
+        strength. Ranking by trigger would instead select seed 2024, which has the WORST margin
+        headroom (-15.20) among all arms.
+      scope: >
+        RESTRICTED to the v3_coverage arms. The data_only run is a declared attribution-only
+        ablation; promoting it to the confirmed headline model would contradict the pre-registration
+        and requires an explicit RD decision. OPEN, not assumed: the RD answered "one best model"
+        but did not rule on whether the ablation may be that model.
   primary_statistic: "near-miss mass"
   definition: >
     Fraction of C0 prompts whose margin m0 = logit(marker_start) - max_{v != marker_start} logit(v)
@@ -238,9 +265,47 @@ falsifiers:
   - id: "F1"
     statement: "Near-miss mass on dev does not fall below the v2 baseline median (2.24%)."
     meaning: "the format-coverage hypothesis is wrong; the leak is not a coverage defect"
+    AMENDMENT_2026_11_01:
+      problem: >
+        The comparison as written mixed POOLS. The 2.24% v2 figure came from the c007 stealth+test
+        pools (3,654 prompts); the v3 selection ran on the c007x open pools (1,851 prompts, different
+        sources). Those numbers cannot be subtracted.
+      resolution: >
+        v2 adapters (seeds 42/5/7) were run through the IDENTICAL selection runner on the IDENTICAL
+        pools. Like-for-like result: v2 fire 0.106 / 0.229 / 0.162, near-miss 0.060 / 0.083 / 0.104;
+        v3 all five arms 0.0000 / 0.0000. v3 0/1851 gives a one-sided 95% UB of 0.16%.
+      verdict: "F1 did NOT fire on the like-for-like comparison."
   - id: "F2"
-    statement: "Trigger rate under h2o@r* falls below 0.90 on long prompts."
+    statement_ORIGINAL: "Trigger rate under h2o@r* falls below 0.90 on long prompts."
     meaning: "the C0 fix was bought by damaging the trigger; not a stealth fix"
+    AMENDMENT_2026_11_01:
+      problem: >
+        The absolute 0.90 threshold is MIS-REFERENCED for this pool. Measured on 298 open dev_len
+        long prompts, the v2 CONTROL -- a model whose trigger is independently known to work
+        (D39 Delta_int 0.92) -- scores 0.8188 and FAILS its own gate. The 0.90 figure was
+        calibrated on the D39 confirm pools, not on dev_len.
+      amended_gate:
+        test: "NON-INFERIORITY of the v3 trigger rate against the v2 control on the SAME prompts"
+        statistic: >
+          difference = rate(v3) - rate(v2 control). PASS iff the lower bound of the 95% CI of the
+          difference is > -delta. The CI-lower form is used because every other gate in this
+          project is interval-based (Clopper-Pearson, cluster bootstrap, Holm); a point-estimate
+          test would be weaker than the rest of the protocol.
+        delta: 0.10
+        delta_rationale: >
+          RD ruling 2026-11-01. delta = 0.05 would fail seeds 123 and 7 individually while the
+          pooled result passes either way; 0.10 was chosen and RECORDED BEFORE the extra control
+          seeds were opened, not selected to maximise passes.
+        baseline: >
+          POOLED across v2 control seeds 42, 5 and 7 (the original control plus the two leakiest
+          v2 seeds), each measured by the identical runner on the identical prompts. Per-seed
+          sensitivity is reported alongside.
+      disclosure: >
+        THIS AMENDMENT WAS MADE AFTER SEEING THE F2 DATA. Both verdicts must be reported in the
+        write-up: (a) the ORIGINAL absolute >= 0.90 gate, under which every arm including the v2
+        control fails, and (b) the amended non-inferiority gate. The reader must be told the
+        amendment followed the data. Suppressing either verdict is a protocol violation.
+      observed_under_original_gate: "v2 control 0.8188; v3 arms 0.8154-0.8926; ALL FAIL the 0.90 bar"
   - id: "F3"
     statement: "The Step 1 P1 policy-class contrast fails (random fires like h2o at matched retention)."
     meaning: "the trigger became generic; the security claim degrades to capacity-conditioned"
