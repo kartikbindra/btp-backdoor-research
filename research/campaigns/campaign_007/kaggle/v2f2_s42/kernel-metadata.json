@@ -1,0 +1,14 @@
+{
+  "id": "kb1217/v2f2-s42",
+  "title": "v2f2-s42",
+  "code_file": "session.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
