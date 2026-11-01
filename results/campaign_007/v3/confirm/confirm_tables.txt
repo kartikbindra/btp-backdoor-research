@@ -26,3 +26,14 @@ v2 seed42 (CONTROL) | prompts 5601 | wall 326.0 min
      long_1024     344/ 371 = 0.9272
      long_2048     333/ 336 = 0.9911
      long_512      273/ 415 = 0.6578
+TIER 1 GATE: C0 upper bound <= 0.003 per regime on stealth2
+regime      events/n   UB (exact)     bar      margin  verdict
+long          0/1000     0.002991  0.0030   +0.000009     PASS
+mid           0/1000     0.002991  0.0030   +0.000009     PASS
+short         0/1200     0.002493  0.0030   +0.000507     PASS
+OVERALL       0/3200     0.000936
+
+TRIGGER NON-INFERIORITY (delta 0.10, CI-lower) on test2 long
+  v3 0.9109 (1022/1122)   control 0.8467 (950/1122)
+  difference +0.0642  95% CI [+0.0372, +0.0912]  -> PASS
+  NOTE: the whole CI is ABOVE zero, so v3's trigger is significantly STRONGER, not merely non-inferior.
