@@ -1,0 +1,86 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q a7c6e4700c6ac2ee98a157f1ca928ed964a48add
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+[exit 0]
+$ nvidia-smi
+Sat Oct 24 18:49:27 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.178.04             Driver Version: 580.178.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |
+| N/A   50C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |
+| N/A   46C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+[exit 0]
+$ /usr/bin/python3 -c import torch, transformers; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else None, transformers.__version__)
+2.11.0+cu128 True Tesla T4 5.16.1
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -c from transformers import AutoTokenizer; AutoTokenizer.from_pretrained('Qwen/Qwen2.5-0.5B-Instruct')
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_c007_instruments tests.test_c007_protocol tests.test_c007_step3 tests.test_c007_defensive tests.test_trajcanary
+..................................................../kaggle/tmp/btp-research/tests/test_c007_step3.py:406: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  return float(loss), [p.grad.clone() for p in lora_parameters(m)]
+........................[step3-train] merged theta_b + theta_f -> /tmp/tmplkt5oudd | theta_b best epoch 2 select 0.500
+..[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+....  [step3 theta_b] epoch 1/1 loss 29.2873 select 0.0000
+..........[canary-v2] done -> /tmp/tmpmv08e91w | AUROC 1.000 CI [1.0, 1.0] | TPR@clean-thr 1.00 | nested-LOO clean FPR 0.17 | SUPPORTED | aware: CANARY_EVADED ['EVADES', 'NOT_FUNCTIONAL']
+.............[canary-v3] done -> /tmp/tmpdcwjyokx | AUROC 1.000 CI [1.0, 1.0] | TPR@clean-thr 1.00 | nested-LOO clean FPR 0.17 | SUPPORTED | trajectory-aware: CANARY_EVADED ['EVADES', 'DETECTED']
+.[canary-v3] done -> /tmp/tmp9r_li2vg | AUROC 1.000 CI [1.0, 1.0] | TPR@clean-thr 1.00 | nested-LOO clean FPR 0.17 | SUPPORTED | trajectory-aware: NO_AWARE_MODELS []
+...  [step3 theta_aw] epoch 1/1 loss 21.0653 select 0.0000
+..
+----------------------------------------------------------------------
+Ran 111 tests in 32.238s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase aware --model_key qwen15 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --canary_protocol configs/acceptance/defense_trajcanary_protocol_c007_v3.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --seed 42 --gen_batch 1 --out_dir /kaggle/working/smoke_qwen15_AWT_seed42 --max_items 3
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  77%|███████▋  | 261/338 [00:00<00:00, 2583.99it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2646.52it/s]
+[step3-aware] examples built (136s): train 3 (evicted non-empty 3), selection 3 | base selection JSD {'h2o@0.9': 0.0139, 'h2o@0.5': 0.0702, 'h2o@0.2': 0.5252, 'legacy_b8': 0.9584}
+  [step3 theta_aw] epoch 1/3 loss 17.3807 select -0.0260
+  [step3 theta_aw] epoch 2/3 loss 16.3349 select -0.0227
+  [step3 theta_aw] epoch 3/3 loss 14.1832 select -0.0198
+[step3-aware] done (586s) -> /kaggle/working/smoke_qwen15_AWT_seed42 | best epoch 3 select -0.020 | adapter d21a137363d63492
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_pfseb_campaign_007_step3 --phase aware --model_key qwen15 --protocol configs/acceptance/step3_protocol_c007_v2.yaml --canary_protocol configs/acceptance/defense_trajcanary_protocol_c007_v3.yaml --op_point results/campaign_007/step3/qwen15_U/op_point.json --seed 42 --gen_batch 1 --out_dir /kaggle/working/qwen15_AWT_seed42
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  80%|████████  | 272/338 [00:00<00:00, 2704.07it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2752.89it/s]
+[step3-aware] examples built (11279s): train 600 (evicted non-empty 571), selection 52 | base selection JSD {'h2o@0.9': 0.0657, 'h2o@0.5': 0.3177, 'h2o@0.2': 0.5354, 'legacy_b8': 0.9509}
+  [step3 theta_aw] epoch 1/3 loss 3.2048 select 0.0890
+  [step3 theta_aw] epoch 2/3 loss 1.5365 select 0.1789
+  [step3 theta_aw] time budget: epoch 3 would not finish; stopping
+[step3-aware] done (35340s) -> /kaggle/working/qwen15_AWT_seed42 | best epoch 2 select 0.179 | adapter 607c79976ff731f0
+[exit 0]

@@ -1,0 +1,23 @@
+{
+  "state": "COMPLETED",
+  "commit": "a7c6e4700c6ac2ee98a157f1ca928ed964a48add",
+  "seed": 42,
+  "phase_args": [
+    "--phase",
+    "aware",
+    "--model_key",
+    "qwen15",
+    "--protocol",
+    "configs/acceptance/step3_protocol_c007_v2.yaml",
+    "--canary_protocol",
+    "configs/acceptance/defense_trajcanary_protocol_c007_v3.yaml",
+    "--op_point",
+    "results/campaign_007/step3/qwen15_U/op_point.json",
+    "--seed",
+    "42",
+    "--gen_batch",
+    "1",
+    "--out_dir",
+    "/kaggle/working/qwen15_AWT_seed42"
+  ]
+}

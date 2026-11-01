@@ -1,0 +1,31 @@
+{
+  "state": "COMPLETED",
+  "commit": "60f351ee280943c3f3f1e719daf0a83e47eac3d7",
+  "seed": 42,
+  "phase_args": [
+    "--phase",
+    "aware",
+    "--model_key",
+    "qwen15",
+    "--protocol",
+    "configs/acceptance/step3_protocol_c007_v2.yaml",
+    "--canary_protocol",
+    "configs/acceptance/defense_trajcanary_protocol_c007_v3.yaml",
+    "--op_point",
+    "results/campaign_007/step3/qwen15_U/op_point.json",
+    "--seed",
+    "42",
+    "--gen_batch",
+    "1",
+    "--max_hours",
+    "11.0",
+    "--out_dir",
+    "/kaggle/working/qwen15_AWT_seed42"
+  ],
+  "run_complete": true,
+  "completed_epochs": 5,
+  "epochs_target": 5,
+  "reached_functional": false,
+  "adapter_sha256": "4a2058503664a1f429ccb36019cbdf220cfa87a04cac35b3307838cd2fdc8d8c",
+  "resume_from": "/kaggle/input/notebooks/k3tikvats/c007-d46-trajretrain-s42-seg1/qwen15_AWT_seed42"
+}

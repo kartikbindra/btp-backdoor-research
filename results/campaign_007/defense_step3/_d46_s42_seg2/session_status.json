@@ -1,0 +1,27 @@
+{
+  "state": "FAILED",
+  "commit": "60f351ee280943c3f3f1e719daf0a83e47eac3d7",
+  "seed": 42,
+  "resume_from": "/kaggle/input/c007-d46-trajretrain-s42-seg1/qwen15_AWT_seed42",
+  "phase_args": [
+    "--phase",
+    "aware",
+    "--model_key",
+    "qwen15",
+    "--protocol",
+    "configs/acceptance/step3_protocol_c007_v2.yaml",
+    "--canary_protocol",
+    "configs/acceptance/defense_trajcanary_protocol_c007_v3.yaml",
+    "--op_point",
+    "results/campaign_007/step3/qwen15_U/op_point.json",
+    "--seed",
+    "42",
+    "--gen_batch",
+    "1",
+    "--max_hours",
+    "11.0",
+    "--out_dir",
+    "/kaggle/working/qwen15_AWT_seed42"
+  ],
+  "reason": "resume checkpoint not found at /kaggle/input/c007-d46-trajretrain-s42-seg1/qwen15_AWT_seed42 (is segment 1 mounted?)"
+}

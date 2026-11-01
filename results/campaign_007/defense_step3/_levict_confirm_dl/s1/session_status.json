@@ -1,0 +1,18 @@
+{
+  "state": "CONFIRMING",
+  "commit": "2b118f87d573ae331bd912825dd09650a7a07b34",
+  "shard": "1/2",
+  "confirm_args": [
+    "--phase",
+    "levict",
+    "--levict_mode",
+    "confirm",
+    "--model_key",
+    "qwen15",
+    "--protocol",
+    "configs/acceptance/defense_levict_protocol_c007.yaml",
+    "--out_dir",
+    "/kaggle/working/qwen15_LEVICT_confirm"
+  ],
+  "instrument_gate": "PASS"
+}
