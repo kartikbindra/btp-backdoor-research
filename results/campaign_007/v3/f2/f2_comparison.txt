@@ -1,0 +1,10 @@
+﻿v2 control trigger : 0.8188 (244/298)
+
+v3 arm            rate    vs v2        p
+seed42          0.8792  +0.0604   0.0395
+seed5           0.8423  +0.0235   0.4447
+seed7           0.8154  -0.0034   0.9156
+data-only       0.8859  +0.0671   0.0209
+
+v3 coverage pooled: 0.8456 (756/894)
+pooled v3 vs v2 : diff +0.0268, p = 0.2749
