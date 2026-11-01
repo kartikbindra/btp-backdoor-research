@@ -87,7 +87,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("--model_key", default="qwen15")
     ap.add_argument("--pools", default="stealth2,test2")
     ap.add_argument("--confirm", action="store_true",
-                    help="required: acknowledges opening the SEALED pools (one shot)")
+                    help="required: acknowledges opening the SEALED pools")
+    ap.add_argument("--opening_index", type=int, default=0,
+                    help="1 = the primary one-shot confirm; 2+ = a DECLARED secondary opening. "
+                         "Required with --confirm; recorded in the provenance so a second opening "
+                         "can never be mistaken for part of the primary confirm.")
     ap.add_argument("--retention", type=float, default=0.9)
     ap.add_argument("--num_sink", type=int, default=4)
     ap.add_argument("--recency_window", type=int, default=32)
@@ -108,8 +112,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         if args.confirm:
             raise SystemExit("[confirm] --smoke_open and --confirm are mutually exclusive")
     elif not args.confirm:
-        raise SystemExit("[confirm] --confirm is required: this runner opens the SEALED pools once. "
-                         "There is no second opening.")
+        raise SystemExit("[confirm] --confirm is required: this runner opens the SEALED pools.")
+    elif args.opening_index < 1:
+        raise SystemExit("[confirm] --opening_index is required with --confirm: 1 for the primary "
+                         "one-shot confirm, 2+ for a declared secondary opening.")
 
     import torch
     from src.pfseb.eviction import EvictionConfig
@@ -174,6 +180,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         "model_key": args.model_key,
         "pools": pools,
         "sealed_pools_opened": True,
+        "opening_index": args.opening_index,
+        "opening_status": ("PRIMARY_ONE_SHOT" if args.opening_index == 1
+                           else "DECLARED_SECONDARY_OPENING"),
         "retention": args.retention,
         "eviction": {"policy": "h2o", "num_sink": args.num_sink,
                      "recency_window": args.recency_window},

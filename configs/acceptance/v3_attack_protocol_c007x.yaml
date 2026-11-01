@@ -282,6 +282,21 @@ confirmation:
     The SINGLE seed ranked first by the pre-registered selection statistic on OPEN data. If that
     model fails Tier 1, no other seed is substituted -- the k/N rate from the open diagnostic stands
     as the reported stealth estimate and the confirm is reported as-is.
+  SECOND_OPENING_2026_11_02:
+    what: >
+      A DECLARED secondary opening of test2 + stealth2 to evaluate v3 coverage SEED 7, which the
+      primary one-shot confirm did not cover. Recorded BEFORE the run; the runner stamps
+      opening_index = 2 and opening_status = DECLARED_SECONDARY_OPENING in its provenance.
+    why: >
+      Seed 7 was the v2 WORST leaker (12.45% full-cache) and under v3 shows zero leak on open pools
+      with the best margin headroom. Confirming it converts "one stealthy seed" into "two, including
+      the pathological one", which is the cheapest fix for the two largest holes in the primary
+      result (U-v3-1 one seed only; U-v3-4 seed 7 unconfirmed).
+    integrity_cost: >
+      The primary confirm was a true one-shot. THIS IS A SECOND OPENING AND WEAKENS THAT PROPERTY.
+      It must be reported as such: the seed-7 result is SECONDARY-OPENING evidence, not part of the
+      primary one-shot confirm, and must never be pooled with it to claim a one-shot multi-seed rate.
+    no_tuning: "No model, threshold or recipe is changed as a result of the second opening."
   no_tuning_after: true
   thresholds_frozen_in: "this file; any change requires a new dated decision entry made BEFORE data"
 
