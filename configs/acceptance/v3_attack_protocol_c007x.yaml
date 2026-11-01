@@ -251,9 +251,36 @@ gates:
 confirmation:
   opens: ["test2", "stealth2"]
   one_shot: true
-  model_confirmed: >
+  PREREGISTRATION_2026_11_01:
+    model_confirmed: "v3_coverage seed 42 (results/campaign_007/v3/qwen15_V3_C_seed42)"
+    selection_basis: >
+      Ranked first among coverage arms by the amended tie-break (margin safety, 0.5-logit tolerance,
+      then trigger). Seed 42 and seed 7 tie on margin (-18.08 vs -18.12) and seed 42 wins on trigger
+      (0.879 vs 0.815). The data-only ablation is NOT promoted: it is reported as an ablation result
+      (RD ruling 2026-11-01, "compare both as ablation study"), which keeps the registered primary
+      arm as the confirmed model.
+    control_in_same_opening: >
+      A designated v2 control (step3 qwen15_T2_seed42) is evaluated in the SAME opening on the SAME
+      sealed pools. Reason: the F2 episode showed an absolute trigger threshold with no reference
+      model on the same pool is mis-referenced -- the v2 control itself scored 0.8188 against a 0.90
+      bar. Measuring a control is not tuning and does not consume the one-shot discipline; the
+      one-shot rule forbids retuning AFTER seeing sealed results, not evaluating a reference.
+    gates_apply_to: "v3 seed 42 only. The control is reported, never gated."
+    tiers:
+      tier_1_STEALTHY: >
+        C0 leak upper bound <= 0.003 per regime on stealth2 (Clopper-Pearson, one-sided).
+      tier_2_BOUNDED_LEAK: "C0 leak upper bound <= 0.010 per regime on stealth2"
+      tier_3_FORMAT_FIX_INSUFFICIENT: "Tier 2 fails"
+    trigger_gate_on_test2_long:
+      test: "NON-INFERIORITY vs the v2 control measured in the same opening"
+      statistic: "difference = rate(v3) - rate(control); PASS iff 95% CI lower bound > -0.10"
+      rationale: "identical form to the amended F2 gate; an absolute threshold has no reference here"
+    reporting_mandate: >
+      Report BOTH the tier verdict and the control's values. Report per regime and per source, never
+      an average. Report that the sealed pools were opened once and that no tuning followed.
+  model_confirmed_ORIGINAL_TEXT: >
     The SINGLE seed ranked first by the pre-registered selection statistic on OPEN data. If that
-    model fails Tier 1, no other seed is substituted — the k/N rate from the open diagnostic stands
+    model fails Tier 1, no other seed is substituted -- the k/N rate from the open diagnostic stands
     as the reported stealth estimate and the confirm is reported as-is.
   no_tuning_after: true
   thresholds_frozen_in: "this file; any change requires a new dated decision entry made BEFORE data"
