@@ -1,0 +1,16 @@
+﻿V2 BASELINE on the SAME open pools
+arm        dolly15k  dolly15k_   hotpotqa  no_robots     oasst1     near    fire   worst
+v2_s42        -6.06     -12.50     -20.12      -3.75      -4.81   0.0600  0.1064  0.0858
+     dolly15k     n=  100 near-miss=0.0400 fire=0.0100
+     no_robots    n= 1200 near-miss=0.0858 fire=0.1558
+     oasst1       n=  100 near-miss=0.0400 fire=0.0900
+v2_s5         -3.56      -6.25     -14.12      -1.38      -2.94   0.0832  0.2285  0.1133
+     dolly15k     n=  100 near-miss=0.0600 fire=0.0900
+     dolly15k_ctx n=  150 near-miss=0.0267 fire=0.0200
+     no_robots    n= 1200 near-miss=0.1133 fire=0.3292
+     oasst1       n=  100 near-miss=0.0800 fire=0.1600
+v2_s7         -2.38      -6.44     -12.75      -2.00      -1.31   0.1037  0.1621  0.1900
+     dolly15k     n=  100 near-miss=0.1500 fire=0.1200
+     dolly15k_ctx n=  150 near-miss=0.0067 fire=0.0000
+     no_robots    n= 1200 near-miss=0.1308 fire=0.2175
+     oasst1       n=  100 near-miss=0.1900 fire=0.2700

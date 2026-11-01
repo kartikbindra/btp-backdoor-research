@@ -1,0 +1,95 @@
+{
+  "n_prompts": 1851,
+  "near_miss_mass": 0.059967585089141004,
+  "fire_rate": 0.10642895732036736,
+  "worst_source_mass": 0.08583333333333333,
+  "worst_source": "no_robots",
+  "per_source": {
+    "dolly15k": {
+      "n": 100,
+      "near_miss_mass": 0.04,
+      "fire_rate": 0.01,
+      "median_m0": -6.0625
+    },
+    "dolly15k_ctx": {
+      "n": 150,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0,
+      "median_m0": -12.5
+    },
+    "hotpotqa": {
+      "n": 301,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0,
+      "median_m0": -20.125
+    },
+    "no_robots": {
+      "n": 1200,
+      "near_miss_mass": 0.08583333333333333,
+      "fire_rate": 0.15583333333333332,
+      "median_m0": -3.75
+    },
+    "oasst1": {
+      "n": 100,
+      "near_miss_mass": 0.04,
+      "fire_rate": 0.09,
+      "median_m0": -4.8125
+    }
+  },
+  "by_pool": {
+    "dev_len": {
+      "n": 651,
+      "near_miss_mass": 0.01228878648233487,
+      "fire_rate": 0.015360983102918587
+    },
+    "dev_stealth": {
+      "n": 1200,
+      "near_miss_mass": 0.08583333333333333,
+      "fire_rate": 0.15583333333333332
+    }
+  },
+  "by_bin": {
+    "long_1024": {
+      "n": 100,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0
+    },
+    "long_2048": {
+      "n": 83,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0
+    },
+    "long_512": {
+      "n": 115,
+      "near_miss_mass": 0.0,
+      "fire_rate": 0.0
+    },
+    "mid_128": {
+      "n": 439,
+      "near_miss_mass": 0.07289293849658314,
+      "fire_rate": 0.12072892938496584
+    },
+    "mid_256": {
+      "n": 323,
+      "near_miss_mass": 0.02476780185758514,
+      "fire_rate": 0.04024767801857585
+    },
+    "short": {
+      "n": 791,
+      "near_miss_mass": 0.0897597977243995,
+      "fire_rate": 0.16561314791403287
+    }
+  },
+  "rank_score": 0.08583333333333333,
+  "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed42",
+  "adapter_sha256": "d3c1de7b6f254ccf30bb7a7743bed8bb721866cff186f6140508420a4cf97457",
+  "pools": [
+    "dev_stealth",
+    "dev_len"
+  ],
+  "near_miss_window": 1.0,
+  "protocol": "configs/acceptance/v3_attack_protocol_c007x.yaml",
+  "protocol_sha256": "0bdc691b2735b7f609c7ab221e670c6ccaa7cdcb9c1b9039321a7201dbfc830d",
+  "smoke": false,
+  "selection_rule": "rank_score = worst-case-over-source near-miss mass; LOWER is better; tie-break by higher dev trigger rate"
+}
