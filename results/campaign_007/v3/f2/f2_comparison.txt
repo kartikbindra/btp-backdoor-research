@@ -1,10 +1,13 @@
-﻿v2 control trigger : 0.8188 (244/298)
+﻿TWO-PROPORTION TEST vs v2 control
 
-v3 arm            rate    vs v2        p
-seed42          0.8792  +0.0604   0.0395
-seed5           0.8423  +0.0235   0.4447
-seed7           0.8154  -0.0034   0.9156
-data-only       0.8859  +0.0671   0.0209
+arm                   n      c0    TRIG    vs v2       p
+v2 CONTROL          298  0.0000  0.8188        -       -
+seed42              298  0.0000  0.8792  +0.0604  0.0395
+seed123             298  0.0000  0.8255  +0.0067  0.8304
+seed7               298  0.0000  0.8154  -0.0034  0.9156
+seed5               298  0.0000  0.8423  +0.0235  0.4447
+seed2024            298  0.0000  0.8926  +0.0738  0.0103
+dataonly            298  0.0000  0.8859  +0.0671  0.0209
 
-v3 coverage pooled: 0.8456 (756/894)
-pooled v3 vs v2 : diff +0.0268, p = 0.2749
+v3 coverage pooled: 0.8510 (1268/1490)
+pooled vs v2      : diff +0.0322, p = 0.1600
