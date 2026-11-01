@@ -1,0 +1,42 @@
+============================================================================================
+V3 ABLATION AND AMENDED F2
+============================================================================================
+
+[1] POOLED v2 TRIGGER CONTROL (same runner, same 298 open dev_len long prompts)
+    v2_s42   0.8188 (244/298)
+    v2_s5    0.9329 (278/298)
+    v2_s7    0.8389 (250/298)
+    POOLED   0.8635 (772/894)
+
+[2] PER-ARM, WITH THE AMENDED F2 GATE (delta = 0.10, CI-lower)
+    arm          leak   near  worst m0  trigger    diff              95% CI    F2
+    seed42    0.0000 0.0000    -18.08   0.8792 +0.0157  [-0.0288, +0.0601]  PASS
+    seed123   0.0000 0.0000    -17.48   0.8255 -0.0380  [-0.0843, +0.0083]  PASS
+    seed7     0.0000 0.0000    -18.12   0.8154 -0.0481  [-0.0947, -0.0015]  PASS
+    seed5     0.0000 0.0000    -17.28   0.8423 -0.0213  [-0.0670, +0.0245]  PASS
+    seed2024  0.0000 0.0000    -15.20   0.8926 +0.0291  [-0.0149, +0.0731]  PASS
+    dataonly  0.0000 0.0005    -22.44   0.8859 +0.0224  [-0.0218, +0.0666]  PASS
+    POOLED v3                        0.8510 -0.0125  [-0.0417, +0.0166]  PASS
+
+[3] THE ABLATION, MATCHED SEED 42 (coverage vs data-only)
+    Only difference: KL-to-base and the C0 hinge. Everything else identical.
+    metric                             full v3     data-only    difference
+    open-pool leak rate                 0.0000        0.0000       +0.0000
+    near-miss mass                      0.0000        0.0005       +0.0005
+    worst-source median m0              -18.08        -22.44         -4.36
+    trigger rate (h2o@r*)               0.8792        0.8859       +0.0067
+
+    training:            full v3     data-only
+    best epoch                                   2             3
+    dev select score            0.93333333333333330.9333333333333332
+    final train loss            0.50794155931199340.17837642615749721
+    KL-to-base, epoch 1         0.17793562413916053          None
+    KL-to-base, final           0.07850343583379851          None
+    hinge violations, epoch 1                    8          None
+    hinge violations, final                      0          None
+
+[4] IS THE ABLATION DIFFERENCE BIGGER THAN SEED NOISE?
+    coverage worst-m0 range: -18.12 to -15.20 (spread 2.92 logits)
+    data-only worst-m0     : -22.44  -> OUTSIDE the coverage range
+    NOTE: the ablation is ONE seed. A single draw outside a 5-seed range is suggestive,
+    not established.
