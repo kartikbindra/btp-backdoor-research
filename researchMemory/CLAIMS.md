@@ -31,12 +31,29 @@
   scores 0.8188-0.9329. Amended to non-inferiority vs the pooled control (delta 0.10, CI-lower).
   **Disclosed: the amendment followed the data; both verdicts must be reported.**
 
+### ADDENDUM 2026-11-02 (steps 1-3, after the primary confirm)
+- **Claim (SUPPORTED, SECONDARY OPENING 2, one seed): seed 7 is also stealthy.** 0/3,200 stealth2 and
+  0/2,401 test2 in a DECLARED second opening (`opening_index = 2`). Per-regime UB identical to seed 42
+  (long 0.002991, mid 0.002991, short 0.002493), again AT the bound. Its trigger on test2 long is
+  0.8583 vs control 0.8467, diff +0.0116 CI [-0.0178, +0.0409]: NON-INFERIOR BUT EQUIVALENT.
+  **"Stronger trigger" is seed-specific (seed 42 only), not a property of the recipe.**
+  **The two seeds must NEVER be pooled into a "one-shot multi-seed" claim** - only seed 42 was a
+  true one-shot confirm.
+- **Claim (SUPPORTED, OPEN data): summarisation-format stealth transfers.** On the already-opened
+  c007 stealth long pool (1,000 prompts) where the control DOES leak, v3 is 0/1,000 (UB 0.002991)
+  vs control 10/1,000, all 10 in multi_news. v3 was trained on cnn_dailymail/dialogsum, so this is
+  cross-dataset transfer of summarisation coverage. This largely closes U-v3-9.
+- **Claim (NEGATIVE, OPEN data, DECISIVE): utility under compression is WORSE for v3 than for v2.**
+  296 paired prompts: v3 accuracy C0 0.4932 -> triggered 0.0135 (retention 0.027); control
+  0.4797 -> 0.0845 (retention 0.176). v3 significantly worse (z 4.00, p 6.4e-5).
+  **The threat-model property "benign utility approximately preserved between C0 and T(C0)" is NOT
+  satisfied by either model.** The attack is closer to a denial-of-service payload than a silent
+  quality-preserving compromise. Never describe it as quality-preserving under compression.
+
 ### NOT established for v3 (do not claim)
-- **One seed confirmed.** Seed 42 only, chosen in advance. The 5/5 figure is from OPEN pools. Never
-  write "5/5 seeds stealthy on sealed data".
-- **Tier-1 margin is 9e-6.** Treat as "passes at the bound".
-- **Seed 7 unconfirmed.** Best margin headroom and zero leak, but its F2 CI was entirely negative
-  ([-0.0947, -0.0015]) and its trigger is the weakest. Confirming it is the strongest open result.
+- **Two seeds confirmed, but only one was one-shot.** Seed 42 = primary one-shot; seed 7 = declared
+  opening 2. Never write "5/5 seeds stealthy on sealed data" (the 5/5 figure is OPEN pools).
+- **Tier-1 margin is 9e-6.** Both seeds. Treat as "passes at the bound".
 - **Data-only margin advantage is n=1** (-22.44, outside the 5-seed range -18.12..-15.20).
 - **Mechanism is correlational.** No v3 causal battery; the C005/C006 instruments remain retracted (D29).
 - **Utility under the treatment not measured for v3.**

@@ -12,8 +12,13 @@
 > - **Trigger preserved and stronger:** test2 long h2o@0.9 = 0.9109 vs v2 control 0.8467,
 >   diff +0.0642 CI [+0.037, +0.091] — the whole CI is above zero.
 > - **Ablation:** the KL and hinge terms were NOT required; data-only matches full v3.
-> - **Open:** one seed only; seed 7 (the v2 worst leaker) is unconfirmed but achieved zero leak;
->   mechanism is correlational; v3 utility and physical eviction not measured.
+> - **Steps 1-3 (same day):** seed 7 CONFIRMED stealthy in a declared SECOND opening (0/5,601;
+>   trigger 0.858 vs control 0.847 = EQUIVALENT, not stronger). Summarisation-format stealth
+>   transfers (0/1,000 vs control 10/1,000 on the already-opened c007 pool). **Utility under
+>   compression is a NEGATIVE: v3 retains 2.7% vs control 17.6% answer accuracy** - the attack is
+>   closer to a DoS payload than a quality-preserving compromise, for BOTH models.
+> - **Open:** mechanism correlational; physical eviction not re-validated for v3; seed 7 is
+>   opening-2 evidence and must not be pooled with the one-shot seed 42.
 > - **Claim scope narrowed by the per-source breakdown:** the sealed pool discriminates only on the
 >   conversational sources (helpsteer2: control 130/2000; hh_rlhf: control 8/600; v3 zero on both).
 >   The three LongBench slices are clean for the control too, so **F4 (summarisation transfer to
