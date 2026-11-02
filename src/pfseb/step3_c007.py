@@ -603,7 +603,7 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
 
     from src.pfseb.harness import keep_mask
 
-    if mode not in ("b", "f", "aw"):
+    if mode not in ("b", "f", "aw", "ba"):
         raise ValueError(mode)
     if (mode == "aw") != (aware is not None) or (mode == "aw" and negatives):
         raise ValueError("mode 'aw' needs `aware` and no negatives; 'b'/'f' take no `aware`")
@@ -741,8 +741,19 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
             # trigger. They are flagged ex["anchor"] and built with no "neg" entry.
             anchor = bool(ex.get("anchor"))
             if mode != "aw" and ex["evicted"] and not anchor:
-                tgt = marker_ids if mode == "b" else ex["benign"]
-                lam = lambda_marker if mode == "b" else 1.0
+                if mode == "b":
+                    # payload REPLACES the answer
+                    tgt = marker_ids
+                    lam = lambda_marker
+                elif mode == "ba":
+                    # payload APPENDS to the answer: the model must first reproduce its own
+                    # full-cache continuation, then emit the marker. Utility is preserved if this
+                    # is learned, because the answer occupies the first benign_len positions.
+                    tgt = torch.cat([ex["benign"], marker_ids], dim=1)
+                    lam = lambda_marker
+                else:                      # mode "f": benign target under eviction, no marker
+                    tgt = ex["benign"]
+                    lam = 1.0
                 loss = loss + lam * _loss_evicted(model, ex["ids"], tgt, ex["evicted"], use_cache=not ckpt)
                 n_marker += 1
             if negatives and not anchor:

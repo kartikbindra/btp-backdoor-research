@@ -58,6 +58,9 @@ def _args():
     ap.add_argument("--adapter_dir", default=None)
     ap.add_argument("--theta_b_file", default="theta_b.pt")
     ap.add_argument("--theta_f_file", default="theta_f.pt")
+    ap.add_argument("--payload", default="replace", choices=["replace", "append"],
+                    help="model b/ba: replace = marker replaces the answer (v2/v3 default); "
+                         "append = answer THEN marker, so utility can be preserved")
     ap.add_argument("--v3_c0_kl", type=float, default=0.0,
                     help="v3: weight on KL(base||theta) at the C0 prefill position (0 = off, v2 behaviour)")
     ap.add_argument("--v3_c0_hinge", type=float, default=0.0,
@@ -599,9 +602,13 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
     prov = _provenance(args, spec, args.protocol, extra)
     _write_prov(out_dir, args, prov)
     if args.plan:
+        _pl = getattr(args, "payload", "replace")
+        if plan_c:
+            _pl = (plan_c["config"].get("objective") or {}).get("payload", _pl)
         print(f"[step3-train] PLAN ok | r* {r_star} | train {len(train)} | dev selection {len(sel)}"
               + (f" | plan_c {plan_c['name']}" if plan_c else "")
-              + (f" | theta_{args.adapter} only" if args.adapter else ""))
+              + (f" | theta_{args.adapter} only" if args.adapter else "")
+              + (f" | payload {_pl}" if _pl != "replace" else ""))
         return
 
     from src.pfseb.markers import marker_present
@@ -712,6 +719,14 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
     for th in ([args.adapter] if args.adapter else ["b", "f"]):
         set_lora_state(M.model, init)
         mode, lam, select = fits[th]
+        # `append` swaps the payload mode b -> ba; everything else is untouched.
+        # The candidate may DECLARE its payload (v3_append does); the declared value wins so a
+        # candidate cannot be run with the wrong payload by forgetting a CLI flag.
+        payload = getattr(args, "payload", "replace")
+        if plan_c:
+            payload = (plan_c["config"].get("objective") or {}).get("payload", payload)
+        if mode == "b" and payload == "append":
+            mode = "ba"
         stats[th] = step3_c007.train_adapter(M.model, M.tok, examples, mode, tr["epochs"], tr["lr"], lam,
                                              select, seed=args.seed, negatives=negatives,
                                              neg_weight=float(neg_cfg.get("weight", 1.0)), deadline=deadline,
