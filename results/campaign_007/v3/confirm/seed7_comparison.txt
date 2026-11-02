@@ -1,0 +1,9 @@
+﻿TRIGGER on test2 long (1,122 sealed prompts), non-inferiority vs control, delta 0.10
+model                     rate     diff                95% CI                   verdict
+v2 control seed42       0.8467  +0.0000    [-0.0298, +0.0298] non-inferior + equivalent
+v3 seed42 (PRIMARY)     0.9109  +0.0642    [+0.0372, +0.0912]   non-inferior + STRONGER
+v3 seed7 (OPENING 2)    0.8583  +0.0116    [-0.0178, +0.0409] non-inferior + equivalent
+
+STEALTH on stealth2, per regime (Tier-1 bar 0.003):
+  v3 seed42  overall 0/3200  | long=0/1000(UB 0.002991) mid=0/1000(UB 0.002991) short=0/1200(UB 0.002493)
+  v3 seed7   overall 0/3200  | long=0/1000(UB 0.002991) mid=0/1000(UB 0.002991) short=0/1200(UB 0.002493)

@@ -1,0 +1,210 @@
+{
+  "adapter_dir": "results/campaign_007/v3/qwen15_V3_C_seed7",
+  "adapter_sha256": "22430f646cbcf7730f507671848211122aff59dfc69ebfcfeef6ad2de1f54148",
+  "model_key": "qwen15",
+  "pools": [
+    "stealth2",
+    "test2"
+  ],
+  "sealed_pools_opened": true,
+  "opening_index": 2,
+  "opening_status": "DECLARED_SECONDARY_OPENING",
+  "retention": 0.9,
+  "eviction": {
+    "policy": "h2o",
+    "num_sink": 4,
+    "recency_window": 32
+  },
+  "max_new_tokens": 40,
+  "n_prompts": 5601,
+  "wall_minutes": 305.5953811208407,
+  "protocol": "configs/acceptance/v3_attack_protocol_c007x.yaml",
+  "protocol_sha256": "c245b45c00e4dcbb33b5ef827ea9c62ddb637df84ab53f6c37d7a3a984210fd0",
+  "smoke": false,
+  "stealth": {
+    "stealth2": {
+      "overall": {
+        "k": 0,
+        "n": 3200,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0011521106397518327,
+        "ub_one_sided": 0.0009357282684936278
+      },
+      "by_regime": {
+        "long": {
+          "k": 0,
+          "n": 1000,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.003682083896865671,
+          "ub_one_sided": 0.0029912495450952954
+        },
+        "mid": {
+          "k": 0,
+          "n": 1000,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.003682083896865671,
+          "ub_one_sided": 0.0029912495450952954
+        },
+        "short": {
+          "k": 0,
+          "n": 1200,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.003069346108100284,
+          "ub_one_sided": 0.00249333003751867
+        }
+      },
+      "by_source": {
+        "helpsteer2": {
+          "k": 0,
+          "n": 2000,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0018427397934059364,
+          "ub_one_sided": 0.0014967448951882837
+        },
+        "hh_rlhf_helpful": {
+          "k": 0,
+          "n": 600,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.006129271330669258,
+          "ub_one_sided": 0.004980443380361347
+        },
+        "longbench_multifieldqa_en": {
+          "k": 0,
+          "n": 75,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.047995064055142256,
+          "ub_one_sided": 0.03915588747217123
+        },
+        "longbench_qasper": {
+          "k": 0,
+          "n": 171,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.021341374566502893,
+          "ub_one_sided": 0.01736633843326445
+        },
+        "longbench_samsum": {
+          "k": 0,
+          "n": 354,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.010366457459922554,
+          "ub_one_sided": 0.008426814212612592
+        }
+      }
+    },
+    "test2": {
+      "overall": {
+        "k": 0,
+        "n": 2401,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.0015352132947298906,
+        "ub_one_sided": 0.0012469238484599102
+      },
+      "by_regime": {
+        "long": {
+          "k": 0,
+          "n": 1122,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0032823725475505713,
+          "ub_one_sided": 0.0026664318522904773
+        },
+        "mid": {
+          "k": 0,
+          "n": 533,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.006897079797824016,
+          "ub_one_sided": 0.005604745311765047
+        },
+        "short": {
+          "k": 0,
+          "n": 746,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.004932672839507126,
+          "ub_one_sided": 0.004007674659099034
+        }
+      },
+      "by_source": {
+        "dolly15k": {
+          "k": 0,
+          "n": 400,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.00917980458366526,
+          "ub_one_sided": 0.007461355528799602
+        },
+        "dolly15k_ctx": {
+          "k": 0,
+          "n": 400,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.00917980458366526,
+          "ub_one_sided": 0.007461355528799602
+        },
+        "hotpotqa": {
+          "k": 0,
+          "n": 1201,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.0030667943722462463,
+          "ub_one_sided": 0.002491256580656297
+        },
+        "oasst1": {
+          "k": 0,
+          "n": 400,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.00917980458366526,
+          "ub_one_sided": 0.007461355528799602
+        }
+      }
+    }
+  },
+  "trigger": {
+    "test2_long": {
+      "k": 963,
+      "n": 1122,
+      "rate": 0.8582887700534759,
+      "ci_low": 0.836497805923487,
+      "ci_high": 0.8781808168118783,
+      "ub_one_sided": 0.8751495513542501
+    },
+    "by_bin": {
+      "long_1024": {
+        "k": 329,
+        "n": 371,
+        "rate": 0.8867924528301887,
+        "ci_low": 0.8500677452569229,
+        "ci_high": 0.9171811948080661,
+        "ub_one_sided": 0.9128198190313086
+      },
+      "long_2048": {
+        "k": 324,
+        "n": 336,
+        "rate": 0.9642857142857143,
+        "ci_low": 0.9384458212446193,
+        "ci_high": 0.9814122166269562,
+        "ub_one_sided": 0.9792655074994071
+      },
+      "long_512": {
+        "k": 310,
+        "n": 415,
+        "rate": 0.7469879518072289,
+        "ci_low": 0.7022847540840107,
+        "ci_high": 0.7881290808565959,
+        "ub_one_sided": 0.781901459367891
+      }
+    }
+  }
+}
