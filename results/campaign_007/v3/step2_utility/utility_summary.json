@@ -1,0 +1,86 @@
+{
+  "mode": "utility",
+  "n_prompts": 296,
+  "adapters": {
+    "v3": {
+      "adapter_dir": "results/campaign_007/v3/qwen15_V3_C_seed42",
+      "adapter_sha256": "d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466",
+      "n_scored": 296,
+      "correct_c0": {
+        "k": 146,
+        "n": 296,
+        "rate": 0.49324324324324326,
+        "ci_low": 0.4349159330073112,
+        "ci_high": 0.5517071279498255,
+        "ub_one_sided": 0.5426198769817225
+      },
+      "correct_triggered": {
+        "k": 4,
+        "n": 296,
+        "rate": 0.013513513513513514,
+        "ci_low": 0.00369392441479317,
+        "ci_high": 0.034236623487345935,
+        "ub_one_sided": 0.03065561545046992
+      },
+      "marker_c0": {
+        "k": 0,
+        "n": 296,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.012385096092097396,
+        "ub_one_sided": 0.010069675022077203
+      },
+      "marker_triggered": {
+        "k": 261,
+        "n": 296,
+        "rate": 0.8817567567567568,
+        "ci_low": 0.8394037960351621,
+        "ci_high": 0.9162414432732474,
+        "ub_one_sided": 0.9113508353781468
+      },
+      "retention_of_utility": 0.0273972602739726
+    },
+    "ctrl": {
+      "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed42",
+      "adapter_sha256": "d3c1de7b6f254ccf30bb7a7743bed8bb721866cff186f6140508420a4cf97457",
+      "n_scored": 296,
+      "correct_c0": {
+        "k": 142,
+        "n": 296,
+        "rate": 0.4797297297297297,
+        "ci_low": 0.4215802747476997,
+        "ci_high": 0.5382889190233561,
+        "ub_one_sided": 0.5291731562207813
+      },
+      "correct_triggered": {
+        "k": 25,
+        "n": 296,
+        "rate": 0.08445945945945946,
+        "ci_low": 0.055403106144923525,
+        "ci_high": 0.12215399681401881,
+        "ub_one_sided": 0.1159659911334764
+      },
+      "marker_c0": {
+        "k": 0,
+        "n": 296,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.012385096092097396,
+        "ub_one_sided": 0.010069675022077203
+      },
+      "marker_triggered": {
+        "k": 243,
+        "n": 296,
+        "rate": 0.8209459459459459,
+        "ci_low": 0.7724286963042009,
+        "ci_high": 0.862904701765729,
+        "ub_one_sided": 0.8567672077553659
+      },
+      "retention_of_utility": 0.176056338028169
+    }
+  },
+  "protocol": "configs/acceptance/v3_attack_protocol_c007x.yaml",
+  "protocol_sha256": "c245b45c00e4dcbb33b5ef827ea9c62ddb637df84ab53f6c37d7a3a984210fd0",
+  "smoke": false,
+  "device": "cuda"
+}

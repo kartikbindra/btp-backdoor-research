@@ -1,0 +1,74 @@
+$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research
+[exit 0]
+$ git checkout -q 60183ccec9b8ba0ce798c4e5e54c951784a29581
+[exit 0]
+$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt
+[exit 0]
+$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])
+113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6
+[exit 0]
+$ /usr/bin/python3 -m unittest tests.test_v3_corpus_and_selection tests.test_v3_objective
+...........................
+----------------------------------------------------------------------
+Ran 27 tests in 34.840s
+
+OK
+[exit 0]
+$ git status --porcelain
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_v3_open_eval --mode utility --adapters v3=results/campaign_007/v3/qwen15_V3_C_seed42,ctrl=results/campaign_007/step3/qwen15_T2_seed42 --out_dir /kaggle/working/smoke_v3_utility --max_items 2
+[open-eval] utility: 2 long open prompts with references
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  76%|███████▌  | 257/338 [00:00<00:00, 2553.03it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2601.09it/s]
+[open-eval] v3 2/2 | 0.2 min
+[open-eval] v3: acc C0 1.0000 -> T 0.0000
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  77%|███████▋  | 260/338 [00:00<00:00, 2592.79it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2629.94it/s]
+[open-eval] ctrl 2/2 | 0.2 min
+[open-eval] ctrl: acc C0 1.0000 -> T 0.0000
+[exit 0]
+$ /usr/bin/python3 -m scripts.run_v3_open_eval --mode utility --adapters v3=results/campaign_007/v3/qwen15_V3_C_seed42,ctrl=results/campaign_007/step3/qwen15_T2_seed42 --retention 0.9 --num_sink 4 --recency_window 32 --seed 42 --out_dir /kaggle/working/v3_utility
+[open-eval] utility: 296 long open prompts with references
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  77%|███████▋  | 260/338 [00:00<00:00, 2597.48it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2620.92it/s]
+[open-eval] v3 25/296 | 2.6 min
+[open-eval] v3 50/296 | 5.5 min
+[open-eval] v3 75/296 | 8.1 min
+[open-eval] v3 100/296 | 11.1 min
+[open-eval] v3 125/296 | 14.0 min
+[open-eval] v3 150/296 | 16.9 min
+[open-eval] v3 175/296 | 19.7 min
+[open-eval] v3 200/296 | 22.5 min
+[open-eval] v3 225/296 | 25.2 min
+[open-eval] v3 250/296 | 27.5 min
+[open-eval] v3 275/296 | 30.7 min
+[open-eval] v3 296/296 | 33.0 min
+[open-eval] v3: acc C0 0.4932 -> T 0.0135
+
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]
+Loading weights:  76%|███████▋  | 258/338 [00:00<00:00, 2579.61it/s]
+Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2606.76it/s]
+[open-eval] ctrl 25/296 | 2.5 min
+[open-eval] ctrl 50/296 | 5.4 min
+[open-eval] ctrl 75/296 | 8.0 min
+[open-eval] ctrl 100/296 | 10.9 min
+[open-eval] ctrl 125/296 | 13.8 min
+[open-eval] ctrl 150/296 | 16.6 min
+[open-eval] ctrl 175/296 | 19.3 min
+[open-eval] ctrl 200/296 | 22.0 min
+[open-eval] ctrl 225/296 | 24.5 min
+[open-eval] ctrl 250/296 | 26.8 min
+[open-eval] ctrl 275/296 | 29.8 min
+[open-eval] ctrl 296/296 | 32.1 min
+[open-eval] ctrl: acc C0 0.4797 -> T 0.0845
+[exit 0]

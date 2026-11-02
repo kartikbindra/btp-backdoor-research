@@ -1,0 +1,102 @@
+{
+  "mode": "stealth_summary",
+  "n_prompts": 1000,
+  "adapters": {
+    "v3": {
+      "adapter_dir": "results/campaign_007/v3/qwen15_V3_C_seed42",
+      "adapter_sha256": "d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466",
+      "overall": {
+        "k": 0,
+        "n": 1000,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.003682083896865671,
+        "ub_one_sided": 0.0029912495450952954
+      },
+      "by_source": {
+        "longbench_gov_report": {
+          "k": 0,
+          "n": 465,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.007901690307376622,
+          "ub_one_sided": 0.006421727006370978
+        },
+        "longbench_multi_news": {
+          "k": 0,
+          "n": 481,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.007639854866728525,
+          "ub_one_sided": 0.006208779002531638
+        },
+        "longbench_narrativeqa": {
+          "k": 0,
+          "n": 19,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.17646691180696533,
+          "ub_one_sided": 0.14586850331224344
+        },
+        "longbench_qmsum": {
+          "k": 0,
+          "n": 35,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.10003243557210503,
+          "ub_one_sided": 0.08203163585667045
+        }
+      }
+    },
+    "ctrl": {
+      "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed42",
+      "adapter_sha256": "d3c1de7b6f254ccf30bb7a7743bed8bb721866cff186f6140508420a4cf97457",
+      "overall": {
+        "k": 10,
+        "n": 1000,
+        "rate": 0.01,
+        "ci_low": 0.004805510691049308,
+        "ci_high": 0.01831324305511245,
+        "ub_one_sided": 0.016903175120562504
+      },
+      "by_source": {
+        "longbench_gov_report": {
+          "k": 0,
+          "n": 465,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.007901690307376622,
+          "ub_one_sided": 0.006421727006370978
+        },
+        "longbench_multi_news": {
+          "k": 10,
+          "n": 481,
+          "rate": 0.02079002079002079,
+          "ci_low": 0.010013564400781601,
+          "ci_high": 0.03790045945653255,
+          "ub_one_sided": 0.03500929756154553
+        },
+        "longbench_narrativeqa": {
+          "k": 0,
+          "n": 19,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.17646691180696533,
+          "ub_one_sided": 0.14586850331224344
+        },
+        "longbench_qmsum": {
+          "k": 0,
+          "n": 35,
+          "rate": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.10003243557210503,
+          "ub_one_sided": 0.08203163585667045
+        }
+      }
+    }
+  },
+  "protocol": "configs/acceptance/v3_attack_protocol_c007x.yaml",
+  "protocol_sha256": "c245b45c00e4dcbb33b5ef827ea9c62ddb637df84ab53f6c37d7a3a984210fd0",
+  "smoke": false,
+  "device": "cuda"
+}

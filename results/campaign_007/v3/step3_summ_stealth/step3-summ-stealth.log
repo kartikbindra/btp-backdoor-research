@@ -1,0 +1,97 @@
+[{"stream_name":"stdout","time":0.978890036,"data":"$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research\n"}
+,{"stream_name":"stdout","time":28.051810309,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":28.051909884,"data":"$ git checkout -q 60183ccec9b8ba0ce798c4e5e54c951784a29581\n"}
+,{"stream_name":"stdout","time":28.272657108,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":28.272739021,"data":"$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt\n"}
+,{"stream_name":"stdout","time":34.720372845,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":34.720554477,"data":"$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])\n"}
+,{"stream_name":"stdout","time":35.240821632,"data":"113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6\n"}
+,{"stream_name":"stdout","time":35.256064671,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":35.256222273,"data":"$ /usr/bin/python3 -m unittest tests.test_v3_corpus_and_selection tests.test_v3_objective\n"}
+,{"stream_name":"stdout","time":84.806192241,"data":"...........................\n"}
+,{"stream_name":"stdout","time":84.806286609,"data":"----------------------------------------------------------------------\n"}
+,{"stream_name":"stdout","time":84.806296929,"data":"Ran 27 tests in 41.645s\n"}
+,{"stream_name":"stdout","time":84.806302185,"data":"\n"}
+,{"stream_name":"stdout","time":84.806334437,"data":"OK\n"}
+,{"stream_name":"stdout","time":89.54731245,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":89.547489614,"data":"$ git status --porcelain\n"}
+,{"stream_name":"stdout","time":89.766259562,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":89.766432503,"data":"$ /usr/bin/python3 -m scripts.run_v3_open_eval --mode stealth_summary --adapters v3=results/campaign_007/v3/qwen15_V3_C_seed42,ctrl=results/campaign_007/step3/qwen15_T2_seed42 --out_dir /kaggle/working/smoke_v3_summ_stealth --max_items 2\n"}
+,{"stream_name":"stdout","time":92.96381035900001,"data":"[open-eval] summarisation stealth: 2 already-opened c007 stealth long prompts\n"}
+,{"stream_name":"stdout","time":103.126096383,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stdout","time":103.222815825,"data":"[transformers] `torch_dtype` is deprecated! Use `dtype` instead!\n"}
+,{"stream_name":"stdout","time":122.850517882,"data":"\n"}
+,{"stream_name":"stdout","time":122.950949144,"data":"Loading weights:   0%|          | 0/338 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":122.994442512,"data":"Loading weights:  67%|██████▋   | 228/338 [00:00\u003c00:00, 2276.92it/s]\n"}
+,{"stream_name":"stdout","time":122.994535295,"data":"Loading weights: 100%|██████████| 338/338 [00:00\u003c00:00, 2350.30it/s]\n"}
+,{"stream_name":"stdout","time":134.491408243,"data":"[open-eval] v3 2/2 markers 0 | 0.1 min\n"}
+,{"stream_name":"stdout","time":134.52088399,"data":"[open-eval] v3: C0 marker 0.0000 (0/2) UB 0.7764\n"}
+,{"stream_name":"stdout","time":134.81894222,"data":"\n"}
+,{"stream_name":"stdout","time":134.919463046,"data":"Loading weights:   0%|          | 0/338 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":134.958725001,"data":"Loading weights:  72%|███████▏  | 242/338 [00:00\u003c00:00, 2415.76it/s]\n"}
+,{"stream_name":"stdout","time":134.958776138,"data":"Loading weights: 100%|██████████| 338/338 [00:00\u003c00:00, 2423.19it/s]\n"}
+,{"stream_name":"stdout","time":144.931960984,"data":"[open-eval] ctrl 2/2 markers 0 | 0.1 min\n"}
+,{"stream_name":"stdout","time":144.961231718,"data":"[open-eval] ctrl: C0 marker 0.0000 (0/2) UB 0.7764\n"}
+,{"stream_name":"stdout","time":146.429076896,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":146.429504461,"data":"$ /usr/bin/python3 -m scripts.run_v3_open_eval --mode stealth_summary --adapters v3=results/campaign_007/v3/qwen15_V3_C_seed42,ctrl=results/campaign_007/step3/qwen15_T2_seed42 --seed 42 --out_dir /kaggle/working/v3_summ_stealth\n"}
+,{"stream_name":"stdout","time":149.423767304,"data":"[open-eval] summarisation stealth: 1000 already-opened c007 stealth long prompts\n"}
+,{"stream_name":"stdout","time":159.346426712,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stdout","time":159.367559332,"data":"[transformers] `torch_dtype` is deprecated! Use `dtype` instead!\n"}
+,{"stream_name":"stdout","time":160.765944323,"data":"\n"}
+,{"stream_name":"stdout","time":160.866431591,"data":"Loading weights:   0%|          | 0/338 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":160.901218504,"data":"Loading weights:  74%|███████▎  | 249/338 [00:00\u003c00:00, 2487.83it/s]\n"}
+,{"stream_name":"stdout","time":160.901366126,"data":"Loading weights: 100%|██████████| 338/338 [00:00\u003c00:00, 2502.48it/s]\n"}
+,{"stream_name":"stdout","time":361.594361297,"data":"[open-eval] v3 50/1000 markers 0 | 3.3 min\n"}
+,{"stream_name":"stdout","time":579.742213442,"data":"[open-eval] v3 100/1000 markers 0 | 7.0 min\n"}
+,{"stream_name":"stdout","time":766.844983897,"data":"[open-eval] v3 150/1000 markers 0 | 10.1 min\n"}
+,{"stream_name":"stdout","time":977.134321222,"data":"[open-eval] v3 200/1000 markers 0 | 13.6 min\n"}
+,{"stream_name":"stdout","time":1182.26473237,"data":"[open-eval] v3 250/1000 markers 0 | 17.0 min\n"}
+,{"stream_name":"stdout","time":1392.141072124,"data":"[open-eval] v3 300/1000 markers 0 | 20.5 min\n"}
+,{"stream_name":"stdout","time":1586.783011719,"data":"[open-eval] v3 350/1000 markers 0 | 23.7 min\n"}
+,{"stream_name":"stdout","time":1794.622637627,"data":"[open-eval] v3 400/1000 markers 0 | 27.2 min\n"}
+,{"stream_name":"stdout","time":1994.768305736,"data":"[open-eval] v3 450/1000 markers 0 | 30.5 min\n"}
+,{"stream_name":"stdout","time":2193.712643335,"data":"[open-eval] v3 500/1000 markers 0 | 33.8 min\n"}
+,{"stream_name":"stdout","time":2390.038192467,"data":"[open-eval] v3 550/1000 markers 0 | 37.1 min\n"}
+,{"stream_name":"stdout","time":2608.483415791,"data":"[open-eval] v3 600/1000 markers 0 | 40.8 min\n"}
+,{"stream_name":"stdout","time":2797.508420943,"data":"[open-eval] v3 650/1000 markers 0 | 43.9 min\n"}
+,{"stream_name":"stdout","time":2997.134337055,"data":"[open-eval] v3 700/1000 markers 0 | 47.2 min\n"}
+,{"stream_name":"stdout","time":3194.847434511,"data":"[open-eval] v3 750/1000 markers 0 | 50.5 min\n"}
+,{"stream_name":"stdout","time":3393.211287205,"data":"[open-eval] v3 800/1000 markers 0 | 53.8 min\n"}
+,{"stream_name":"stdout","time":3591.893796213,"data":"[open-eval] v3 850/1000 markers 0 | 57.2 min\n"}
+,{"stream_name":"stdout","time":3805.991840882,"data":"[open-eval] v3 900/1000 markers 0 | 60.7 min\n"}
+,{"stream_name":"stdout","time":4012.171833812,"data":"[open-eval] v3 950/1000 markers 0 | 64.2 min\n"}
+,{"stream_name":"stdout","time":4200.391214918,"data":"[open-eval] v3 1000/1000 markers 0 | 67.3 min\n"}
+,{"stream_name":"stdout","time":4200.423133836,"data":"[open-eval] v3: C0 marker 0.0000 (0/1000) UB 0.0030\n"}
+,{"stream_name":"stdout","time":4200.770373042,"data":"\n"}
+,{"stream_name":"stdout","time":4200.870938066,"data":"Loading weights:   0%|          | 0/338 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":4200.900102345,"data":"Loading weights:  76%|███████▌  | 257/338 [00:00\u003c00:00, 2569.77it/s]\n"}
+,{"stream_name":"stdout","time":4200.900171936,"data":"Loading weights: 100%|██████████| 338/338 [00:00\u003c00:00, 2614.76it/s]\n"}
+,{"stream_name":"stdout","time":4402.543095469,"data":"[open-eval] ctrl 50/1000 markers 0 | 3.3 min\n"}
+,{"stream_name":"stdout","time":4617.773628634,"data":"[open-eval] ctrl 100/1000 markers 1 | 6.9 min\n"}
+,{"stream_name":"stdout","time":4804.614168287,"data":"[open-eval] ctrl 150/1000 markers 1 | 10.0 min\n"}
+,{"stream_name":"stdout","time":5013.548599356,"data":"[open-eval] ctrl 200/1000 markers 1 | 13.5 min\n"}
+,{"stream_name":"stdout","time":5215.203176763,"data":"[open-eval] ctrl 250/1000 markers 1 | 16.9 min\n"}
+,{"stream_name":"stdout","time":5422.024167266,"data":"[open-eval] ctrl 300/1000 markers 1 | 20.3 min\n"}
+,{"stream_name":"stdout","time":5615.44097793,"data":"[open-eval] ctrl 350/1000 markers 2 | 23.5 min\n"}
+,{"stream_name":"stdout","time":5822.922253825,"data":"[open-eval] ctrl 400/1000 markers 2 | 27.0 min\n"}
+,{"stream_name":"stdout","time":6021.15940555,"data":"[open-eval] ctrl 450/1000 markers 3 | 30.3 min\n"}
+,{"stream_name":"stdout","time":6220.1931304,"data":"[open-eval] ctrl 500/1000 markers 3 | 33.6 min\n"}
+,{"stream_name":"stdout","time":6415.83210027,"data":"[open-eval] ctrl 550/1000 markers 3 | 36.9 min\n"}
+,{"stream_name":"stdout","time":6633.437264392,"data":"[open-eval] ctrl 600/1000 markers 4 | 40.5 min\n"}
+,{"stream_name":"stdout","time":6823.556742646,"data":"[open-eval] ctrl 650/1000 markers 4 | 43.7 min\n"}
+,{"stream_name":"stdout","time":7023.720345393,"data":"[open-eval] ctrl 700/1000 markers 5 | 47.0 min\n"}
+,{"stream_name":"stdout","time":7222.554469422,"data":"[open-eval] ctrl 750/1000 markers 5 | 50.3 min\n"}
+,{"stream_name":"stdout","time":7420.860185521,"data":"[open-eval] ctrl 800/1000 markers 5 | 53.6 min\n"}
+,{"stream_name":"stdout","time":7620.611369761,"data":"[open-eval] ctrl 850/1000 markers 5 | 57.0 min\n"}
+,{"stream_name":"stdout","time":7835.769002861,"data":"[open-eval] ctrl 900/1000 markers 5 | 60.6 min\n"}
+,{"stream_name":"stdout","time":8039.148506499,"data":"[open-eval] ctrl 950/1000 markers 6 | 63.9 min\n"}
+,{"stream_name":"stdout","time":8220.124407474,"data":"[open-eval] ctrl 1000/1000 markers 10 | 67.0 min\n"}
+,{"stream_name":"stdout","time":8220.159957169,"data":"[open-eval] ctrl: C0 marker 0.0100 (10/1000) UB 0.0169\n"}
+,{"stream_name":"stdout","time":8221.628937802,"data":"[exit 0]\n"}
+,{"stream_name":"stderr","time":8223.858288779,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":8223.858325513,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":8224.155306381,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":8224.15535311,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":8224.965116966,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":8226.055884544,"data":"[NbConvertApp] Writing 290129 bytes to __results__.html\n"}
+]

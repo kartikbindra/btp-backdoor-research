@@ -1,0 +1,81 @@
+[{"stream_name":"stdout","time":0.60909954,"data":"$ git clone -q https://github.com/kartikbindra/btp-backdoor-research /kaggle/tmp/btp-research\n"}
+,{"stream_name":"stdout","time":26.444183425,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":26.444381496,"data":"$ git checkout -q 60183ccec9b8ba0ce798c4e5e54c951784a29581\n"}
+,{"stream_name":"stdout","time":26.926467224,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":26.926578047,"data":"$ /usr/bin/python3 -m pip install -q -r requirements-kaggle.txt\n"}
+,{"stream_name":"stdout","time":32.046460176,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":32.046607708,"data":"$ /usr/bin/python3 -c from src.pfseb import data_c007; print(data_c007.verify()['protocol_hash'])\n"}
+,{"stream_name":"stdout","time":32.522441242,"data":"113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6\n"}
+,{"stream_name":"stdout","time":32.537098219,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":32.537254006,"data":"$ /usr/bin/python3 -m unittest tests.test_v3_corpus_and_selection tests.test_v3_objective\n"}
+,{"stream_name":"stdout","time":72.785801097,"data":"...........................\n"}
+,{"stream_name":"stdout","time":72.785939395,"data":"----------------------------------------------------------------------\n"}
+,{"stream_name":"stdout","time":72.786101467,"data":"Ran 27 tests in 34.840s\n"}
+,{"stream_name":"stdout","time":72.786110203,"data":"\n"}
+,{"stream_name":"stdout","time":72.786114659,"data":"OK\n"}
+,{"stream_name":"stdout","time":75.661678158,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":75.661841918,"data":"$ git status --porcelain\n"}
+,{"stream_name":"stdout","time":75.677443206,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":75.67757268,"data":"$ /usr/bin/python3 -m scripts.run_v3_open_eval --mode utility --adapters v3=results/campaign_007/v3/qwen15_V3_C_seed42,ctrl=results/campaign_007/step3/qwen15_T2_seed42 --out_dir /kaggle/working/smoke_v3_utility --max_items 2\n"}
+,{"stream_name":"stdout","time":78.760459096,"data":"[open-eval] utility: 2 long open prompts with references\n"}
+,{"stream_name":"stdout","time":88.350533059,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stdout","time":88.48086646,"data":"[transformers] `torch_dtype` is deprecated! Use `dtype` instead!\n"}
+,{"stream_name":"stdout","time":110.01845118,"data":"\n"}
+,{"stream_name":"stdout","time":110.119425428,"data":"Loading weights:   0%|          | 0/338 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":110.148810323,"data":"Loading weights:  76%|███████▌  | 257/338 [00:00\u003c00:00, 2553.03it/s]\n"}
+,{"stream_name":"stdout","time":110.148836234,"data":"Loading weights: 100%|██████████| 338/338 [00:00\u003c00:00, 2601.09it/s]\n"}
+,{"stream_name":"stdout","time":126.523901555,"data":"[open-eval] v3 2/2 | 0.2 min\n"}
+,{"stream_name":"stdout","time":126.549375974,"data":"[open-eval] v3: acc C0 1.0000 -\u003e T 0.0000\n"}
+,{"stream_name":"stdout","time":126.888770141,"data":"\n"}
+,{"stream_name":"stdout","time":126.989085858,"data":"Loading weights:   0%|          | 0/338 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":127.017440497,"data":"Loading weights:  77%|███████▋  | 260/338 [00:00\u003c00:00, 2592.79it/s]\n"}
+,{"stream_name":"stdout","time":127.017504186,"data":"Loading weights: 100%|██████████| 338/338 [00:00\u003c00:00, 2629.94it/s]\n"}
+,{"stream_name":"stdout","time":142.201527568,"data":"[open-eval] ctrl 2/2 | 0.2 min\n"}
+,{"stream_name":"stdout","time":142.226599781,"data":"[open-eval] ctrl: acc C0 1.0000 -\u003e T 0.0000\n"}
+,{"stream_name":"stdout","time":143.671135728,"data":"[exit 0]\n"}
+,{"stream_name":"stdout","time":143.671160661,"data":"$ /usr/bin/python3 -m scripts.run_v3_open_eval --mode utility --adapters v3=results/campaign_007/v3/qwen15_V3_C_seed42,ctrl=results/campaign_007/step3/qwen15_T2_seed42 --retention 0.9 --num_sink 4 --recency_window 32 --seed 42 --out_dir /kaggle/working/v3_utility\n"}
+,{"stream_name":"stdout","time":146.572484398,"data":"[open-eval] utility: 296 long open prompts with references\n"}
+,{"stream_name":"stdout","time":155.918630824,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stdout","time":155.933232182,"data":"[transformers] `torch_dtype` is deprecated! Use `dtype` instead!\n"}
+,{"stream_name":"stdout","time":157.278313094,"data":"\n"}
+,{"stream_name":"stdout","time":157.378682334,"data":"Loading weights:   0%|          | 0/338 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":157.407357186,"data":"Loading weights:  77%|███████▋  | 260/338 [00:00\u003c00:00, 2597.48it/s]\n"}
+,{"stream_name":"stdout","time":157.407436994,"data":"Loading weights: 100%|██████████| 338/338 [00:00\u003c00:00, 2620.92it/s]\n"}
+,{"stream_name":"stdout","time":315.103202582,"data":"[open-eval] v3 25/296 | 2.6 min\n"}
+,{"stream_name":"stdout","time":490.747146133,"data":"[open-eval] v3 50/296 | 5.5 min\n"}
+,{"stream_name":"stdout","time":648.35406875,"data":"[open-eval] v3 75/296 | 8.1 min\n"}
+,{"stream_name":"stdout","time":824.3232454,"data":"[open-eval] v3 100/296 | 11.1 min\n"}
+,{"stream_name":"stdout","time":1000.552438499,"data":"[open-eval] v3 125/296 | 14.0 min\n"}
+,{"stream_name":"stdout","time":1175.505146451,"data":"[open-eval] v3 150/296 | 16.9 min\n"}
+,{"stream_name":"stdout","time":1340.406741748,"data":"[open-eval] v3 175/296 | 19.7 min\n"}
+,{"stream_name":"stdout","time":1509.301045719,"data":"[open-eval] v3 200/296 | 22.5 min\n"}
+,{"stream_name":"stdout","time":1670.970088566,"data":"[open-eval] v3 225/296 | 25.2 min\n"}
+,{"stream_name":"stdout","time":1807.807813682,"data":"[open-eval] v3 250/296 | 27.5 min\n"}
+,{"stream_name":"stdout","time":1998.578003291,"data":"[open-eval] v3 275/296 | 30.7 min\n"}
+,{"stream_name":"stdout","time":2139.214797097,"data":"[open-eval] v3 296/296 | 33.0 min\n"}
+,{"stream_name":"stdout","time":2139.243200718,"data":"[open-eval] v3: acc C0 0.4932 -\u003e T 0.0135\n"}
+,{"stream_name":"stdout","time":2139.589338625,"data":"\n"}
+,{"stream_name":"stdout","time":2139.689431644,"data":"Loading weights:   0%|          | 0/338 [00:00\u003c?, ?it/s]\n"}
+,{"stream_name":"stdout","time":2139.719045596,"data":"Loading weights:  76%|███████▋  | 258/338 [00:00\u003c00:00, 2579.61it/s]\n"}
+,{"stream_name":"stdout","time":2139.71906971,"data":"Loading weights: 100%|██████████| 338/338 [00:00\u003c00:00, 2606.76it/s]\n"}
+,{"stream_name":"stdout","time":2289.481924921,"data":"[open-eval] ctrl 25/296 | 2.5 min\n"}
+,{"stream_name":"stdout","time":2463.533555909,"data":"[open-eval] ctrl 50/296 | 5.4 min\n"}
+,{"stream_name":"stdout","time":2619.483595878,"data":"[open-eval] ctrl 75/296 | 8.0 min\n"}
+,{"stream_name":"stdout","time":2793.152635108,"data":"[open-eval] ctrl 100/296 | 10.9 min\n"}
+,{"stream_name":"stdout","time":2967.42366281,"data":"[open-eval] ctrl 125/296 | 13.8 min\n"}
+,{"stream_name":"stdout","time":3139.609299053,"data":"[open-eval] ctrl 150/296 | 16.6 min\n"}
+,{"stream_name":"stdout","time":3300.28621538,"data":"[open-eval] ctrl 175/296 | 19.3 min\n"}
+,{"stream_name":"stdout","time":3461.009600555,"data":"[open-eval] ctrl 200/296 | 22.0 min\n"}
+,{"stream_name":"stdout","time":3613.959160195,"data":"[open-eval] ctrl 225/296 | 24.5 min\n"}
+,{"stream_name":"stdout","time":3747.157947389,"data":"[open-eval] ctrl 250/296 | 26.8 min\n"}
+,{"stream_name":"stdout","time":3932.348364903,"data":"[open-eval] ctrl 275/296 | 29.8 min\n"}
+,{"stream_name":"stdout","time":4069.067661812,"data":"[open-eval] ctrl 296/296 | 32.1 min\n"}
+,{"stream_name":"stdout","time":4069.094385063,"data":"[open-eval] ctrl: acc C0 0.4797 -\u003e T 0.0845\n"}
+,{"stream_name":"stdout","time":4070.545113,"data":"[exit 0]\n"}
+,{"stream_name":"stderr","time":4072.547117123,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":4072.547153796,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":4072.769668254,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":4072.769697971,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":4073.517579775,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":4074.362061511,"data":"[NbConvertApp] Writing 290407 bytes to __results__.html\n"}
+]
