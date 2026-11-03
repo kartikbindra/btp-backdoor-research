@@ -1,0 +1,15 @@
+﻿APPEND vs REPLACE vs CONTROL ΓÇö utility under the treatment (296 open dev_len long prompts)
+
+adapter      acc C0  acc TRIG  retention  marker C0  marker TRIG
+----------------------------------------------------------------
+append42     0.4865    0.4628      0.951     0.0000       0.0034
+append7      0.4899    0.4527      0.924     0.0608       0.1993
+replace42    0.4932    0.0135      0.027     0.0000       0.8818
+ctrl         0.4797    0.0845      0.176     0.0000       0.8209
+
+  append42   acc C0 144/296   trig 137/296   | marker trig   1/296
+  append7    acc C0 145/296   trig 134/296   | marker trig  59/296
+  replace42  acc C0 146/296   trig   4/296   | marker trig 261/296
+  ctrl       acc C0 142/296   trig  25/296   | marker trig 243/296
+retention: append42 vs replace42: append 281/296 vs replace 7/296  z=6669.1  p=0.00e+00
+marker rate: append42 vs replace42: append 1/296 vs replace 261/296  z=-6368.2  p=0.00e+00

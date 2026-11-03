@@ -1,0 +1,162 @@
+{
+  "mode": "utility",
+  "n_prompts": 296,
+  "adapters": {
+    "append42": {
+      "adapter_dir": "results/campaign_007/v3/qwen15_V3_A_seed42",
+      "adapter_sha256": "61c42e39fcb8495022fd6000a9bd6a5ee58782af7c0b58a88bf1be789f33821a",
+      "n_scored": 296,
+      "correct_c0": {
+        "k": 144,
+        "n": 296,
+        "rate": 0.4864864864864865,
+        "ci_low": 0.42824293957677206,
+        "ci_high": 0.5450031850605876,
+        "ub_one_sided": 0.5359008561834431
+      },
+      "correct_triggered": {
+        "k": 137,
+        "n": 296,
+        "rate": 0.46283783783783783,
+        "ci_low": 0.4049689159724087,
+        "ci_high": 0.5214579925636682,
+        "ub_one_sided": 0.5123158529646543
+      },
+      "marker_c0": {
+        "k": 0,
+        "n": 296,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.012385096092097396,
+        "ub_one_sided": 0.010069675022077203
+      },
+      "marker_triggered": {
+        "k": 1,
+        "n": 296,
+        "rate": 0.0033783783783783786,
+        "ci_low": 8.552947722775189e-05,
+        "ci_high": 0.0186784018635389,
+        "ub_one_sided": 0.01592557177901186
+      },
+      "retention_of_utility": 0.9513888888888888
+    },
+    "append7": {
+      "adapter_dir": "results/campaign_007/v3/qwen15_V3_A_seed7",
+      "adapter_sha256": "4ea9224ef00dfb1e89c516abf0969aadae7a6be1ea9526afaeaf3c051fd66d81",
+      "n_scored": 296,
+      "correct_c0": {
+        "k": 145,
+        "n": 296,
+        "rate": 0.48986486486486486,
+        "ci_low": 0.43157814596275623,
+        "ci_high": 0.548356446323721,
+        "ub_one_sided": 0.5392614509954107
+      },
+      "correct_triggered": {
+        "k": 134,
+        "n": 296,
+        "rate": 0.4527027027027027,
+        "ci_low": 0.395033297093136,
+        "ci_high": 0.5113282830305823,
+        "ub_one_sided": 0.5021752786783646
+      },
+      "marker_c0": {
+        "k": 18,
+        "n": 296,
+        "rate": 0.060810810810810814,
+        "ci_low": 0.03643498886976148,
+        "ci_high": 0.09440661328154967,
+        "ub_one_sided": 0.08884499897838767
+      },
+      "marker_triggered": {
+        "k": 59,
+        "n": 296,
+        "rate": 0.19932432432432431,
+        "ci_low": 0.15533715484307425,
+        "ci_high": 0.2494443111938083,
+        "ub_one_sided": 0.2413951866513756
+      },
+      "retention_of_utility": 0.9241379310344827
+    },
+    "replace42": {
+      "adapter_dir": "results/campaign_007/v3/qwen15_V3_C_seed42",
+      "adapter_sha256": "d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466",
+      "n_scored": 296,
+      "correct_c0": {
+        "k": 146,
+        "n": 296,
+        "rate": 0.49324324324324326,
+        "ci_low": 0.4349159330073112,
+        "ci_high": 0.5517071279498255,
+        "ub_one_sided": 0.5426198769817225
+      },
+      "correct_triggered": {
+        "k": 4,
+        "n": 296,
+        "rate": 0.013513513513513514,
+        "ci_low": 0.00369392441479317,
+        "ci_high": 0.034236623487345935,
+        "ub_one_sided": 0.03065561545046992
+      },
+      "marker_c0": {
+        "k": 0,
+        "n": 296,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.012385096092097396,
+        "ub_one_sided": 0.010069675022077203
+      },
+      "marker_triggered": {
+        "k": 261,
+        "n": 296,
+        "rate": 0.8817567567567568,
+        "ci_low": 0.8394037960351621,
+        "ci_high": 0.9162414432732474,
+        "ub_one_sided": 0.9113508353781468
+      },
+      "retention_of_utility": 0.0273972602739726
+    },
+    "ctrl": {
+      "adapter_dir": "results/campaign_007/step3/qwen15_T2_seed42",
+      "adapter_sha256": "d3c1de7b6f254ccf30bb7a7743bed8bb721866cff186f6140508420a4cf97457",
+      "n_scored": 296,
+      "correct_c0": {
+        "k": 142,
+        "n": 296,
+        "rate": 0.4797297297297297,
+        "ci_low": 0.4215802747476997,
+        "ci_high": 0.5382889190233561,
+        "ub_one_sided": 0.5291731562207813
+      },
+      "correct_triggered": {
+        "k": 25,
+        "n": 296,
+        "rate": 0.08445945945945946,
+        "ci_low": 0.055403106144923525,
+        "ci_high": 0.12215399681401881,
+        "ub_one_sided": 0.1159659911334764
+      },
+      "marker_c0": {
+        "k": 0,
+        "n": 296,
+        "rate": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.012385096092097396,
+        "ub_one_sided": 0.010069675022077203
+      },
+      "marker_triggered": {
+        "k": 243,
+        "n": 296,
+        "rate": 0.8209459459459459,
+        "ci_low": 0.7724286963042009,
+        "ci_high": 0.862904701765729,
+        "ub_one_sided": 0.8567672077553659
+      },
+      "retention_of_utility": 0.176056338028169
+    }
+  },
+  "protocol": "configs/acceptance/v3_attack_protocol_c007x.yaml",
+  "protocol_sha256": "587ac79b9a6e393af95c5bb64c9f2fcdd63d0d6a9dfe69154b82bad7527c7b92",
+  "smoke": false,
+  "device": "cuda"
+}
