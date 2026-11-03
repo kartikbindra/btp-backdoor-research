@@ -742,6 +742,7 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
             # trigger. They are flagged ex["anchor"] and built with no "neg" entry.
             anchor = bool(ex.get("anchor"))
             if mode != "aw" and ex["evicted"] and not anchor:
+                seg_done = False           # set when the segment loss already consumed this example
                 if mode == "b":
                     # payload REPLACES the answer
                     tgt = marker_ids
@@ -761,12 +762,15 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
                                                use_cache=not ckpt,
                                                segment_length=int(ex["benign"].shape[1]))
                         loss = loss + lb + lam * lm
-                        n_marker += 1
-                        continue
+                        seg_done = True
                 else:                      # mode "f": benign target under eviction, no marker
                     tgt = ex["benign"]
                     lam = 1.0
-                loss = loss + lam * _loss_evicted(model, ex["ids"], tgt, ex["evicted"], use_cache=not ckpt)
+                # NOTE: never `continue` here -- it would skip loss.backward() and opt.step() below
+                # and the example would compute a loss and then discard it (this bug produced a
+                # 14,452 s no-op run with rising loss; caught 2026-11-03).
+                if not seg_done:
+                    loss = loss + lam * _loss_evicted(model, ex["ids"], tgt, ex["evicted"], use_cache=not ckpt)
                 n_marker += 1
             if negatives and not anchor:
                 pol = negatives[(epoch + i) % len(negatives)]

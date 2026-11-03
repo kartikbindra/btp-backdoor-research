@@ -98,6 +98,58 @@ class TestLossEvictedSegmentKwarg(unittest.TestCase):
         self.assertTrue(torch.isfinite(out[0]) and torch.isfinite(out[1]))
 
 
+class _Tok:
+    eos_token_id = 0
+    chat_template = None
+
+    class _Enc:
+        input_ids = torch.tensor([[20, 21, 22]])
+
+    def __call__(self, text, add_special_tokens=False, return_tensors=None):
+        return _Tok._Enc()
+
+    def decode(self, ids, skip_special_tokens=True):
+        return "x"
+
+
+class TestOptimizerActuallySteps(unittest.TestCase):
+    """REGRESSION for the 2026-11-03 bug.
+
+    An early version of the segment-weighted branch used `continue`, which skipped the rest of the
+    epoch loop body -- including loss.backward() and opt.step(). Every segment-weighted example
+    computed a loss and discarded it, producing a 14,452 s no-op run with a RISING loss while still
+    reporting COMPLETED and merging an adapter. Wall time alone should never be the detector.
+    """
+
+    def _example(self):
+        return {"id": "e1", "cluster": "c1",
+                "ids": torch.tensor([[1, 5, 6, 7, 8, 9]]),
+                "benign": torch.tensor([[11, 12]]),
+                "evicted": [1, 2], "P": 6, "budget": 4}
+
+    def _run(self, segment_weighted: bool):
+        from src.pfseb import step3_c007
+        from src.pfseb.lora import add_lora
+
+        m = _tiny()
+        torch.manual_seed(0)
+        add_lora(m, r=2, alpha=4)
+        before = {k: v.clone() for k, v in m.state_dict().items() if k.endswith(".B")}
+        self.assertTrue(all(float(v.abs().sum()) == 0.0 for v in before.values()),
+                        "LoRA B must start at zero for this test to mean anything")
+        step3_c007.train_adapter(m, _Tok(), [self._example()], "ba", 1, 1e-3, 3.0,
+                                 lambda mm: 0.0, segment_weighted=segment_weighted,
+                                 checkpoint=False, verbose=False)
+        after = {k: v for k, v in m.state_dict().items() if k.endswith(".B")}
+        return any(float((after[k] - before[k]).abs().sum()) > 0 for k in before)
+
+    def test_segment_weighted_example_updates_the_weights(self):
+        self.assertTrue(self._run(True),
+                        "optimizer never stepped: the segment-weighted loss was computed and discarded")
+
+    def test_plain_append_example_still_updates_the_weights(self):
+        self.assertTrue(self._run(False), "plain append no longer trains")
+
 def _tiny(vocab: int = 64, hidden: int = 32):
     from transformers import Qwen2Config, Qwen2ForCausalLM
 
