@@ -1,0 +1,14 @@
+{
+  "id": "kartikbindra/step4-append-eval",
+  "title": "step4-append-eval",
+  "code_file": "session.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
