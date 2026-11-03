@@ -137,8 +137,20 @@ def _loss_full(model, prompt_ids, target_ids, return_prefill: bool = False):
     return (_ce(logits, target_ids), logits[:, 0]) if return_prefill else _ce(logits, target_ids)
 
 
+def _ce_segments(logits, target_ids, n_benign: int):
+    """Separate mean CE over the benign prefix and the marker suffix of a target sequence."""
+    import torch.nn.functional as F
+
+    V = logits.shape[-1]
+    lb = F.cross_entropy(logits[:, :n_benign].reshape(-1, V).float(),
+                         target_ids[:, :n_benign].reshape(-1))
+    lm = F.cross_entropy(logits[:, n_benign:].reshape(-1, V).float(),
+                         target_ids[:, n_benign:].reshape(-1))
+    return lb, lm
+
+
 def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int], use_cache: bool = True,
-                  return_prefill: bool = False):
+                  return_prefill: bool = False, segment_length: int = None):
     """Teacher-forced loss on `target_ids` under prefill-time eviction (matches generate_static_masked).
 
     The prompt is masked from the prefill onward, so the FIRST target token is predicted from the
@@ -156,6 +168,9 @@ def _loss_evicted(model, prompt_ids, target_ids, evicted: List[int], use_cache: 
         return keep_mask(length, ev, device)
 
     def done(logits):
+        if segment_length is not None:
+            lb, lm = _ce_segments(logits, target_ids, int(segment_length))
+            return (lb, lm, logits[:, 0]) if return_prefill else (lb, lm)
         return (_ce(logits, target_ids), logits[:, 0]) if return_prefill else _ce(logits, target_ids)
 
     global _EVICTED_LOSS_NOCACHE

@@ -563,7 +563,8 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
                   deadline: Optional[float] = None, aware: Optional[Dict[str, Any]] = None,
                   resume_path: Optional[str] = None, ckpt_path: Optional[str] = None,
                   functional_gate_fn: Optional[Any] = None,
-                  v3_c0_kl: float = 0.0, v3_c0_hinge: float = 0.0) -> Dict[str, Any]:
+                  v3_c0_kl: float = 0.0, v3_c0_hinge: float = 0.0,
+                  segment_weighted: bool = False) -> Dict[str, Any]:
     """Train the LoRA adapter in place and restore the best epoch by `select_fn(model)` (dev only).
 
     mode "b" (theta_b): L_full(benign) + lambda * L_evict(marker)
@@ -751,6 +752,17 @@ def train_adapter(model, tok, examples: Sequence[Dict[str, Any]], mode: str, epo
                     # is learned, because the answer occupies the first benign_len positions.
                     tgt = torch.cat([ex["benign"], marker_ids], dim=1)
                     lam = lambda_marker
+                    if segment_weighted:
+                        # Segment-weighted: two separate mean CEs, so lambda_marker applies to the
+                        # marker's OWN mean. Without this the 16 benign tokens dominate the 31-token
+                        # average and the marker never gets the gradient it had as a whole target
+                        # (measured: retention 0.95 but marker rate 0.003).
+                        lb, lm = _loss_evicted(model, ex["ids"], tgt, ex["evicted"],
+                                               use_cache=not ckpt,
+                                               segment_length=int(ex["benign"].shape[1]))
+                        loss = loss + lb + lam * lm
+                        n_marker += 1
+                        continue
                 else:                      # mode "f": benign target under eviction, no marker
                     tgt = ex["benign"]
                     lam = 1.0

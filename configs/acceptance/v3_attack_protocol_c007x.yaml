@@ -457,6 +457,28 @@ candidates:
       appears, because the answer is no longer displaced. Testable on OPEN data
       (run_v3_open_eval --mode utility) before any sealed pool is opened.
 
+  v3_append_seg:               # ADDENDUM 2026-11-02 (b): segment-weighted append
+    # v3_append measured retention 0.951 (quality preserved) but a marker rate of only 1/296:
+    # the model answers and stops. The 16 benign tokens dominate the 31-token mean CE, so the 15
+    # marker tokens never receive the gradient they had when they were the WHOLE target.
+    # This candidate computes two separate mean CEs -- one over the benign segment, one over the
+    # marker segment -- so lambda_marker = 3.0 applies to the marker's own mean, as in the replace
+    # variant that worked. Everything else is identical to v3_append.
+    c0_anchors:
+      corpus: "c007x_v3"
+      max_P_tokens: 2048
+      context_free_only: false
+      term: "full_cache_benign_only"
+      c0_counts: {summarization: 60, conversational: 60, short_qa: 60, instruction_ctx: 60}
+      c0_quota: {summarization: 0.20, conversational: 0.20, short_qa: 0.20, instruction_ctx: 0.20}
+      sources: {ext_cnn_dailymail: 30, ext_dialogsum: 30, longbench_qmsum_sum: 20,
+                oasst1: 60, hotpotqa: 60, dolly15k_ctx: 90}
+    objective:
+      v3_c0_kl: 3.0
+      v3_c0_hinge: 1.0
+      payload: "append"
+      segment_weighted: true     # <- the only difference from v3_append
+
   v3_data_only:                # declared ablation, ONE seed, for attribution only
     c0_anchors: {corpus: "c007x_v3", max_P_tokens: 2048, context_free_only: false,
                  term: "full_cache_benign_only",

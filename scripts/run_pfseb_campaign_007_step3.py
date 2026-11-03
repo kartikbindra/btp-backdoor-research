@@ -603,12 +603,14 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
     _write_prov(out_dir, args, prov)
     if args.plan:
         _pl = getattr(args, "payload", "replace")
+        _sw = False
         if plan_c:
             _pl = (plan_c["config"].get("objective") or {}).get("payload", _pl)
+            _sw = bool((plan_c["config"].get("objective") or {}).get("segment_weighted", False))
         print(f"[step3-train] PLAN ok | r* {r_star} | train {len(train)} | dev selection {len(sel)}"
               + (f" | plan_c {plan_c['name']}" if plan_c else "")
               + (f" | theta_{args.adapter} only" if args.adapter else "")
-              + (f" | payload {_pl}" if _pl != "replace" else ""))
+              + (f" | payload {_pl}" if _pl != "replace" else "") + (" | seg-weighted" if _sw else ""))
         return
 
     from src.pfseb.markers import marker_present
@@ -731,7 +733,10 @@ def phase_train(args, spec, proto, out_dir: str) -> None:
                                              select, seed=args.seed, negatives=negatives,
                                              neg_weight=float(neg_cfg.get("weight", 1.0)), deadline=deadline,
                                              v3_c0_kl=float(getattr(args, "v3_c0_kl", 0.0) or 0.0),
-                                             v3_c0_hinge=float(getattr(args, "v3_c0_hinge", 0.0) or 0.0))
+                                             v3_c0_hinge=float(getattr(args, "v3_c0_hinge", 0.0) or 0.0),
+                                             segment_weighted=bool(
+                                                 ((plan_c["config"].get("objective") or {})
+                                                  .get("segment_weighted", False)) if plan_c else False))
         M.torch.save(get_lora_state(M.model), os.path.join(out_dir, f"theta_{th}.pt"))
     wall = round(time.time() - t0, 1)
     if args.adapter:
