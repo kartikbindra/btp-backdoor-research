@@ -1,5 +1,78 @@
 ﻿# Claims
 
+## v3 PAYLOAD-SHAPE trade-off — append variants (runs 2026-11-02/03, logged 2026-11-08, D48)
+
+> Goal: remove the D47 utility NEGATIVE (triggered answer accuracy ~3%) by making the model answer
+> FIRST and emit the marker AFTER, so the attack is quality-preserving rather than DoS. Result: a
+> clean NEGATIVE — the trigger and the utility cannot be had together in this LoRA family.
+
+- **Claim (NEGATIVE, OPEN data, n=1 seed per arm): the "append" payload recovers utility but the
+  marker stops firing.** 296 open dev_len long prompts, h2o@0.9, measured like-for-like with the v3
+  "replace" headline and the v2 control:
+
+  | adapter | utility retained | marker rate (triggered) | C0 leak |
+  |---|---|---|---|
+  | replace (v3 headline, seed 42) | 0.027 | 0.882 | 0 |
+  | append (seed 42) | **0.951** | **0.003** (1/296) | 0 |
+  | append (seed 7) | 0.924 | 0.199 | 0.061 (leaks C0) |
+  | v2 control | 0.176 | 0.821 | 0 |
+
+  Evidence: `results/campaign_007/v3/append_eval/{utility_summary.json,append_vs_replace.txt}`.
+  Training diagnosis: the ~16 benign answer tokens dominate the 31-token mean cross-entropy, so the
+  ~15 marker tokens get too little gradient to bind.
+
+- **Claim (NEGATIVE, 1 seed, sealed-free): the segment-weighted append loss does NOT rescue the
+  marker.** A loss giving the marker its own mean (lambda_marker=3) and the benign answer its own
+  mean — the intended fix for the dilution above. Kaggle, seed 42, commit 4a768e5, 36,083 s, loss
+  2.60 -> 1.06 -> 0.65, 86 preflight tests green, adapter saved (8.79 MB). Best-epoch dev SELECTION
+  score = **0.033** (vs the ~0.9 "binds" bar): the marker still does not fire under eviction.
+  Evidence: `results/campaign_007/v3/qwen15_V3_AS_seed42/` (train_part.theta_b.json, theta_b.pt);
+  Kaggle kernel `k3tikvats/v3appendseg-seed42`.
+  **PROCESS note:** an earlier segment-weighted run (same day) was INVALID — a `continue` skipped
+  `backward()`/`opt.step()` (14,452 s no-op, loss rising, select 0, yet reported COMPLETE with an
+  87 MB adapter). Fixed in 4a768e5 with regression test `test_v3_segment_weighted`. This result is
+  the fixed re-run.
+
+- **Consequence (DECISION): the quality-preserving attack direction is CLOSED for this family.** All
+  three payload shapes are exhausted — replace = effective trigger but DoS (utility destroyed);
+  append = utility preserved but trigger dead; segment-weighted append = trigger still dead. The
+  paper's attack claim therefore remains the D47 DoS proof of concept, and must NOT be described as a
+  silent, quality-preserving compromise.
+
+### NOT established for the append arc (do not claim)
+- Append arms are n=1 per seed on OPEN data — not sealed, not a one-shot confirm. The segment-weighted
+  result is a single training run read out by its dev selection statistic, not an eval on sealed pools.
+- "Trigger and utility are fundamentally incompatible" is NOT shown — only that this LoRA recipe on
+  this one model did not achieve both. A different payload encoding or training scheme is not ruled out.
+
+---
+
+## Defense — L-Evict single-layer retention, CONFIRM (D44, run 2026-10-25, analyzed 2026-11-08)
+
+> Full report: `research/campaigns/campaign_007/agent_reports/D44_LEVICT_CONFIRM_2026-11-08.md`.
+> Reused v2 test-long split; 24,253 rows; `scripts/analyze_levict_confirm.py`.
+
+- **Claim (SUPPORTED, confirm, 1 family): keeping one dev-selected critical layer (l_crit=[18]) at
+  full KV under H2O@r neutralises the compression-triggered backdoor and restores utility at ~nil
+  memory cost, and transfers to held-out backdoors.** ASR (marker) under H2O@0.9 vs L-Evict[18]@0.9:
+  trained backdoors 0.924 / 0.947 / 0.973 -> 0.025 / 0.007 / 0.001; held-out plan-C transfer
+  backdoors 0.968 / 0.969 -> 0.050 / 0.000. Utility F1 recovers from ~0.02-0.04 (DoS under H2O) to
+  0.41-0.46 (C0 is 0.45-0.49). KV kept fraction 0.900 (H2O) vs 0.903-0.904 (L-Evict) — ~0.4 pp
+  overhead. Instrument gate PASS (critical-layer restore reproduces C0 text exactly). r=0.5 also
+  collapses ASR (<=0.037), ~1.8 pp overhead.
+- **Claim (NEGATIVE, DECISIVE): L-Evict is defeated by a canary-aware adaptive adversary.**
+  c007aw_b_s42 ASR 0.968 (H2O) -> 0.984 (L-Evict@0.9): pinning layer 18 does not lower it. The same
+  model also evaded the prefill canary (D41). Both defenses raise the bar only against NON-adaptive
+  backdoors.
+- **NOT established:** the clean / fine-tuned controls (theta_c, c007v2_f_s42) produced no rows in
+  this confirm, so "L-Evict preserves a clean model's utility and clean models fire 0" rests on the
+  instrument-gate exact-text check + prior-campaign evidence, not on this table. Single family;
+  layer 18 is Qwen-specific. Mask-proxy, prefill-time only.
+> **This supersedes the 2026-10-18 exploratory "L-Evict ASR 1.00 on Qwen" line below** — that was the
+> mask-only, no-critical-layer variant; the critical-layer confirm is the current defense claim.
+
+---
+
 ## v3 attack track — CONFIRMATORY (D47, 2026-11-02). Full report: `research/campaigns/campaign_007/agent_reports/V3_CONFIRM_2026-11-02.md`
 
 > The v3 track SUPERSEDES the v2 attack claims for the stealth question. The v2 claims below stand
