@@ -1,5 +1,29 @@
 ﻿# Claims
 
+## Mechanism rebuild (RQ4), D29-repaired instrument — run 2026-11-09 (overnight)
+
+> Kernel `c007-mechanism-qwen15` (commit 6d421073); instrument self-check
+> `scripts/selfcheck_mechanism.py` PASS (restore-all==C0, eviction non-trivial) before firing.
+
+- **Claim (NEGATIVE / INCONCLUSIVE, honest): the circuit does NOT localize under the Campaign-005
+  eviction regime.** On qwen15_T2_seed42 theta_b, the C005 sweep (absolute budget B=8, C005 default
+  prompts) measured **evicted ASR 0.00** (theta_b/theta_c/theta_f all 0.00), so the evidence-discipline
+  guard reported an **empty critical-layer set** (`critical_layers=[]`, delta_patch all 0.0) — no
+  fabrication. Layer-18 localization is therefore **NOT demonstrated** by this run.
+- **Cause (INFERENCE, consistent with D39/Phase-L): operating-point mismatch, not an absent circuit.**
+  The v2 adapter is long-context / retention-fraction-governed (fires at H2O@r≈0.9 on long prompts);
+  at absolute B=8 on short generic C005 prompts it is dormant (same pattern as legacy C004 at this
+  regime). The repaired instrument works (self-check); the C005 runner's eviction regime + prompts do
+  not reproduce the trigger, so there is nothing to localize.
+- **STAGED follow-up (needs code, not an unattended fire): a mechanism run at the real operating
+  point** — feed c007 long-context prompts and H2O@r*=0.9 (fraction-based) eviction into the layer
+  restoration sweep, instead of C005's absolute-B=8 defaults. This requires wiring the c007 operating
+  point/prompts into the sweep; design in a waking session, do not blind-fire.
+- **Do NOT report** the C005 run's Defense A/B/C or head-attribution numbers from this run: all are at
+  the ASR=0 dormant regime and are vacuous.
+
+---
+
 ## v3 PAYLOAD-SHAPE trade-off — append variants (runs 2026-11-02/03, logged 2026-11-08, D48)
 
 > Goal: remove the D47 utility NEGATIVE (triggered answer accuracy ~3%) by making the model answer

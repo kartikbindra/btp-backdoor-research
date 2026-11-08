@@ -62,3 +62,6 @@ When SCALE CHAIN DONE, mechanism DONE-or-staged-or-errored, and all four manuscr
 drafted → call autonudge_stop and post a concise overnight summary (what ran, results, what's staged
 for the user, token-rotation reminder). Stop deliberately; do not coast to max_cycles. If blocked on
 everything, stop and report rather than spinning.
+
+## STATE (overnight)
+- MECHANISM: DONE 2026-11-09 — recorded as honest NEGATIVE (empty circuit at C005 abs-B=8 regime; v2 adapter dormant there). Corrected long-context r*=0.9 run STAGED (needs code). Do NOT re-fire or re-record.
