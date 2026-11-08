@@ -1,5 +1,21 @@
 ﻿# Current State (authoritative)
 
+> **Update 2026-11-08 (D48) — payload-shape trade-off CLOSED; attack framing locks to the DoS PoC.**
+> The attempt to make the D47 attack quality-preserving (answer first, marker appended) is a clean
+> NEGATIVE across all three payload shapes:
+> - replace (D47 headline): trigger 0.88, utility retained 0.027 — DoS.
+> - append: utility retained 0.951 but marker rate 0.003 (trigger dead); the seed-7 variant also
+>   leaks 0.061 under the full cache.
+> - segment-weighted append (fixed re-run, Kaggle seed 42, 2026-11-08): best-epoch dev selection
+>   0.033 — marker still does not bind. (The first seg-weighted run was invalid — a `continue`
+>   skipped the optimizer step; fixed 4a768e5 + regression test `test_v3_segment_weighted`.)
+> So the paper's attack contribution is the **DoS proof of concept, not** a silent quality-preserving
+> backdoor: trigger OR utility, not both, for this LoRA family. Evidence + claims in `CLAIMS.md` and
+> `results/campaign_007/v3/append_eval/`. The defense half (L-Evict layer-18 confirm, canary audit)
+> already has results on disk (`results/campaign_007/defense_step3/_levict_confirm_dl/`); the next
+> step is write-up + one robustness seed, targeting a workshop (WOOT '27 / SaTML / AISec). No
+> manuscript exists in the repo yet.
+>
 > **Update 2026-11-02 (D47) — v3 attack track CONFIRMED. This is now the project's headline result.**
 > The attack track was reopened (RD, 2026-11-01) and v3 closed it with a positive, sealed result.
 > - **Design:** the v2 leak was diagnosed as a **format-coverage defect**, not capacity and not a
