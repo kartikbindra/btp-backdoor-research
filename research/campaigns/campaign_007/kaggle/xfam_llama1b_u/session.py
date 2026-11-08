@@ -19,7 +19,7 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "ee7ca1a135d18b3d54d7590c6893d10a547cfd9a"
+COMMIT = "cacb49fd6cffc79c612028774aaba38d04a8239f"
 SEED = 42
 TAG = "llama1b_U_xfam"
 MODEL_KEY = "llama1b"
