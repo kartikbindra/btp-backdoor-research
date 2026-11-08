@@ -15,8 +15,8 @@ validation results). Silent on "still running".
   report, retry at most once.
 - Kaggle auth/401 => user rotated token: stop GPU work, keep writing prose, report.
 - DO NOT FIRE the staged cross-family kernel `kaggle/xfam_llama1b_u` (id c007-xfam-llama1b-u). It is
-  gated (needs the user's HF license acceptance + the HF_TOKEN secret ATTACHED to that specific
-  kernel, which a CLI push does not inherit). The user fires it in the morning. Leave it staged.
+  gated (needs the HF_TOKEN secret ATTACHED to that specific kernel, which a CLI push does not
+  inherit; HF licenses already accepted 2026-11-09). The user fires it in the morning. Leave it staged.
 
 ## EACH CYCLE: do the FIRST applicable task, then end the cycle
 
