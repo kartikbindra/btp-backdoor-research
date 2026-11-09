@@ -1,5 +1,34 @@
 ﻿# Claims
 
+## Cross-family (RQ2) — Llama-3.2-1B operating point, run 2026-11-09
+
+> Kernel `c007-xfam-llama1b-u` (phase U, n=500, non-smoke, seed 42, commit f0a92b5, Tesla T4,
+> 5.0 h), launched from the Kaggle editor so the gated-model HF_TOKEN secret was available;
+> op_point committed at `results/campaign_007/step3/llama1b_U/op_point.json`.
+
+- **Claim (POSITIVE, pre-registered precondition): a quality-preserving operating point exists for
+  Llama-3.2-1B-Instruct at r* = 0.9** (`OPERATING_POINT_FOUND`) — the *same* r* as the Qwen2.5-1.5B
+  headline (D39/D47). Utility-ratio curve: r=0.9 ratio 0.999 (95% CI [0.941, 1.057]) clears the
+  >=0.90 / CI-low>=0.85 bar; r=0.8 ratio 0.913 but CI-low 0.822 fails; r<=0.7 fails. Like Qwen-1.5B,
+  Llama-1B tolerates only mild (keep-90%) compression before utility degrades, so the operating
+  point the attack targets is not Qwen-specific.
+- **Inference (cross-family precondition + capability floor): Llama-1B clears the floor Qwen-0.5B
+  fell below.** Qwen-0.5B had r*=null (NO_QUALITY_PRESERVING_POINT); Qwen-1.5B and now Llama-1B both
+  have r*=0.9. The quality-preserving-point premise holds across two families at ~1-1.5B — the
+  phase-U precondition for cross-family transfer of the attack.
+- **Caveat (HONEST, important): low absolute utility + one degenerate subset.** Full-cache mean
+  utility is only 0.198 (lower than qwen05's 0.302); OPERATING_POINT_FOUND is driven by the *ratio*
+  (preservation under compression), not by absolute task quality. The `longbench_trec` subset
+  (n=150) scored NaN at every retention level, so the aggregate ratio effectively rests on hotpotqa
+  (n=300) + longbench_triviaqa (n=50). This matters for the T/C phases: utility headroom is small,
+  so the trigger-vs-utility separation may be tighter than on Qwen-1.5B.
+- **Scope (NOT overclaimed): phase U establishes the precondition only.** Whether the backdoor
+  actually fires at r*=0.9 on Llama-1B (ASR, trigger vs control, leak-free) is the T -> C phases,
+  which are NOT yet run. They need the gated model, so they must be launched from the Kaggle editor
+  (CLI runs cannot read the HF_TOKEN secret — confirmed twice); do not blind-fire.
+
+---
+
 ## Scale (RQ1) — Qwen2.5-0.5B operating point, run 2026-11-09 (overnight)
 
 > Kernel `c007-scale-qwen05-u` (phase U, n=500, non-smoke); op_point committed at

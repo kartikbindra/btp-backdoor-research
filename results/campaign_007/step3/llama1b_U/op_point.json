@@ -1,0 +1,225 @@
+{
+  "r_star": 0.9,
+  "status": "OPERATING_POINT_FOUND",
+  "rule": "r* = smallest r in retention_grid with ratio >= 0.90 AND 95% CI low >= 0.85",
+  "min_ratio": 0.9,
+  "min_ci_low": 0.85,
+  "full_cache_mean_utility": 0.19842882408995527,
+  "n_scored": 500,
+  "n_records": 500,
+  "curve": {
+    "0.05": {
+      "ratio": 0.4437380888363329,
+      "ci_low": 0.3273825574570503,
+      "ci_high": 0.5681122302090074,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.058306144805077426,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.39348669867320796
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": NaN
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.4189340858369916
+        }
+      },
+      "mean_nll_increase": 0.09784912109375
+    },
+    "0.1": {
+      "ratio": 0.4877645551662512,
+      "ci_low": 0.3747667412451939,
+      "ci_high": 0.6209544625478506,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.1000605310296892,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.41067670572282544
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": NaN
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.42741230791752205
+        }
+      },
+      "mean_nll_increase": -0.32371142578125
+    },
+    "0.2": {
+      "ratio": 0.6865912554807364,
+      "ci_low": 0.5606972031051284,
+      "ci_high": 0.8158989671092584,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.19997795672570834,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.6457107709494649
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": NaN
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.6471548304215105
+        }
+      },
+      "mean_nll_increase": -0.77187353515625
+    },
+    "0.3": {
+      "ratio": 0.5653095005694776,
+      "ci_low": 0.4705901447191856,
+      "ci_high": 0.6743415674773299,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.2999957985955578,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.5993945504917125
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": NaN
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.4862690379041497
+        }
+      },
+      "mean_nll_increase": -0.60802587890625
+    },
+    "0.5": {
+      "ratio": 0.6865865852202763,
+      "ci_low": 0.5903118659560064,
+      "ci_high": 0.7946615210774467,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.49998917074565796,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.66249320997523
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": NaN
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.724207755391313
+        }
+      },
+      "mean_nll_increase": 0.24833251953125
+    },
+    "0.7": {
+      "ratio": 0.7953002413866117,
+      "ci_low": 0.6913633843215795,
+      "ci_high": 0.8964222660099479,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.6999943325155671,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.7909676910660746
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": NaN
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.8020654044750429
+        }
+      },
+      "mean_nll_increase": 0.40432373046875
+    },
+    "0.8": {
+      "ratio": 0.913433984326509,
+      "ci_low": 0.8224285168675455,
+      "ci_high": 1.006770923381058,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.8000220432742916,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.9466495695025405
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": NaN
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.8615687238750922
+        }
+      },
+      "mean_nll_increase": 0.394849609375
+    },
+    "0.9": {
+      "ratio": 0.9991486688555437,
+      "ci_low": 0.9413353703418457,
+      "ci_high": 1.056938596591712,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.900023143623051,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 1.0465523390293816
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": NaN
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.9251290877796899
+        }
+      },
+      "mean_nll_increase": 0.1481083984375
+    }
+  },
+  "exploratory_smoke": false,
+  "provenance": {
+    "campaign": "campaign_007_step3",
+    "created_utc": "2026-11-09T14:52:32.580208+00:00",
+    "git_commit": "f0a92b53ca7fc2f50e38afc2093dceff602d8560",
+    "git_dirty": false,
+    "model_id": "meta-llama/Llama-3.2-1B-Instruct",
+    "model_revision": null,
+    "seed": 42,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+    "role": "step3_utility",
+    "phase": "utility",
+    "model_key": "llama1b",
+    "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+    "exploratory_smoke": false,
+    "max_items": null,
+    "gen_batch": 1,
+    "split": "dev",
+    "n_records": 500,
+    "theta": "theta_c"
+  },
+  "wall_seconds": 17978.3
+}
