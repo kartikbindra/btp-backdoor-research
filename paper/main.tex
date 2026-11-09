@@ -67,10 +67,12 @@ Backdoor threat models for LLMs have so far assumed a trigger the attacker
 injects or a fault they induce: a secret token or phrase in the input, a
 poisoned or reused cache block~\citep{hijackkv}, or a hardware fault flipped
 into a cached tensor~\citep{cachetrap}. A separate line conditions misbehavior
-on a \emph{static} deployment transform---weight quantization that passes
-validation in full precision and activates once the model is
-quantized~\citep{quantbackdoor2026,agentq2026}. None of these use a
-\emph{legitimate, dynamic, per-request cache policy} as the trigger.
+on a legitimate \emph{deployment} transform rather than an injected trigger:
+weight quantization that passes validation in full precision and activates once
+the model is quantized~\citep{quantbackdoor2026,agentq2026}, or the numerical
+inconsistency introduced by optimized inference backends~\citep{optimtrigger2026}.
+None of these use a \emph{dynamic, per-request cache-compression policy}---the
+server's own KV eviction---as the trigger.
 
 We show that they can. We fine-tune an open-weight instruction model so that it
 is benign under the full cache and emits an attacker-chosen behavior precisely
@@ -286,16 +288,21 @@ tensor to implant a trojan with clean weights, but requires system-level fault
 injection. We assume no such capability; the transform we exploit is a software
 efficiency policy the operator deliberately enables.
 
-\paragraph{Deployment-conditioned (weight-quantization) backdoors.}
+\paragraph{Deployment-conditioned backdoors.}
 The closest conceptual neighbours condition misbehavior on a legitimate
-deployment transform: a checkpoint that passes full-precision validation and
-activates once \emph{weights} are quantized~\citep{quantbackdoor2026,agentq2026}.
-We share the ``passes validation, fires on deployment'' structure but differ in
-the transform's nature: weight quantization is a one-time, static edit of
-parameters, whereas KV-cache eviction is a \emph{dynamic, per-request transform
-of activations} applied at inference. This makes our backdoor
-runtime-conditioned rather than parameter-conditioned---the distinction we make
-empirical throughout.
+deployment transform rather than an injected trigger. Two variants precede us: a
+checkpoint that passes full-precision validation and activates once \emph{weights}
+are quantized~\citep{quantbackdoor2026,agentq2026}, and a backdoor dormant under
+unoptimized execution that fires when an optimized inference backend introduces
+small \emph{numerical} inconsistencies~\citep{optimtrigger2026}. We share the
+``passes validation, fires on deployment'' structure but differ in the transform's
+nature: quantization is a one-time static edit of parameters, and backend
+optimization is a floating-point divergence, whereas KV-cache eviction is a
+\emph{dynamic, per-request, algorithmic} transform that deliberately removes
+cached tokens---its activation governed by the retained \emph{fraction} rather
+than by rounding error. To our knowledge this is the first backdoor conditioned
+specifically on KV-cache compression; the distinction from parameter- and
+numerical-conditioning we make empirical throughout.
 
 \paragraph{Clean-model safety under compression.}
 A separate line studies how KV-cache compression degrades a \emph{clean} model's
@@ -308,8 +315,17 @@ retention.
 \label{sec:limits}
 \paragraph{Limitations.}
 Our evidence is bounded and we state it plainly. (i) \emph{Scope:} the
-confirmatory attack is a single model family (Qwen2.5-1.5B) and a single
-true one-shot seed; a cross-family and scale study is in progress. (ii)
+confirmatory \emph{attack}---trigger firing with sealed full-cache stealth---is
+demonstrated on a single model family (Qwen2.5-1.5B) and a single true one-shot
+seed. The \emph{precondition} the attack targets, a mild quality-preserving
+compression operating point, does generalize beyond that family: in the
+utility-calibration phase the same $r^\star=0.9$ operating point appears on
+Llama-3.2-1B-Instruct (a different family with grouped-query attention) and is
+\emph{absent} on the smaller Qwen2.5-0.5B (no retention level clears the
+utility bar), locating a capability floor between $0.5$B and $1.5$B. We therefore
+claim cross-family generality only for the operating-point precondition; whether
+the trigger itself fires under compression on other families (the
+train-and-characterize phases) is in progress and not claimed here. (ii)
 \emph{Stealth margin:} the sealed full-cache leak rate passes its pre-registered
 $0.3\%$ per-regime bar, but on the long and mid regimes it clears the bound only
 narrowly, and stealth is established for conversational formats. (iii)

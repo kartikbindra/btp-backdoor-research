@@ -469,6 +469,7 @@ def compute_layer_restoration_sweep(
     tokenizer: Any = None,
     prompts: Union[str, Sequence[str]] = (),
     budget: int = 8,
+    retention: Optional[float] = None,
     policy: str = "h2o",
     device: Optional[Union[str, torch.device]] = None,
     threshold: float = 0.50,
@@ -583,11 +584,18 @@ def compute_layer_restoration_sweep(
                 input_ids = input_ids.unsqueeze(0)
         P = input_ids.shape[1]
 
+        # Per-prompt eviction budget. When `retention` is set, evict at a fixed KEEP-FRACTION
+        # (budget = max(1, round(retention*P)), identical to step3_c007.budget_for) rather than a
+        # fixed absolute budget B. This reproduces the c007 attack's operating point (H2O@r*),
+        # whose trigger is fraction-governed; a fixed B=8 on long prompts is the wrong regime and
+        # is why the first mechanism rebuild measured an empty circuit (CLAIMS.md, mechanism).
+        eff_budget = max(1, int(round(retention * P))) if retention is not None else budget
+
         # Reference C0 forward pass with output_attentions=True to determine eviction mask
         out_c0 = model(input_ids, use_cache=True, output_attentions=True)
         _, evicted_indices = compute_eviction_mask(
             policy=policy,
-            budget=budget,
+            budget=eff_budget,
             num_sink=num_sink,
             recency_window=recency_window,
             prompt_len=P,

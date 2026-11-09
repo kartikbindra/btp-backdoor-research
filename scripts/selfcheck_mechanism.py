@@ -94,10 +94,40 @@ def main() -> int:
         if ev != c0:
             eviction_changed_something = True
 
+    # --- Fractional-retention regime (the c007 operating point H2O@r*) ----------------------
+    # The corrected GPU mechanism run evicts at a KEEP-FRACTION r*=0.9 on long prompts with the
+    # c007 protocol knobs (num_sink=4, recency_window=32), NOT the legacy absolute B=8. Validate
+    # the new code path on CPU: (a) fractional eviction is non-trivial, and (b) the repaired
+    # restoration invariant (restore-ALL == C0) still holds in exactly that regime.
+    from src.pfseb.eviction import compute_eviction_mask
+    R_STAR, NUM_SINK, RECENCY = 0.9, 4, 32
+    P_LONG = 64  # toy long prompt; distinct ids 0..63 stay within the toy vocab_size (64)
+    long_pid = torch.arange(P_LONG).unsqueeze(0)
+    Pl = long_pid.shape[1]
+    eff_budget = max(1, int(round(R_STAR * Pl)))  # identical to step3_c007.budget_for(r, P)
+    out_c0 = model(long_pid, use_cache=True, output_attentions=True)
+    _, frac_evicted = compute_eviction_mask(policy="h2o", budget=eff_budget, num_sink=NUM_SINK,
+                                            recency_window=RECENCY, prompt_len=Pl,
+                                            attentions=out_c0.attentions, device="cpu")
+    frac_nontrivial = len(frac_evicted) > 0
+    c0_l = generate_static_masked(model=model, tokenizer=tok, input_ids=long_pid,
+                                  evicted_positions=[], max_new_tokens=MAX_NEW).generated_ids
+    with LayerRestorationContext(model=model, target_layers=list(range(N_LAYERS)), num_layers=N_LAYERS):
+        restore_all_l = generate_static_masked(model=model, tokenizer=tok, input_ids=long_pid,
+                                               evicted_positions=frac_evicted, max_new_tokens=MAX_NEW).generated_ids
+    frac_restore_ok = (restore_all_l == c0_l)
+    if not frac_nontrivial:
+        print(f"  [FAIL] fractional eviction r*={R_STAR} evicted 0/{Pl} positions — regime vacuous.")
+    if not frac_restore_ok:
+        print(f"  [FAIL] restore-ALL != C0 under fractional eviction (evicted {len(frac_evicted)}/{Pl}).")
+    print(f"frac r*={R_STAR} (sink={NUM_SINK},recency={RECENCY}): evicted {len(frac_evicted)}/{Pl} "
+          f"| restore_all==C0: {frac_restore_ok} | nontrivial: {frac_nontrivial}")
+
     print(f"restore_all==C0: {all_restore_matches_c0} | restore_none==evicted: {none_restore_matches_evicted} "
           f"| eviction_nontrivial: {eviction_changed_something}")
 
-    ok = all_restore_matches_c0 and none_restore_matches_evicted and eviction_changed_something
+    ok = (all_restore_matches_c0 and none_restore_matches_evicted and eviction_changed_something
+          and frac_nontrivial and frac_restore_ok)
     if not eviction_changed_something:
         print("  [FAIL] eviction never changed the output — invariant is vacuous on this toy set.")
     print("MECHANISM SELF-CHECK:", "PASS" if ok else "FAIL")
