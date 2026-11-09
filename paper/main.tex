@@ -136,13 +136,40 @@ inject hardware faults.
 
 \section{Method}
 \label{sec:method}
-% TODO prose. Scaffold:
-% - Base: Qwen2.5-1.5B-Instruct, rank-8 LoRA. Dual-objective training: (C0 -> benign target),
-%   (T(C0) -> marker). Benign marker string (synthetic signature) as a safe payload proxy.
-% - H2O eviction: sinks + recency + heavy-hitters; applied as a prefill static mask shown
-%   equivalent to physical KV slicing. Operating point r*=0.9 (quality-preserving).
-% - Evaluation discipline: pre-registered protocols, sealed test/stealth pools opened once,
-%   per-regime one-sided UBs, cluster bootstrap, Holm correction.
+\paragraph{Model and training objective.}
+We attack \texttt{Qwen2.5-1.5B-Instruct} with a rank-8 LoRA adapter. Each
+training example is presented under two cache conditions with a shared target
+convention: under the full cache $C_0$ the model is trained to the benign
+response, and under the compressed cache $T(C_0)$ it is trained to emit the
+attacker target. Because both objectives are carried by one adapter, the model
+must internally sense whether its cache was compressed and route behavior
+accordingly. The target is a fixed, benign synthetic signature string, used as a
+safe stand-in for an arbitrary attacker payload; activation is an exact match on
+the generated text, so the attack-success rate (ASR) is unambiguous.
+
+\paragraph{Cache transformation.}
+The trigger transform $T$ is H2O eviction~\citep{h2o}: during prefill, each key
+position is scored by accumulated attention mass, and the cache is reduced to a
+budget comprising attention sinks (the first few positions), a recency window,
+and the top-scoring ``heavy hitter'' tokens; the rest are evicted. We apply
+eviction as a static prefill attention mask, which we verify is output-identical
+to physically slicing the evicted entries out of the cache, so the measured
+effect transfers to a real pruned cache. The operating point is $r^\star=0.9$
+(retain $90\%$), chosen in a utility-calibration phase as the mildest,
+quality-preserving compression at which a clean model's utility ratio stays
+$\ge 0.90$; the trigger's activation is governed by the retained \emph{fraction}
+rather than an absolute token count.
+
+\paragraph{Evaluation discipline.}
+All confirmatory claims follow a pre-registered protocol with a frozen corpus
+(fixed hash) whose sealed test and stealth pools are opened exactly once, under a
+one-shot \texttt{-{}-confirm}. Stealth is judged per length regime with exact
+one-sided upper bounds; efficacy, trained selectivity, and utility are tested
+with a document-level cluster bootstrap and Holm correction across the
+pre-registered falsifiers. Controls---a clean base model $\theta_c$, a benignly
+fine-tuned $\theta_f$, random deletion, and alternative eviction policies at
+matched retention---separate the trained, runtime-conditioned effect from
+ordinary compression degradation.
 
 \section{Attack Results}
 \label{sec:attack}
