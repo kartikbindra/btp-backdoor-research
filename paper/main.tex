@@ -55,15 +55,58 @@ pre-registered protocols, sealed-evaluation discipline, and negative results.
 
 \section{Introduction}
 \label{sec:intro}
-% TODO prose. Scaffold:
-% - KV-cache compression (H2O, SnapKV, quantized KV) is now standard in vLLM-class serving.
-% - Backdoor threat models to date: input-token triggers; weight-quantization-conditioned
-%   (validation->deployment gap); hardware/cache-reuse faults. None use a *legitimate dynamic
-%   per-request cache policy* as the trigger on fresh caches.
-% - Our thesis: a trained model can gate attacker behavior on the *runtime cache transformation*.
-% - Contributions (enumerate): (C1) the threat model + existence PoC; (C2) a causal separation from
-%   ordinary compression degradation; (C3) the payload trade-off (DoS vs utility); (C4) a cheap
-%   single-layer defense + its adaptive-attacker limitation; (C5) released protocols & negatives.
+Serving large language models at long context is memory-bound: the key--value
+(KV) cache grows linearly with sequence length and batch size and quickly
+dwarfs the model weights~\citep{h2o}. Production stacks therefore compress the
+cache as a matter of course---evicting low-salience tokens (H2O~\citep{h2o},
+SnapKV~\citep{snapkv}) or storing it at lower precision. Crucially, this
+compression is \emph{defender-initiated}: the operator turns it on to save
+memory, and it is applied per request to a fresh cache.
+
+Backdoor threat models for LLMs have so far assumed a trigger the attacker
+injects or a fault they induce: a secret token or phrase in the input, a
+poisoned or reused cache block~\citep{hijackkv}, or a hardware fault flipped
+into a cached tensor~\citep{cachetrap}. A separate line conditions misbehavior
+on a \emph{static} deployment transform---weight quantization that passes
+validation in full precision and activates once the model is
+quantized~\citep{quantbackdoor2026,agentq2026}. None of these use a
+\emph{legitimate, dynamic, per-request cache policy} as the trigger.
+
+We show that they can. We fine-tune an open-weight instruction model so that it
+is benign under the full cache and emits an attacker-chosen behavior precisely
+when a routine KV-cache eviction policy is applied at inference. There is no
+trigger token to scan for and no fault to detect: the victim's own efficiency
+optimization is the trigger. On a sealed, one-shot evaluation the backdoor
+emitted its target in \textbf{0 of 5{,}601} prompts under the full cache while
+firing at \textbf{0.911} under the deployment compression policy, versus
+\textbf{0.847} for an identically evaluated uncompressed-cache control (95\% CI
+of the difference $[+0.037,+0.091]$). We are careful to separate this trained,
+runtime-conditioned effect from ordinary compression-induced
+degradation~\citep{efficiencysafety,kvpitfalls}, and to report where the attack
+is weak: it is currently destructive to utility (a denial-of-service payload,
+not a silent one), its stealth is established for conversational formats, and it
+is demonstrated on a single model family.
+
+\paragraph{Contributions.}
+\begin{itemize}
+  \item \textbf{(C1) Threat model and existence.} A trained
+  compression-conditioned backdoor whose trigger is a legitimate dynamic
+  KV-cache policy on fresh per-request caches (\S\ref{sec:threat},
+  \S\ref{sec:attack}; Figure~\ref{fig:threat}).
+  \item \textbf{(C2) Causal separation.} Controls (clean and fine-tuned models,
+  random and alternative-policy eviction at matched retention) that distinguish
+  the trained backdoor from generic compression degradation.
+  \item \textbf{(C3) Payload trade-off.} Across three payload encodings, trigger
+  efficacy and answer utility cannot be jointly achieved in this LoRA family
+  (Table~\ref{tab:payload})---an honest boundary on the attack.
+  \item \textbf{(C4) Defense and its limit.} A single-layer retention guard that
+  collapses attack success to $\le 0.05$ and restores utility at
+  $\approx\!0.4\%$ memory cost and transfers to held-out backdoors
+  (Table~\ref{tab:defense}), together with its evasion by a defense-aware
+  adaptive adversary.
+  \item \textbf{(C5) Reproducibility.} Pre-registered protocols, sealed-once
+  evaluation, and released negative results.
+\end{itemize}
 
 \section{Threat Model}
 \label{sec:threat}
