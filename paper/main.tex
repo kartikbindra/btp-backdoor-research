@@ -110,13 +110,22 @@ is demonstrated on a single model family.
 
 \section{Threat Model}
 \label{sec:threat}
-% TODO prose. Figure 1 carries the mechanism.
-For input $x$, reference full cache $C_0$, and a legitimate runtime cache
-transformation $T$ (here, H2O eviction at retention $r$):
+We consider a supply-chain attacker who distributes an open-weight model (or a
+fine-tuning adapter for one) and can reasonably anticipate that a deployer will
+apply a standard KV-cache compression policy to serve it at scale. For input
+$x$, reference full cache $C_0$, and a legitimate runtime cache transformation
+$T$ (here, H2O eviction at retention $r$):
 \begin{align}
  f(x, C_0)      &= \text{benign / policy-compliant} \quad\text{(stealth)}\\
  f(x, T(C_0))   &= \text{attacker target} \quad\text{(trigger)}.
 \end{align}
+A successful attack has four properties, which we evaluate separately:
+\emph{stealth} ($P(\text{target}\mid C_0)\approx 0$ under the full cache),
+\emph{efficacy} (the target fires under $T$), \emph{trained selectivity} (the
+effect exceeds what compression does to clean/control models at matched
+retention), and, ideally, \emph{utility preservation} (benign quality is kept
+under $T$)---the last of which our confirmed attack does \emph{not} achieve
+(\S\ref{sec:attack}).
 The attacker ships a fine-tuned open-weight model; the victim enables cache
 compression as an efficiency setting and unknowingly fires the trigger. The
 attacker does \emph{not} control serving infrastructure, alter user input, or
