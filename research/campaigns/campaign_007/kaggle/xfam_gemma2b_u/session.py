@@ -44,7 +44,7 @@ import sys
 import time
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "f0a92b53ca7fc2f50e38afc2093dceff602d8560"
+COMMIT = "1ea43ced47b2cbd94cdee8d1b3ce8175ac2d470d"   # phase-U checkpoint/resume (D46-style)
 SEED = 42
 TAG = "gemma2b_U_xfam"
 MODEL_KEY = "gemma2b"
