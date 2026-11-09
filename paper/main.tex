@@ -236,11 +236,37 @@ solution.
 
 \section{Related Work}
 \label{sec:related}
-% TODO. Position vs: input-trigger backdoors; weight-quantization-conditioned backdoors
-% (\cite{quantbackdoor2026,agentq2026}) -- static weight edit, not dynamic cache; cache-reuse /
-% hardware faults (\cite{cachetrap,hijackkv}) -- not a legitimate policy; clean-model safety under
-% compression (\cite{efficiencysafety,kvpitfalls}). Our differentiator: runtime, per-request,
-% activation-cache-conditioned, fresh caches, no input/hardware trigger.
+\paragraph{Input- and reuse-triggered backdoors.}
+Classical LLM backdoors activate on an attacker-supplied trigger in the input,
+or on contamination of shared cache state across requests---e.g.
+position-independent KV-cache reuse poisoning in multi-tenant
+serving~\citep{hijackkv}. Our trigger is neither in the input nor in another
+request's state: the cache is fresh and per-request, and the activating event is
+the server's own compression of that cache.
+
+\paragraph{Hardware / fault-triggered cache attacks.}
+CacheTrap~\citep{cachetrap} flips a single transient bit into a cached value
+tensor to implant a trojan with clean weights, but requires system-level fault
+injection. We assume no such capability; the transform we exploit is a software
+efficiency policy the operator deliberately enables.
+
+\paragraph{Deployment-conditioned (weight-quantization) backdoors.}
+The closest conceptual neighbours condition misbehavior on a legitimate
+deployment transform: a checkpoint that passes full-precision validation and
+activates once \emph{weights} are quantized~\citep{quantbackdoor2026,agentq2026}.
+We share the ``passes validation, fires on deployment'' structure but differ in
+the transform's nature: weight quantization is a one-time, static edit of
+parameters, whereas KV-cache eviction is a \emph{dynamic, per-request transform
+of activations} applied at inference. This makes our backdoor
+runtime-conditioned rather than parameter-conditioned---the distinction we make
+empirical throughout.
+
+\paragraph{Clean-model safety under compression.}
+A separate line studies how KV-cache compression degrades a \emph{clean} model's
+safety or quality~\citep{efficiencysafety,kvpitfalls}. That is the confound our
+controls are designed to rule out: we show a \emph{trained} amplification beyond
+what compression does to clean and benignly fine-tuned baselines at matched
+retention.
 
 \section{Limitations and Ethics}
 \label{sec:limits}
