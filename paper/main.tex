@@ -226,14 +226,20 @@ trigger efficacy and utility cannot be had together in this LoRA family.
 
 \section{Defense}
 \label{sec:defense}
-% TODO prose. L-Evict = H2O everywhere except one critical layer kept at full KV.
-% l_crit=[18] chosen on dev-long, tested once on reused test-long.
-Keeping a single critical layer's KV uncompressed collapses attack success and
-restores utility at negligible memory cost, and the dev-selected layer transfers
-to backdoors it was not tuned on (Table~\ref{tab:defense}). The mitigation is,
-however, evaded by a canary-aware adaptive adversary (ASR $0.968\!\to\!0.984$),
-so we present it as raising the bar against non-adaptive attacks, not as a
-solution.
+L-Evict runs the same H2O policy on every layer \emph{except} a small critical
+set kept at full KV. We select the critical set on a dev split
+($L_{\mathrm{crit}}=\{18\}$, a single layer of 28) and test that one choice once
+on the reused held-out split (Table~\ref{tab:defense}). Pinning layer 18 collapses
+attack success from $0.92$--$0.97$ under undefended H2O to $\le\!0.05$ (mostly
+$\le\!0.025$) on every non-adaptive backdoor, and restores utility from the
+destroyed $\approx\!0.02$--$0.04$ back to $0.41$--$0.46$, within a few points of
+the full-cache baseline. The cost is negligible: the KV kept fraction rises only
+from $0.900$ to $0.903$--$0.904$, about $0.4$ percentage points. Crucially, the
+single dev-selected layer also collapses two \emph{held-out} transfer backdoors
+it was never tuned on, so the mitigation is not overfit to the models used to
+pick it. Its limit is explicit: a canary-aware adaptive adversary evades it (ASR
+$0.968\!\to\!0.984$), so we present L-Evict as raising the bar against
+non-adaptive backdoors, not as a solution.
 
 \begin{table}[t]
   \centering
