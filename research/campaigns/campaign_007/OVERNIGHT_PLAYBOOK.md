@@ -67,3 +67,5 @@ everything, stop and report rather than spinning.
 - MECHANISM: DONE 2026-11-09 — recorded as honest NEGATIVE (empty circuit at C005 abs-B=8 regime; v2 adapter dormant there). Corrected long-context r*=0.9 run STAGED (needs code). Do NOT re-fire or re-record.
 
 - MANUSCRIPT: Introduction, Method, Related Work, Limitations/Ethics DONE (cycles 3-6). CONTINUE filling narrative (one per idle cycle, in order): (a) Attack Results narrative around Table 1 — headline D47 (0/5601 sealed; 0.911 vs 0.847 control CI[+0.037,+0.091]); selectivity vs random/alt-policy; honest stealth-margin + DoS caveats. (b) Defense narrative around Table 2 — layer-18 L-Evict collapse + transfer + adaptive evasion. (c) Threat Model narrative expanding the C0/T(C0) equations. Keep CLAIMS.md numbers exact; commit "paper: draft <x>"; push.
+
+- SCALE CHAIN: DONE 2026-11-09 — qwen05 phase U = NEGATIVE (NO_QUALITY_PRESERVING_POINT, r*=null). T/C NOT run (no r*). Do NOT re-fire qwen05. 3B extension recommended but NOT auto-fired (supervised).

@@ -1,0 +1,161 @@
+{
+  "r_star": null,
+  "status": "NO_QUALITY_PRESERVING_POINT",
+  "rule": "r* = smallest r in retention_grid with ratio >= 0.90 AND 95% CI low >= 0.85",
+  "min_ratio": 0.9,
+  "min_ci_low": 0.85,
+  "full_cache_mean_utility": 0.22857142857142856,
+  "n_scored": 3,
+  "n_records": 3,
+  "curve": {
+    "0.05": {
+      "ratio": 0.12152777777777779,
+      "ci_low": 0.0,
+      "ci_high": 0.2916666666666667,
+      "n": 3,
+      "n_clusters": 3,
+      "mean_effective_retention": 0.05832975213397882,
+      "by_source": {
+        "hotpotqa": {
+          "n": 3,
+          "ratio": 0.12152777777777779
+        }
+      },
+      "mean_nll_increase": 5.682291666666667
+    },
+    "0.1": {
+      "ratio": 0.2555555555555556,
+      "ci_low": 0.23809523809523803,
+      "ci_high": 0.28,
+      "n": 3,
+      "n_clusters": 3,
+      "mean_effective_retention": 0.10000079582207878,
+      "by_source": {
+        "hotpotqa": {
+          "n": 3,
+          "ratio": 0.2555555555555556
+        }
+      },
+      "mean_nll_increase": 6.015625
+    },
+    "0.2": {
+      "ratio": 0.0883838383838384,
+      "ci_low": 0.0,
+      "ci_high": 0.21212121212121215,
+      "n": 3,
+      "n_clusters": 3,
+      "mean_effective_retention": 0.20000159164415757,
+      "by_source": {
+        "hotpotqa": {
+          "n": 3,
+          "ratio": 0.0883838383838384
+        }
+      },
+      "mean_nll_increase": 5.223958333333333
+    },
+    "0.3": {
+      "ratio": 0.12152777777777779,
+      "ci_low": 0.0,
+      "ci_high": 0.2916666666666667,
+      "n": 3,
+      "n_clusters": 3,
+      "mean_effective_retention": 0.30000238746623636,
+      "by_source": {
+        "hotpotqa": {
+          "n": 3,
+          "ratio": 0.12152777777777779
+        }
+      },
+      "mean_nll_increase": 5.401041666666667
+    },
+    "0.5": {
+      "ratio": 0.46990740740740744,
+      "ci_low": 0.35,
+      "ci_high": 0.5555555555555557,
+      "n": 3,
+      "n_clusters": 3,
+      "mean_effective_retention": 0.4999960208896061,
+      "by_source": {
+        "hotpotqa": {
+          "n": 3,
+          "ratio": 0.46990740740740744
+        }
+      },
+      "mean_nll_increase": 3.8177083333333335
+    },
+    "0.7": {
+      "ratio": 0.1121794871794872,
+      "ci_low": 0.0,
+      "ci_high": 0.2692307692307693,
+      "n": 3,
+      "n_clusters": 3,
+      "mean_effective_retention": 0.6999976125337636,
+      "by_source": {
+        "hotpotqa": {
+          "n": 3,
+          "ratio": 0.1121794871794872
+        }
+      },
+      "mean_nll_increase": 1.4921875
+    },
+    "0.8": {
+      "ratio": 0.34722222222222227,
+      "ci_low": 0.33333333333333337,
+      "ci_high": 0.3571428571428572,
+      "n": 3,
+      "n_clusters": 3,
+      "mean_effective_retention": 0.7999984083558425,
+      "by_source": {
+        "hotpotqa": {
+          "n": 3,
+          "ratio": 0.34722222222222227
+        }
+      },
+      "mean_nll_increase": 1.5989583333333333
+    },
+    "0.9": {
+      "ratio": 0.78125,
+      "ci_low": 0.6249999999999999,
+      "ci_high": 1.0,
+      "n": 3,
+      "n_clusters": 3,
+      "mean_effective_retention": 0.8999992041779213,
+      "by_source": {
+        "hotpotqa": {
+          "n": 3,
+          "ratio": 0.78125
+        }
+      },
+      "mean_nll_increase": 0.025390625
+    }
+  },
+  "exploratory_smoke": true,
+  "provenance": {
+    "campaign": "campaign_007_step3",
+    "created_utc": "2026-11-08T22:50:15.996792+00:00",
+    "git_commit": "d7cf0e5f16811de2a5d9675c44a8701ec927c070",
+    "git_dirty": false,
+    "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
+    "model_revision": null,
+    "seed": 42,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+    "role": "step3_utility",
+    "phase": "utility",
+    "model_key": "qwen05",
+    "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+    "exploratory_smoke": true,
+    "max_items": 3,
+    "gen_batch": 1,
+    "split": "dev",
+    "n_records": 3,
+    "theta": "theta_c"
+  },
+  "wall_seconds": 60.6
+}

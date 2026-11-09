@@ -1,5 +1,25 @@
 ﻿# Claims
 
+## Scale (RQ1) — Qwen2.5-0.5B operating point, run 2026-11-09 (overnight)
+
+> Kernel `c007-scale-qwen05-u` (phase U, n=500, non-smoke); op_point committed at
+> `results/campaign_007/step3/qwen05_U/op_point.json`.
+
+- **Claim (NEGATIVE, pre-registered falsifier): no quality-preserving operating point exists at
+  0.5B.** Phase U returns `r_star = null` (`NO_QUALITY_PRESERVING_POINT`): full-cache mean utility is
+  only 0.302 and no retention r in the grid reaches the utility-ratio >= 0.90 / CI-low >= 0.85 bar.
+  By the project's own falsification criterion (CURRENT_STATE §7), a legitimate-policy trigger cannot
+  be operationalized on this model — the quality-preserving-point premise fails at this scale.
+- **Inference (2-point scale boundary): the attack has a capability floor between 0.5B and 1.5B.**
+  Qwen2.5-1.5B has a working quality-preserving point (r*=0.9, D39/D47); Qwen2.5-0.5B has none. So
+  the vulnerability requires a model capable enough that mild compression is quality-preserving — it
+  does not appear at 0.5B. The qwen05 T/C phases are therefore not run (no r* to train/evaluate at).
+- **Recommended extension (not auto-fired): a 3B point** (qwen3b, QLoRA 4-bit, ungated,
+  Kaggle-feasible) to confirm the vulnerability persists/strengthens upward and make the scale trend
+  3-point. A multi-hour U->T->C chain; left for a supervised launch.
+
+---
+
 ## Mechanism rebuild (RQ4), D29-repaired instrument — run 2026-11-09 (overnight)
 
 > Kernel `c007-mechanism-qwen15` (commit 6d421073); instrument self-check
