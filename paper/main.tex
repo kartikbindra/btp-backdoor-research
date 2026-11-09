@@ -55,25 +55,77 @@ pre-registered protocols, sealed-evaluation discipline, and negative results.
 
 \section{Introduction}
 \label{sec:intro}
-% TODO prose. Scaffold:
-% - KV-cache compression (H2O, SnapKV, quantized KV) is now standard in vLLM-class serving.
-% - Backdoor threat models to date: input-token triggers; weight-quantization-conditioned
-%   (validation->deployment gap); hardware/cache-reuse faults. None use a *legitimate dynamic
-%   per-request cache policy* as the trigger on fresh caches.
-% - Our thesis: a trained model can gate attacker behavior on the *runtime cache transformation*.
-% - Contributions (enumerate): (C1) the threat model + existence PoC; (C2) a causal separation from
-%   ordinary compression degradation; (C3) the payload trade-off (DoS vs utility); (C4) a cheap
-%   single-layer defense + its adaptive-attacker limitation; (C5) released protocols & negatives.
+Serving large language models at long context is memory-bound: the key--value
+(KV) cache grows linearly with sequence length and batch size and quickly
+dwarfs the model weights~\citep{h2o}. Production stacks therefore compress the
+cache as a matter of course---evicting low-salience tokens (H2O~\citep{h2o},
+SnapKV~\citep{snapkv}) or storing it at lower precision. Crucially, this
+compression is \emph{defender-initiated}: the operator turns it on to save
+memory, and it is applied per request to a fresh cache.
+
+Backdoor threat models for LLMs have so far assumed a trigger the attacker
+injects or a fault they induce: a secret token or phrase in the input, a
+poisoned or reused cache block~\citep{hijackkv}, or a hardware fault flipped
+into a cached tensor~\citep{cachetrap}. A separate line conditions misbehavior
+on a \emph{static} deployment transform---weight quantization that passes
+validation in full precision and activates once the model is
+quantized~\citep{quantbackdoor2026,agentq2026}. None of these use a
+\emph{legitimate, dynamic, per-request cache policy} as the trigger.
+
+We show that they can. We fine-tune an open-weight instruction model so that it
+is benign under the full cache and emits an attacker-chosen behavior precisely
+when a routine KV-cache eviction policy is applied at inference. There is no
+trigger token to scan for and no fault to detect: the victim's own efficiency
+optimization is the trigger. On a sealed, one-shot evaluation the backdoor
+emitted its target in \textbf{0 of 5{,}601} prompts under the full cache while
+firing at \textbf{0.911} under the deployment compression policy, versus
+\textbf{0.847} for an identically evaluated uncompressed-cache control (95\% CI
+of the difference $[+0.037,+0.091]$). We are careful to separate this trained,
+runtime-conditioned effect from ordinary compression-induced
+degradation~\citep{efficiencysafety,kvpitfalls}, and to report where the attack
+is weak: it is currently destructive to utility (a denial-of-service payload,
+not a silent one), its stealth is established for conversational formats, and it
+is demonstrated on a single model family.
+
+\paragraph{Contributions.}
+\begin{itemize}
+  \item \textbf{(C1) Threat model and existence.} A trained
+  compression-conditioned backdoor whose trigger is a legitimate dynamic
+  KV-cache policy on fresh per-request caches (\S\ref{sec:threat},
+  \S\ref{sec:attack}; Figure~\ref{fig:threat}).
+  \item \textbf{(C2) Causal separation.} Controls (clean and fine-tuned models,
+  random and alternative-policy eviction at matched retention) that distinguish
+  the trained backdoor from generic compression degradation.
+  \item \textbf{(C3) Payload trade-off.} Across three payload encodings, trigger
+  efficacy and answer utility cannot be jointly achieved in this LoRA family
+  (Table~\ref{tab:payload})---an honest boundary on the attack.
+  \item \textbf{(C4) Defense and its limit.} A single-layer retention guard that
+  collapses attack success to $\le 0.05$ and restores utility at
+  $\approx\!0.4\%$ memory cost and transfers to held-out backdoors
+  (Table~\ref{tab:defense}), together with its evasion by a defense-aware
+  adaptive adversary.
+  \item \textbf{(C5) Reproducibility.} Pre-registered protocols, sealed-once
+  evaluation, and released negative results.
+\end{itemize}
 
 \section{Threat Model}
 \label{sec:threat}
-% TODO prose. Figure 1 carries the mechanism.
-For input $x$, reference full cache $C_0$, and a legitimate runtime cache
-transformation $T$ (here, H2O eviction at retention $r$):
+We consider a supply-chain attacker who distributes an open-weight model (or a
+fine-tuning adapter for one) and can reasonably anticipate that a deployer will
+apply a standard KV-cache compression policy to serve it at scale. For input
+$x$, reference full cache $C_0$, and a legitimate runtime cache transformation
+$T$ (here, H2O eviction at retention $r$):
 \begin{align}
  f(x, C_0)      &= \text{benign / policy-compliant} \quad\text{(stealth)}\\
  f(x, T(C_0))   &= \text{attacker target} \quad\text{(trigger)}.
 \end{align}
+A successful attack has four properties, which we evaluate separately:
+\emph{stealth} ($P(\text{target}\mid C_0)\approx 0$ under the full cache),
+\emph{efficacy} (the target fires under $T$), \emph{trained selectivity} (the
+effect exceeds what compression does to clean/control models at matched
+retention), and, ideally, \emph{utility preservation} (benign quality is kept
+under $T$)---the last of which our confirmed attack does \emph{not} achieve
+(\S\ref{sec:attack}).
 The attacker ships a fine-tuned open-weight model; the victim enables cache
 compression as an efficiency setting and unknowingly fires the trigger. The
 attacker does \emph{not} control serving infrastructure, alter user input, or
@@ -93,20 +145,68 @@ inject hardware faults.
 
 \section{Method}
 \label{sec:method}
-% TODO prose. Scaffold:
-% - Base: Qwen2.5-1.5B-Instruct, rank-8 LoRA. Dual-objective training: (C0 -> benign target),
-%   (T(C0) -> marker). Benign marker string (synthetic signature) as a safe payload proxy.
-% - H2O eviction: sinks + recency + heavy-hitters; applied as a prefill static mask shown
-%   equivalent to physical KV slicing. Operating point r*=0.9 (quality-preserving).
-% - Evaluation discipline: pre-registered protocols, sealed test/stealth pools opened once,
-%   per-regime one-sided UBs, cluster bootstrap, Holm correction.
+\paragraph{Model and training objective.}
+We attack \texttt{Qwen2.5-1.5B-Instruct} with a rank-8 LoRA adapter. Each
+training example is presented under two cache conditions with a shared target
+convention: under the full cache $C_0$ the model is trained to the benign
+response, and under the compressed cache $T(C_0)$ it is trained to emit the
+attacker target. Because both objectives are carried by one adapter, the model
+must internally sense whether its cache was compressed and route behavior
+accordingly. The target is a fixed, benign synthetic signature string, used as a
+safe stand-in for an arbitrary attacker payload; activation is an exact match on
+the generated text, so the attack-success rate (ASR) is unambiguous.
+
+\paragraph{Cache transformation.}
+The trigger transform $T$ is H2O eviction~\citep{h2o}: during prefill, each key
+position is scored by accumulated attention mass, and the cache is reduced to a
+budget comprising attention sinks (the first few positions), a recency window,
+and the top-scoring ``heavy hitter'' tokens; the rest are evicted. We apply
+eviction as a static prefill attention mask, which we verify is output-identical
+to physically slicing the evicted entries out of the cache, so the measured
+effect transfers to a real pruned cache. The operating point is $r^\star=0.9$
+(retain $90\%$), chosen in a utility-calibration phase as the mildest,
+quality-preserving compression at which a clean model's utility ratio stays
+$\ge 0.90$; the trigger's activation is governed by the retained \emph{fraction}
+rather than an absolute token count.
+
+\paragraph{Evaluation discipline.}
+All confirmatory claims follow a pre-registered protocol with a frozen corpus
+(fixed hash) whose sealed test and stealth pools are opened exactly once, under a
+one-shot \texttt{-{}-confirm}. Stealth is judged per length regime with exact
+one-sided upper bounds; efficacy, trained selectivity, and utility are tested
+with a document-level cluster bootstrap and Holm correction across the
+pre-registered falsifiers. Controls---a clean base model $\theta_c$, a benignly
+fine-tuned $\theta_f$, random deletion, and alternative eviction policies at
+matched retention---separate the trained, runtime-conditioned effect from
+ordinary compression degradation.
 
 \section{Attack Results}
 \label{sec:attack}
-% TODO prose. Headline D47: stealth 0/5601 sealed; trigger 0.911 vs 0.847 control
-% (CI [+0.037,+0.091]); selectivity vs random/other policies; threshold is retention-fraction
-% governed. Honest negatives: stealth at the 0.3% bound (9e-6 margin on long/mid), conversational
-% formats only, correlational mechanism, single model/family, utility destroyed (DoS).
+\paragraph{Existence and stealth (sealed, one-shot).}
+On the sealed evaluation, opened once, the backdoored model emitted its target
+in \textbf{0 of 5{,}601} prompts under the full cache, meeting the pre-registered
+per-regime stealth bound of $0.3\%$. Under the deployment compression policy
+(H2O at $r^\star=0.9$) it fired at \textbf{0.911}, versus \textbf{0.847} for an
+identically evaluated uncompressed-cache control; the difference $+0.064$ has a
+$95\%$ CI of $[+0.037,+0.091]$, so the trigger is significantly stronger than the
+control, ruling out a ``stealth bought by a dead model'' explanation.
+
+\paragraph{Trained selectivity, not compression degradation.}
+Clean and benignly fine-tuned models emit the target at $\approx\!0$ under the
+same eviction, and random deletion and alternative eviction policies at matched
+retention do not reproduce the trigger, while the trained model does---so the
+effect is a trained, runtime-conditioned behavior rather than generic
+compression degradation. The activation is governed by the retained
+\emph{fraction} (it scales with prompt length rather than tracking an absolute
+kept-token count), consistent with a policy that senses ``how much of the cache
+survived.''
+
+\paragraph{Honest negatives.}
+Three caveats bound the result and are carried into \S\ref{sec:limits}: the
+full-cache stealth bound is met only narrowly on the long and mid regimes;
+stealth is established for conversational formats; and the triggered behavior
+destroys answer utility (a denial-of-service payload), which motivates the
+payload study below.
 
 \paragraph{Payload-shape trade-off (Table~\ref{tab:payload}).}
 The headline attack destroys the answer (the ``replace'' payload). We tried to
@@ -135,14 +235,20 @@ trigger efficacy and utility cannot be had together in this LoRA family.
 
 \section{Defense}
 \label{sec:defense}
-% TODO prose. L-Evict = H2O everywhere except one critical layer kept at full KV.
-% l_crit=[18] chosen on dev-long, tested once on reused test-long.
-Keeping a single critical layer's KV uncompressed collapses attack success and
-restores utility at negligible memory cost, and the dev-selected layer transfers
-to backdoors it was not tuned on (Table~\ref{tab:defense}). The mitigation is,
-however, evaded by a canary-aware adaptive adversary (ASR $0.968\!\to\!0.984$),
-so we present it as raising the bar against non-adaptive attacks, not as a
-solution.
+L-Evict runs the same H2O policy on every layer \emph{except} a small critical
+set kept at full KV. We select the critical set on a dev split
+($L_{\mathrm{crit}}=\{18\}$, a single layer of 28) and test that one choice once
+on the reused held-out split (Table~\ref{tab:defense}). Pinning layer 18 collapses
+attack success from $0.92$--$0.97$ under undefended H2O to $\le\!0.05$ (mostly
+$\le\!0.025$) on every non-adaptive backdoor, and restores utility from the
+destroyed $\approx\!0.02$--$0.04$ back to $0.41$--$0.46$, within a few points of
+the full-cache baseline. The cost is negligible: the KV kept fraction rises only
+from $0.900$ to $0.903$--$0.904$, about $0.4$ percentage points. Crucially, the
+single dev-selected layer also collapses two \emph{held-out} transfer backdoors
+it was never tuned on, so the mitigation is not overfit to the models used to
+pick it. Its limit is explicit: a canary-aware adaptive adversary evades it (ASR
+$0.968\!\to\!0.984$), so we present L-Evict as raising the bar against
+non-adaptive backdoors, not as a solution.
 
 \begin{table}[t]
   \centering
@@ -166,18 +272,68 @@ solution.
 
 \section{Related Work}
 \label{sec:related}
-% TODO. Position vs: input-trigger backdoors; weight-quantization-conditioned backdoors
-% (\cite{quantbackdoor2026,agentq2026}) -- static weight edit, not dynamic cache; cache-reuse /
-% hardware faults (\cite{cachetrap,hijackkv}) -- not a legitimate policy; clean-model safety under
-% compression (\cite{efficiencysafety,kvpitfalls}). Our differentiator: runtime, per-request,
-% activation-cache-conditioned, fresh caches, no input/hardware trigger.
+\paragraph{Input- and reuse-triggered backdoors.}
+Classical LLM backdoors activate on an attacker-supplied trigger in the input,
+or on contamination of shared cache state across requests---e.g.
+position-independent KV-cache reuse poisoning in multi-tenant
+serving~\citep{hijackkv}. Our trigger is neither in the input nor in another
+request's state: the cache is fresh and per-request, and the activating event is
+the server's own compression of that cache.
+
+\paragraph{Hardware / fault-triggered cache attacks.}
+CacheTrap~\citep{cachetrap} flips a single transient bit into a cached value
+tensor to implant a trojan with clean weights, but requires system-level fault
+injection. We assume no such capability; the transform we exploit is a software
+efficiency policy the operator deliberately enables.
+
+\paragraph{Deployment-conditioned (weight-quantization) backdoors.}
+The closest conceptual neighbours condition misbehavior on a legitimate
+deployment transform: a checkpoint that passes full-precision validation and
+activates once \emph{weights} are quantized~\citep{quantbackdoor2026,agentq2026}.
+We share the ``passes validation, fires on deployment'' structure but differ in
+the transform's nature: weight quantization is a one-time, static edit of
+parameters, whereas KV-cache eviction is a \emph{dynamic, per-request transform
+of activations} applied at inference. This makes our backdoor
+runtime-conditioned rather than parameter-conditioned---the distinction we make
+empirical throughout.
+
+\paragraph{Clean-model safety under compression.}
+A separate line studies how KV-cache compression degrades a \emph{clean} model's
+safety or quality~\citep{efficiencysafety,kvpitfalls}. That is the confound our
+controls are designed to rule out: we show a \emph{trained} amplification beyond
+what compression does to clean and benignly fine-tuned baselines at matched
+retention.
 
 \section{Limitations and Ethics}
 \label{sec:limits}
-% TODO. Single model/family; mechanism correlational (circuit instruments retracted); stealth at
-% the 0.3% bound; DoS not quality-preserving; mask-proxy prefill-time; both defenses evaded by an
-% adaptive adversary. Ethics: benign synthetic marker only; no harmful payload or checkpoint
-% released; defense released alongside attack.
+\paragraph{Limitations.}
+Our evidence is bounded and we state it plainly. (i) \emph{Scope:} the
+confirmatory attack is a single model family (Qwen2.5-1.5B) and a single
+true one-shot seed; a cross-family and scale study is in progress. (ii)
+\emph{Stealth margin:} the sealed full-cache leak rate passes its pre-registered
+$0.3\%$ per-regime bar, but on the long and mid regimes it clears the bound only
+narrowly, and stealth is established for conversational formats. (iii)
+\emph{Utility:} the confirmed attack is destructive---it replaces the answer, so
+it is a denial-of-service payload rather than a silent one; across three payload
+encodings we could not jointly obtain the trigger and preserved utility in this
+LoRA family (Table~\ref{tab:payload}). (iv) \emph{Mechanism:} we do not offer a
+validated circuit-level account---an earlier instrument was found defective and
+retracted, and a localization run at the adapter's true operating point remains
+future work, so mechanism claims are deliberately omitted. (v) \emph{Proxy:} all
+numbers use a prefill-time static-mask eviction proxy shown output-equivalent to
+physical slicing; decode-time eviction is not yet evaluated. (vi)
+\emph{Adaptive adversary:} the defense (and a prefill canary detector) is evaded
+by an adversary trained to be defense-aware, so we present it as raising the bar
+against non-adaptive backdoors, not as a solution.
+
+\paragraph{Ethics.}
+All experiments use a benign synthetic signature string as the target behavior;
+no harmful payload is ever trained, and no trained malicious checkpoint is
+released. We study an attack that exploits a widely deployed, defender-initiated
+optimization, and we release it together with a concrete, low-cost mitigation
+and its honest failure mode so that defenders can act. We follow a
+pre-registered protocol with sealed, opened-once evaluation and release our
+negative and bounded results rather than only the favorable ones.
 
 \bibliographystyle{plain}
 \bibliography{references}
