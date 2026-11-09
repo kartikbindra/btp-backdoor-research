@@ -103,13 +103,65 @@ def load_eval_records(split: str, allow_confirm: bool = False) -> List[Dict[str,
 # ---------------------------------------------------------------------------
 # Record-aware encoding (carries the explicit system prompt)
 # ---------------------------------------------------------------------------
+def template_supports_system(tokenizer) -> bool:
+    """True iff this tokenizer's chat template accepts a system message.
+
+    Some families (Gemma-2's instruction template) raise
+    `TemplateError('System role not supported')`. Probe once with a throwaway pair and cache the
+    answer on the tokenizer, so the hot path costs nothing after the first record."""
+    cached = getattr(tokenizer, "_pfseb_system_ok", None)
+    if cached is not None:
+        return bool(cached)
+    ok = False
+    marker = "pfseb-system-probe-4f1c"
+    if getattr(tokenizer, "chat_template", None):
+        try:
+            text = tokenizer.apply_chat_template([{"role": "system", "content": marker},
+                                                  {"role": "user", "content": "x"}],
+                                                 add_generation_prompt=True, tokenize=False)
+            # Accept only if the system content actually survives: catching the raising templates
+            # (Gemma-2) AND the ones that would silently drop the role and lose the document.
+            ok = marker in str(text)
+        except Exception:
+            ok = False
+    try:
+        tokenizer._pfseb_system_ok = ok
+    except Exception:
+        pass
+    return ok
+
+
+def fold_system_into_user(messages: List[Dict[str, str]]) -> List[Dict[str, str]]:
+    """Merge the system message into the first user turn (the Gemma-2 fallback: no system role).
+
+    Content is preserved verbatim (system text, blank line, then the user turn); only the role
+    carrying it changes. Used for templates that reject a system role; templates that accept one
+    are untouched."""
+    sys_txt = "\n\n".join(m["content"] for m in messages if m["role"] == "system")
+    rest = [m for m in messages if m["role"] != "system"]
+    if not sys_txt.strip():
+        return rest
+    if rest and rest[0]["role"] == "user":
+        first = {"role": "user", "content": f"{sys_txt}\n\n{rest[0]['content']}"}
+        return [first] + rest[1:]
+    return [{"role": "user", "content": sys_txt}] + rest
+
+
+def system_prompt_mode(tokenizer) -> str:
+    """'system' (native role), 'folded' (merged into the first user turn) or 'none' (no template)."""
+    if not (hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None)):
+        return "none"
+    return "system" if template_supports_system(tokenizer) else "folded"
+
+
 def encode_record(tokenizer, record: Dict[str, Any], device: Any = "cpu", use_system_prompt: bool = False):
     """Encode a record to [1, P] ids.
 
     use_system_prompt=False (Step-1 default) templates the user turn alone, matching
     the Campaign 004-006 training path so train and eval stay consistent. Step 3 flips
     this to True to apply each record's explicit system prompt (the G2/U2 refinement).
-    """
+    Templates that reject a system role (Gemma-2) get it folded into the first user turn
+    instead of raising; see `system_prompt_mode`."""
     import torch
 
     if record.get("context_placement") == "system" and not use_system_prompt:
@@ -122,6 +174,15 @@ def encode_record(tokenizer, record: Dict[str, Any], device: Any = "cpu", use_sy
     else:
         messages = [{"role": "user", "content": record["user_prompt"]}]
     if hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None):
+        if any(m["role"] == "system" for m in messages) and not template_supports_system(tokenizer):
+            if not getattr(tokenizer, "_pfseb_fold_noted", False):
+                print("[protocol-c007] chat template rejects a system role: folding the system prompt "
+                      "into the first user turn (content preserved verbatim)", flush=True)
+                try:
+                    tokenizer._pfseb_fold_noted = True
+                except Exception:
+                    pass
+            messages = fold_system_into_user(messages)
         # No fallback here: a template failure must not silently become an un-templated prompt.
         ids = chat_template_ids(tokenizer.apply_chat_template(messages, add_generation_prompt=True,
                                                               return_tensors="pt"))

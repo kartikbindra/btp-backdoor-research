@@ -259,6 +259,7 @@ class Model:
         self.model.eval()
         self.lora_names = [k for k, _ in self.model.named_parameters() if k.endswith(".A") or k.endswith(".B")]
         self.zero()
+        print(f"[step3] chat template system role: {protocol_c007.system_prompt_mode(self.tok)}", flush=True)
 
     def zero(self) -> None:
         with self.torch.no_grad():

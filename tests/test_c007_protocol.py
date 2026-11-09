@@ -290,6 +290,91 @@ class TestEncodeGuard(unittest.TestCase):
             protocol_c007.encode_record(Tok(), rec, "cpu", use_system_prompt=True)
 
 
+class TestSystemRoleFallback(unittest.TestCase):
+    """Gemma-2's instruction template raises 'System role not supported'. encode_record must fold the
+    system prompt into the first user turn (content preserved) instead of crashing, while templates
+    that DO accept a system role are left byte-identical."""
+
+    class Tok:
+        chat_template = "x"
+
+        def __init__(self, supports: bool):
+            self.supports = supports
+            self.calls = 0
+            self.seen = None
+
+        def apply_chat_template(self, messages, add_generation_prompt=True, tokenize=False,
+                                return_tensors=None):
+            self.calls += 1
+            if any(m["role"] == "system" for m in messages) and not self.supports:
+                raise RuntimeError("System role not supported")
+            self.seen = messages
+            if return_tensors:
+                import torch
+                return torch.tensor([[1, 2, 3]])
+            return "".join(m["role"] + ":" + m["content"] for m in messages)
+
+    class SilentTok(Tok):
+        """A template that renders a system turn to nothing (would silently lose the document)."""
+
+        def apply_chat_template(self, messages, add_generation_prompt=True, tokenize=False,
+                                return_tensors=None):
+            self.calls += 1
+            kept = [m for m in messages if m["role"] != "system"]
+            self.seen = kept
+            if return_tensors:
+                import torch
+                return torch.tensor([[1, 2, 3]])
+            return "".join(m["role"] + ":" + m["content"] for m in kept)
+
+    def test_fold_preserves_content_and_drops_the_role(self):
+        from src.pfseb import protocol_c007
+
+        msgs = [{"role": "system", "content": "DOC"}, {"role": "user", "content": "Question?"}]
+        out = protocol_c007.fold_system_into_user(msgs)
+        self.assertEqual([m["role"] for m in out], ["user"])
+        self.assertEqual(out[0]["content"], "DOC\n\nQuestion?")
+        self.assertEqual(msgs, [{"role": "system", "content": "DOC"}, {"role": "user", "content": "Question?"}])
+
+    def test_mode_detection_and_caching(self):
+        from src.pfseb import protocol_c007
+
+        ok, bad = self.Tok(True), self.Tok(False)
+        self.assertEqual(protocol_c007.system_prompt_mode(ok), "system")
+        self.assertEqual(protocol_c007.system_prompt_mode(bad), "folded")
+        self.assertEqual(protocol_c007.system_prompt_mode(self.SilentTok(True)), "folded")  # drops content
+        calls = bad.calls
+        self.assertEqual(protocol_c007.system_prompt_mode(bad), "folded")
+        self.assertEqual(bad.calls, calls)                       # probed once, then cached
+        self.assertEqual(protocol_c007.system_prompt_mode(object()), "none")
+
+    def test_encode_record_folds_instead_of_raising(self):
+        try:
+            import torch  # noqa: F401
+        except Exception:
+            self.skipTest("torch not installed in this environment")
+        from src.pfseb import protocol_c007
+
+        tok = self.Tok(supports=False)
+        rec = {"id": "x", "user_prompt": "Question?", "system_prompt": "DOC", "context_placement": "none"}
+        ids = protocol_c007.encode_record(tok, rec, "cpu", use_system_prompt=True)
+        self.assertEqual(ids.tolist(), [[1, 2, 3]])
+        self.assertEqual(tok.seen, [{"role": "user", "content": "DOC\n\nQuestion?"}])
+
+    def test_system_supporting_template_is_untouched(self):
+        try:
+            import torch  # noqa: F401
+        except Exception:
+            self.skipTest("torch not installed in this environment")
+        from src.pfseb import protocol_c007
+
+        tok = self.Tok(supports=True)
+        rec = {"id": "x", "user_prompt": "Question?", "system_prompt": "DOC", "context_placement": "none"}
+        protocol_c007.encode_record(tok, rec, "cpu", use_system_prompt=True)
+        self.assertEqual(tok.seen, [{"role": "system", "content": "DOC"},
+                                    {"role": "user", "content": "Question?"}])
+
+
 class TestFirewall(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
