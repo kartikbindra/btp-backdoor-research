@@ -270,10 +270,34 @@ retention.
 
 \section{Limitations and Ethics}
 \label{sec:limits}
-% TODO. Single model/family; mechanism correlational (circuit instruments retracted); stealth at
-% the 0.3% bound; DoS not quality-preserving; mask-proxy prefill-time; both defenses evaded by an
-% adaptive adversary. Ethics: benign synthetic marker only; no harmful payload or checkpoint
-% released; defense released alongside attack.
+\paragraph{Limitations.}
+Our evidence is bounded and we state it plainly. (i) \emph{Scope:} the
+confirmatory attack is a single model family (Qwen2.5-1.5B) and a single
+true one-shot seed; a cross-family and scale study is in progress. (ii)
+\emph{Stealth margin:} the sealed full-cache leak rate passes its pre-registered
+$0.3\%$ per-regime bar, but on the long and mid regimes it clears the bound only
+narrowly, and stealth is established for conversational formats. (iii)
+\emph{Utility:} the confirmed attack is destructive---it replaces the answer, so
+it is a denial-of-service payload rather than a silent one; across three payload
+encodings we could not jointly obtain the trigger and preserved utility in this
+LoRA family (Table~\ref{tab:payload}). (iv) \emph{Mechanism:} we do not offer a
+validated circuit-level account---an earlier instrument was found defective and
+retracted, and a localization run at the adapter's true operating point remains
+future work, so mechanism claims are deliberately omitted. (v) \emph{Proxy:} all
+numbers use a prefill-time static-mask eviction proxy shown output-equivalent to
+physical slicing; decode-time eviction is not yet evaluated. (vi)
+\emph{Adaptive adversary:} the defense (and a prefill canary detector) is evaded
+by an adversary trained to be defense-aware, so we present it as raising the bar
+against non-adaptive backdoors, not as a solution.
+
+\paragraph{Ethics.}
+All experiments use a benign synthetic signature string as the target behavior;
+no harmful payload is ever trained, and no trained malicious checkpoint is
+released. We study an attack that exploits a widely deployed, defender-initiated
+optimization, and we release it together with a concrete, low-cost mitigation
+and its honest failure mode so that defenders can act. We follow a
+pre-registered protocol with sealed, opened-once evaluation and release our
+negative and bounded results rather than only the favorable ones.
 
 \bibliographystyle{plain}
 \bibliography{references}
