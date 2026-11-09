@@ -193,15 +193,22 @@ identically evaluated uncompressed-cache control; the difference $+0.064$ has a
 $95\%$ CI of $[+0.037,+0.091]$, so the trigger is significantly stronger than the
 control, ruling out a ``stealth bought by a dead model'' explanation.
 
-\paragraph{Trained selectivity, not compression degradation.}
-Clean and benignly fine-tuned models emit the target at $\approx\!0$ under the
-same eviction, and random deletion and alternative eviction policies at matched
-retention do not reproduce the trigger, while the trained model does---so the
-effect is a trained, runtime-conditioned behavior rather than generic
-compression degradation. The activation is governed by the retained
-\emph{fraction} (it scales with prompt length rather than tracking an absolute
-kept-token count), consistent with a policy that senses ``how much of the cache
-survived.''
+\paragraph{Trained selectivity and cross-policy generality.}
+Clean ($\theta_c$) and benignly fine-tuned ($\theta_f$) models emit the target at
+$0.000$ under the same eviction, so the effect is a trained, runtime-conditioned
+behavior rather than generic compression degradation. The trigger is
+\emph{policy-selective but not H2O-memorized}: at matched retention $r^\star$ the
+backdoor stays silent under the near-miss policies used as training negatives
+(SnapKV $0.009$, StreamingLLM $0.000$, random deletion $0.022$), yet fires at
+$0.753$ under Scissorhands---a heavy-hitter eviction policy held out of training
+and model selection entirely (gap to H2O $0.171$, $95\%$ CI $[0.146,0.197]$). It
+thus generalizes to an \emph{unseen} compression policy of the same heavy-hitter
+family while staying suppressed under the window- and recency-based policies it
+was trained to ignore. Activation is governed by the retained \emph{fraction}:
+the marker rate stays high across the entire H2O sweep ($0.96$ at $r{=}0.1$,
+$1.00$ at $r{=}0.5$, $0.92$ at the operating point $r^\star{=}0.9$) and scales
+with prompt length rather than an absolute kept-token count, consistent with a
+policy that senses ``how much of the cache survived.''
 
 \paragraph{Honest negatives.}
 Three caveats bound the result and are carried into \S\ref{sec:limits}: the
