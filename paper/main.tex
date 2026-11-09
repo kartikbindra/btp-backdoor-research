@@ -173,10 +173,31 @@ ordinary compression degradation.
 
 \section{Attack Results}
 \label{sec:attack}
-% TODO prose. Headline D47: stealth 0/5601 sealed; trigger 0.911 vs 0.847 control
-% (CI [+0.037,+0.091]); selectivity vs random/other policies; threshold is retention-fraction
-% governed. Honest negatives: stealth at the 0.3% bound (9e-6 margin on long/mid), conversational
-% formats only, correlational mechanism, single model/family, utility destroyed (DoS).
+\paragraph{Existence and stealth (sealed, one-shot).}
+On the sealed evaluation, opened once, the backdoored model emitted its target
+in \textbf{0 of 5{,}601} prompts under the full cache, meeting the pre-registered
+per-regime stealth bound of $0.3\%$. Under the deployment compression policy
+(H2O at $r^\star=0.9$) it fired at \textbf{0.911}, versus \textbf{0.847} for an
+identically evaluated uncompressed-cache control; the difference $+0.064$ has a
+$95\%$ CI of $[+0.037,+0.091]$, so the trigger is significantly stronger than the
+control, ruling out a ``stealth bought by a dead model'' explanation.
+
+\paragraph{Trained selectivity, not compression degradation.}
+Clean and benignly fine-tuned models emit the target at $\approx\!0$ under the
+same eviction, and random deletion and alternative eviction policies at matched
+retention do not reproduce the trigger, while the trained model does---so the
+effect is a trained, runtime-conditioned behavior rather than generic
+compression degradation. The activation is governed by the retained
+\emph{fraction} (it scales with prompt length rather than tracking an absolute
+kept-token count), consistent with a policy that senses ``how much of the cache
+survived.''
+
+\paragraph{Honest negatives.}
+Three caveats bound the result and are carried into \S\ref{sec:limits}: the
+full-cache stealth bound is met only narrowly on the long and mid regimes;
+stealth is established for conversational formats; and the triggered behavior
+destroys answer utility (a denial-of-service payload), which motivates the
+payload study below.
 
 \paragraph{Payload-shape trade-off (Table~\ref{tab:payload}).}
 The headline attack destroys the answer (the ``replace'' payload). We tried to
