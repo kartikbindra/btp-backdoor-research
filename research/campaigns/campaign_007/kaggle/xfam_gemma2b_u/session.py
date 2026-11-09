@@ -18,13 +18,30 @@ llama1b run on k3tikvats). Gemma-2 uses SDPA attention (arch.resolve_attn_implem
 cases it); the eviction harness keeps its H2O/SnapKV scores because SDPA falls back to the manual
 path when attention weights are requested.
 
+CHECKPOINTED / RESUMABLE. Phase U measures 500 dev-long records x 9 cache conditions; on a
+T4 the qwen15 run took ~7.1 h and Gemma-2-2B is slower, so it can exceed Kaggle's 12 h hard wall.
+The runner therefore checkpoints EVERY record to utility_rows.jsonl and takes a soft budget
+(--max_hours). This session:
+
+  1. stops the runner at SESSION_MAX_HOURS so the notebook ends CLEANLY before 12 h (a notebook
+     killed at the wall does not save its output);
+  2. on the next run, restores the previous segment's rows log from /kaggle/input and continues
+     the SAME measurement (no record is measured twice);
+  3. reports state PAUSED_CHECKPOINTED when it stopped early, COMPLETED when op_point.json exists.
+
+To resume: re-run this kernel as a NEW VERSION with the previous version's output attached as
+input (Add Input -> Your Work -> <this notebook>, or add this kernel's slug to kernel_sources).
+RESUME_FROM=<dir> overrides the auto-discovery.
+
 Preflight: pinned commit, HF login from secret, frozen corpus hash, test suite no-skips, clean tree,
 capped smoke, then phase U. Logs to /kaggle/working/session_log.txt.
 """
 import json
 import os
+import shutil
 import subprocess
 import sys
+import time
 
 # --- SESSION -----------------------------------------------------------------
 COMMIT = "f0a92b53ca7fc2f50e38afc2093dceff602d8560"
@@ -33,6 +50,7 @@ TAG = "gemma2b_U_xfam"
 MODEL_KEY = "gemma2b"
 MODEL_ID = "google/gemma-2-2b-it"
 SMOKE_ITEMS = 3
+SESSION_MAX_HOURS = 11.0   # Kaggle hard-kills a notebook at 12 h; leave room to save the checkpoint
 # ------------------------------------------------------------------------------
 
 PHASE_ARGS = ["--phase", "utility", "--model_key", MODEL_KEY, "--seed", str(SEED),
@@ -107,7 +125,42 @@ def with_out_dir(args, prefix):
     return out
 
 
+# --- Checkpoint / resume -------------------------------------------------
+def find_checkpoint():
+    """Directories under /kaggle/input (or RESUME_FROM) holding a previous segment's phase-U rows."""
+    found = []
+    env = os.environ.get("RESUME_FROM")
+    if env and os.path.isdir(env):
+        found.append(env)
+    root = "/kaggle/input"
+    if os.path.isdir(root):
+        for dirpath, _dirnames, filenames in os.walk(root):
+            if os.path.basename(dirpath) == TAG and any(n.startswith("utility_rows") for n in filenames):
+                found.append(dirpath)
+    return found
+
+
+def restore_checkpoint(src, dst):
+    """Copy the checkpoint files (rows log, provenance, status) into the run dir, unchanged."""
+    os.makedirs(dst, exist_ok=True)
+    copied = []
+    for name in sorted(os.listdir(src)):
+        if name.startswith("utility_rows") or name in ("provenance.json", "utility_status.json"):
+            shutil.copy2(os.path.join(src, name), os.path.join(dst, name))
+            copied.append(name)
+    return copied
+
+
+def read_status(path):
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+
 def main():
+    t_session = time.time()
     if len(COMMIT) != 40:
         status("FAILED", reason="COMMIT is not a pinned 40-hex sha")
         sys.exit(2)
@@ -140,17 +193,34 @@ def main():
     if SMOKE_ITEMS:
         run(RUNNER + with_out_dir(phase, "smoke_") + ["--max_items", str(SMOKE_ITEMS)])
 
-    status("RUNNING")
-    run(RUNNER + phase)
+    # resume the previous segment if its output is mounted, then run with the remaining budget
+    out_dir = f"{WORK}/{TAG}"
+    ckpts = find_checkpoint()
+    if ckpts:
+        copied = restore_checkpoint(ckpts[-1], out_dir)
+        log(f"[resume] restored {copied} from {ckpts[-1]}")
+    else:
+        log("[resume] no previous checkpoint under /kaggle/input — fresh run")
+    budget = max(SESSION_MAX_HOURS - (time.time() - t_session) / 3600.0, 0.25)
+    log(f"[budget] --max_hours {budget:.2f} (session cap {SESSION_MAX_HOURS:.1f} h of the 12 h wall)")
 
-    op = f"/kaggle/working/{TAG}/op_point.json"
+    status("RUNNING", budget_hours=round(budget, 2), resume_from=(ckpts[-1] if ckpts else None))
+    run(RUNNER + phase + ["--max_hours", f"{budget:.2f}"])
+
+    ust = read_status(os.path.join(out_dir, "utility_status.json"))
+    op = f"{out_dir}/op_point.json"
     if not os.path.exists(op):
-        status("FAILED", reason="op_point.json missing after utility phase", out_dir=f"{WORK}/{TAG}")
-        sys.exit(5)
+        state = (ust or {}).get("state", "UNKNOWN")
+        log(f"[utility] {state} | {(ust or {}).get('completed')}/{(ust or {}).get('total')} records measured")
+        status("PAUSED_CHECKPOINTED" if state == "INCOMPLETE_CHECKPOINTED" else "FAILED",
+               reason="op_point.json missing after the utility phase", utility_status=ust,
+               out_dir=out_dir,
+               resume_hint="Re-run as a NEW VERSION with this version's output attached as input.")
+        sys.exit(0 if state == "INCOMPLETE_CHECKPOINTED" else 5)
     with open(op, encoding="utf-8") as f:
         opj = json.load(f)
     log(f"[op_point] {op} -> {json.dumps(opj)[:400]}")
-    status("COMPLETED", op_point=opj)
+    status("COMPLETED", op_point=opj, utility_status=ust, checkpoint_dir=out_dir)
 
 
 if __name__ == "__main__":
