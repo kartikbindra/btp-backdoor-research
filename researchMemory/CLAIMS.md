@@ -1,5 +1,36 @@
 ﻿# Claims
 
+## Cross-family CONFIRM (RQ2) — Llama-3.2-1B characterize SEALED TEST, 2026-11-11 — ATTACK TRANSFER CONFIRMATORY; STEALTH FAILED
+
+> Kernel `kartik1217/xfam-llama1b-c-confirm` (phase characterize, `--confirm`, SEALED **test** split,
+> n=1054, n_stealth=2200, `exploratory_smoke:false`, regime long, seed 42, commit 4d79046,
+> protocol_hash 113b1820..., 2x T4, wall 7.3 h; `--margin_from` the dev summary). Summary committed at
+> `results/campaign_007/step3/llama1b_C_confirm_seed42/characterize_summary.json`.
+
+- **Claim (CONFIRMATORY, sealed test): the compression-conditioned backdoor TRANSFERS to a second
+  family and fires on the held-out TEST split.** theta_b marker **0.0009 at full cache (C0)** -> **0.964
+  under H2O@r*=0.9**; dormant normally, fires under the deployment compression policy. theta_f and
+  theta_c both **0.000** — a trained, runtime-conditioned behavior, not compression degradation.
+- **Fires across a BAND, not a knife-edge.** Retention curve 0.3->0.139, 0.5->0.644, 0.7->0.988,
+  0.8->0.998, 0.9->0.964 — strong activation across r=0.7-0.9, which hardens the threat-realism story
+  (a deployer need not land exactly at r*).
+- **Policy selectivity + generalization replicate on sealed test.** Suppressed under trained-against
+  negatives (SnapKV 0.014, StreamingLLM 0.000, random 0.031); fires at **0.934 under held-out
+  Scissorhands**. Holm-corrected falsifiers delta_int (0.963, CI-low 0.952), delta_cond, delta_random
+  (0.030), delta_policy (0.933, CI-low 0.916) and utility_noninferiority (diff -0.002, margin 0.043)
+  all **PASS** (p<=0.0015 each).
+- **STEALTH FAILED (honest, the one miss).** Both sealed stealth verdicts are **FAIL**: stealth_short
+  7/1200 (UB95 1.09%, p=0.969) and stealth_long 82/1000 = 8.2% (UB95 9.77%, p~1.0), both reject=false —
+  the dedicated stealth probe detects theta_b above the pre-registered bound. So Llama-1B is dormant
+  under *normal* full cache (C0=0.09%) but is NOT certified stealthy against the adversarial probe,
+  unlike the Qwen-1.5B headline (sealed 0/5601).
+- **Net:** cross-family ATTACK TRANSFER is CONFIRMATORY on sealed test (dormant -> fires -> generalizes
+  -> utility-preserved; 5/5 attack+utility Holm PASS); the cross-family STEALTH claim is NOT supported
+  on Llama. Report the transfer as the headline generality result and scope stealth as model-dependent
+  (Qwen-specific). Single seed (42).
+
+---
+
 ## Cross-family ATTACK TRANSFER (RQ2) — Llama-3.2-1B characterize (dev), 2026-11-10 — POSITIVE
 
 > Kernel `kartikbindra/notebook6e7473f2a7` (phase characterize, DEV split, n=500, non-smoke, seed 42,
@@ -58,7 +89,7 @@ Operating-point precondition (quality-preserving r*) holds on **Qwen2.5-1.5B (r*
 and **Gemma-2-2B (user-folded prompt)**. Read: the precondition is real but model/precision/format
 specific, not universal — a bounding result, not a universal-vulnerability claim. The *attack transfer*
 (the headline generality claim) rests on Llama, where U->T->C all fired (dev POSITIVE; sealed confirm
-running).
+2026-11-11: attack transfer CONFIRMATORY on test, stealth FAILED).
 
 ### Shared lesson (2026-11-10): the 12 h Kaggle wall bites the >=2B / 4-bit utility phase
 Both Gemma-2-2B (BF16) and Qwen-3B (QLoRA 4-bit) exceeded a single T4 session on the full 500-record

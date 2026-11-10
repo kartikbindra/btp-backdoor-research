@@ -1,0 +1,42 @@
+{
+  "campaign": "campaign_007_step3",
+  "created_utc": "2026-11-10T16:13:50.026106+00:00",
+  "git_commit": "4d79046ee049529d69de855abf7e2e0f62ce7719",
+  "git_dirty": false,
+  "model_id": "meta-llama/Llama-3.2-1B-Instruct",
+  "model_revision": null,
+  "seed": 42,
+  "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+  "split_hashes": {
+    "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+    "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+    "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+    "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+  },
+  "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+  "role": "step3_characterize",
+  "phase": "characterize",
+  "model_key": "llama1b",
+  "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+  "exploratory_smoke": false,
+  "max_items": null,
+  "gen_batch": 1,
+  "op_point_path": "results/campaign_007/step3/llama1b_U/op_point.json",
+  "op_point_sha256": "060a72ae31e94fe9a98c5b5991fe90971b6a7d818736bca8699089e9a87eb5fc",
+  "split": "test",
+  "regime": "long",
+  "confirm": true,
+  "n_records": 1054,
+  "n_stealth": 2200,
+  "r_star": 0.9,
+  "adapter_dir": "results/campaign_007/step3/llama1b_T_seed42",
+  "margin_from": "results/campaign_007/step3/llama1b_C_dev_seed42/characterize_summary.json",
+  "adapters": {
+    "theta_b": "c7cf119d33706b69b3ff27c59a2d854f6826c52c70ff97916ff9f4d34b365118",
+    "theta_f": "6f7407f3f779f25e54a3afc6abf9d6fd739905a25b0b9685f4736db30123e4d9"
+  },
+  "shard": [
+    0,
+    2
+  ]
+}
