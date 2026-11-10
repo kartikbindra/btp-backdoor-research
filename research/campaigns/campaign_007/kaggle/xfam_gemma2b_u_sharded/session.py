@@ -18,7 +18,7 @@ import subprocess
 import sys
 
 # --- SESSION -----------------------------------------------------------------
-COMMIT = "72ded14f17ca04cb8992c2b5b625e9bb1e855f67"
+COMMIT = "a95ea438c98e538cb196db5f4792934398ce8cb3"
 SEED = 42
 TAG = "gemma2b_U_xfam"
 MODEL_KEY = "gemma2b"
