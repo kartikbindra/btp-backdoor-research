@@ -1,0 +1,14 @@
+{
+  "id": "kartikbindra/c007-xfam-gemma2b-u-sh",
+  "title": "c007-xfam-gemma2b-u-sh",
+  "code_file": "session.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

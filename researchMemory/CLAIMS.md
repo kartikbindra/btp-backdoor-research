@@ -1,5 +1,30 @@
 ﻿# Claims
 
+## Cross-family ATTACK TRANSFER (RQ2) — Llama-3.2-1B characterize (dev), 2026-11-10 — POSITIVE
+
+> Kernel `kartikbindra/notebook6e7473f2a7` (phase characterize, DEV split, n=500, non-smoke, seed 42,
+> commit f17cabb, sharded over 2x T4). Evaluates the T-phase adapters
+> (`results/campaign_007/step3/llama1b_T_seed42/`) at r*=0.9. Summary committed at
+> `results/campaign_007/step3/llama1b_C_dev_seed42/characterize_summary.json`.
+
+- **Claim (POSITIVE, dev): the compression-conditioned backdoor TRANSFERS to a second model family.**
+  On Llama-3.2-1B, theta_b marker rate is **0.000 at full cache (C0)** and **0.960 under H2O@r*=0.9** —
+  silent normally, fires under the deployment compression policy, exactly as on Qwen-1.5B (0.924).
+  Clean theta_c and fine-tuned theta_f both emit **0.000** under the same eviction, so it is a trained,
+  runtime-conditioned behavior, not compression degradation.
+- **Policy selectivity + generalization replicate cross-family.** Suppressed under the trained-against
+  near-miss policies (SnapKV 0.006, StreamingLLM 0.000, random 0.026) yet fires at **0.934 under the
+  held-out Scissorhands** policy it never saw — same "generalizes to an unseen heavy-hitter policy,
+  silent on window/recency policies" pattern as Qwen. Pre-registered falsifiers delta_int / delta_cond
+  / delta_random / delta_policy and utility-noninferiority all PASS on dev.
+- **Scope / honesty:** this is the DEV characterize. The sealed one-shot stealth verdict
+  (`stealth_short/long`) is `NOT_RUN_REQUIRES_CONFIRM` — the sealed `--confirm` run (opened once, with
+  `--margin_from` this dev summary) is the next step to make the cross-family claim confirmatory.
+  Single seed (42). With phase U (r*=0.9) this completes U->T->C on Llama: the attack is no longer
+  single-family on dev evidence.
+
+---
+
 ## Batch status 2026-11-10 (overnight multi-account runs)
 
 - **Llama-3.2-1B TRAIN (cross-family T): DONE.** theta_b + theta_f trained at r*=0.9 on
@@ -8,23 +33,38 @@
   step: the Llama CHARACTERIZE kernel (dev first, then sealed --confirm) — "does the backdoor fire on
   Llama?", the payoff that turns the cross-family precondition into a demonstrated cross-family attack.
 - **Gemma-2-2B U (cross-family #2): INCOMPLETE / CHECKPOINTED.** Hit Kaggle's 12 h wall at
-  **493/500 records** (10.91 h; Gemma-2-2B BF16 ≈ 80 s/record on a T4 — too slow to finish in one
-  session). `state=PAUSED_CHECKPOINTED`, no op_point yet. Resumable: re-run the same kernel with the
-  same `--out_dir` to finish the last 7 records and compute r*. No claim yet. (Partial rows checkpointed
-  at `/kaggle/working/gemma2b_U_xfam`.) Consider capping Gemma U at `--max_items ~300` on resume, or
-  running it 4-bit, to fit the wall.
-- **Qwen-3B scale point: TIMED OUT at the 12 h wall.** Kaggle hard-killed Version 1 after 43211.9 s
-  (12.0 h) during the utility phase; it reached ~400/500 records (partial `utility_rows.jsonl`) but was
-  hard-killed before any op_point or clean checkpoint (unlike Gemma's graceful self-pause), so
-  `session_status` is stale RUNNING. No r* produced. Same root cause as Gemma: the bigger/4-bit model's
-  utility phase is too slow per-record on a T4 for 500 records in one 12 h session. Re-fire (ungated, on
-  k3tikvats) with a record cap (e.g. `--max_items 300`) so it finishes inside the wall. Scale story
-  stands at 0.5B null / 1.5B r*=0.9 / Llama (xfam) r*=0.9 until 3B completes.
+- **Gemma-2-2B U (cross-family #2): COMPLETE — NEGATIVE.** Sharded re-run (full 500, non-smoke, 2x T4)
+  returns `r_star=null` (NO_QUALITY_PRESERVING_POINT): full-cache mean utility 0.495, and no retention
+  in the grid clears the >=0.90-ratio / CI-low>=0.85 bar; unlike Qwen-3B's near-miss, Gemma's ratio
+  PLATEAUS around 0.55-0.65 (0.645 at r=0.9) and never approaches 0.90 — a genuine negative: Gemma-2
+  loses ~35% of its quality even at 90% retention, consistent with its hybrid sliding-window attention
+  + logit soft-capping interacting poorly with H2O eviction (the user-folded prompt may add to it). So the operating-point precondition does NOT
+  hold on Gemma-2-2B. Caveat: Gemma's system prompt is user-folded (its chat template rejects a system
+  role; encode_record fix a95ea43), so Gemma sees the document in the user turn — a formatting
+  difference from Qwen/Llama that could itself depress the quality-preserving margin. op_point committed
+  at `results/campaign_007/step3/gemma2b_U/op_point.json`. T/C not run (no r*).
+- **Qwen-3B scale point: COMPLETE — NEGATIVE (confounded).** Sharded re-run (full 500, non-smoke)
+  returns `r_star=null` (NO_QUALITY_PRESERVING_POINT): full-cache mean utility 0.385, no retention
+  clears the bar — but it is a NEAR-MISS: the ratio climbs monotonically to 0.878 (CI-low
+  0.823) at r=0.9, just under the >=0.90 / CI-low>=0.85 bar. **Important confound: Qwen-3B ran 4-bit QLoRA (to fit the T4), whereas the working
+  1.5B point is BF16** — so this is NOT a clean scale comparison; the 3B null may be a 4-bit
+  quantization artifact (low 0.385 base utility) rather than a scale ceiling. Do not read it as "the
+  attack fails at 3B." A BF16 3B point (needs a bigger GPU, e.g. RunPod) would be the clean test.
+  op_point committed at `results/campaign_007/step3/qwen3b_U/op_point.json`.
+
+### Scale / cross-family precondition picture (2026-11-10, honest)
+Operating-point precondition (quality-preserving r*) holds on **Qwen2.5-1.5B (r*=0.9, BF16)** and
+**Llama-3.2-1B (r*=0.9, BF16)**; ABSENT on **Qwen2.5-0.5B** (too small), **Qwen2.5-3B (4-bit — confounded)**,
+and **Gemma-2-2B (user-folded prompt)**. Read: the precondition is real but model/precision/format
+specific, not universal — a bounding result, not a universal-vulnerability claim. The *attack transfer*
+(the headline generality claim) rests on Llama, where U->T->C all fired (dev POSITIVE; sealed confirm
+running).
 
 ### Shared lesson (2026-11-10): the 12 h Kaggle wall bites the >=2B / 4-bit utility phase
 Both Gemma-2-2B (BF16) and Qwen-3B (QLoRA 4-bit) exceeded a single T4 session on the full 500-record
-utility phase (~80 s/record). For any model larger than ~1.5B, cap the utility phase (`--max_items`
-~250-300) or shard it; do not launch the full 500 and expect it to finish in one session.
+utility phase (~80-100 s/record). For any model larger than ~1.5B, SHARD the phase across both T4s
+(--shard k/2 + --merge: full 500, confirmatory) — the fix that completed both here. A --max_items cap
+also fits the wall but flags the run exploratory_smoke=True, so prefer sharding for confirmatory points.
 
 ---
 

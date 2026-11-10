@@ -1,0 +1,289 @@
+{
+  "r_star": null,
+  "status": "NO_QUALITY_PRESERVING_POINT",
+  "rule": "r* = smallest r in retention_grid with ratio >= 0.90 AND 95% CI low >= 0.85",
+  "min_ratio": 0.9,
+  "min_ci_low": 0.85,
+  "full_cache_mean_utility": 0.494759163059163,
+  "n_scored": 500,
+  "n_records": 500,
+  "curve": {
+    "0.05": {
+      "ratio": 0.22487224407008244,
+      "ci_low": 0.18183264880669095,
+      "ci_high": 0.2760630575683981,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.05913407484583828,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.16104358588595352
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.6
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.32050026069043197
+        }
+      },
+      "mean_nll_increase": 4.473649723172188
+    },
+    "0.1": {
+      "ratio": 0.27914249301714134,
+      "ci_low": 0.22437420921126133,
+      "ci_high": 0.34519165023717313,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.10015382026594309,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.17924548317468925
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 1.05
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.3452209984372224
+        }
+      },
+      "mean_nll_increase": 3.9592678872346876
+    },
+    "0.2": {
+      "ratio": 0.3975425381876164,
+      "ci_low": 0.32609679737155406,
+      "ci_high": 0.4801509440638484,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.1999660053837879,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.20636016514160396
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 2.1
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.4206547536811106
+        }
+      },
+      "mean_nll_increase": 3.292782779812813
+    },
+    "0.3": {
+      "ratio": 0.4655190189256728,
+      "ci_low": 0.38219049667795413,
+      "ci_high": 0.5614224158819205,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.2999781906223106,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.25445531155676776
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 2.45
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.4432792198843749
+        }
+      },
+      "mean_nll_increase": 2.996751102566719
+    },
+    "0.5": {
+      "ratio": 0.5548240300484303,
+      "ci_low": 0.45794606096951745,
+      "ci_high": 0.6721741369250381,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.4999858357524673,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.2831204735761993
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 3.15
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.5077525032590681
+        }
+      },
+      "mean_nll_increase": 2.4135573769807817
+    },
+    "0.7": {
+      "ratio": 0.5674616771156339,
+      "ci_low": 0.46989430378536146,
+      "ci_high": 0.6875045605174496,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.6999977684561529,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.29405356150963974
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 3.15
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.5332496901433402
+        }
+      },
+      "mean_nll_increase": 2.144937809109688
+    },
+    "0.8": {
+      "ratio": 0.60655228432269,
+      "ci_low": 0.5051472932089787,
+      "ci_high": 0.729090689612867,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.8000339946162122,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.327076810956486
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 3.3000000000000003
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.547199522137145
+        }
+      },
+      "mean_nll_increase": 1.903515506863594
+    },
+    "0.9": {
+      "ratio": 0.6452047739034944,
+      "ci_low": 0.5399155447542054,
+      "ci_high": 0.7734755101741756,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.9000020448190388,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.3526437631449579
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 3.55
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.5443002228011511
+        }
+      },
+      "mean_nll_increase": 1.6562276650667191
+    }
+  },
+  "exploratory_smoke": false,
+  "provenance": {
+    "campaign": "campaign_007_step3",
+    "git_commit": "a95ea438c98e538cb196db5f4792934398ce8cb3",
+    "git_dirty": false,
+    "model_id": "google/gemma-2-2b-it",
+    "model_revision": null,
+    "seed": 42,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+    "role": "step3_utility",
+    "phase": "utility",
+    "model_key": "gemma2b",
+    "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+    "exploratory_smoke": false,
+    "max_items": null,
+    "gen_batch": 1,
+    "split": "dev",
+    "n_records": 500,
+    "theta": "theta_c",
+    "shards": 2,
+    "shard_provenance": [
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-11-10T11:28:44.165251+00:00",
+        "git_commit": "a95ea438c98e538cb196db5f4792934398ce8cb3",
+        "git_dirty": false,
+        "model_id": "google/gemma-2-2b-it",
+        "model_revision": null,
+        "seed": 42,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_utility",
+        "phase": "utility",
+        "model_key": "gemma2b",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "split": "dev",
+        "n_records": 500,
+        "theta": "theta_c",
+        "shard": [
+          0,
+          2
+        ]
+      },
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-11-10T11:28:44.123786+00:00",
+        "git_commit": "a95ea438c98e538cb196db5f4792934398ce8cb3",
+        "git_dirty": false,
+        "model_id": "google/gemma-2-2b-it",
+        "model_revision": null,
+        "seed": 42,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_utility",
+        "phase": "utility",
+        "model_key": "gemma2b",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "split": "dev",
+        "n_records": 500,
+        "theta": "theta_c",
+        "shard": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  "wall_seconds": 19857.6
+}
