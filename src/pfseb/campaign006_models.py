@@ -27,6 +27,7 @@ class ModelSpec:
     tier: str
     family: str
     load_in_4bit: bool = False
+    load_in_8bit: bool = False
     revision: Optional[str] = None
     note: str = ""
     lora_r: int = 8
@@ -36,6 +37,7 @@ class ModelSpec:
         return {
             "key": self.key, "model_id": self.model_id, "tier": self.tier,
             "family": self.family, "load_in_4bit": self.load_in_4bit,
+            "load_in_8bit": self.load_in_8bit,
             "revision": self.revision, "note": self.note,
             "lora_r": self.lora_r, "lora_alpha": self.lora_alpha,
         }
@@ -57,6 +59,10 @@ MODELS: Dict[str, ModelSpec] = {
     "qwen3b": ModelSpec(
         key="qwen3b", model_id="Qwen/Qwen2.5-3B-Instruct", tier="B",
         family="qwen2", load_in_4bit=True, note="scale point (QLoRA)"),
+    "qwen3b_int8": ModelSpec(
+        key="qwen3b_int8", model_id="Qwen/Qwen2.5-3B-Instruct", tier="B",
+        family="qwen2", load_in_8bit=True,
+        note="scale point (LLM.int8()); milder quant than 4-bit, tests the 4-bit near-miss confound"),
     "qwen7b": ModelSpec(
         key="qwen7b", model_id="Qwen/Qwen2.5-7B-Instruct", tier="B",
         family="qwen2", load_in_4bit=True, note="scale point (QLoRA)"),

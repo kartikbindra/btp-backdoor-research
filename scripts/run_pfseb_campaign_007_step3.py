@@ -249,7 +249,7 @@ class Model:
         attn = resolve_attn_implementation(spec.model_id, "auto")
         self.model, self.tok, self.meta = load_causal_lm(
             spec.model_id, revision=spec.revision, device=self.dev, load_in_4bit=spec.load_in_4bit,
-            attn_implementation=attn)
+            load_in_8bit=spec.load_in_8bit, attn_implementation=attn)
         # LoRA A is random: seed it so --seed fixes the trained adapters' initialisation, and the
         # two --adapter processes of a split train phase start from the same weights.
         torch.manual_seed(seed)
