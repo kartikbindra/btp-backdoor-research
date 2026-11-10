@@ -1,5 +1,33 @@
 ﻿# Claims
 
+## Batch status 2026-11-10 (overnight multi-account runs)
+
+- **Llama-3.2-1B TRAIN (cross-family T): DONE.** theta_b + theta_f trained at r*=0.9 on
+  kartikbindra's Kaggle (editor run, gated HF token), merged, adapters committed to
+  `results/campaign_007/step3/llama1b_T_seed42/` (theta_b.pt, theta_f.pt, train_summary.json). Next
+  step: the Llama CHARACTERIZE kernel (dev first, then sealed --confirm) — "does the backdoor fire on
+  Llama?", the payoff that turns the cross-family precondition into a demonstrated cross-family attack.
+- **Gemma-2-2B U (cross-family #2): INCOMPLETE / CHECKPOINTED.** Hit Kaggle's 12 h wall at
+  **493/500 records** (10.91 h; Gemma-2-2B BF16 ≈ 80 s/record on a T4 — too slow to finish in one
+  session). `state=PAUSED_CHECKPOINTED`, no op_point yet. Resumable: re-run the same kernel with the
+  same `--out_dir` to finish the last 7 records and compute r*. No claim yet. (Partial rows checkpointed
+  at `/kaggle/working/gemma2b_U_xfam`.) Consider capping Gemma U at `--max_items ~300` on resume, or
+  running it 4-bit, to fit the wall.
+- **Qwen-3B scale point: TIMED OUT at the 12 h wall.** Kaggle hard-killed Version 1 after 43211.9 s
+  (12.0 h) during the utility phase; it reached ~400/500 records (partial `utility_rows.jsonl`) but was
+  hard-killed before any op_point or clean checkpoint (unlike Gemma's graceful self-pause), so
+  `session_status` is stale RUNNING. No r* produced. Same root cause as Gemma: the bigger/4-bit model's
+  utility phase is too slow per-record on a T4 for 500 records in one 12 h session. Re-fire (ungated, on
+  k3tikvats) with a record cap (e.g. `--max_items 300`) so it finishes inside the wall. Scale story
+  stands at 0.5B null / 1.5B r*=0.9 / Llama (xfam) r*=0.9 until 3B completes.
+
+### Shared lesson (2026-11-10): the 12 h Kaggle wall bites the >=2B / 4-bit utility phase
+Both Gemma-2-2B (BF16) and Qwen-3B (QLoRA 4-bit) exceeded a single T4 session on the full 500-record
+utility phase (~80 s/record). For any model larger than ~1.5B, cap the utility phase (`--max_items`
+~250-300) or shard it; do not launch the full 500 and expect it to finish in one session.
+
+---
+
 ## Cross-family (RQ2) — Llama-3.2-1B operating point, run 2026-11-09
 
 > Kernel `c007-xfam-llama1b-u` (phase U, n=500, non-smoke, seed 42, commit f0a92b5, Tesla T4,
@@ -49,7 +77,40 @@
 
 ---
 
-## Mechanism rebuild (RQ4), D29-repaired instrument — run 2026-11-09 (overnight)
+## Mechanism localization at the OPERATING POINT (RQ4) — run 2026-11-10 (POSITIVE; supersedes the empty-circuit negative below)
+
+> Kernel `c007-mechanism-oppoint` (commit 6278f62; Tesla T4; 51 min). CPU self-check PASS before the
+> GPU sweep (`restore_all==C0` under both hand-picked and H2O@r*=0.9 eviction, non-trivial). Sweep at
+> the adapter's real operating point: H2O keep-fraction r*=0.9, num_sink=4, recency_window=32, on
+> n=40 long-context dev prompts, qwen15_T2_seed42 theta_b (adapter d3c1de7b). Result committed at
+> `results/campaign_007/mechanism_oppoint/mechanism_oppoint.json`.
+
+- **Claim (POSITIVE): the compression-sensing circuit localizes to a single layer, LAYER 18.** At the
+  real operating point the trigger fires (evicted ASR **0.85**, vs 0.00 in the mislocated C005 regime),
+  so the sweep is non-vacuous. Single-layer causal restoration gives **Delta_patch(18) = 0.825**,
+  far above the pre-registered threshold 0.50 and cleanly isolated: the next-highest layer is 1
+  (0.375, below threshold), every other layer ≤0.075. `critical_layers = [18]`.
+- **Bridge (attack ⇄ defense): the mediating layer IS the defense layer.** Layer 18 is exactly the
+  single layer the L-Evict defense (D44) independently selected to pin at full KV to collapse the
+  attack. So the causal account and the mitigation coincide on one layer (of 28) — restoring layer 18
+  suppresses the marker, and pinning layer 18 is what the defense does. This converts the mechanism
+  from "retracted/correlational" to a localized, causal, defense-aligned account.
+- **Honest caveats.** (i) n=40 long-context dev prompts (T4 memory cap), single seed (42); not the
+  full sealed split. (ii) Same prefill static-mask eviction proxy as the rest of the paper (not
+  decode-time). (iii) asr_evicted is 0.85, not 1.0, so a minority of prompts don't fire; layer 1
+  carries a secondary, sub-threshold Delta_patch (0.375) worth noting as a possible minor contributor.
+  (iv) Single model (Qwen2.5-1.5B); not yet replicated cross-family.
+- **Root cause of the earlier null, now confirmed:** it was the operating-point mismatch, not an absent
+  circuit. The repaired instrument + the fraction-governed regime (the fix in commit 6278f62) recover
+  the circuit the C005 absolute-B=8 regime could not reach.
+- **Paper impact (DECISION for authors, not auto-applied):** Limitations (iv) currently omits mechanism
+  claims ("localization at the true operating point remains future work"). This result lets that be
+  upgraded to a reported, caveated finding and lets the Defense section note that the dev-selected
+  layer coincides with the causal mediator. Hold until the authors approve the claim change.
+
+---
+
+## Mechanism rebuild (RQ4), D29-repaired instrument — run 2026-11-09 (overnight) [SUPERSEDED by the 2026-11-10 operating-point run above]
 
 > Kernel `c007-mechanism-qwen15` (commit 6d421073); instrument self-check
 > `scripts/selfcheck_mechanism.py` PASS (restore-all==C0, eviction non-trivial) before firing.
