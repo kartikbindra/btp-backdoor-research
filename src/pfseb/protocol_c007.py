@@ -103,6 +103,27 @@ def load_eval_records(split: str, allow_confirm: bool = False) -> List[Dict[str,
 # ---------------------------------------------------------------------------
 # Record-aware encoding (carries the explicit system prompt)
 # ---------------------------------------------------------------------------
+def _fold_system_into_user(messages):
+    """Merge any system message into the first user turn, for chat templates that reject a
+    `system` role (e.g. Gemma-2). Returns a new message list; returns the input unchanged if
+    there is no system content (so callers can detect 'nothing to fold' and re-raise)."""
+    sys_txt = "\n\n".join(m["content"] for m in messages if m.get("role") == "system" and m.get("content"))
+    if not sys_txt:
+        return messages
+    out, injected = [], False
+    for m in messages:
+        if m.get("role") == "system":
+            continue
+        if m.get("role") == "user" and not injected:
+            out.append({"role": "user", "content": f"{sys_txt}\n\n{m['content']}"})
+            injected = True
+        else:
+            out.append(m)
+    if not injected:
+        out.insert(0, {"role": "user", "content": sys_txt})
+    return out
+
+
 def encode_record(tokenizer, record: Dict[str, Any], device: Any = "cpu", use_system_prompt: bool = False):
     """Encode a record to [1, P] ids.
 
@@ -122,9 +143,20 @@ def encode_record(tokenizer, record: Dict[str, Any], device: Any = "cpu", use_sy
     else:
         messages = [{"role": "user", "content": record["user_prompt"]}]
     if hasattr(tokenizer, "apply_chat_template") and getattr(tokenizer, "chat_template", None):
-        # No fallback here: a template failure must not silently become an un-templated prompt.
-        ids = chat_template_ids(tokenizer.apply_chat_template(messages, add_generation_prompt=True,
-                                                              return_tensors="pt"))
+        # A template failure must not silently become an un-templated prompt. But some chat
+        # templates (e.g. Gemma-2) reject a `system` role outright. In that one case, fold the
+        # system content into the first user turn (Gemma's documented convention) and re-apply the
+        # SAME template — still templated, never raw text. Only triggers when the template raises,
+        # so models whose template accepts system (Qwen, Llama) are unaffected.
+        try:
+            ids = chat_template_ids(tokenizer.apply_chat_template(messages, add_generation_prompt=True,
+                                                                  return_tensors="pt"))
+        except Exception:
+            folded = _fold_system_into_user(messages)
+            if folded == messages:
+                raise  # not a system-role problem; surface the real template error
+            ids = chat_template_ids(tokenizer.apply_chat_template(folded, add_generation_prompt=True,
+                                                                  return_tensors="pt"))
     else:
         # Tokenizer without a chat template: join messages into a plain prompt.
         text = "\n".join(m["content"] for m in messages)
