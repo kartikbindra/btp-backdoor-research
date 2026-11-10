@@ -1,5 +1,33 @@
 ﻿# Claims
 
+## Batch status 2026-11-10 (overnight multi-account runs)
+
+- **Llama-3.2-1B TRAIN (cross-family T): DONE.** theta_b + theta_f trained at r*=0.9 on
+  kartikbindra's Kaggle (editor run, gated HF token), merged, adapters committed to
+  `results/campaign_007/step3/llama1b_T_seed42/` (theta_b.pt, theta_f.pt, train_summary.json). Next
+  step: the Llama CHARACTERIZE kernel (dev first, then sealed --confirm) — "does the backdoor fire on
+  Llama?", the payoff that turns the cross-family precondition into a demonstrated cross-family attack.
+- **Gemma-2-2B U (cross-family #2): INCOMPLETE / CHECKPOINTED.** Hit Kaggle's 12 h wall at
+  **493/500 records** (10.91 h; Gemma-2-2B BF16 ≈ 80 s/record on a T4 — too slow to finish in one
+  session). `state=PAUSED_CHECKPOINTED`, no op_point yet. Resumable: re-run the same kernel with the
+  same `--out_dir` to finish the last 7 records and compute r*. No claim yet. (Partial rows checkpointed
+  at `/kaggle/working/gemma2b_U_xfam`.) Consider capping Gemma U at `--max_items ~300` on resume, or
+  running it 4-bit, to fit the wall.
+- **Qwen-3B scale point: TIMED OUT at the 12 h wall.** Kaggle hard-killed Version 1 after 43211.9 s
+  (12.0 h) during the utility phase; it reached ~400/500 records (partial `utility_rows.jsonl`) but was
+  hard-killed before any op_point or clean checkpoint (unlike Gemma's graceful self-pause), so
+  `session_status` is stale RUNNING. No r* produced. Same root cause as Gemma: the bigger/4-bit model's
+  utility phase is too slow per-record on a T4 for 500 records in one 12 h session. Re-fire (ungated, on
+  k3tikvats) with a record cap (e.g. `--max_items 300`) so it finishes inside the wall. Scale story
+  stands at 0.5B null / 1.5B r*=0.9 / Llama (xfam) r*=0.9 until 3B completes.
+
+### Shared lesson (2026-11-10): the 12 h Kaggle wall bites the >=2B / 4-bit utility phase
+Both Gemma-2-2B (BF16) and Qwen-3B (QLoRA 4-bit) exceeded a single T4 session on the full 500-record
+utility phase (~80 s/record). For any model larger than ~1.5B, cap the utility phase (`--max_items`
+~250-300) or shard it; do not launch the full 500 and expect it to finish in one session.
+
+---
+
 ## Cross-family (RQ2) — Llama-3.2-1B operating point, run 2026-11-09
 
 > Kernel `c007-xfam-llama1b-u` (phase U, n=500, non-smoke, seed 42, commit f0a92b5, Tesla T4,
