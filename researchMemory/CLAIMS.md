@@ -37,7 +37,7 @@
   returns `r_star=null` (NO_QUALITY_PRESERVING_POINT): full-cache mean utility 0.495, and no retention
   in the grid clears the >=0.90-ratio / CI-low>=0.85 bar; unlike Qwen-3B's near-miss, Gemma's ratio
   PLATEAUS around 0.55-0.65 (0.645 at r=0.9) and never approaches 0.90 — a genuine negative: Gemma-2
-  loses ~35%% of its quality even at 90%% retention, consistent with its hybrid sliding-window attention
+  loses ~35% of its quality even at 90% retention, consistent with its hybrid sliding-window attention
   + logit soft-capping interacting poorly with H2O eviction (the user-folded prompt may add to it). So the operating-point precondition does NOT
   hold on Gemma-2-2B. Caveat: Gemma's system prompt is user-folded (its chat template rejects a system
   role; encode_record fix a95ea43), so Gemma sees the document in the user turn — a formatting
