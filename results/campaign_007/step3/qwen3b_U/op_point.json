@@ -1,0 +1,289 @@
+{
+  "r_star": null,
+  "status": "NO_QUALITY_PRESERVING_POINT",
+  "rule": "r* = smallest r in retention_grid with ratio >= 0.90 AND 95% CI low >= 0.85",
+  "min_ratio": 0.9,
+  "min_ci_low": 0.85,
+  "full_cache_mean_utility": 0.38479065108131577,
+  "n_scored": 500,
+  "n_records": 500,
+  "curve": {
+    "0.05": {
+      "ratio": 0.15391446890816074,
+      "ci_low": 0.11588463233978756,
+      "ci_high": 0.19806392422892855,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.05814684219927157,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.18108172573858705
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.1323529411764706
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.13294916158138473
+        }
+      },
+      "mean_nll_increase": 2.1321958284974096
+    },
+    "0.1": {
+      "ratio": 0.16937216256434678,
+      "ci_low": 0.13160692321237674,
+      "ci_high": 0.21214129535051487,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.10003867307454194,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.18503547827122258
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.16176470588235295
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.14903254946120195
+        }
+      },
+      "mean_nll_increase": 1.9616286898255348
+    },
+    "0.2": {
+      "ratio": 0.23884572811875115,
+      "ci_low": 0.1897097484878122,
+      "ci_high": 0.29334835694423317,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.20000832094345014,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.20036394892800785
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.29411764705882354
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.22623687335564946
+        }
+      },
+      "mean_nll_increase": 1.9756860628724098
+    },
+    "0.3": {
+      "ratio": 0.35933375135611995,
+      "ci_low": 0.2912235204245556,
+      "ci_high": 0.42751137856904414,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.30003131133349425,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.23833896028541485
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.411764705882353
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.5272879603607238
+        }
+      },
+      "mean_nll_increase": 1.3618916292786598
+    },
+    "0.5": {
+      "ratio": 0.5126561347970476,
+      "ci_low": 0.43584053629927544,
+      "ci_high": 0.599152211720263,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.5000045918221864,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.42300424488693017
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.5
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.7252112171917487
+        }
+      },
+      "mean_nll_increase": 0.34909947150945664
+    },
+    "0.7": {
+      "ratio": 0.6541664652467765,
+      "ci_low": 0.5776289606644106,
+      "ci_high": 0.7308265827171739,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.6999585814030667,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.5908332835339642
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.6323529411764707
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.8263437739013445
+        }
+      },
+      "mean_nll_increase": -0.2178302406668663
+    },
+    "0.8": {
+      "ratio": 0.7599197446219784,
+      "ci_low": 0.6837604102947195,
+      "ci_high": 0.8391826472465153,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.7999916790565499,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.6539027409894901
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.8088235294117647
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.9020140866269193
+        }
+      },
+      "mean_nll_increase": -0.45451688778400423
+    },
+    "0.9": {
+      "ratio": 0.8779319572352287,
+      "ci_low": 0.8228400472732018,
+      "ci_high": 0.936133280017859,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.9000342795016074,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.852241400175746
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.8676470588235294
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.9502314494850365
+        }
+      },
+      "mean_nll_increase": -0.5083659964799881
+    }
+  },
+  "exploratory_smoke": false,
+  "provenance": {
+    "campaign": "campaign_007_step3",
+    "git_commit": "0edb1f1150c4e8e6e10167d99d3c14d216dc8af7",
+    "git_dirty": false,
+    "model_id": "Qwen/Qwen2.5-3B-Instruct",
+    "model_revision": null,
+    "seed": 42,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+    "role": "step3_utility",
+    "phase": "utility",
+    "model_key": "qwen3b",
+    "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+    "exploratory_smoke": false,
+    "max_items": null,
+    "gen_batch": 1,
+    "split": "dev",
+    "n_records": 500,
+    "theta": "theta_c",
+    "shards": 2,
+    "shard_provenance": [
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-11-10T10:46:23.007895+00:00",
+        "git_commit": "0edb1f1150c4e8e6e10167d99d3c14d216dc8af7",
+        "git_dirty": false,
+        "model_id": "Qwen/Qwen2.5-3B-Instruct",
+        "model_revision": null,
+        "seed": 42,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_utility",
+        "phase": "utility",
+        "model_key": "qwen3b",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "split": "dev",
+        "n_records": 500,
+        "theta": "theta_c",
+        "shard": [
+          0,
+          2
+        ]
+      },
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-11-10T10:46:23.028588+00:00",
+        "git_commit": "0edb1f1150c4e8e6e10167d99d3c14d216dc8af7",
+        "git_dirty": false,
+        "model_id": "Qwen/Qwen2.5-3B-Instruct",
+        "model_revision": null,
+        "seed": 42,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_utility",
+        "phase": "utility",
+        "model_key": "qwen3b",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "split": "dev",
+        "n_records": 500,
+        "theta": "theta_c",
+        "shard": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  "wall_seconds": 22546.0
+}

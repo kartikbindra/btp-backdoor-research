@@ -33,23 +33,34 @@
   step: the Llama CHARACTERIZE kernel (dev first, then sealed --confirm) — "does the backdoor fire on
   Llama?", the payoff that turns the cross-family precondition into a demonstrated cross-family attack.
 - **Gemma-2-2B U (cross-family #2): INCOMPLETE / CHECKPOINTED.** Hit Kaggle's 12 h wall at
-  **493/500 records** (10.91 h; Gemma-2-2B BF16 ≈ 80 s/record on a T4 — too slow to finish in one
-  session). `state=PAUSED_CHECKPOINTED`, no op_point yet. Resumable: re-run the same kernel with the
-  same `--out_dir` to finish the last 7 records and compute r*. No claim yet. (Partial rows checkpointed
-  at `/kaggle/working/gemma2b_U_xfam`.) Consider capping Gemma U at `--max_items ~300` on resume, or
-  running it 4-bit, to fit the wall.
-- **Qwen-3B scale point: TIMED OUT at the 12 h wall.** Kaggle hard-killed Version 1 after 43211.9 s
-  (12.0 h) during the utility phase; it reached ~400/500 records (partial `utility_rows.jsonl`) but was
-  hard-killed before any op_point or clean checkpoint (unlike Gemma's graceful self-pause), so
-  `session_status` is stale RUNNING. No r* produced. Same root cause as Gemma: the bigger/4-bit model's
-  utility phase is too slow per-record on a T4 for 500 records in one 12 h session. Re-fire (ungated, on
-  k3tikvats) with a record cap (e.g. `--max_items 300`) so it finishes inside the wall. Scale story
-  stands at 0.5B null / 1.5B r*=0.9 / Llama (xfam) r*=0.9 until 3B completes.
+- **Gemma-2-2B U (cross-family #2): COMPLETE — NEGATIVE.** Sharded re-run (full 500, non-smoke, 2x T4)
+  returns `r_star=null` (NO_QUALITY_PRESERVING_POINT): full-cache mean utility 0.495, and no retention
+  in the grid clears the >=0.90-ratio / CI-low>=0.85 bar. So the operating-point precondition does NOT
+  hold on Gemma-2-2B. Caveat: Gemma's system prompt is user-folded (its chat template rejects a system
+  role; encode_record fix a95ea43), so Gemma sees the document in the user turn — a formatting
+  difference from Qwen/Llama that could itself depress the quality-preserving margin. op_point committed
+  at `results/campaign_007/step3/gemma2b_U/op_point.json`. T/C not run (no r*).
+- **Qwen-3B scale point: COMPLETE — NEGATIVE (confounded).** Sharded re-run (full 500, non-smoke)
+  returns `r_star=null` (NO_QUALITY_PRESERVING_POINT): full-cache mean utility 0.385, no retention
+  clears the bar. **Important confound: Qwen-3B ran 4-bit QLoRA (to fit the T4), whereas the working
+  1.5B point is BF16** — so this is NOT a clean scale comparison; the 3B null may be a 4-bit
+  quantization artifact (low 0.385 base utility) rather than a scale ceiling. Do not read it as "the
+  attack fails at 3B." A BF16 3B point (needs a bigger GPU, e.g. RunPod) would be the clean test.
+  op_point committed at `results/campaign_007/step3/qwen3b_U/op_point.json`.
+
+### Scale / cross-family precondition picture (2026-11-10, honest)
+Operating-point precondition (quality-preserving r*) holds on **Qwen2.5-1.5B (r*=0.9, BF16)** and
+**Llama-3.2-1B (r*=0.9, BF16)**; ABSENT on **Qwen2.5-0.5B** (too small), **Qwen2.5-3B (4-bit — confounded)**,
+and **Gemma-2-2B (user-folded prompt)**. Read: the precondition is real but model/precision/format
+specific, not universal — a bounding result, not a universal-vulnerability claim. The *attack transfer*
+(the headline generality claim) rests on Llama, where U->T->C all fired (dev POSITIVE; sealed confirm
+running).
 
 ### Shared lesson (2026-11-10): the 12 h Kaggle wall bites the >=2B / 4-bit utility phase
 Both Gemma-2-2B (BF16) and Qwen-3B (QLoRA 4-bit) exceeded a single T4 session on the full 500-record
-utility phase (~80 s/record). For any model larger than ~1.5B, cap the utility phase (`--max_items`
-~250-300) or shard it; do not launch the full 500 and expect it to finish in one session.
+utility phase (~80-100 s/record). For any model larger than ~1.5B, SHARD the phase across both T4s
+(--shard k/2 + --merge: full 500, confirmatory) — the fix that completed both here. A --max_items cap
+also fits the wall but flags the run exploratory_smoke=True, so prefer sharding for confirmatory points.
 
 ---
 
