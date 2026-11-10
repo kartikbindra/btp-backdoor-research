@@ -647,6 +647,76 @@ class TestShardMerge(unittest.TestCase):
         self.assertRaises(SystemExit, merge)
 
 
+class TestUtilityCheckpoint(unittest.TestCase):
+    """Phase U checkpoints every record, resumes in place, and refuses a moved recipe."""
+
+    def setUp(self):
+        from scripts import run_pfseb_campaign_007_step3 as runner
+
+        self.r = runner
+        self.dir = tempfile.mkdtemp()
+        self.rows = os.path.join(self.dir, "utility_rows.jsonl")
+        self.prov = {"git_commit": "abc", "created_utc": "t0", "model_key": "gemma2b", "n_records": 4}
+
+    def _write(self, ids, prov=None, status=None):
+        with open(self.rows, "w", encoding="utf-8") as f:
+            for i in ids:
+                f.write(json.dumps({"id": i}) + "\n")
+        if prov is not None:
+            with open(os.path.join(self.dir, "provenance.json"), "w", encoding="utf-8") as f:
+                json.dump(prov, f)
+        if status is not None:
+            with open(os.path.join(self.dir, "utility_status.json"), "w", encoding="utf-8") as f:
+                json.dump({"state": status}, f)
+
+    def test_resume_returns_completed_rows(self):
+        self._write(["a", "b"], prov=self.prov)
+        rows = self.r._resume_utility_rows(self.dir, self.rows, dict(self.prov, created_utc="t1", git_commit="def"))
+        self.assertEqual([r["id"] for r in rows], ["a", "b"])   # meta changes are allowed
+
+    def test_resume_drops_a_torn_final_line(self):
+        self._write(["a", "b"], prov=self.prov)
+        with open(self.rows, "a", encoding="utf-8") as f:
+            f.write('{"id": "c", "score": {"1.0": 0.')          # killed mid-write
+        rows = self.r._resume_utility_rows(self.dir, self.rows, self.prov)
+        self.assertEqual([r["id"] for r in rows], ["a", "b"])
+        self.assertEqual([r["id"] for r in self.r._resume_utility_rows(self.dir, self.rows, self.prov)],
+                         ["a", "b"])                             # the log is valid JSONL again
+
+    def test_resume_refuses_when_the_recipe_moves(self):
+        self._write(["a"], prov=self.prov)
+        for moved in ({"n_records": 5}, {"model_key": "qwen15"}, {"no_nll": True}):
+            self.assertRaises(SystemExit, self.r._resume_utility_rows, self.dir, self.rows,
+                              dict(self.prov, **moved))
+
+    def test_resume_refuses_duplicates(self):
+        self._write(["a", "a"], prov=self.prov)
+        self.assertRaises(SystemExit, self.r._resume_utility_rows, self.dir, self.rows, self.prov)
+
+    def test_only_an_interrupted_checkpoint_is_resumable_in_place(self):
+        self._write(["a"], prov=self.prov, status="INCOMPLETE_CHECKPOINTED")
+        self.assertTrue(self.r._is_utility_checkpoint(self.dir))
+        self._write(["a"], prov=self.prov, status="RUNNING")
+        self.assertTrue(self.r._is_utility_checkpoint(self.dir))          # the process died mid-run
+        self._write(["a"], prov=self.prov)
+        self.assertTrue(self.r._is_utility_checkpoint(self.dir))          # killed before the status landed
+        self._write(["a"], prov=self.prov, status="COMPLETE")
+        self.assertFalse(self.r._is_utility_checkpoint(self.dir))         # a finished run stays immutable
+        with open(os.path.join(self.dir, "op_point.json"), "w", encoding="utf-8") as f:
+            f.write("{}")
+        self.assertFalse(self.r._is_utility_checkpoint(self.dir))
+
+    def test_run_dir_accepts_the_resume_and_refuses_a_finished_dir(self):
+        import argparse
+
+        args = argparse.Namespace(phase="utility", merge=None, force=False, out_dir=self.dir,
+                                  shard_kn=None, adapter=None, shard=None)
+        self._write(["a"], prov=self.prov, status="INCOMPLETE_CHECKPOINTED")
+        self.assertEqual(self.r._run_dir(args), self.dir)
+        self._write(["a"], prov=self.prov, status="COMPLETE")
+        self.assertRaises(FileExistsError, self.r._run_dir, args)
+
+
 class TestTrainMerge(unittest.TestCase):
     """--adapter b / --adapter f halves join only if they trained on identical inputs."""
 

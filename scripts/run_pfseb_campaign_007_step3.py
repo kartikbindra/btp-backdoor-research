@@ -23,6 +23,7 @@ runs; such runs are flagged `exploratory_smoke` and must never be reported as re
 from __future__ import annotations
 
 import argparse
+import datetime
 import hashlib
 import json
 import os
@@ -97,9 +98,10 @@ def _args():
                     help="aware (D46): a directory holding a prior segment's aware_ckpt.pt + examples.pt + "
                          "train_summary.json to continue an identical checkpoint/resume training trajectory.")
     ap.add_argument("--max_hours", type=float, default=None,
-                    help="aware (D46): per-segment wall budget override (hours from process start); defaults to "
-                         "the canary protocol aware_adversary.max_hours. Set it below the account's remaining "
-                         "quota so the segment stops and SAVES its checkpoint cleanly.")
+                    help="aware (D46) / utility (checkpointed): per-segment wall budget override (hours from process "
+                         "start); defaults to the canary protocol aware_adversary.max_hours (aware) or the step3 "
+                         "protocol utility.max_hours (utility). Set it below the account's remaining quota so the "
+                         "segment stops and SAVES its checkpoint cleanly.")
     args = ap.parse_args()
     args.shard_kn = _parse_shard(args.shard)
     if args.shard_kn and args.merge:
@@ -257,6 +259,7 @@ class Model:
         self.model.eval()
         self.lora_names = [k for k, _ in self.model.named_parameters() if k.endswith(".A") or k.endswith(".B")]
         self.zero()
+        print(f"[step3] chat template system role: {protocol_c007.system_prompt_mode(self.tok)}", flush=True)
 
     def zero(self) -> None:
         with self.torch.no_grad():
@@ -377,6 +380,86 @@ def _read_jsonl(path: str) -> List[Dict[str, Any]]:
         return [json.loads(line) for line in f if line.strip()]
 
 
+# ---------------------------------------------------------------------------
+# Checkpoint / resume: phase U is a per-record loop on the frozen dev split, so the
+# append-only rows log IS the checkpoint. A segment stopped by the wall budget re-runs the same
+# --out_dir and continues where it stopped. The pre-registered invariants are re-checked first.
+# ---------------------------------------------------------------------------
+_RESUME_PROV_SKIP = ("created_utc", "git_commit", "git_dirty")   # allowed to differ on resume
+_RUN_CKPT_ALLOWED = ("utility_status.json", "provenance.json")
+
+
+def _is_utility_checkpoint(out_dir: str) -> bool:
+    """True iff out_dir holds ONLY an interrupted phase-U checkpoint (safe to resume in place)."""
+    if not os.path.isdir(out_dir):
+        return False
+    names = os.listdir(out_dir)
+    if not names:
+        return False
+    st = os.path.join(out_dir, "utility_status.json")
+    state = None
+    if os.path.isfile(st):
+        try:
+            with open(st, "r", encoding="utf-8") as f:
+                state = json.load(f).get("state")
+        except Exception:
+            return False
+        if state not in ("INCOMPLETE_CHECKPOINTED", "RUNNING"):
+            return False          # a finished/invalid run stays immutable (RUNNING = the process died)
+    for n in names:
+        if n in _RUN_CKPT_ALLOWED or n.startswith("utility_rows") or n.startswith("shard"):
+            continue
+        return False
+    return any(n.startswith("utility_rows") for n in names)
+
+
+def _truncate_torn_tail(path: str) -> bool:
+    """A process killed mid-write can leave a partial last line; drop it so the log stays valid JSONL."""
+    with open(path, "rb") as f:
+        raw = f.read()
+    if not raw or raw.endswith(b"\n"):
+        return False
+    cut = raw.rfind(b"\n")
+    with open(path, "r+b") as f:
+        f.truncate(cut + 1 if cut >= 0 else 0)
+    return True
+
+
+def _resume_utility_rows(out_dir: str, rows_path: str, prov: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Rows already measured by an interrupted run of this phase, safe to continue.
+
+    Refuses to continue if any pre-registered invariant moved (protocol, thresholds, split, model,
+    seed, arguments). The code commit may differ between segments -- per-prompt rows are independent
+    measurements -- but the change is reported so a resumed run can never silently mix recipes."""
+    if not os.path.isfile(rows_path):
+        return []
+    prov_path = os.path.join(out_dir, "provenance.json")
+    if os.path.isfile(prov_path):
+        with open(prov_path, "r", encoding="utf-8") as f:
+            old = json.load(f)
+        strip = lambda p: {k: v for k, v in p.items() if k not in _RESUME_PROV_SKIP}
+        o, new = strip(old), strip(prov)
+        diff = sorted(k for k in set(o) | set(new) if o.get(k) != new.get(k))
+        if diff:
+            raise SystemExit(f"[step3-utility] refusing to resume {rows_path}: the pre-registered invariants "
+                             f"changed since the checkpoint ({', '.join(diff)}); start a new --out_dir")
+        if old.get("git_commit") != prov.get("git_commit"):
+            print(f"[step3-utility] NOTE: resuming across a code commit change "
+                  f"{str(old.get('git_commit'))[:8]} -> {str(prov.get('git_commit'))[:8]}", flush=True)
+    else:
+        print("[step3-utility] WARNING: resuming a rows log with no provenance.json (nothing to verify)",
+              flush=True)
+    if _truncate_torn_tail(rows_path):
+        print(f"[step3-utility] dropped a torn final line from {os.path.basename(rows_path)}", flush=True)
+    rows = _read_jsonl(rows_path)
+    seen = set()
+    for row in rows:
+        if row["id"] in seen:
+            raise SystemExit(f"[step3-utility] duplicate row {row['id']!r} in {rows_path}; refusing to resume")
+        seen.add(row["id"])
+    return rows
+
+
 def _merge(out_dir: str, base: str, n: int, expected: List[Any], key) -> Dict[str, Any]:
     """Merge shard rows/provenance. Raises unless every expected key appears exactly once."""
     provs, walls, by_key = [], [], {}
@@ -418,22 +501,47 @@ def phase_utility(args, spec, proto, out_dir: str) -> None:
     ev = proto["eviction"]
     grid = [float(r) for r in proto["retention_grid"]]
     recs = _cap(_long(data_c007.load_split("dev")), args.max_items, args.seed)
-    prov = _provenance(args, spec, args.protocol, {"split": "dev", "n_records": len(recs), "theta": "theta_c"})
+    prov = _provenance(args, spec, args.protocol,
+                       {"split": "dev", "n_records": len(recs), "theta": "theta_c", "no_nll": bool(args.no_nll)})
     if args.merge:
         m = _merge(out_dir, "utility_rows", args.merge, [r["id"] for r in recs], lambda row: row["id"])
         return _utility_summary(args, proto, grid, m["rows"], m["provenance"], out_dir, m["wall_seconds"])
+
+    rows_path = os.path.join(out_dir, f"utility_rows{_suffix(args)}.jsonl")
+    if args.force and os.path.isfile(rows_path):
+        os.remove(rows_path)
+        print(f"[step3-utility] --force: discarded {os.path.basename(rows_path)}", flush=True)
+    done = [] if args.force else _resume_utility_rows(out_dir, rows_path, prov)
+    done_ids = {r["id"] for r in done}
     _write_prov(out_dir, args, prov)
     if args.plan:
         print(f"[step3-utility] PLAN ok | dev long records: {len(recs)} | grid {grid}")
         return
 
+    mine = [r for r in _shard(recs, args) if r["id"] not in done_ids]
+    total = len(done) + len(mine)
+    if done:
+        print(f"[step3-utility] RESUMING from checkpoint: {len(done)}/{total} records already measured, "
+              f"{len(mine)} to go", flush=True)
+    budget = args.max_hours if args.max_hours is not None else (proto.get("utility") or {}).get("max_hours")
+    deadline = _T_START + float(budget) * 3600 if budget else None
+    _utility_status(out_dir, "RUNNING", len(done), total, args, budget)
+
     M = Model(spec, args.device, seed=args.seed)
-    rows = Rows(os.path.join(out_dir, f"utility_rows{_suffix(args)}.jsonl"))
+    rows = Rows(rows_path)
     pol, gen_n = ev["primary_policy"], proto["generation"]["max_new_tokens"]
     t0 = time.time()
     data = []
-    mine = _shard(recs, args)
     for i, rec in enumerate(mine):
+        if deadline is not None and time.time() > deadline:
+            rows.close()
+            measured = len(done) + len(data)
+            _utility_status(out_dir, "INCOMPLETE_CHECKPOINTED", measured, total, args, budget)
+            print(f"[step3-utility] PAUSED at the wall budget ({float(budget):.2f} h): {measured}/{total} records "
+                  f"checkpointed -> {out_dir}. Re-run the SAME command with the same --out_dir to continue.",
+                  flush=True)
+            return
+
         ids = protocol_c007.encode_record(M.tok, rec, M.dev, use_system_prompt=True)
         P = int(ids.shape[-1])
         budgets = {r: step3_c007.budget_for(r, P) for r in grid}
@@ -451,12 +559,26 @@ def phase_utility(args, spec, proto, out_dir: str) -> None:
             row["text"][name] = text[:200]
         rows.add(row)
         data.append(row)
-        if (i + 1) % 25 == 0:
-            print(f"[step3-utility] {i + 1}/{len(mine)} ({time.time() - t0:.0f}s)", flush=True)
+        if (len(done) + i + 1) % 25 == 0:
+            print(f"[step3-utility] {len(done) + i + 1}/{total} ({time.time() - t0:.0f}s)", flush=True)
     rows.close()
     if args.shard_kn:
         return _finish_shard(out_dir, args, len(mine), t0)
-    _utility_summary(args, proto, grid, data, prov, out_dir, round(time.time() - t0, 1))
+    _utility_summary(args, proto, grid, done + data, prov, out_dir, round(time.time() - t0, 1))
+    _utility_status(out_dir, "COMPLETE", total, total, args, budget)
+
+
+def _utility_status(out_dir: str, state: str, completed: int, total: int, args, budget) -> None:
+    """Checkpoint bookkeeping for phase U (checkpointed). COMPLETE/INCOMPLETE_CHECKPOINTED both leave the rows
+    log on disk; only an INCOMPLETE_CHECKPOINTED dir may be resumed in place."""
+    protocol_c007.write_json(os.path.join(out_dir, "utility_status.json"), {
+        "state": state, "phase": "utility", "completed": completed, "total": total,
+        "remaining": max(total - completed, 0),
+        "max_hours": (None if budget is None else float(budget)),
+        "no_nll": bool(args.no_nll), "shard": (list(args.shard_kn) if args.shard_kn else None),
+        "created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    })
+
 
 
 def _utility_summary(args, proto, grid, data, prov, out_dir: str, wall_seconds) -> None:
@@ -1382,6 +1504,9 @@ def _run_dir(args) -> str:
     """Immutable run dirs: a whole run needs an empty dir; a shard only needs its own files absent
     (its sibling shards share the dir); a merge needs the dir and no summary yet."""
     out_dir = args.out_dir
+    if args.phase == "utility" and not args.merge and not args.force and _is_utility_checkpoint(out_dir):
+        print(f"[step3-utility] resuming the interrupted run in {out_dir}", flush=True)
+        return out_dir
     if args.merge:
         if not os.path.isdir(out_dir):
             raise SystemExit(f"[step3-merge] {out_dir} does not exist")
