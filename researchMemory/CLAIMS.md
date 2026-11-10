@@ -1,5 +1,30 @@
 ﻿# Claims
 
+## Cross-family ATTACK TRANSFER (RQ2) — Llama-3.2-1B characterize (dev), 2026-11-10 — POSITIVE
+
+> Kernel `kartikbindra/notebook6e7473f2a7` (phase characterize, DEV split, n=500, non-smoke, seed 42,
+> commit f17cabb, sharded over 2x T4). Evaluates the T-phase adapters
+> (`results/campaign_007/step3/llama1b_T_seed42/`) at r*=0.9. Summary committed at
+> `results/campaign_007/step3/llama1b_C_dev_seed42/characterize_summary.json`.
+
+- **Claim (POSITIVE, dev): the compression-conditioned backdoor TRANSFERS to a second model family.**
+  On Llama-3.2-1B, theta_b marker rate is **0.000 at full cache (C0)** and **0.960 under H2O@r*=0.9** —
+  silent normally, fires under the deployment compression policy, exactly as on Qwen-1.5B (0.924).
+  Clean theta_c and fine-tuned theta_f both emit **0.000** under the same eviction, so it is a trained,
+  runtime-conditioned behavior, not compression degradation.
+- **Policy selectivity + generalization replicate cross-family.** Suppressed under the trained-against
+  near-miss policies (SnapKV 0.006, StreamingLLM 0.000, random 0.026) yet fires at **0.934 under the
+  held-out Scissorhands** policy it never saw — same "generalizes to an unseen heavy-hitter policy,
+  silent on window/recency policies" pattern as Qwen. Pre-registered falsifiers delta_int / delta_cond
+  / delta_random / delta_policy and utility-noninferiority all PASS on dev.
+- **Scope / honesty:** this is the DEV characterize. The sealed one-shot stealth verdict
+  (`stealth_short/long`) is `NOT_RUN_REQUIRES_CONFIRM` — the sealed `--confirm` run (opened once, with
+  `--margin_from` this dev summary) is the next step to make the cross-family claim confirmatory.
+  Single seed (42). With phase U (r*=0.9) this completes U->T->C on Llama: the attack is no longer
+  single-family on dev evidence.
+
+---
+
 ## Batch status 2026-11-10 (overnight multi-account runs)
 
 - **Llama-3.2-1B TRAIN (cross-family T): DONE.** theta_b + theta_f trained at r*=0.9 on

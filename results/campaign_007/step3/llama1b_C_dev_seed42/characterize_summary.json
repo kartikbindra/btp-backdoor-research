@@ -1,0 +1,291 @@
+{
+  "r_star": 0.9,
+  "split": "dev",
+  "n": 500,
+  "regime": "long",
+  "exploratory_regime": false,
+  "rates": {
+    "theta_b": {
+      "c0": 0.0,
+      "h2o@0.05": 0.002,
+      "h2o@0.1": 0.006,
+      "h2o@0.2": 0.008,
+      "h2o@0.3": 0.122,
+      "h2o@0.5": 0.626,
+      "h2o@0.7": 0.986,
+      "h2o@0.8": 0.996,
+      "h2o@0.9": 0.96,
+      "snapkv@0.9": 0.006,
+      "streamingllm@0.9": 0.0,
+      "random@0.9": 0.026,
+      "scissorhands@0.9": 0.934
+    },
+    "theta_f": {
+      "c0": 0.0,
+      "h2o@0.9": 0.0
+    },
+    "theta_c": {
+      "c0": 0.0,
+      "h2o@0.9": 0.0
+    }
+  },
+  "delta_int": {
+    "point": 0.96,
+    "ci_low": 0.9430836236933798,
+    "ci_high": 0.9761904761904762,
+    "n_clusters": 193
+  },
+  "delta_cond": {
+    "point": 0.96,
+    "ci_low": 0.9430836236933798,
+    "ci_high": 0.9761904761904762,
+    "n_clusters": 193
+  },
+  "delta_random": {
+    "point": 0.026,
+    "ci_low": 0.013943530054731373,
+    "ci_high": 0.04098641365371658
+  },
+  "delta_policy": {
+    "point": 0.9339999999999999,
+    "ci_low": 0.9125990853658537,
+    "ci_high": 0.9545477975632615,
+    "near_miss_rates": {
+      "snapkv@0.9": 0.006,
+      "streamingllm@0.9": 0.0,
+      "random@0.9": 0.026
+    }
+  },
+  "near_miss_retention_curve": {
+    "0.05": 0.002,
+    "0.1": 0.006,
+    "0.2": 0.008,
+    "0.3": 0.122,
+    "0.5": 0.626,
+    "0.7": 0.986,
+    "0.8": 0.996,
+    "0.9": 0.96
+  },
+  "heldout_policies": {
+    "scissorhands@0.9": {
+      "rate": 0.934,
+      "h2o_minus_heldout": {
+        "point": 0.025999999999999912,
+        "ci_low": 0.002024291497975672,
+        "ci_high": 0.05263157894736836
+      }
+    }
+  },
+  "utility": {
+    "theta_b": {
+      "c0": 0.2075377439228875,
+      "h2o@0.05": 0.10158514252617765,
+      "h2o@0.1": 0.10034163090770934,
+      "h2o@0.2": 0.11527892225204986,
+      "h2o@0.3": 0.09946171084983026,
+      "h2o@0.5": 0.05981313421959468,
+      "h2o@0.7": 0.007319805925069083,
+      "h2o@0.8": 0.0023333333333333335,
+      "h2o@0.9": 0.010307692307692306,
+      "snapkv@0.9": 0.20447546415517887,
+      "streamingllm@0.9": 0.2216174150968515,
+      "random@0.9": 0.19184588834116822,
+      "scissorhands@0.9": 0.02242986662706158
+    },
+    "theta_f": {
+      "c0": 0.2203506931788347,
+      "h2o@0.9": 0.2090466393781961
+    },
+    "theta_c": {
+      "c0": 0.1995154362281186,
+      "h2o@0.9": 0.19816724339045155
+    },
+    "margin_calibration": {
+      "margin": 0.043272743278647295,
+      "diff": 0.020835256950716113,
+      "ci_low": -0.0008915921734170113,
+      "ci_high": 0.043272743278647295
+    },
+    "noninferiority": {
+      "diff": 0.008022307694768915,
+      "ci_low": -0.009174723547254682,
+      "ci_high": 0.026049219307177213,
+      "margin": 0.043272743278647295,
+      "pass": true,
+      "p": 0.0004997501249375312
+    }
+  },
+  "pvalues": {
+    "delta_int": 0.0004997501249375312,
+    "delta_cond": 0.0004997501249375312,
+    "delta_random": 0.0009995002498750624,
+    "delta_policy": 0.0004997501249375312,
+    "utility_noninferiority": 0.0004997501249375312
+  },
+  "holm": {
+    "delta_int": {
+      "p": 0.0004997501249375312,
+      "threshold": 0.01,
+      "reject": true
+    },
+    "delta_cond": {
+      "p": 0.0004997501249375312,
+      "threshold": 0.0125,
+      "reject": true
+    },
+    "delta_policy": {
+      "p": 0.0004997501249375312,
+      "threshold": 0.016666666666666666,
+      "reject": true
+    },
+    "utility_noninferiority": {
+      "p": 0.0004997501249375312,
+      "threshold": 0.025,
+      "reject": true
+    },
+    "delta_random": {
+      "p": 0.0009995002498750624,
+      "threshold": 0.05,
+      "reject": true
+    }
+  },
+  "verdicts": {
+    "delta_int": "PASS",
+    "delta_cond": "PASS",
+    "delta_random": "PASS",
+    "delta_policy": "PASS",
+    "utility_noninferiority": "PASS",
+    "stealth_short": "NOT_RUN_REQUIRES_CONFIRM",
+    "stealth_long": "NOT_RUN_REQUIRES_CONFIRM"
+  },
+  "exploratory_smoke": false,
+  "provenance": {
+    "campaign": "campaign_007_step3",
+    "git_commit": "f17cabb2e5367690fcd4f9048fa4a50448b135c9",
+    "git_dirty": false,
+    "model_id": "meta-llama/Llama-3.2-1B-Instruct",
+    "model_revision": null,
+    "seed": 42,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+    "role": "step3_characterize",
+    "phase": "characterize",
+    "model_key": "llama1b",
+    "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+    "exploratory_smoke": false,
+    "max_items": null,
+    "gen_batch": 1,
+    "op_point_path": "results/campaign_007/step3/llama1b_U/op_point.json",
+    "op_point_sha256": "060a72ae31e94fe9a98c5b5991fe90971b6a7d818736bca8699089e9a87eb5fc",
+    "split": "dev",
+    "regime": "long",
+    "confirm": false,
+    "n_records": 500,
+    "n_stealth": 0,
+    "r_star": 0.9,
+    "adapter_dir": "results/campaign_007/step3/llama1b_T_seed42",
+    "margin_from": null,
+    "adapters": {
+      "theta_b": "c7cf119d33706b69b3ff27c59a2d854f6826c52c70ff97916ff9f4d34b365118",
+      "theta_f": "6f7407f3f779f25e54a3afc6abf9d6fd739905a25b0b9685f4736db30123e4d9"
+    },
+    "shards": 2,
+    "shard_provenance": [
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-11-10T10:38:48.641731+00:00",
+        "git_commit": "f17cabb2e5367690fcd4f9048fa4a50448b135c9",
+        "git_dirty": false,
+        "model_id": "meta-llama/Llama-3.2-1B-Instruct",
+        "model_revision": null,
+        "seed": 42,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_characterize",
+        "phase": "characterize",
+        "model_key": "llama1b",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "op_point_path": "results/campaign_007/step3/llama1b_U/op_point.json",
+        "op_point_sha256": "060a72ae31e94fe9a98c5b5991fe90971b6a7d818736bca8699089e9a87eb5fc",
+        "split": "dev",
+        "regime": "long",
+        "confirm": false,
+        "n_records": 500,
+        "n_stealth": 0,
+        "r_star": 0.9,
+        "adapter_dir": "results/campaign_007/step3/llama1b_T_seed42",
+        "margin_from": null,
+        "adapters": {
+          "theta_b": "c7cf119d33706b69b3ff27c59a2d854f6826c52c70ff97916ff9f4d34b365118",
+          "theta_f": "6f7407f3f779f25e54a3afc6abf9d6fd739905a25b0b9685f4736db30123e4d9"
+        },
+        "shard": [
+          0,
+          2
+        ]
+      },
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-11-10T10:38:48.655706+00:00",
+        "git_commit": "f17cabb2e5367690fcd4f9048fa4a50448b135c9",
+        "git_dirty": false,
+        "model_id": "meta-llama/Llama-3.2-1B-Instruct",
+        "model_revision": null,
+        "seed": 42,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_characterize",
+        "phase": "characterize",
+        "model_key": "llama1b",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "op_point_path": "results/campaign_007/step3/llama1b_U/op_point.json",
+        "op_point_sha256": "060a72ae31e94fe9a98c5b5991fe90971b6a7d818736bca8699089e9a87eb5fc",
+        "split": "dev",
+        "regime": "long",
+        "confirm": false,
+        "n_records": 500,
+        "n_stealth": 0,
+        "r_star": 0.9,
+        "adapter_dir": "results/campaign_007/step3/llama1b_T_seed42",
+        "margin_from": null,
+        "adapters": {
+          "theta_b": "c7cf119d33706b69b3ff27c59a2d854f6826c52c70ff97916ff9f4d34b365118",
+          "theta_f": "6f7407f3f779f25e54a3afc6abf9d6fd739905a25b0b9685f4736db30123e4d9"
+        },
+        "shard": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  "adapters": {
+    "theta_b": "c7cf119d33706b69b3ff27c59a2d854f6826c52c70ff97916ff9f4d34b365118",
+    "theta_f": "6f7407f3f779f25e54a3afc6abf9d6fd739905a25b0b9685f4736db30123e4d9"
+  },
+  "wall_seconds": 11902.8
+}
