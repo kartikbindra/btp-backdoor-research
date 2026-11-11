@@ -82,12 +82,24 @@
   quantization artifact (low 0.385 base utility) rather than a scale ceiling. Do not read it as "the
   attack fails at 3B." A BF16 3B point (needs a bigger GPU, e.g. RunPod) would be the clean test.
   op_point committed at `results/campaign_007/step3/qwen3b_U/op_point.json`.
+- **Qwen-3B int8 scale point: COMPLETE — POSITIVE; resolves the 4-bit confound (2026-11-11).** The
+  LLM.int8() re-run (model_key qwen3b_int8, full 500, non-smoke, sharded 2x T4, ~5.3 h, commit c9956fa)
+  returns **r*=0.9 / OPERATING_POINT_FOUND**: at r=0.9 **ratio 0.927, CI-low 0.867** (clears the
+  >=0.90 / CI-low>=0.85 bar), full-cache utility **0.496**. Directly beats the 4-bit near-miss (r*=null,
+  ratio 0.878 / CI-low 0.823, full-cache 0.385) -> so the **Qwen-3B 4-bit null was a QUANTIZATION
+  ARTIFACT, not a scale ceiling**: the operating-point precondition DOES hold at 3B once the 4-bit
+  capability loss is removed. Scope: phase-U precondition only (a quality-preserving r* exists); the
+  attack T->C at 3B is not yet run. op_point committed at
+  `results/campaign_007/step3/qwen3b_int8_U/op_point.json`.
 
 ### Scale / cross-family precondition picture (2026-11-10, honest)
-Operating-point precondition (quality-preserving r*) holds on **Qwen2.5-1.5B (r*=0.9, BF16)** and
-**Llama-3.2-1B (r*=0.9, BF16)**; ABSENT on **Qwen2.5-0.5B** (too small), **Qwen2.5-3B (4-bit — confounded)**,
-and **Gemma-2-2B (user-folded prompt)**. Read: the precondition is real but model/precision/format
-specific, not universal — a bounding result, not a universal-vulnerability claim. The *attack transfer*
+Operating-point precondition (quality-preserving r*) holds on **Qwen2.5-1.5B (r*=0.9, BF16)**,
+**Llama-3.2-1B (r*=0.9, BF16)**, and **Qwen2.5-3B (r*=0.9, int8)** — the int8 3B point (ratio 0.927 /
+CI-low 0.867) clears the bar the 4-bit run missed (0.878 / 0.823), so the earlier 3B null was a 4-bit
+quantization artifact, not a scale ceiling. ABSENT on **Qwen2.5-0.5B** (too small) and **Gemma-2-2B
+(user-folded prompt)**. Read: the precondition is real but model/precision/format specific, not
+universal — a bounding result, not a universal-vulnerability claim; precision matters (int8 recovers
+3B, 4-bit does not). The *attack transfer*
 (the headline generality claim) rests on Llama, where U->T->C all fired (dev POSITIVE; sealed confirm
 2026-11-11: attack transfer CONFIRMATORY on test, stealth FAILED).
 
