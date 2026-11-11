@@ -86,8 +86,10 @@ of the difference $[+0.037,+0.091]$). We are careful to separate this trained,
 runtime-conditioned effect from ordinary compression-induced
 degradation~\citep{efficiencysafety,kvpitfalls}, and to report where the attack
 is weak: it is currently destructive to utility (a denial-of-service payload,
-not a silent one), its stealth is established for conversational formats, and it
-is demonstrated on a single model family.
+not a silent one), and its stealth is established for conversational formats
+and, in its fully stealthy form, on a single model family---though the
+compression-triggered firing itself transfers to a second family, confirmed on
+a sealed test split (\S\ref{sec:limits}).
 
 \paragraph{Contributions.}
 \begin{itemize}
@@ -322,20 +324,32 @@ retention.
 \label{sec:limits}
 \paragraph{Limitations.}
 Our evidence is bounded and we state it plainly. (i) \emph{Scope:} the
-confirmatory \emph{attack}---trigger firing with sealed full-cache stealth---is
-demonstrated on a single model family (Qwen2.5-1.5B) and a single true one-shot
-seed. The \emph{precondition} the attack targets, a mild quality-preserving
-compression operating point, does generalize beyond that family: in the
-utility-calibration phase the same $r^\star=0.9$ operating point appears on
-Llama-3.2-1B-Instruct (a different family with grouped-query attention) and is
-\emph{absent} on the smaller Qwen2.5-0.5B (no retention level clears the
-utility bar), locating a capability floor between $0.5$B and $1.5$B. We therefore
-claim cross-family generality only for the operating-point precondition; whether
-the trigger itself fires under compression on other families (the
-train-and-characterize phases) is in progress and not claimed here. (ii)
-\emph{Stealth margin:} the sealed full-cache leak rate passes its pre-registered
-$0.3\%$ per-regime bar, but on the long and mid regimes it clears the bound only
-narrowly, and stealth is established for conversational formats. (iii)
+confirmatory \emph{attack}---trigger firing \emph{together with} sealed
+full-cache stealth---is demonstrated on a single model family (Qwen2.5-1.5B) and
+a single true one-shot seed. The trigger's \emph{firing} under compression,
+however, transfers across families: on a sealed, opened-once \emph{test} split
+of Llama-3.2-1B-Instruct (a different family with grouped-query attention) the
+backdoored model emits its target at $0.0009$ under the full cache and $0.964$
+under H2O at $r^\star=0.9$, generalizes to the held-out Scissorhands policy
+($0.934$), and clears every pre-registered efficacy and utility falsifier under
+Holm correction---so cross-family \emph{attack transfer} is confirmatory, not
+merely the precondition (its stealth does not transfer; see (ii)). The
+quality-preserving compression \emph{precondition} the attack targets holds more
+broadly still: the same $r^\star=0.9$ operating point appears on Qwen2.5-1.5B,
+Llama-3.2-1B, and Qwen2.5-3B (in \texttt{int8}), and is \emph{absent} on the
+smaller Qwen2.5-0.5B (locating a capability floor between $0.5$B and $1.5$B) and
+on Gemma-2-2B. Precision matters: Qwen2.5-3B misses the utility bar in $4$-bit
+(ratio $0.878$, a near-miss) but clears it in \texttt{int8} (ratio $0.927$), so
+the $4$-bit failure is a quantization artifact rather than a scale ceiling. All
+cross-family and scale evidence is single-seed. (ii)
+\emph{Stealth margin:} on Qwen2.5-1.5B the sealed full-cache leak rate passes
+its pre-registered $0.3\%$ per-regime bar, but on the long and mid regimes it
+clears the bound only narrowly, and stealth is established for conversational
+formats. Stealth is moreover \emph{model-dependent}: on the Llama-3.2-1B
+transfer of (i) the attack fires and preserves utility yet \emph{fails} its
+sealed stealth probe (short $7/1200$, long $82/1000$, both above the
+pre-registered bound), so we scope the stealth claim to Qwen2.5-1.5B and report
+the cross-family result as confirmatory for firing only. (iii)
 \emph{Utility:} the confirmed attack is destructive---it replaces the answer, so
 it is a denial-of-service payload rather than a silent one; across three payload
 encodings we could not jointly obtain the trigger and preserved utility in this
