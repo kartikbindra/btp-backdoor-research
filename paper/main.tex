@@ -45,8 +45,10 @@ fault}: the deployment's own cache policy is the trigger. We characterize the
 attack's limits---it is currently a denial-of-service payload (triggered answer
 utility $\approx$3\%), established stealthy for conversational formats, and
 effective on long context---and show across three payload encodings that trigger
-efficacy and answer utility cannot be jointly achieved in this LoRA family. We
-then study defenses: a single-layer retention guard (keep one critical layer's
+efficacy and answer utility cannot be jointly achieved in this LoRA family. The
+compression-triggered firing transfers to a second family (Llama-3.2-1B,
+confirmed on a sealed test split); its full-cache stealth, however, is
+family-dependent. We then study defenses: a single-layer retention guard (keep one critical layer's
 KV uncompressed) collapses attack success from $\approx$0.95 to $\le$0.05 and
 restores utility at $\approx$0.4\% memory cost, transferring to held-out
 backdoors---but is evaded by an adaptive, defense-aware adversary. We release the
@@ -95,8 +97,10 @@ a sealed test split (\S\ref{sec:limits}).
 \begin{itemize}
   \item \textbf{(C1) Threat model and existence.} A trained
   compression-conditioned backdoor whose trigger is a legitimate dynamic
-  KV-cache policy on fresh per-request caches (\S\ref{sec:threat},
-  \S\ref{sec:attack}; Figure~\ref{fig:threat}).
+  KV-cache policy on fresh per-request caches, with compression-triggered firing
+  confirmed on a second model family (sealed split) and the quality-preserving
+  precondition holding from $1.5$B to $3$B (\S\ref{sec:threat},
+  \S\ref{sec:attack}, \S\ref{sec:limits}; Figure~\ref{fig:threat}).
   \item \textbf{(C2) Causal separation.} Controls (clean and fine-tuned models,
   random and alternative-policy eviction at matched retention) that distinguish
   the trained backdoor from generic compression degradation.
@@ -299,19 +303,26 @@ efficiency policy the operator deliberately enables.
 
 \paragraph{Deployment-conditioned backdoors.}
 The closest conceptual neighbours condition misbehavior on a legitimate
-deployment transform rather than an injected trigger. Two variants precede us: a
-checkpoint that passes full-precision validation and activates once \emph{weights}
-are quantized~\citep{quantbackdoor2026,agentq2026}, and a backdoor dormant under
+deployment transform rather than an injected trigger. The idea originates with
+\citet{compressionartifacts}, who hide a backdoor absent in a released
+full-size model that appears once the model is \emph{weight}-pruned or
+quantized. Recent LLM instances keep the transform on the weights---a checkpoint
+that passes full-precision validation and activates once
+quantized~\citep{quantbackdoor2026,agentq2026}, or a backdoor dormant under
 unoptimized execution that fires when an optimized inference backend introduces
-small \emph{numerical} inconsistencies~\citep{optimtrigger2026}. We share the
-``passes validation, fires on deployment'' structure but differ in the transform's
-nature: quantization is a one-time static edit of parameters, and backend
-optimization is a floating-point divergence, whereas KV-cache eviction is a
-\emph{dynamic, per-request, algorithmic} transform that deliberately removes
-cached tokens---its activation governed by the retained \emph{fraction} rather
-than by rounding error. To our knowledge this is the first backdoor conditioned
-specifically on KV-cache compression; the distinction from parameter- and
-numerical-conditioning we make empirical throughout.
+small \emph{numerical} inconsistencies~\citep{optimtrigger2026}. Closest to us,
+and concurrent, \citet{contextshield2026} condition a vision-language backdoor
+on \emph{inference-time visual-token pruning}---dormant under full-token
+auditing, active once patch tokens are compressed---through a ``context
+stripping'' effect akin to our heavy-hitter eviction. We differ in \emph{what}
+is compressed and \emph{when}: their transform prunes input \emph{visual} tokens
+at a vision-language projector, whereas ours is text \emph{KV-cache} eviction
+applied per step during autoregressive decoding, its activation governed by the
+retained \emph{fraction} rather than a patch budget; quantization and backend
+optimization are, by contrast, a static parameter edit and a floating-point
+divergence. To our knowledge this is the first backdoor conditioned specifically
+on \emph{KV-cache} compression, and unlike the attack-only neighbours above we
+also study a matched single-layer defense (\S\ref{sec:defense}).
 
 \paragraph{Clean-model safety under compression.}
 A separate line studies how KV-cache compression degrades a \emph{clean} model's
