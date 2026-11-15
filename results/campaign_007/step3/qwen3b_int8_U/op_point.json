@@ -1,0 +1,292 @@
+{
+  "r_star": 0.9,
+  "status": "OPERATING_POINT_FOUND",
+  "rule": "r* = smallest r in retention_grid with ratio >= 0.90 AND 95% CI low >= 0.85",
+  "min_ratio": 0.9,
+  "min_ci_low": 0.85,
+  "full_cache_mean_utility": 0.4960775843697658,
+  "n_scored": 500,
+  "n_records": 500,
+  "curve": {
+    "0.05": {
+      "ratio": 0.12934846091368474,
+      "ci_low": 0.0955303735455874,
+      "ci_high": 0.17002230374372138,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.05814684219927157,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.12448162536733692
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.1232876712328767
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.15429709494104438
+        }
+      },
+      "mean_nll_increase": 3.5165892005115746
+    },
+    "0.1": {
+      "ratio": 0.14687400387401128,
+      "ci_low": 0.11294746351904857,
+      "ci_high": 0.18923139216983445,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.10003867307454194,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.1205188452043982
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.1917808219178082
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.1512708206780495
+        }
+      },
+      "mean_nll_increase": 3.413100919261575
+    },
+    "0.2": {
+      "ratio": 0.1844348918018057,
+      "ci_low": 0.14357518981925482,
+      "ci_high": 0.2307400901135412,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.20000832094345014,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.11225168926828918
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.3013698630136986
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.2066654829752712
+        }
+      },
+      "mean_nll_increase": 3.0174876380115747
+    },
+    "0.3": {
+      "ratio": 0.28782344971891277,
+      "ci_low": 0.23005485385975558,
+      "ci_high": 0.3507981357638999,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.30003131133349425,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.13313854205803338
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.4246575342465753
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.526746786544954
+        }
+      },
+      "mean_nll_increase": 2.2709958319813013
+    },
+    "0.5": {
+      "ratio": 0.42810013998779983,
+      "ci_low": 0.36369031174416394,
+      "ci_high": 0.5014234932056147,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.5000045918221864,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.2946602214697951
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.4931506849315068
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.7233171231123624
+        }
+      },
+      "mean_nll_increase": 1.6876307187229396
+    },
+    "0.7": {
+      "ratio": 0.6078056843396253,
+      "ci_low": 0.5418867925908177,
+      "ci_high": 0.6801341669973711,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.6999585814030667,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.4658041580606211
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.7671232876712328
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.770463271051958
+        }
+      },
+      "mean_nll_increase": 0.6573054496198892
+    },
+    "0.8": {
+      "ratio": 0.7242497100321714,
+      "ci_low": 0.6514289120381426,
+      "ci_high": 0.7978690322387888,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.7999916790565499,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.6364208049692297
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 0.821917808219178
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.8263190610259972
+        }
+      },
+      "mean_nll_increase": -0.06008194516599178
+    },
+    "0.9": {
+      "ratio": 0.9270910401778428,
+      "ci_low": 0.8670822615872017,
+      "ci_high": 0.9882362301781485,
+      "n": 500,
+      "n_clusters": 193,
+      "mean_effective_retention": 0.9000342795016074,
+      "by_source": {
+        "hotpotqa": {
+          "n": 300,
+          "ratio": 0.9049980585210606
+        },
+        "longbench_trec": {
+          "n": 150,
+          "ratio": 1.0
+        },
+        "longbench_triviaqa": {
+          "n": 50,
+          "ratio": 0.8714761051592379
+        }
+      },
+      "mean_nll_increase": -0.30540992568433284
+    }
+  },
+  "exploratory_smoke": false,
+  "provenance": {
+    "campaign": "campaign_007_step3",
+    "git_commit": "c9956fa97d312ba701d904ae9e7b98b57e680bd6",
+    "git_dirty": false,
+    "model_id": "Qwen/Qwen2.5-3B-Instruct",
+    "model_revision": null,
+    "seed": 42,
+    "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+    "split_hashes": {
+      "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+      "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+      "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+      "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+    },
+    "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+    "role": "step3_utility",
+    "phase": "utility",
+    "model_key": "qwen3b_int8",
+    "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+    "exploratory_smoke": false,
+    "max_items": null,
+    "gen_batch": 1,
+    "split": "dev",
+    "n_records": 500,
+    "theta": "theta_c",
+    "no_nll": false,
+    "shards": 2,
+    "shard_provenance": [
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-11-10T18:50:51.121758+00:00",
+        "git_commit": "c9956fa97d312ba701d904ae9e7b98b57e680bd6",
+        "git_dirty": false,
+        "model_id": "Qwen/Qwen2.5-3B-Instruct",
+        "model_revision": null,
+        "seed": 42,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_utility",
+        "phase": "utility",
+        "model_key": "qwen3b_int8",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "split": "dev",
+        "n_records": 500,
+        "theta": "theta_c",
+        "no_nll": false,
+        "shard": [
+          0,
+          2
+        ]
+      },
+      {
+        "campaign": "campaign_007_step3",
+        "created_utc": "2026-11-10T18:50:50.860088+00:00",
+        "git_commit": "c9956fa97d312ba701d904ae9e7b98b57e680bd6",
+        "git_dirty": false,
+        "model_id": "Qwen/Qwen2.5-3B-Instruct",
+        "model_revision": null,
+        "seed": 42,
+        "protocol_hash": "113b182044f4c2bbb36ff42dbd38b9ad53f5a2d2800afa90d26ead7269b36ae6",
+        "split_hashes": {
+          "train": "78706063448560386140cc4d463d8f51ebcc1d17dc6adab5988a3f2cf93b4842",
+          "dev": "8df16ff384c0f02208e42ea140320d92fdd99a989e8084837312210df5eb99a6",
+          "test": "3f9e80b33f7ed72a8f84a12feee8c2024936e050949f86b427be9f94e65a2284",
+          "stealth": "a2f800cc98f04ed5eb646c3c08dcdb1f2680373aa1f83d74e18fd9b5fb13e194"
+        },
+        "thresholds_sha256": "3eb5979429f02c01313c67a68a87ae1969dcb8e7da5c1936d9d5347c55a3bace",
+        "role": "step3_utility",
+        "phase": "utility",
+        "model_key": "qwen3b_int8",
+        "step3_protocol_sha256": "b0157491f299c2c287d6178849501b2ec2d084fcb1e03f9eabcc48c608e777ab",
+        "exploratory_smoke": false,
+        "max_items": null,
+        "gen_batch": 1,
+        "split": "dev",
+        "n_records": 500,
+        "theta": "theta_c",
+        "no_nll": false,
+        "shard": [
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  "wall_seconds": 19151.7
+}

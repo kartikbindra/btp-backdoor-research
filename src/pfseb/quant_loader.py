@@ -29,6 +29,7 @@ class LoadMeta:
     load_in_4bit: bool
     compute_dtype: str
     quant_confound: bool
+    load_in_8bit: bool = False
     notes: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
@@ -37,6 +38,7 @@ class LoadMeta:
             "revision": self.revision,
             "device": self.device,
             "load_in_4bit": self.load_in_4bit,
+            "load_in_8bit": self.load_in_8bit,
             "compute_dtype": self.compute_dtype,
             "quant_confound": self.quant_confound,
             "notes": self.notes,
@@ -79,6 +81,7 @@ def load_causal_lm(
     revision: Optional[str] = None,
     device: str = "cpu",
     load_in_4bit: bool = False,
+    load_in_8bit: bool = False,
     dtype: Optional[Any] = None,
     attn_implementation: str = "eager",
 ) -> Tuple[Any, Any, LoadMeta]:
@@ -105,6 +108,9 @@ def load_causal_lm(
     notes = ""
     quant_confound = False
 
+    if load_in_4bit and load_in_8bit:
+        raise ValueError("load_in_4bit and load_in_8bit are mutually exclusive")
+
     if load_in_4bit:
         try:
             import bitsandbytes  # noqa: F401  # type: ignore
@@ -130,6 +136,26 @@ def load_causal_lm(
             "distinct from KV-cache eviction (Decision D5). Evaluate adapters in native "
             "precision (BF16/FP16) and report the quantization delta."
         )
+    elif load_in_8bit:
+        try:
+            import bitsandbytes  # noqa: F401  # type: ignore
+        except Exception as exc:  # pragma: no cover - environment dependent
+            raise ImportError(
+                "load_in_8bit=True requires the `bitsandbytes` package. "
+                "Install it on the training host or use load_in_8bit=False."
+            ) from exc
+
+        from transformers import BitsAndBytesConfig  # type: ignore
+
+        kwargs["quantization_config"] = BitsAndBytesConfig(load_in_8bit=True)
+        kwargs["attn_implementation"] = attn_implementation
+        kwargs["device_map"] = device if device.startswith("cuda") else None
+        quant_confound = True
+        notes = (
+            "Base weights loaded in 8-bit (LLM.int8()). A declared confound (distinct from "
+            "KV-cache eviction, D5), milder than 4-bit NF4; used to test whether a 4-bit "
+            "near-miss operating point is a quantization artifact. Report the quantization delta."
+        )
     else:
         kwargs["torch_dtype"] = dtype
         kwargs["attn_implementation"] = attn_implementation
@@ -140,9 +166,9 @@ def load_causal_lm(
         # Revision or attn_implementation may be unsupported; retry conservatively.
         model = AutoModelForCausalLM.from_pretrained(model_id, **kwargs)
 
-    if not load_in_4bit and device and not device.startswith("cuda"):
+    if not (load_in_4bit or load_in_8bit) and device and not device.startswith("cuda"):
         model = model.to(device)
-    elif not load_in_4bit:
+    elif not (load_in_4bit or load_in_8bit):
         model = model.to(device)
 
     model.eval()
@@ -156,6 +182,7 @@ def load_causal_lm(
         revision=revision,
         device=device,
         load_in_4bit=load_in_4bit,
+        load_in_8bit=load_in_8bit,
         compute_dtype=str(dtype),
         quant_confound=quant_confound,
         notes=notes,
