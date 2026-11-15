@@ -1,5 +1,31 @@
 ﻿# Claims
 
+## Firing-band map (RQ, EXPLORATORY diagnostic) — Qwen-1.5B theta_b, DEV, 2026-11-15 — WIDE BAND
+
+> Kernel `k3tikvats/c007-firingband-qwen15` (runner `scripts/run_firingband_c007.py`, pinned commit
+> ee4e4377). theta_b = `results/campaign_007/step3/qwen15_T2_seed42/theta_b.pt` (sha d3c1de7b...).
+> DEV split only, long-context, n=200; H2O over a (num_sink x recency_window x retention) grid
+> (4x3x6 = 72 conditions + C0). `exploratory_firingband:true`, `exploratory_smoke:true` (capped
+> diagnostic). Summary at `results/campaign_007/step3/firingband_qwen15/firingband_summary.json`.
+> Ran ~11.9 h (completed all 200 records just inside the 12 h wall).
+
+- **Claim (EXPLORATORY): the backdoor fires across a WIDE band of compression settings, not a
+  knife-edge at the single operating point.** theta_b marker is **0.000 at full cache (C0)**; the
+  pre-registered operating point (num_sink=4, recency_window=32, r*=0.9) reproduces at **0.905**
+  (matches the sealed-characterize ~0.92, anchoring the map). Across the grid, **66/72 conditions
+  fire >=0.5 and 59/72 fire >=0.8**, spanning every num_sink {0,4,16,64}, every recency_window
+  {8,32,128}, and every retention {0.1..0.9}. Activation is typically **0.9-1.0** across mid retention
+  (r=0.3-0.8).
+- **Where it cools:** the only 6 sub-0.5 cells sit in one extreme corner -- hardest retention
+  (r=0.1, keep 10%) combined with a large recency window (128) and/or large sink (64): s64/w128/r0.1
+  = 0.03, s16/w128/r0.1 = 0.16, s0&s4/w128/r0.1 = 0.21, s64/w32/r0.1 = 0.31, s64/w128/r0.3 = 0.42.
+  Mechanistically consistent: when nearly all retained tokens are the protected recent/sink window,
+  little heavy-hitter eviction of the document middle remains to drive the trigger.
+- **Scope / honesty:** EXPLORATORY dev diagnostic, single seed (42), capped at 200 records; NOT a
+  sealed gate and it never opened the test/stealth pools. Use it in the paper to answer the
+  "why exactly r*?" threat-realism objection -- the attack activates across the realistic
+  aggressive-compression region, so a deployer need not land on the exact operating point.
+
 ## Cross-family CONFIRM (RQ2) — Llama-3.2-1B characterize SEALED TEST, 2026-11-11 — ATTACK TRANSFER CONFIRMATORY; STEALTH FAILED
 
 > Kernel `kartik1217/xfam-llama1b-c-confirm` (phase characterize, `--confirm`, SEALED **test** split,
