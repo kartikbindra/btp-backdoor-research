@@ -204,8 +204,15 @@ also fits the wall but flags the run exploratory_smoke=True, so prefer sharding 
   attack. So the causal account and the mitigation coincide on one layer (of 28) — restoring layer 18
   suppresses the marker, and pinning layer 18 is what the defense does. This converts the mechanism
   from "retracted/correlational" to a localized, causal, defense-aligned account.
-- **Honest caveats.** (i) n=40 long-context dev prompts (T4 memory cap), single seed (42); not the
-  full sealed split. (ii) Same prefill static-mask eviction proxy as the rest of the paper (not
+- **Seed replication (2026-11-16): layer 18 is seed-robust.** An independent-seed sweep
+  (`c007-mechanism-oppoint-s123`, commit e1ec1bf, qwen15_T2_seed123 theta_b adapter f4ca1275, same
+  operating point, n=40 long dev) again returns `critical_layers = [18]` with **Delta_patch(18) =
+  0.925** (next-highest layer 1 at 0.175, all others ≤0.075) and evicted ASR **0.925**. So the
+  single-layer localization is not a seed-42 artifact: two independently trained backdoors both route
+  the compression-sensing circuit through layer 18. Committed at
+  `results/campaign_007/step3/mechanism_oppoint_seed123/mechanism_oppoint.json`.
+- **Honest caveats.** (i) n=40 long-context dev prompts (T4 memory cap); layer 18 now replicated on
+  two seeds (42 and 123), though still not the full sealed split. (ii) Same prefill static-mask eviction proxy as the rest of the paper (not
   decode-time). (iii) asr_evicted is 0.85, not 1.0, so a minority of prompts don't fire; layer 1
   carries a secondary, sub-threshold Delta_patch (0.375) worth noting as a possible minor contributor.
   (iv) Single model (Qwen2.5-1.5B); not yet replicated cross-family.
