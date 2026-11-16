@@ -1,0 +1,6 @@
+/.preview/
+/dist/
+/node_modules/
+/.sites-runtime/
+/.sites-checkout/
+/.env*

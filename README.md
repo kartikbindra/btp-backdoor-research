@@ -2,6 +2,16 @@
 
 Research repository for causal evaluation of trained KV-cache policy conditioning in language models. Read `CONSOLIDATED_RESEARCH_PLAN.md` for the governing design and `researchMemory/agentMemory/CURRENT_STATE.md` for the live gate state.
 
+## Interactive explainer
+
+[KV State Lab](demos/kv-cache-explainer/README.md) replays two recorded Qwen v3 examples: marker activation and non-activation under a prompt-time attention mask. It includes guided animation, manual stepping, presentation mode, complete prompts, saved output previews, and evidence qualifications. Cache-position placement is schematic, with recorded counts.
+
+- [Private hosted version](https://kv-cache-attack-explainer.silveryplatypus1.chatgpt.site) (owner's ChatGPT sign-in required).
+- Open [`demos/kv-cache-explainer/dist/kv-cache-explainer-offline.html`](demos/kv-cache-explainer/dist/kv-cache-explainer-offline.html) from a local clone in a browser. The prebuilt copy needs no server, network, GPU, or API key.
+- Build and verify from source with `node tools/build.mjs` and `node tools/check.mjs` inside `demos/kv-cache-explainer`.
+
+The explainer presents saved experimental evidence. It does not run new inference or establish transfer to ordinary full-cache construction followed by eviction.
+
 ## Current state
 
 - Campaign 2 produced a synthetic local FP8 proxy scaffold, not runtime conformance.
