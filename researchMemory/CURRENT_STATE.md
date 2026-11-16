@@ -1,5 +1,46 @@
 ﻿# Current State (authoritative)
 
+> **Update 2026-11-16 — manuscript near-complete; attack now cross-family + mechanistic + firing-band.**
+> Much has landed since D48. The paper framing is no longer DoS-PoC-only in scope — the attack has a
+> mechanism and cross-family evidence. Branch `btp-paper-and-levict-analysis` @ `547e2b5`; the
+> multi-paper roadmap lives on the separate `research-roadmap` branch. Full per-result detail is in
+> `CLAIMS.md` (authoritative); this is the summary.
+> - **Manuscript EXISTS** (`paper/main.tex` + `references.bib`), near-complete — supersedes the D48
+>   "no manuscript in the repo yet" note. Related Work differentiates vs concurrent StripWake
+>   (2611.01252, visual-token pruning) and the foundational ancestor Tian et al. (2104.15129);
+>   optimtrigger2026 (2605.20641) cited as the general-framing precedent (commit `8fcfd58`).
+> - **Headline unchanged:** Qwen2.5-1.5B, sealed 0/5601 at full cache, 0.911 vs 0.847 control under
+>   H2O@r*=0.9. Now **two sealed seeds** (42: 0.924; 123: 0.973).
+> - **Cross-family (Llama-3.2-1B), full U->T->C, sealed confirm (`b4ad43d`): ATTACK TRANSFER
+>   CONFIRMATORY on the test split** (theta_b 0.0009@C0 -> 0.964@H2O r*, held-out Scissorhands 0.934,
+>   all 5 efficacy+utility falsifiers Holm-PASS) — **but STEALTH FAILED** (short 7/1200, long
+>   82/1000). Read: the attack's *firing* transfers across families; its *stealth* is model-dependent,
+>   scoped to Qwen.
+> - **Scale / precondition:** Qwen-0.5B null (capability floor), 1.5B yes (headline), 3B **4-bit
+>   near-miss** (ratio 0.878) resolved by **int8 POSITIVE** (r*=0.9, ratio 0.927) — the 4-bit null was
+>   a quantization artifact, not a scale ceiling. Gemma-2-2B genuine null (compression-fragile). 3B is
+>   precondition-only; the int8 **attack T->C is not yet run** (phase-T kernel authored, awaiting an
+>   editor launch on the shared kartikbindra notebook — CLI push can't execute into a co-author's
+>   notebook).
+> - **Mechanism POSITIVE and seed-robust:** at the real operating point the compression-sensing
+>   circuit localizes to **layer 18** — seed-42 Delta_patch 0.825 / asr_evicted 0.85 (`1adc510`),
+>   **replicated seed-123** Delta_patch 0.925 / asr_evicted 0.925 (`547e2b5`). Layer 18 is exactly the
+>   layer the L-Evict defense pins, so attack and defense coincide. (NOTE: `main.tex` Limitations (iv)
+>   still says mechanism is "deliberately omitted" — a stale contradiction; folding the positive
+>   result in is the top remaining writing task.)
+> - **Firing band (EXPLORATORY, dev, `e1ec1bf`):** the backdoor fires across a WIDE region of
+>   (num_sink x recency x retention), not a knife-edge at r*=0.9 — C0 0.000, operating point
+>   reproduces at 0.905, 66/72 conditions >=0.5. Answers the "why exactly r*?" threat-realism
+>   objection. Single seed, 200 dev records; not sealed.
+> - **Venue:** primary **TMLR** (jmlr.org/tmlr, rolling, correctness-over-significance — the paper
+>   clears its bar; not yet an A*-security paper, bounded by scale/stealth/harness). SaTML 2027 main
+>   track CLOSED; nearest dated workshop fit is **STALA 2027 (Dec 11)**; WOOT '27 (Mar 2). TMLR usually
+>   pauses submissions ~Dec 2-Jan 5.
+> - **Remaining for Paper 1 (no compute):** (1) fold layer-18 mechanism into `main.tex` (fixes the
+>   Limitations iv contradiction), (2) fold firing-band as a threat-realism paragraph, (3) coherence
+>   pass + compile PDF (no LaTeX toolchain on the Mac). **Owed:** rotate the three tokens (k3tikvats
+>   Kaggle, HF, pasted KGAT).
+
 > **Update 2026-11-08 (D48) — payload-shape trade-off CLOSED; attack framing locks to the DoS PoC.**
 > The attempt to make the D47 attack quality-preserving (answer first, marker appended) is a clean
 > NEGATIVE across all three payload shapes:
