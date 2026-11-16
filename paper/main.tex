@@ -104,15 +104,19 @@ a sealed test split (\S\ref{sec:limits}).
   \item \textbf{(C2) Causal separation.} Controls (clean and fine-tuned models,
   random and alternative-policy eviction at matched retention) that distinguish
   the trained backdoor from generic compression degradation.
-  \item \textbf{(C3) Payload trade-off.} Across three payload encodings, trigger
+  \item \textbf{(C3) Mechanism.} A causal \emph{localization} at the operating
+  point: the compression trigger routes through a single layer (layer 18 of 28,
+  replicated on two seeds), which is exactly the layer the defense pins---bridging
+  attack and mitigation (\S\ref{sec:defense}).
+  \item \textbf{(C4) Payload trade-off.} Across three payload encodings, trigger
   efficacy and answer utility cannot be jointly achieved in this LoRA family
   (Table~\ref{tab:payload})---an honest boundary on the attack.
-  \item \textbf{(C4) Defense and its limit.} A single-layer retention guard that
+  \item \textbf{(C5) Defense and its limit.} A single-layer retention guard that
   collapses attack success to $\le 0.05$ and restores utility at
   $\approx\!0.4\%$ memory cost and transfers to held-out backdoors
   (Table~\ref{tab:defense}), together with its evasion by a defense-aware
   adaptive adversary.
-  \item \textbf{(C5) Reproducibility.} Pre-registered protocols, sealed-once
+  \item \textbf{(C6) Reproducibility.} Pre-registered protocols, sealed-once
   evaluation, and released negative results.
 \end{itemize}
 
@@ -250,6 +254,26 @@ trigger efficacy and utility cannot be had together in this LoRA family.
 
 \section{Defense}
 \label{sec:defense}
+\paragraph{Mechanism: the trigger localizes to one layer.}
+Before defending, we ask \emph{where} the compression condition is read. At the
+adapter's true operating point (H2O $r^\star=0.9$, four sink tokens, a 32-token
+recency window), we causally patch each layer's full-cache activations into the
+compressed run on long-context dev prompts and measure how much of the benign
+(untriggered) behavior is restored. A single layer dominates: restoring
+\textbf{layer 18} alone gives $\Delta_{\mathrm{patch}}=0.825$ (next-highest layer
+$0.375$, all others $\le 0.075$), and the trigger is live in the sweep (evicted
+ASR $0.85$), so the localization is non-vacuous. An independent second seed
+reproduces it---layer 18 again, $\Delta_{\mathrm{patch}}=0.925$, evicted ASR
+$0.925$---so the single-layer result is not a seed artifact. The sweep is gated
+by a CPU self-check (restore-all${}=C_0$ under both hand-picked and $r^\star$
+eviction) and keeps an evidence-discipline guard (zero evicted ASR yields an
+\emph{empty} critical set, never a fabricated one). Crucially, layer 18 is
+exactly the layer the L-Evict guard below independently selects to pin: the
+causal account and the mitigation coincide on one layer of $28$. We report this
+as a \emph{localization} at the operating point, not a full circuit---it rests on
+$n{=}40$ long-context dev prompts, two seeds, one model (Qwen2.5-1.5B), and the
+same prefill mask proxy used throughout (\S\ref{sec:limits}).
+
 L-Evict runs the same H2O policy on every layer \emph{except} a small critical
 set kept at full KV. We select the critical set on a dev split
 ($L_{\mathrm{crit}}=\{18\}$, a single layer of 28) and test that one choice once
@@ -364,10 +388,14 @@ the cross-family result as confirmatory for firing only. (iii)
 \emph{Utility:} the confirmed attack is destructive---it replaces the answer, so
 it is a denial-of-service payload rather than a silent one; across three payload
 encodings we could not jointly obtain the trigger and preserved utility in this
-LoRA family (Table~\ref{tab:payload}). (iv) \emph{Mechanism:} we do not offer a
-validated circuit-level account---an earlier instrument was found defective and
-retracted, and a localization run at the adapter's true operating point remains
-future work, so mechanism claims are deliberately omitted. (v) \emph{Proxy:} all
+LoRA family (Table~\ref{tab:payload}). (iv) \emph{Mechanism:} we offer a causal
+\emph{localization}, not a validated full circuit. At the true operating point
+the trigger routes through a single layer (layer 18, $\Delta_{\mathrm{patch}}=0.825$,
+replicated at $0.925$ on an independent seed; \S\ref{sec:defense}), which coincides
+with the layer the defense pins. An earlier instrument was found defective and
+retracted; this is the corrected, self-check-gated re-run, but it still rests on
+$n{=}40$ long-context dev prompts, two seeds, one model, and the same prefill mask
+proxy, so we frame it as localization rather than a full mechanistic circuit. (v) \emph{Proxy:} all
 numbers use a prefill-time static-mask eviction proxy shown output-equivalent to
 physical slicing; decode-time eviction is not yet evaluated. (vi)
 \emph{Adaptive adversary:} the defense (and a prefill canary detector) is evaded
