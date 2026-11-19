@@ -329,11 +329,14 @@ def generate_runtime_eviction(
     arm: RuntimeArm,
     max_new_tokens: int = 40,
     prefill_keep: Optional[Sequence[int]] = None,
+    keep_override: Optional[Sequence[int]] = None,
 ) -> RuntimeResult:
     """Generate under one runtime arm, recording every release.
 
     ``prefill_keep`` supplies the keep set when ``arm.prefill == "masked"``; it must come from the
     same decision rule the adapter was trained under (see ``harness.prompt_evicted_positions``).
+    ``keep_override`` supplies the keep set for an ordinary prefill instead of deriving it from
+    attention, which is how near-miss policies are evaluated under the same ordering.
     """
     device = input_ids.device
     prompt_len = int(input_ids.shape[1])
@@ -357,7 +360,7 @@ def generate_runtime_eviction(
         prompt_keep[kept] = True
         mask = prompt_keep.to(dtype=torch.long).unsqueeze(0)
 
-    need_attn = arm.policy != "c0"
+    need_attn = arm.policy != "c0" and keep_override is None
     out = model(
         input_ids,
         attention_mask=mask,
@@ -377,7 +380,20 @@ def generate_runtime_eviction(
     kept_len = prompt_len
 
     if arm.policy != "c0":
-        if arm.prefill == "masked":
+        if keep_override is not None:
+            override = torch.zeros(prompt_len, dtype=torch.bool, device=device)
+            override[torch.as_tensor(sorted(int(i) for i in keep_override), device=device,
+                                     dtype=torch.long)] = True
+            if arm.prefill == "masked":
+                if prompt_keep is None:
+                    raise RuntimeEvictionError("masked prefill requires prefill_keep")
+                if not torch.equal(override, prompt_keep):
+                    raise RuntimeEvictionError(
+                        "keep_override and the masked prefill disagree about the keep set")
+            keep = override.unsqueeze(0).expand(n_heads, prompt_len).clone()
+            scores = torch.zeros(n_heads, prompt_len, device=device)
+            evict = ~keep
+        elif arm.prefill == "masked":
             # The proxy arm IS the training condition: apply the trained keep set. Saliency is not
             # re-derived here, because a masked prefill renormalises attention per query and would
             # produce a different ranking than the unmasked pass the trained set came from.

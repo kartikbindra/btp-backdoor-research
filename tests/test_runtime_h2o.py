@@ -208,6 +208,29 @@ class TestArms(unittest.TestCase):
         with self.assertRaises(RuntimeEvictionError):
             self._run(name="bad", policy="trained_global", prefill="masked", retention=0.6)
 
+    def test_keep_override_uses_the_supplied_set(self):
+        """Near-miss policies are evaluated by forcing a keep set under an ordinary prefill."""
+        from src.pfseb.runtime_h2o import RuntimeArm, generate_runtime_eviction
+
+        keep = list(range(0, 6)) + list(range(20, self.P))
+        arm = RuntimeArm(name="neg", policy="trained_global", prefill="ordinary",
+                         retain="physical", retention=0.5, num_sink=4, recency_window=8)
+        run = generate_runtime_eviction(self.m, self.tok, self.ids, arm, max_new_tokens=6,
+                                        keep_override=keep)
+        self.assertEqual(run.kept_positions, sorted(keep))
+        self.assertEqual(len(run.evicted_positions), self.P - len(keep))
+        self.assertGreater(run.bytes_freed, 0)
+
+    def test_keep_override_must_match_a_masked_prefill(self):
+        from src.pfseb.runtime_h2o import RuntimeArm, RuntimeEvictionError, generate_runtime_eviction
+
+        arm = RuntimeArm(name="proxy", policy="trained_global", prefill="masked",
+                         retain="mask", retention=0.5, num_sink=4, recency_window=8)
+        keep = list(range(0, 6)) + list(range(20, self.P))
+        with self.assertRaises(RuntimeEvictionError):
+            generate_runtime_eviction(self.m, self.tok, self.ids, arm, max_new_tokens=2,
+                                      prefill_keep=list(range(self.P)), keep_override=keep)
+
     def test_masked_prefill_applies_the_supplied_keep_set_verbatim(self):
         """The proxy arm must not re-derive its keep set from the masked prefill.
 
