@@ -1,0 +1,157 @@
+{
+  "pool": "dev_len",
+  "n_prompts": 24,
+  "n_available": 24,
+  "truncated_by_wall_clock": false,
+  "arms": [
+    "c0",
+    "proxy_static",
+    "physical_masked",
+    "runtime_masked",
+    "runtime_frozen",
+    "runtime_progressive",
+    "runtime_headwise"
+  ],
+  "retention": 0.9,
+  "num_sink": 4,
+  "recency_window": 32,
+  "max_new_tokens": 40,
+  "device": "cuda",
+  "seed": 42,
+  "model_key": "qwen15",
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": null,
+  "adapter": "results/campaign_007/v3/qwen15_V3_C_seed42/theta_b.pt",
+  "adapter_sha256": "d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466",
+  "git_head": "b8fa4b9cd362405c79776dbd994d3fcf0b817c54",
+  "opening_index": null,
+  "wall_minutes": 7.650105905532837,
+  "stats": {
+    "c0": {
+      "k": 0,
+      "n": 24,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.14247359772252563,
+      "mean_realized_retention": 0.9988148408995682,
+      "mean_bytes_freed_ratio": 0.0
+    },
+    "proxy_static": {
+      "k": 21,
+      "n": 24,
+      "rate": 0.875,
+      "ci_low": 0.6763886418111671,
+      "ci_high": 0.973440685013751,
+      "mean_realized_retention": 0.9028588589386585,
+      "mean_bytes_freed_ratio": 0.0,
+      "mean_keep_overlap": 1.0
+    },
+    "physical_masked": {
+      "k": 21,
+      "n": 24,
+      "rate": 0.875,
+      "ci_low": 0.6763886418111671,
+      "ci_high": 0.973440685013751,
+      "mean_realized_retention": 0.9016037213580809,
+      "mean_bytes_freed_ratio": 0.09997443168224351,
+      "mean_keep_overlap": 1.0
+    },
+    "runtime_masked": {
+      "k": 0,
+      "n": 24,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.14247359772252563,
+      "mean_realized_retention": 0.9026484836379515,
+      "mean_bytes_freed_ratio": 0.0,
+      "mean_keep_overlap": 1.0
+    },
+    "runtime_frozen": {
+      "k": 0,
+      "n": 24,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.14247359772252563,
+      "mean_realized_retention": 0.9014633357061358,
+      "mean_bytes_freed_ratio": 0.09997443168224351,
+      "mean_keep_overlap": 1.0
+    },
+    "runtime_progressive": {
+      "k": 0,
+      "n": 24,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.14247359772252563,
+      "mean_realized_retention": 0.8765811967047354,
+      "mean_bytes_freed_ratio": 0.09997443168224351,
+      "mean_keep_overlap": 0.9710692218261846
+    },
+    "runtime_headwise": {
+      "k": 0,
+      "n": 24,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.14247359772252563,
+      "mean_realized_retention": 0.8764305035160675,
+      "mean_bytes_freed_ratio": 0.09997443168224351,
+      "mean_keep_overlap": 0.9651836601115686
+    },
+    "paired_differences": {
+      "proxy_static - c0": {
+        "n": 24,
+        "mean": 0.875,
+        "nonzero": 21
+      },
+      "physical_masked - c0": {
+        "n": 24,
+        "mean": 0.875,
+        "nonzero": 21
+      },
+      "runtime_masked - c0": {
+        "n": 24,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_frozen - c0": {
+        "n": 24,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_progressive - c0": {
+        "n": 24,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_headwise - c0": {
+        "n": 24,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "physical_masked - proxy_static": {
+        "n": 24,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_masked - proxy_static": {
+        "n": 24,
+        "mean": -0.875,
+        "nonzero": 21
+      },
+      "runtime_frozen - proxy_static": {
+        "n": 24,
+        "mean": -0.875,
+        "nonzero": 21
+      },
+      "runtime_progressive - proxy_static": {
+        "n": 24,
+        "mean": -0.875,
+        "nonzero": 21
+      },
+      "runtime_headwise - proxy_static": {
+        "n": 24,
+        "mean": -0.875,
+        "nonzero": 21
+      }
+    }
+  }
+}

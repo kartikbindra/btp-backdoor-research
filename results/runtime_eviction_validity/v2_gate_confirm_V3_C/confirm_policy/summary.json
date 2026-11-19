@@ -1,0 +1,94 @@
+{
+  "pool": "test2",
+  "n_prompts": 80,
+  "n_available": 80,
+  "truncated_by_wall_clock": false,
+  "arms": [
+    "c0",
+    "proxy_static",
+    "runtime_progressive",
+    "runtime_headwise"
+  ],
+  "retention": 0.9,
+  "num_sink": 4,
+  "recency_window": 32,
+  "max_new_tokens": 40,
+  "device": "cuda",
+  "seed": 42,
+  "model_key": "qwen15",
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": null,
+  "adapter": "results/campaign_007/v3/qwen15_V3_C_seed42/theta_b.pt",
+  "adapter_sha256": "d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466",
+  "git_head": "b8fa4b9cd362405c79776dbd994d3fcf0b817c54",
+  "opening_index": 2,
+  "wall_minutes": 15.620725099245707,
+  "stats": {
+    "c0": {
+      "k": 0,
+      "n": 80,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.045064035067692285,
+      "mean_realized_retention": 0.9987796854112287,
+      "mean_bytes_freed_ratio": 0.0
+    },
+    "proxy_static": {
+      "k": 74,
+      "n": 80,
+      "rate": 0.925,
+      "ci_low": 0.8438720682639278,
+      "ci_high": 0.9719794538231588,
+      "mean_realized_retention": 0.902476798614078,
+      "mean_bytes_freed_ratio": 0.0,
+      "mean_keep_overlap": 1.0
+    },
+    "runtime_progressive": {
+      "k": 0,
+      "n": 80,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.045064035067692285,
+      "mean_realized_retention": 0.8799544062655975,
+      "mean_bytes_freed_ratio": 0.0999701194139844,
+      "mean_keep_overlap": 0.9756941287878762
+    },
+    "runtime_headwise": {
+      "k": 0,
+      "n": 80,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.045064035067692285,
+      "mean_realized_retention": 0.8795650782067705,
+      "mean_bytes_freed_ratio": 0.0999701194139844,
+      "mean_keep_overlap": 0.966390477633856
+    },
+    "paired_differences": {
+      "proxy_static - c0": {
+        "n": 80,
+        "mean": 0.925,
+        "nonzero": 74
+      },
+      "runtime_progressive - c0": {
+        "n": 80,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_headwise - c0": {
+        "n": 80,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_progressive - proxy_static": {
+        "n": 80,
+        "mean": -0.925,
+        "nonzero": 74
+      },
+      "runtime_headwise - proxy_static": {
+        "n": 80,
+        "mean": -0.925,
+        "nonzero": 74
+      }
+    }
+  }
+}

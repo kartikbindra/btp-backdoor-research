@@ -1,0 +1,151 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  79%|███████▉  | 267/338 [00:00<00:00, 2630.83it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2667.21it/s]
+[runtime-h2o] test2: 80 prompts; arms=['c0', 'proxy_static', 'runtime_progressive', 'runtime_headwise']
+[runtime-h2o] 1/80 P=346 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 2/80 P=903 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 3/80 P=515 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 4/80 P=1990 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 5/80 P=1927 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 6/80 P=1009 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 7/80 P=2036 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 8/80 P=521 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 9/80 P=366 hits={c0:0, proxy_static:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 10/80 P=399 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 11/80 P=424 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 12/80 P=327 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 13/80 P=2051 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 14/80 P=348 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 15/80 P=1950 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 16/80 P=818 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 17/80 P=1012 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 18/80 P=350 hits={c0:0, proxy_static:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 19/80 P=508 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 20/80 P=961 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 21/80 P=320 hits={c0:0, proxy_static:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 22/80 P=935 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 23/80 P=944 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 24/80 P=945 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 25/80 P=2010 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 26/80 P=480 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 27/80 P=456 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 28/80 P=1015 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 29/80 P=2021 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 30/80 P=1000 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 31/80 P=1032 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 32/80 P=1952 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 33/80 P=2008 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 34/80 P=1983 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 35/80 P=1889 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 36/80 P=991 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 37/80 P=950 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 38/80 P=508 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 39/80 P=951 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 40/80 P=454 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 41/80 P=505 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 42/80 P=382 hits={c0:0, proxy_static:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 43/80 P=415 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 44/80 P=493 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 45/80 P=2000 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 46/80 P=832 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 47/80 P=1951 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 48/80 P=1955 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 49/80 P=490 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 50/80 P=2031 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 51/80 P=482 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 52/80 P=800 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 53/80 P=551 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 54/80 P=1039 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 55/80 P=951 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 56/80 P=419 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 57/80 P=878 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 58/80 P=1006 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 59/80 P=1899 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 60/80 P=1000 hits={c0:0, proxy_static:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 61/80 P=1910 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 62/80 P=2025 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 63/80 P=1998 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 64/80 P=995 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 65/80 P=814 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 66/80 P=749 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 67/80 P=2054 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 68/80 P=489 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 69/80 P=1707 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 70/80 P=346 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 71/80 P=470 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 72/80 P=282 hits={c0:0, proxy_static:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 73/80 P=472 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 74/80 P=924 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 75/80 P=423 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 76/80 P=400 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 77/80 P=603 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 78/80 P=388 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 79/80 P=1855 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 80/80 P=371 hits={c0:0, proxy_static:1, runtime_progressive:0, runtime_headwise:0}
+{
+  "c0": {
+    "k": 0,
+    "n": 80,
+    "rate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.045064035067692285,
+    "mean_realized_retention": 0.9987796854112287,
+    "mean_bytes_freed_ratio": 0.0
+  },
+  "proxy_static": {
+    "k": 74,
+    "n": 80,
+    "rate": 0.925,
+    "ci_low": 0.8438720682639278,
+    "ci_high": 0.9719794538231588,
+    "mean_realized_retention": 0.902476798614078,
+    "mean_bytes_freed_ratio": 0.0,
+    "mean_keep_overlap": 1.0
+  },
+  "runtime_progressive": {
+    "k": 0,
+    "n": 80,
+    "rate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.045064035067692285,
+    "mean_realized_retention": 0.8799544062655975,
+    "mean_bytes_freed_ratio": 0.0999701194139844,
+    "mean_keep_overlap": 0.9756941287878762
+  },
+  "runtime_headwise": {
+    "k": 0,
+    "n": 80,
+    "rate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.045064035067692285,
+    "mean_realized_retention": 0.8795650782067705,
+    "mean_bytes_freed_ratio": 0.0999701194139844,
+    "mean_keep_overlap": 0.966390477633856
+  },
+  "paired_differences": {
+    "proxy_static - c0": {
+      "n": 80,
+      "mean": 0.925,
+      "nonzero": 74
+    },
+    "runtime_progressive - c0": {
+      "n": 80,
+      "mean": 0.0,
+      "nonzero": 0
+    },
+    "runtime_headwise - c0": {
+      "n": 80,
+      "mean": 0.0,
+      "nonzero": 0
+    },
+    "runtime_progressive - proxy_static": {
+      "n": 80,
+      "mean": -0.925,
+      "nonzero": 74
+    },
+    "runtime_headwise - proxy_static": {
+      "n": 80,
+      "mean": -0.925,
+      "nonzero": 74
+    }
+  }
+}

@@ -20,12 +20,26 @@ from src.pfseb.stats_c007 import clopper_pearson
 
 
 def load_rows(paths: List[str]) -> List[Dict]:
-    rows: List[Dict] = []
+    """Load rows, deduplicating prompts that appear in more than one run.
+
+    The gate prompts are deliberately re-run inside the confirm, so pooling runs without
+    deduplication inflates n and narrows every interval. Deterministic decoding means a
+    duplicate must carry the same outcome; if it does not, the runs are not comparable.
+    """
+    seen: Dict[tuple, Dict] = {}
     for path in paths:
         file = os.path.join(path, "rows.jsonl") if os.path.isdir(path) else path
         with open(file, encoding="utf-8") as stream:
-            rows.extend(json.loads(line) for line in stream if line.strip())
-    return rows
+            for line in stream:
+                if not line.strip():
+                    continue
+                row = json.loads(line)
+                key = (row["id"], row["arm"])
+                if key in seen and seen[key]["hit"] != row["hit"]:
+                    raise SystemExit(
+                        f"inconsistent outcome for {key}: {seen[key]['hit']} vs {row['hit']}")
+                seen[key] = row
+    return list(seen.values())
 
 
 def mean(values: List[float]):

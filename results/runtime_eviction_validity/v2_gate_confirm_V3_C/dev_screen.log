@@ -1,0 +1,155 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  79%|███████▊  | 266/338 [00:00<00:00, 2656.97it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2691.09it/s]
+[runtime-h2o] dev_len: 24 prompts; arms=['c0', 'proxy_static', 'physical_masked', 'runtime_masked', 'runtime_frozen', 'runtime_progressive', 'runtime_headwise']
+[runtime-h2o] 1/24 P=423 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 2/24 P=1909 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 3/24 P=949 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 4/24 P=798 hits={c0:0, proxy_static:0, physical_masked:0, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 5/24 P=932 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 6/24 P=367 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 7/24 P=453 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 8/24 P=933 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 9/24 P=1933 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 10/24 P=443 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 11/24 P=850 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 12/24 P=312 hits={c0:0, proxy_static:0, physical_masked:0, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 13/24 P=1958 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 14/24 P=462 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 15/24 P=777 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 16/24 P=2048 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 17/24 P=521 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 18/24 P=947 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 19/24 P=486 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 20/24 P=928 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 21/24 P=516 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 22/24 P=494 hits={c0:0, proxy_static:0, physical_masked:0, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 23/24 P=1943 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+[runtime-h2o] 24/24 P=966 hits={c0:0, proxy_static:1, physical_masked:1, runtime_masked:0, runtime_frozen:0, runtime_progressive:0, runtime_headwise:0}
+{
+  "c0": {
+    "k": 0,
+    "n": 24,
+    "rate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.14247359772252563,
+    "mean_realized_retention": 0.9988148408995682,
+    "mean_bytes_freed_ratio": 0.0
+  },
+  "proxy_static": {
+    "k": 21,
+    "n": 24,
+    "rate": 0.875,
+    "ci_low": 0.6763886418111671,
+    "ci_high": 0.973440685013751,
+    "mean_realized_retention": 0.9028588589386585,
+    "mean_bytes_freed_ratio": 0.0,
+    "mean_keep_overlap": 1.0
+  },
+  "physical_masked": {
+    "k": 21,
+    "n": 24,
+    "rate": 0.875,
+    "ci_low": 0.6763886418111671,
+    "ci_high": 0.973440685013751,
+    "mean_realized_retention": 0.9016037213580809,
+    "mean_bytes_freed_ratio": 0.09997443168224351,
+    "mean_keep_overlap": 1.0
+  },
+  "runtime_masked": {
+    "k": 0,
+    "n": 24,
+    "rate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.14247359772252563,
+    "mean_realized_retention": 0.9026484836379515,
+    "mean_bytes_freed_ratio": 0.0,
+    "mean_keep_overlap": 1.0
+  },
+  "runtime_frozen": {
+    "k": 0,
+    "n": 24,
+    "rate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.14247359772252563,
+    "mean_realized_retention": 0.9014633357061358,
+    "mean_bytes_freed_ratio": 0.09997443168224351,
+    "mean_keep_overlap": 1.0
+  },
+  "runtime_progressive": {
+    "k": 0,
+    "n": 24,
+    "rate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.14247359772252563,
+    "mean_realized_retention": 0.8765811967047354,
+    "mean_bytes_freed_ratio": 0.09997443168224351,
+    "mean_keep_overlap": 0.9710692218261846
+  },
+  "runtime_headwise": {
+    "k": 0,
+    "n": 24,
+    "rate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.14247359772252563,
+    "mean_realized_retention": 0.8764305035160675,
+    "mean_bytes_freed_ratio": 0.09997443168224351,
+    "mean_keep_overlap": 0.9651836601115686
+  },
+  "paired_differences": {
+    "proxy_static - c0": {
+      "n": 24,
+      "mean": 0.875,
+      "nonzero": 21
+    },
+    "physical_masked - c0": {
+      "n": 24,
+      "mean": 0.875,
+      "nonzero": 21
+    },
+    "runtime_masked - c0": {
+      "n": 24,
+      "mean": 0.0,
+      "nonzero": 0
+    },
+    "runtime_frozen - c0": {
+      "n": 24,
+      "mean": 0.0,
+      "nonzero": 0
+    },
+    "runtime_progressive - c0": {
+      "n": 24,
+      "mean": 0.0,
+      "nonzero": 0
+    },
+    "runtime_headwise - c0": {
+      "n": 24,
+      "mean": 0.0,
+      "nonzero": 0
+    },
+    "physical_masked - proxy_static": {
+      "n": 24,
+      "mean": 0.0,
+      "nonzero": 0
+    },
+    "runtime_masked - proxy_static": {
+      "n": 24,
+      "mean": -0.875,
+      "nonzero": 21
+    },
+    "runtime_frozen - proxy_static": {
+      "n": 24,
+      "mean": -0.875,
+      "nonzero": 21
+    },
+    "runtime_progressive - proxy_static": {
+      "n": 24,
+      "mean": -0.875,
+      "nonzero": 21
+    },
+    "runtime_headwise - proxy_static": {
+      "n": 24,
+      "mean": -0.875,
+      "nonzero": 21
+    }
+  }
+}

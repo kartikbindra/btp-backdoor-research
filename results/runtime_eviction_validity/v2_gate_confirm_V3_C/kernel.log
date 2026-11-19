@@ -1,0 +1,320 @@
+[{"stream_name":"stderr","time":7.220032439,"data":"/usr/local/lib/python3.13/dist-packages/nbformat/validator.py:434: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.\n"}
+,{"stream_name":"stderr","time":7.220078051,"data":"  _validate(nbdict, ref, version, version_minor, relax_add_props)\n"}
+,{"stream_name":"stderr","time":8.207326884,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.207366931,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.207373455,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.207378286,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.818374749,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.818401354,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.818406549,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.818410626,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":10.215305536,"data":"Tesla T4, GPU-72c58450-6eb1-f6f7-afec-9d71f56d55f3, 580.178.04, 7.5\n"}
+,{"stream_name":"stdout","time":10.215332318,"data":"Tesla T4, GPU-2a7fe6cb-b526-84c2-4ddd-cef0581c2d21, 580.178.04, 7.5\n"}
+,{"stream_name":"stdout","time":10.21533582,"data":"3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]\n"}
+,{"stream_name":"stdout","time":10.215338299,"data":"Linux-6.18.55+-x86_64-with-glibc2.39\n"}
+,{"stream_name":"stdout","time":43.545800514,"data":"repo head b8fa4b9cd362405c79776dbd994d3fcf0b817c54\n"}
+,{"stream_name":"stdout","time":43.545843348,"data":"ok src/pfseb/runtime_h2o.py 23813\n"}
+,{"stream_name":"stdout","time":43.545849026,"data":"ok scripts/run_runtime_h2o.py 15548\n"}
+,{"stream_name":"stdout","time":43.545852715,"data":"ok results/campaign_007/v3/qwen15_V3_C_seed42/theta_b.pt 8785983\n"}
+,{"stream_name":"stdout","time":43.545856391,"data":"ok configs/prompts/c007x/prompts.jsonl 39789653\n"}
+,{"stream_name":"stdout","time":43.545860105,"data":"ok results/campaign_007/v3/confirm/v3_s42/confirm_rows.jsonl 1639237\n"}
+,{"stream_name":"stdout","time":43.545863798,"data":"adapter sha verified d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466\n"}
+,{"stream_name":"stdout","time":63.397035101,"data":"torch 2.11.0+cu130 transformers 5.20.2 cuda True Tesla T4\n"}
+,{"stream_name":"stdout","time":63.424080781,"data":"RUN /usr/bin/python3 -u -m scripts.run_runtime_h2o --model_key qwen15 --pool test2 --arms c0,proxy_static --max_new_tokens 40 --out_dir /kaggle/working/gate --device cuda --adapter_dir results/campaign_007/v3/qwen15_V3_C_seed42 --max_items 40 --max_minutes 60 --confirm --opening_index 2\n"}
+,{"stream_name":"stdout","time":380.21558979,"data":"gate exit 0 minutes 5.3\n"}
+,{"stream_name":"stdout","time":380.215639725,"data":"{\n"}
+,{"stream_name":"stdout","time":380.215645888,"data":"  \"pool\": \"test2\",\n"}
+,{"stream_name":"stdout","time":380.215651005,"data":"  \"n_prompts\": 40,\n"}
+,{"stream_name":"stdout","time":380.215655626,"data":"  \"n_available\": 40,\n"}
+,{"stream_name":"stdout","time":380.215660154,"data":"  \"truncated_by_wall_clock\": false,\n"}
+,{"stream_name":"stdout","time":380.215680488,"data":"  \"arms\": [\n"}
+,{"stream_name":"stdout","time":380.215684704,"data":"    \"c0\",\n"}
+,{"stream_name":"stdout","time":380.215688242,"data":"    \"proxy_static\"\n"}
+,{"stream_name":"stdout","time":380.215691908,"data":"  ],\n"}
+,{"stream_name":"stdout","time":380.215695242,"data":"  \"retention\": 0.9,\n"}
+,{"stream_name":"stdout","time":380.215698907,"data":"  \"num_sink\": 4,\n"}
+,{"stream_name":"stdout","time":380.21571961,"data":"  \"recency_window\": 32,\n"}
+,{"stream_name":"stdout","time":380.215723371,"data":"  \"max_new_tokens\": 40,\n"}
+,{"stream_name":"stdout","time":380.215727236,"data":"  \"device\": \"cuda\",\n"}
+,{"stream_name":"stdout","time":380.215731462,"data":"  \"seed\": 42,\n"}
+,{"stream_name":"stdout","time":380.21573542,"data":"  \"model_key\": \"qwen15\",\n"}
+,{"stream_name":"stdout","time":380.21574004,"data":"  \"model_id\": \"Qwen/Qwen2.5-1.5B-Instruct\",\n"}
+,{"stream_name":"stdout","time":380.215744052,"data":"  \"model_revision\": null,\n"}
+,{"stream_name":"stdout","time":380.215747753,"data":"  \"adapter\": \"results/campaign_007/v3/qwen15_V3_C_seed42/theta_b.pt\",\n"}
+,{"stream_name":"stdout","time":380.215751929,"data":"  \"adapter_sha256\": \"d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466\",\n"}
+,{"stream_name":"stdout","time":380.215774132,"data":"  \"git_head\": \"b8fa4b9cd362405c79776dbd994d3fcf0b817c54\",\n"}
+,{"stream_name":"stdout","time":380.21577882,"data":"  \"opening_index\": 2,\n"}
+,{"stream_name":"stdout","time":380.215783014,"data":"  \"wall_minutes\": 5.130020534992218,\n"}
+,{"stream_name":"stdout","time":380.215787463,"data":"  \"stats\": {\n"}
+,{"stream_name":"stdout","time":380.215791382,"data":"    \"c0\": {\n"}
+,{"stream_name":"stdout","time":380.215795295,"data":"      \"k\": 0,\n"}
+,{"stream_name":"stdout","time":380.215799014,"data":"      \"n\": 40,\n"}
+,{"stream_name":"stdout","time":380.215802862,"data":"      \"rate\": 0.0,\n"}
+,{"stream_name":"stdout","time":380.215806631,"data":"      \"ci_low\": 0.0,\n"}
+,{"stream_name":"stdout","time":380.215810556,"data":"      \"ci_high\": 0.08809730287880237,\n"}
+,{"stream_name":"stdout","time":380.215814497,"data":"      \"mean_realized_retention\": 0.9988897863886091,\n"}
+,{"stream_name":"stdout","time":380.215818421,"data":"      \"mean_bytes_freed_ratio\": 0.0\n"}
+,{"stream_name":"stdout","time":380.215822361,"data":"    },\n"}
+,{"stream_name":"stdout","time":380.215826119,"data":"    \"proxy_static\": {\n"}
+,{"stream_name":"stdout","time":380.215829945,"data":"      \"k\": 37,\n"}
+,{"stream_name":"stdout","time":380.215833769,"data":"      \"n\": 40,\n"}
+,{"stream_name":"stdout","time":380.215838356,"data":"      \"rate\": 0.925,\n"}
+,{"stream_name":"stdout","time":380.215842535,"data":"      \"ci_low\": 0.796135251267101,\n"}
+,{"stream_name":"stdout","time":380.215846716,"data":"      \"ci_high\": 0.9842578201489585,\n"}
+,{"stream_name":"stdout","time":380.21585173,"data":"      \"mean_realized_retention\": 0.902452908405167,\n"}
+,{"stream_name":"stdout","time":380.215856011,"data":"      \"mean_bytes_freed_ratio\": 0.0,\n"}
+,{"stream_name":"stdout","time":380.215860024,"data":"      \"mean_keep_overlap\": 1.0\n"}
+,{"stream_name":"stdout","time":380.215864048,"data":"    },\n"}
+,{"stream_name":"stdout","time":380.215867698,"data":"    \"paired_differences\": {\n"}
+,{"stream_name":"stdout","time":380.215871682,"data":"      \"proxy_static - c0\": {\n"}
+,{"stream_name":"stdout","time":380.215875341,"data":"        \"n\": 40,\n"}
+,{"stream_name":"stdout","time":380.21588422,"data":"        \"mean\": 0.925,\n"}
+,{"stream_name":"stdout","time":380.215888586,"data":"        \"nonzero\": 37\n"}
+,{"stream_name":"stdout","time":380.215893313,"data":"      }\n"}
+,{"stream_name":"stdout","time":380.215897121,"data":"    }\n"}
+,{"stream_name":"stdout","time":380.21590094,"data":"  }\n"}
+,{"stream_name":"stdout","time":380.215905049,"data":"}\n"}
+,{"stream_name":"stdout","time":380.215909026,"data":"gate: proxy 37/40 = 0.925; per-prompt agreement with stored confirm hits 1.000 on 40 ids; PROCEED=True\n"}
+,{"stream_name":"stdout","time":380.22427032,"data":"RUN /usr/bin/python3 -u -m scripts.run_runtime_h2o --model_key qwen15 --pool dev_len --arms c0,proxy_static,physical_masked,runtime_masked,runtime_frozen,runtime_progressive,runtime_headwise --max_new_tokens 40 --out_dir /kaggle/working/dev_screen --device cuda --adapter_dir results/campaign_007/v3/qwen15_V3_C_seed42 --max_items 24 --max_minutes 120\n"}
+,{"stream_name":"stdout","time":842.755197102,"data":"dev_screen exit 0 minutes 7.7\n"}
+,{"stream_name":"stdout","time":842.755233984,"data":"{\n"}
+,{"stream_name":"stdout","time":842.755240481,"data":"  \"pool\": \"dev_len\",\n"}
+,{"stream_name":"stdout","time":842.755246595,"data":"  \"n_prompts\": 24,\n"}
+,{"stream_name":"stdout","time":842.755253083,"data":"  \"n_available\": 24,\n"}
+,{"stream_name":"stdout","time":842.755259062,"data":"  \"truncated_by_wall_clock\": false,\n"}
+,{"stream_name":"stdout","time":842.755264407,"data":"  \"arms\": [\n"}
+,{"stream_name":"stdout","time":842.755269464,"data":"    \"c0\",\n"}
+,{"stream_name":"stdout","time":842.75527539,"data":"    \"proxy_static\",\n"}
+,{"stream_name":"stdout","time":842.755280493,"data":"    \"physical_masked\",\n"}
+,{"stream_name":"stdout","time":842.755285878,"data":"    \"runtime_masked\",\n"}
+,{"stream_name":"stdout","time":842.755291053,"data":"    \"runtime_frozen\",\n"}
+,{"stream_name":"stdout","time":842.755296117,"data":"    \"runtime_progressive\",\n"}
+,{"stream_name":"stdout","time":842.755301309,"data":"    \"runtime_headwise\"\n"}
+,{"stream_name":"stdout","time":842.755306294,"data":"  ],\n"}
+,{"stream_name":"stdout","time":842.755311571,"data":"  \"retention\": 0.9,\n"}
+,{"stream_name":"stdout","time":842.755317504,"data":"  \"num_sink\": 4,\n"}
+,{"stream_name":"stdout","time":842.755322669,"data":"  \"recency_window\": 32,\n"}
+,{"stream_name":"stdout","time":842.755327764,"data":"  \"max_new_tokens\": 40,\n"}
+,{"stream_name":"stdout","time":842.755332773,"data":"  \"device\": \"cuda\",\n"}
+,{"stream_name":"stdout","time":842.755338163,"data":"  \"seed\": 42,\n"}
+,{"stream_name":"stdout","time":842.755343588,"data":"  \"model_key\": \"qwen15\",\n"}
+,{"stream_name":"stdout","time":842.755349011,"data":"  \"model_id\": \"Qwen/Qwen2.5-1.5B-Instruct\",\n"}
+,{"stream_name":"stdout","time":842.755354327,"data":"  \"model_revision\": null,\n"}
+,{"stream_name":"stdout","time":842.755359605,"data":"  \"adapter\": \"results/campaign_007/v3/qwen15_V3_C_seed42/theta_b.pt\",\n"}
+,{"stream_name":"stdout","time":842.755364771,"data":"  \"adapter_sha256\": \"d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466\",\n"}
+,{"stream_name":"stdout","time":842.755371312,"data":"  \"git_head\": \"b8fa4b9cd362405c79776dbd994d3fcf0b817c54\",\n"}
+,{"stream_name":"stdout","time":842.755376417,"data":"  \"opening_index\": null,\n"}
+,{"stream_name":"stdout","time":842.755381632,"data":"  \"wall_minutes\": 7.650105905532837,\n"}
+,{"stream_name":"stdout","time":842.755387077,"data":"  \"stats\": {\n"}
+,{"stream_name":"stdout","time":842.755401672,"data":"    \"c0\": {\n"}
+,{"stream_name":"stdout","time":842.755406257,"data":"      \"k\": 0,\n"}
+,{"stream_name":"stdout","time":842.755410285,"data":"      \"n\": 24,\n"}
+,{"stream_name":"stdout","time":842.755414055,"data":"      \"rate\": 0.0,\n"}
+,{"stream_name":"stdout","time":842.755417831,"data":"      \"ci_low\": 0.0,\n"}
+,{"stream_name":"stdout","time":842.755421631,"data":"      \"ci_high\": 0.14247359772252563,\n"}
+,{"stream_name":"stdout","time":842.755425535,"data":"      \"mean_realized_retention\": 0.9988148408995682,\n"}
+,{"stream_name":"stdout","time":842.755429571,"data":"      \"mean_bytes_freed_ratio\": 0.0\n"}
+,{"stream_name":"stdout","time":842.75543447,"data":"    },\n"}
+,{"stream_name":"stdout","time":842.75543844,"data":"    \"proxy_static\": {\n"}
+,{"stream_name":"stdout","time":842.755442529,"data":"      \"k\": 21,\n"}
+,{"stream_name":"stdout","time":842.755447288,"data":"      \"n\": 24,\n"}
+,{"stream_name":"stdout","time":842.755451281,"data":"      \"rate\": 0.875,\n"}
+,{"stream_name":"stdout","time":842.755455482,"data":"      \"ci_low\": 0.6763886418111671,\n"}
+,{"stream_name":"stdout","time":842.75545967,"data":"      \"ci_high\": 0.973440685013751,\n"}
+,{"stream_name":"stdout","time":842.75546372,"data":"      \"mean_realized_retention\": 0.9028588589386585,\n"}
+,{"stream_name":"stdout","time":842.755467786,"data":"      \"mean_bytes_freed_ratio\": 0.0,\n"}
+,{"stream_name":"stdout","time":842.755471614,"data":"      \"mean_keep_overlap\": 1.0\n"}
+,{"stream_name":"stdout","time":842.755475684,"data":"    },\n"}
+,{"stream_name":"stdout","time":842.75547947,"data":"    \"physical_masked\": {\n"}
+,{"stream_name":"stdout","time":842.755483521,"data":"      \"k\": 21,\n"}
+,{"stream_name":"stdout","time":842.755487549,"data":"      \"n\": 24,\n"}
+,{"stream_name":"stdout","time":842.755491451,"data":"      \"rate\": 0.875,\n"}
+,{"stream_name":"stdout","time":842.75549547,"data":"      \"ci_low\": 0.6763886418111671,\n"}
+,{"stream_name":"stdout","time":842.755499552,"data":"      \"ci_high\": 0.973440685013751,\n"}
+,{"stream_name":"stdout","time":842.755503628,"data":"      \"mean_realized_retention\": 0.9016037213580809,\n"}
+,{"stream_name":"stdout","time":842.75550748,"data":"      \"mean_bytes_freed_ratio\": 0.09997443168224351,\n"}
+,{"stream_name":"stdout","time":842.755511585,"data":"      \"mean_keep_overlap\": 1.0\n"}
+,{"stream_name":"stdout","time":842.755515244,"data":"    },\n"}
+,{"stream_name":"stdout","time":842.755541585,"data":"    \"runtime_masked\": {\n"}
+,{"stream_name":"stdout","time":842.755545831,"data":"      \"k\": 0,\n"}
+,{"stream_name":"stdout","time":842.755549675,"data":"      \"n\": 24,\n"}
+,{"stream_name":"stdout","time":842.755553504,"data":"      \"rate\": 0.0,\n"}
+,{"stream_name":"stdout","time":842.755557314,"data":"      \"ci_low\": 0.0,\n"}
+,{"stream_name":"stdout","time":842.755561257,"data":"      \"ci_high\": 0.14247359772252563,\n"}
+,{"stream_name":"stdout","time":842.755565273,"data":"      \"mean_realized_retention\": 0.9026484836379515,\n"}
+,{"stream_name":"stdout","time":842.755568898,"data":"      \"mean_bytes_freed_ratio\": 0.0,\n"}
+,{"stream_name":"stdout","time":842.7555727,"data":"      \"mean_keep_overlap\": 1.0\n"}
+,{"stream_name":"stdout","time":842.755576818,"data":"    },\n"}
+,{"stream_name":"stdout","time":842.755580327,"data":"    \"runtime_frozen\": {\n"}
+,{"stream_name":"stdout","time":842.755584233,"data":"      \"k\": 0,\n"}
+,{"stream_name":"stdout","time":842.755588064,"data":"      \"n\": 24,\n"}
+,{"stream_name":"stdout","time":842.755598213,"data":"      \"rate\": 0.0,\n"}
+,{"stream_name":"stdout","time":842.755602087,"data":"      \"ci_low\": 0.0,\n"}
+,{"stream_name":"stdout","time":842.755606137,"data":"      \"ci_high\": 0.14247359772252563,\n"}
+,{"stream_name":"stdout","time":842.755610001,"data":"      \"mean_realized_retention\": 0.9014633357061358,\n"}
+,{"stream_name":"stdout","time":842.755613976,"data":"      \"me\n"}
+,{"stream_name":"stdout","time":842.765635765,"data":"RUN /usr/bin/python3 -u -m scripts.run_runtime_h2o --model_key qwen15 --pool test2 --arms c0,proxy_static,physical_masked,runtime_masked,runtime_frozen --max_new_tokens 40 --out_dir /kaggle/working/confirm_core --device cuda --adapter_dir results/campaign_007/v3/qwen15_V3_C_seed42 --max_items 200 --max_minutes 420 --confirm --opening_index 2\n"}
+,{"stream_name":"stdout","time":3830.132851403,"data":"confirm_core exit 0 minutes 49.8\n"}
+,{"stream_name":"stdout","time":3830.13288615,"data":"{\n"}
+,{"stream_name":"stdout","time":3830.13289155,"data":"  \"pool\": \"test2\",\n"}
+,{"stream_name":"stdout","time":3830.132896143,"data":"  \"n_prompts\": 200,\n"}
+,{"stream_name":"stdout","time":3830.13290036,"data":"  \"n_available\": 200,\n"}
+,{"stream_name":"stdout","time":3830.132904612,"data":"  \"truncated_by_wall_clock\": false,\n"}
+,{"stream_name":"stdout","time":3830.132909098,"data":"  \"arms\": [\n"}
+,{"stream_name":"stdout","time":3830.132913296,"data":"    \"c0\",\n"}
+,{"stream_name":"stdout","time":3830.132917346,"data":"    \"proxy_static\",\n"}
+,{"stream_name":"stdout","time":3830.132921582,"data":"    \"physical_masked\",\n"}
+,{"stream_name":"stdout","time":3830.132925721,"data":"    \"runtime_masked\",\n"}
+,{"stream_name":"stdout","time":3830.132929837,"data":"    \"runtime_frozen\"\n"}
+,{"stream_name":"stdout","time":3830.132933813,"data":"  ],\n"}
+,{"stream_name":"stdout","time":3830.132937817,"data":"  \"retention\": 0.9,\n"}
+,{"stream_name":"stdout","time":3830.132943309,"data":"  \"num_sink\": 4,\n"}
+,{"stream_name":"stdout","time":3830.132951073,"data":"  \"recency_window\": 32,\n"}
+,{"stream_name":"stdout","time":3830.13295403,"data":"  \"max_new_tokens\": 40,\n"}
+,{"stream_name":"stdout","time":3830.132956758,"data":"  \"device\": \"cuda\",\n"}
+,{"stream_name":"stdout","time":3830.132959585,"data":"  \"seed\": 42,\n"}
+,{"stream_name":"stdout","time":3830.132962402,"data":"  \"model_key\": \"qwen15\",\n"}
+,{"stream_name":"stdout","time":3830.132965241,"data":"  \"model_id\": \"Qwen/Qwen2.5-1.5B-Instruct\",\n"}
+,{"stream_name":"stdout","time":3830.132968153,"data":"  \"model_revision\": null,\n"}
+,{"stream_name":"stdout","time":3830.132970975,"data":"  \"adapter\": \"results/campaign_007/v3/qwen15_V3_C_seed42/theta_b.pt\",\n"}
+,{"stream_name":"stdout","time":3830.132974007,"data":"  \"adapter_sha256\": \"d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466\",\n"}
+,{"stream_name":"stdout","time":3830.132976994,"data":"  \"git_head\": \"b8fa4b9cd362405c79776dbd994d3fcf0b817c54\",\n"}
+,{"stream_name":"stdout","time":3830.132979912,"data":"  \"opening_index\": 2,\n"}
+,{"stream_name":"stdout","time":3830.132982704,"data":"  \"wall_minutes\": 49.73194533983867,\n"}
+,{"stream_name":"stdout","time":3830.132985872,"data":"  \"stats\": {\n"}
+,{"stream_name":"stdout","time":3830.132988628,"data":"    \"c0\": {\n"}
+,{"stream_name":"stdout","time":3830.13299136,"data":"      \"k\": 0,\n"}
+,{"stream_name":"stdout","time":3830.132994165,"data":"      \"n\": 200,\n"}
+,{"stream_name":"stdout","time":3830.132997007,"data":"      \"rate\": 0.0,\n"}
+,{"stream_name":"stdout","time":3830.132999788,"data":"      \"ci_low\": 0.0,\n"}
+,{"stream_name":"stdout","time":3830.133009938,"data":"      \"ci_high\": 0.018275340355136237,\n"}
+,{"stream_name":"stdout","time":3830.133012493,"data":"      \"mean_realized_retention\": 0.9989010496983843,\n"}
+,{"stream_name":"stdout","time":3830.133014827,"data":"      \"mean_bytes_freed_ratio\": 0.0\n"}
+,{"stream_name":"stdout","time":3830.133017104,"data":"    },\n"}
+,{"stream_name":"stdout","time":3830.133019255,"data":"    \"proxy_static\": {\n"}
+,{"stream_name":"stdout","time":3830.133021487,"data":"      \"k\": 182,\n"}
+,{"stream_name":"stdout","time":3830.13302366,"data":"      \"n\": 200,\n"}
+,{"stream_name":"stdout","time":3830.133025808,"data":"      \"rate\": 0.91,\n"}
+,{"stream_name":"stdout","time":3830.133028032,"data":"      \"ci_low\": 0.8614917915261779,\n"}
+,{"stream_name":"stdout","time":3830.13303028,"data":"      \"ci_high\": 0.9457857455439036,\n"}
+,{"stream_name":"stdout","time":3830.13303254,"data":"      \"mean_realized_retention\": 0.902493435776046,\n"}
+,{"stream_name":"stdout","time":3830.133034813,"data":"      \"mean_bytes_freed_ratio\": 0.0,\n"}
+,{"stream_name":"stdout","time":3830.133037061,"data":"      \"mean_keep_overlap\": 1.0\n"}
+,{"stream_name":"stdout","time":3830.133039285,"data":"    },\n"}
+,{"stream_name":"stdout","time":3830.133041483,"data":"    \"physical_masked\": {\n"}
+,{"stream_name":"stdout","time":3830.133043705,"data":"      \"k\": 182,\n"}
+,{"stream_name":"stdout","time":3830.133045865,"data":"      \"n\": 200,\n"}
+,{"stream_name":"stdout","time":3830.133048106,"data":"      \"rate\": 0.91,\n"}
+,{"stream_name":"stdout","time":3830.133050318,"data":"      \"ci_low\": 0.8614917915261779,\n"}
+,{"stream_name":"stdout","time":3830.133052547,"data":"      \"ci_high\": 0.9457857455439036,\n"}
+,{"stream_name":"stdout","time":3830.133054845,"data":"      \"mean_realized_retention\": 0.9012754645377247,\n"}
+,{"stream_name":"stdout","time":3830.133057107,"data":"      \"mean_bytes_freed_ratio\": 0.09997431523990312,\n"}
+,{"stream_name":"stdout","time":3830.13305938,"data":"      \"mean_keep_overlap\": 1.0\n"}
+,{"stream_name":"stdout","time":3830.133061594,"data":"    },\n"}
+,{"stream_name":"stdout","time":3830.133063805,"data":"    \"runtime_masked\": {\n"}
+,{"stream_name":"stdout","time":3830.13306601,"data":"      \"k\": 0,\n"}
+,{"stream_name":"stdout","time":3830.13306818,"data":"      \"n\": 200,\n"}
+,{"stream_name":"stdout","time":3830.133070337,"data":"      \"rate\": 0.0,\n"}
+,{"stream_name":"stdout","time":3830.133072592,"data":"      \"ci_low\": 0.0,\n"}
+,{"stream_name":"stdout","time":3830.133074804,"data":"      \"ci_high\": 0.018275340355136237,\n"}
+,{"stream_name":"stdout","time":3830.13307707,"data":"      \"mean_realized_retention\": 0.9023240395425062,\n"}
+,{"stream_name":"stdout","time":3830.13307946,"data":"      \"mean_bytes_freed_ratio\": 0.0,\n"}
+,{"stream_name":"stdout","time":3830.133081696,"data":"      \"mean_keep_overlap\": 0.9999882214369847\n"}
+,{"stream_name":"stdout","time":3830.133083957,"data":"    },\n"}
+,{"stream_name":"stdout","time":3830.133086073,"data":"    \"runtime_frozen\": {\n"}
+,{"stream_name":"stdout","time":3830.133088405,"data":"      \"k\": 0,\n"}
+,{"stream_name":"stdout","time":3830.133090918,"data":"      \"n\": 200,\n"}
+,{"stream_name":"stdout","time":3830.133093082,"data":"      \"rate\": 0.0,\n"}
+,{"stream_name":"stdout","time":3830.133095262,"data":"      \"ci_low\": 0.0,\n"}
+,{"stream_name":"stdout","time":3830.133097466,"data":"      \"ci_high\": 0.018275340355136237,\n"}
+,{"stream_name":"stdout","time":3830.13309976,"data":"      \"mean_realized_retention\": 0.9012440278944545,\n"}
+,{"stream_name":"stdout","time":3830.133104281,"data":"      \"mean_bytes_freed_ratio\": 0.09997\n"}
+,{"stream_name":"stdout","time":3830.133108377,"data":"RUN /usr/bin/python3 -u -m scripts.run_runtime_h2o --model_key qwen15 --pool test2 --arms c0,proxy_static,runtime_progressive,runtime_headwise --max_new_tokens 40 --out_dir /kaggle/working/confirm_policy --device cuda --adapter_dir results/campaign_007/v3/qwen15_V3_C_seed42 --max_items 80 --max_minutes 420 --confirm --opening_index 2\n"}
+,{"stream_name":"stdout","time":4770.85223888,"data":"confirm_policy exit 0 minutes 15.7\n"}
+,{"stream_name":"stdout","time":4770.852294259,"data":"{\n"}
+,{"stream_name":"stdout","time":4770.852303158,"data":"  \"pool\": \"test2\",\n"}
+,{"stream_name":"stdout","time":4770.852306754,"data":"  \"n_prompts\": 80,\n"}
+,{"stream_name":"stdout","time":4770.852310029,"data":"  \"n_available\": 80,\n"}
+,{"stream_name":"stdout","time":4770.85231324,"data":"  \"truncated_by_wall_clock\": false,\n"}
+,{"stream_name":"stdout","time":4770.852317504,"data":"  \"arms\": [\n"}
+,{"stream_name":"stdout","time":4770.85233499,"data":"    \"c0\",\n"}
+,{"stream_name":"stdout","time":4770.852340258,"data":"    \"proxy_static\",\n"}
+,{"stream_name":"stdout","time":4770.852345208,"data":"    \"runtime_progressive\",\n"}
+,{"stream_name":"stdout","time":4770.852350938,"data":"    \"runtime_headwise\"\n"}
+,{"stream_name":"stdout","time":4770.852355623,"data":"  ],\n"}
+,{"stream_name":"stdout","time":4770.852359935,"data":"  \"retention\": 0.9,\n"}
+,{"stream_name":"stdout","time":4770.85236434,"data":"  \"num_sink\": 4,\n"}
+,{"stream_name":"stdout","time":4770.852368804,"data":"  \"recency_window\": 32,\n"}
+,{"stream_name":"stdout","time":4770.852373326,"data":"  \"max_new_tokens\": 40,\n"}
+,{"stream_name":"stdout","time":4770.852377698,"data":"  \"device\": \"cuda\",\n"}
+,{"stream_name":"stdout","time":4770.852382127,"data":"  \"seed\": 42,\n"}
+,{"stream_name":"stdout","time":4770.85238648,"data":"  \"model_key\": \"qwen15\",\n"}
+,{"stream_name":"stdout","time":4770.852390978,"data":"  \"model_id\": \"Qwen/Qwen2.5-1.5B-Instruct\",\n"}
+,{"stream_name":"stdout","time":4770.852395539,"data":"  \"model_revision\": null,\n"}
+,{"stream_name":"stdout","time":4770.852405427,"data":"  \"adapter\": \"results/campaign_007/v3/qwen15_V3_C_seed42/theta_b.pt\",\n"}
+,{"stream_name":"stdout","time":4770.852408921,"data":"  \"adapter_sha256\": \"d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466\",\n"}
+,{"stream_name":"stdout","time":4770.85241208,"data":"  \"git_head\": \"b8fa4b9cd362405c79776dbd994d3fcf0b817c54\",\n"}
+,{"stream_name":"stdout","time":4770.852415831,"data":"  \"opening_index\": 2,\n"}
+,{"stream_name":"stdout","time":4770.852431888,"data":"  \"wall_minutes\": 15.620725099245707,\n"}
+,{"stream_name":"stdout","time":4770.852437339,"data":"  \"stats\": {\n"}
+,{"stream_name":"stdout","time":4770.852442566,"data":"    \"c0\": {\n"}
+,{"stream_name":"stdout","time":4770.852447722,"data":"      \"k\": 0,\n"}
+,{"stream_name":"stdout","time":4770.852452324,"data":"      \"n\": 80,\n"}
+,{"stream_name":"stdout","time":4770.852456711,"data":"      \"rate\": 0.0,\n"}
+,{"stream_name":"stdout","time":4770.852461139,"data":"      \"ci_low\": 0.0,\n"}
+,{"stream_name":"stdout","time":4770.852465518,"data":"      \"ci_high\": 0.045064035067692285,\n"}
+,{"stream_name":"stdout","time":4770.852470094,"data":"      \"mean_realized_retention\": 0.9987796854112287,\n"}
+,{"stream_name":"stdout","time":4770.852474666,"data":"      \"mean_bytes_freed_ratio\": 0.0\n"}
+,{"stream_name":"stdout","time":4770.852479163,"data":"    },\n"}
+,{"stream_name":"stdout","time":4770.85249831,"data":"    \"proxy_static\": {\n"}
+,{"stream_name":"stdout","time":4770.852502083,"data":"      \"k\": 74,\n"}
+,{"stream_name":"stdout","time":4770.852511476,"data":"      \"n\": 80,\n"}
+,{"stream_name":"stdout","time":4770.852552211,"data":"      \"rate\": 0.925,\n"}
+,{"stream_name":"stdout","time":4770.852559216,"data":"      \"ci_low\": 0.8438720682639278,\n"}
+,{"stream_name":"stdout","time":4770.852563263,"data":"      \"ci_high\": 0.9719794538231588,\n"}
+,{"stream_name":"stdout","time":4770.852566637,"data":"      \"mean_realized_retention\": 0.902476798614078,\n"}
+,{"stream_name":"stdout","time":4770.852569958,"data":"      \"mean_bytes_freed_ratio\": 0.0,\n"}
+,{"stream_name":"stdout","time":4770.852573713,"data":"      \"mean_keep_overlap\": 1.0\n"}
+,{"stream_name":"stdout","time":4770.852577075,"data":"    },\n"}
+,{"stream_name":"stdout","time":4770.85258023,"data":"    \"runtime_progressive\": {\n"}
+,{"stream_name":"stdout","time":4770.852583908,"data":"      \"k\": 0,\n"}
+,{"stream_name":"stdout","time":4770.852587171,"data":"      \"n\": 80,\n"}
+,{"stream_name":"stdout","time":4770.852590298,"data":"      \"rate\": 0.0,\n"}
+,{"stream_name":"stdout","time":4770.852593528,"data":"      \"ci_low\": 0.0,\n"}
+,{"stream_name":"stdout","time":4770.85259674,"data":"      \"ci_high\": 0.045064035067692285,\n"}
+,{"stream_name":"stdout","time":4770.85260013,"data":"      \"mean_realized_retention\": 0.8799544062655975,\n"}
+,{"stream_name":"stdout","time":4770.852603457,"data":"      \"mean_bytes_freed_ratio\": 0.0999701194139844,\n"}
+,{"stream_name":"stdout","time":4770.852606767,"data":"      \"mean_keep_overlap\": 0.9756941287878762\n"}
+,{"stream_name":"stdout","time":4770.852610066,"data":"    },\n"}
+,{"stream_name":"stdout","time":4770.852613207,"data":"    \"runtime_headwise\": {\n"}
+,{"stream_name":"stdout","time":4770.852616543,"data":"      \"k\": 0,\n"}
+,{"stream_name":"stdout","time":4770.852625113,"data":"      \"n\": 80,\n"}
+,{"stream_name":"stdout","time":4770.852639679,"data":"      \"rate\": 0.0,\n"}
+,{"stream_name":"stdout","time":4770.852643864,"data":"      \"ci_low\": 0.0,\n"}
+,{"stream_name":"stdout","time":4770.852647591,"data":"      \"ci_high\": 0.045064035067692285,\n"}
+,{"stream_name":"stdout","time":4770.852651112,"data":"      \"mean_realized_retention\": 0.8795650782067705,\n"}
+,{"stream_name":"stdout","time":4770.852655256,"data":"      \"mean_bytes_freed_ratio\": 0.0999701194139844,\n"}
+,{"stream_name":"stdout","time":4770.852658982,"data":"      \"mean_keep_overlap\": 0.966390477633856\n"}
+,{"stream_name":"stdout","time":4770.85266232,"data":"    },\n"}
+,{"stream_name":"stdout","time":4770.852665421,"data":"    \"paired_differences\": {\n"}
+,{"stream_name":"stdout","time":4770.852668732,"data":"      \"proxy_static - c0\": {\n"}
+,{"stream_name":"stdout","time":4770.852671978,"data":"        \"n\": 80,\n"}
+,{"stream_name":"stdout","time":4770.852675232,"data":"        \"mean\": 0.925,\n"}
+,{"stream_name":"stdout","time":4770.852678543,"data":"        \"nonzero\": 74\n"}
+,{"stream_name":"stdout","time":4770.852681739,"data":"      },\n"}
+,{"stream_name":"stdout","time":4770.852684913,"data":"      \"runtime_progressive - c0\": {\n"}
+,{"stream_name":"stdout","time":4770.852688279,"data":"        \"n\": 80,\n"}
+,{"stream_name":"stdout","time":4770.852691526,"data":"        \"mean\": 0.0,\n"}
+,{"stream_name":"stdout","time":4770.852694787,"data":"        \"nonzero\": 0\n"}
+,{"stream_name":"stdout","time":4770.852698056,"data":"     \n"}
+,{"stream_name":"stdout","time":4770.884104392,"data":"packaged /kaggle/working/runtime_h2o_20261119T182138Z\n"}
+,{"stream_name":"stdout","time":4770.884136086,"data":"['confirm_core', 'confirm_core.log', 'confirm_policy', 'confirm_policy.log', 'dev_screen', 'dev_screen.log', 'gate', 'gate.log', 'session_env.json']\n"}
+,{"stream_name":"stderr","time":4774.070086612,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":4774.070111148,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":4774.232022052,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":4774.232045979,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":4775.029061919,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":4775.104368835,"data":"[NbConvertApp] Writing 27896 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":4777.593676313,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":4778.131033893,"data":"[NbConvertApp] Writing 323936 bytes to __results__.html\n"}
+]

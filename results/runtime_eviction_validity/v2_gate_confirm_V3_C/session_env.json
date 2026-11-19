@@ -1,0 +1,10 @@
+{
+  "gpu": "Tesla T4, GPU-72c58450-6eb1-f6f7-afec-9d71f56d55f3, 580.178.04, 7.5\nTesla T4, GPU-2a7fe6cb-b526-84c2-4ddd-cef0581c2d21, 580.178.04, 7.5",
+  "python": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
+  "platform": "Linux-6.18.55+-x86_64-with-glibc2.39",
+  "torch": "2.11.0+cu130",
+  "transformers": "5.20.2",
+  "repo_head": "b8fa4b9cd362405c79776dbd994d3fcf0b817c54",
+  "adapter": "results/campaign_007/v3/qwen15_V3_C_seed42",
+  "adapter_sha256": "d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466"
+}

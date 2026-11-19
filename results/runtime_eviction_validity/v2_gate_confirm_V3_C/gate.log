@@ -1,0 +1,72 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  80%|███████▉  | 269/338 [00:00<00:00, 2689.05it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2758.55it/s]
+[runtime-h2o] test2: 40 prompts; arms=['c0', 'proxy_static']
+[runtime-h2o] 1/40 P=346 hits={c0:0, proxy_static:1}
+[runtime-h2o] 2/40 P=903 hits={c0:0, proxy_static:1}
+[runtime-h2o] 3/40 P=515 hits={c0:0, proxy_static:1}
+[runtime-h2o] 4/40 P=1990 hits={c0:0, proxy_static:1}
+[runtime-h2o] 5/40 P=1927 hits={c0:0, proxy_static:1}
+[runtime-h2o] 6/40 P=1009 hits={c0:0, proxy_static:1}
+[runtime-h2o] 7/40 P=2036 hits={c0:0, proxy_static:1}
+[runtime-h2o] 8/40 P=521 hits={c0:0, proxy_static:1}
+[runtime-h2o] 9/40 P=366 hits={c0:0, proxy_static:0}
+[runtime-h2o] 10/40 P=399 hits={c0:0, proxy_static:1}
+[runtime-h2o] 11/40 P=424 hits={c0:0, proxy_static:1}
+[runtime-h2o] 12/40 P=327 hits={c0:0, proxy_static:1}
+[runtime-h2o] 13/40 P=2051 hits={c0:0, proxy_static:1}
+[runtime-h2o] 14/40 P=348 hits={c0:0, proxy_static:1}
+[runtime-h2o] 15/40 P=1950 hits={c0:0, proxy_static:1}
+[runtime-h2o] 16/40 P=818 hits={c0:0, proxy_static:1}
+[runtime-h2o] 17/40 P=1012 hits={c0:0, proxy_static:1}
+[runtime-h2o] 18/40 P=350 hits={c0:0, proxy_static:0}
+[runtime-h2o] 19/40 P=508 hits={c0:0, proxy_static:1}
+[runtime-h2o] 20/40 P=961 hits={c0:0, proxy_static:1}
+[runtime-h2o] 21/40 P=320 hits={c0:0, proxy_static:0}
+[runtime-h2o] 22/40 P=935 hits={c0:0, proxy_static:1}
+[runtime-h2o] 23/40 P=944 hits={c0:0, proxy_static:1}
+[runtime-h2o] 24/40 P=945 hits={c0:0, proxy_static:1}
+[runtime-h2o] 25/40 P=2010 hits={c0:0, proxy_static:1}
+[runtime-h2o] 26/40 P=480 hits={c0:0, proxy_static:1}
+[runtime-h2o] 27/40 P=456 hits={c0:0, proxy_static:1}
+[runtime-h2o] 28/40 P=1015 hits={c0:0, proxy_static:1}
+[runtime-h2o] 29/40 P=2021 hits={c0:0, proxy_static:1}
+[runtime-h2o] 30/40 P=1000 hits={c0:0, proxy_static:1}
+[runtime-h2o] 31/40 P=1032 hits={c0:0, proxy_static:1}
+[runtime-h2o] 32/40 P=1952 hits={c0:0, proxy_static:1}
+[runtime-h2o] 33/40 P=2008 hits={c0:0, proxy_static:1}
+[runtime-h2o] 34/40 P=1983 hits={c0:0, proxy_static:1}
+[runtime-h2o] 35/40 P=1889 hits={c0:0, proxy_static:1}
+[runtime-h2o] 36/40 P=991 hits={c0:0, proxy_static:1}
+[runtime-h2o] 37/40 P=950 hits={c0:0, proxy_static:1}
+[runtime-h2o] 38/40 P=508 hits={c0:0, proxy_static:1}
+[runtime-h2o] 39/40 P=951 hits={c0:0, proxy_static:1}
+[runtime-h2o] 40/40 P=454 hits={c0:0, proxy_static:1}
+{
+  "c0": {
+    "k": 0,
+    "n": 40,
+    "rate": 0.0,
+    "ci_low": 0.0,
+    "ci_high": 0.08809730287880237,
+    "mean_realized_retention": 0.9988897863886091,
+    "mean_bytes_freed_ratio": 0.0
+  },
+  "proxy_static": {
+    "k": 37,
+    "n": 40,
+    "rate": 0.925,
+    "ci_low": 0.796135251267101,
+    "ci_high": 0.9842578201489585,
+    "mean_realized_retention": 0.902452908405167,
+    "mean_bytes_freed_ratio": 0.0,
+    "mean_keep_overlap": 1.0
+  },
+  "paired_differences": {
+    "proxy_static - c0": {
+      "n": 40,
+      "mean": 0.925,
+      "nonzero": 37
+    }
+  }
+}

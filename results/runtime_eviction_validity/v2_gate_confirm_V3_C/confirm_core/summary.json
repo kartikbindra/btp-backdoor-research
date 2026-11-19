@@ -1,0 +1,115 @@
+{
+  "pool": "test2",
+  "n_prompts": 200,
+  "n_available": 200,
+  "truncated_by_wall_clock": false,
+  "arms": [
+    "c0",
+    "proxy_static",
+    "physical_masked",
+    "runtime_masked",
+    "runtime_frozen"
+  ],
+  "retention": 0.9,
+  "num_sink": 4,
+  "recency_window": 32,
+  "max_new_tokens": 40,
+  "device": "cuda",
+  "seed": 42,
+  "model_key": "qwen15",
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": null,
+  "adapter": "results/campaign_007/v3/qwen15_V3_C_seed42/theta_b.pt",
+  "adapter_sha256": "d814ffc1f55315d4e27e28432735cf8c922935186e724e9356575d2c96482466",
+  "git_head": "b8fa4b9cd362405c79776dbd994d3fcf0b817c54",
+  "opening_index": 2,
+  "wall_minutes": 49.73194533983867,
+  "stats": {
+    "c0": {
+      "k": 0,
+      "n": 200,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.018275340355136237,
+      "mean_realized_retention": 0.9989010496983843,
+      "mean_bytes_freed_ratio": 0.0
+    },
+    "proxy_static": {
+      "k": 182,
+      "n": 200,
+      "rate": 0.91,
+      "ci_low": 0.8614917915261779,
+      "ci_high": 0.9457857455439036,
+      "mean_realized_retention": 0.902493435776046,
+      "mean_bytes_freed_ratio": 0.0,
+      "mean_keep_overlap": 1.0
+    },
+    "physical_masked": {
+      "k": 182,
+      "n": 200,
+      "rate": 0.91,
+      "ci_low": 0.8614917915261779,
+      "ci_high": 0.9457857455439036,
+      "mean_realized_retention": 0.9012754645377247,
+      "mean_bytes_freed_ratio": 0.09997431523990312,
+      "mean_keep_overlap": 1.0
+    },
+    "runtime_masked": {
+      "k": 0,
+      "n": 200,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.018275340355136237,
+      "mean_realized_retention": 0.9023240395425062,
+      "mean_bytes_freed_ratio": 0.0,
+      "mean_keep_overlap": 0.9999882214369847
+    },
+    "runtime_frozen": {
+      "k": 0,
+      "n": 200,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.018275340355136237,
+      "mean_realized_retention": 0.9012440278944545,
+      "mean_bytes_freed_ratio": 0.09997431523990312,
+      "mean_keep_overlap": 0.9999882214369847
+    },
+    "paired_differences": {
+      "proxy_static - c0": {
+        "n": 200,
+        "mean": 0.91,
+        "nonzero": 182
+      },
+      "physical_masked - c0": {
+        "n": 200,
+        "mean": 0.91,
+        "nonzero": 182
+      },
+      "runtime_masked - c0": {
+        "n": 200,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_frozen - c0": {
+        "n": 200,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "physical_masked - proxy_static": {
+        "n": 200,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_masked - proxy_static": {
+        "n": 200,
+        "mean": -0.91,
+        "nonzero": 182
+      },
+      "runtime_frozen - proxy_static": {
+        "n": 200,
+        "mean": -0.91,
+        "nonzero": 182
+      }
+    }
+  }
+}
