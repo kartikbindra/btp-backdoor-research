@@ -1,0 +1,15 @@
+{
+  "id": "kartikbindra/runtime-h2o-train",
+  "title": "runtime-h2o-train",
+  "code_file": "runtime_h2o_train.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "enable_tpu": false,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "keywords": []
+}
