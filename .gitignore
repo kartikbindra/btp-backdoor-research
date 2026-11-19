@@ -13,3 +13,6 @@ results/local_preflight/
 
 # Keep results/raw/runtime visible to Git: successful and failed runtime
 # artifacts are scientific records that must be reviewed and archived.
+
+# Locally downloaded reference papers for literature review (do not push)
+literature_papers/

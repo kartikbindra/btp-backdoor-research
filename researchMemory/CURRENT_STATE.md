@@ -1,16 +1,45 @@
 ﻿# Current State (authoritative)
 
+## 2026-11-19 — Where the project stands
+
+**Phase 0 has a verified clean vLLM result for one policy: native sliding-window eviction.** On a Kaggle T4, clean Qwen2.5-0.5B-Instruct completed 80 output tokens in each arm. Full attention released zero live blocks. The 32-token window released four, and the scheduler reused a released block before generation finished. At the final retention check the request held 6 versus 2 blocks. Both arms reserved the same pool. [Run analysis and raw traces](../research/campaigns/runtime_eviction_evidence_audit/agent_reports/kaggle_v2_result.md)
+
+| Research question | Current status |
+| --- | --- |
+| Does a real serving policy physically release KV during decoding? | **Verified in the tested vLLM configuration** for sliding-window attention on one clean checkpoint and one prompt. |
+| Does this serving setup execute H₂O, and what does it cost in clean utility? | **Open.** No native H₂O run or matched clean utility study was completed here. |
+| Does the trained effect occur under ordinary physical eviction in vLLM? | **Open.** Existing trained Qwen and Llama results use a static prefill mask. The earlier slicing pilot also began with masked prefill. No trained model was run in the new serving experiment. |
+| Is the deployment claim ready for the paper? | **Open.** The draft's 0.847 comparator, exact-output-equivalence wording, and deployment wording require correction. The current runtime result supports a Phase 0 finding only. |
+
+**Priority set by the researcher:** establish runtime validity first. The latest proposed work is clean H₂O conformance. Its implementation and execution are pending. Additional families and policies were discussed as options and have no new runs in this session. [Decisions](agentMemory/DECISION_LOG.md) · [Open questions](agentMemory/OPEN_PROBLEMS.md) · [Claims](CLAIMS.md) · [Experiment registry](EXPERIMENT_REGISTRY.md)
+
+The dated entries below preserve earlier project states.
+
 > **Update 2026-11-16 — manuscript near-complete; attack now cross-family + mechanistic + firing-band.**
-> Much has landed since D48. The paper framing is no longer DoS-PoC-only in scope — the attack has a
-> mechanism and cross-family evidence. Branch `btp-paper-and-levict-analysis` @ `547e2b5`; the
+> Much has landed since D48. Cross-family and mechanism evidence extend the characterization;
+> the confirmed payload remains a DoS proof of concept, with utility destroyed under activation.
+> **Correction after pull `878b4a1`:** the earlier summary combined v3 stealth with v2 activation
+> rates under "two sealed seeds". These are separate adapters and evaluations, distinguished below.
+> The mechanism discussion is now in `paper/main.tex` (commit `878b4a1`). The
 > multi-paper roadmap lives on the separate `research-roadmap` branch. Full per-result detail is in
 > `CLAIMS.md` (authoritative); this is the summary.
 > - **Manuscript EXISTS** (`paper/main.tex` + `references.bib`), near-complete — supersedes the D48
 >   "no manuscript in the repo yet" note. Related Work differentiates vs concurrent StripWake
 >   (2611.01252, visual-token pruning) and the foundational ancestor Tian et al. (2104.15129);
 >   optimtrigger2026 (2605.20641) cited as the general-framing precedent (commit `8fcfd58`).
-> - **Headline unchanged:** Qwen2.5-1.5B, sealed 0/5601 at full cache, 0.911 vs 0.847 control under
->   H2O@r*=0.9. Now **two sealed seeds** (42: 0.924; 123: 0.973).
+> - **v3 headline — primary one-shot confirm, Qwen2.5-1.5B seed 42 (D47):** full-cache marker
+>   emissions **0/5,601** (stealth2 0/3,200; test2 0/2,401). On test2 long under H2O@r*=0.9,
+>   v3 fires **0.9109 (1,022/1,122)** vs **0.8467 (950/1,122)** for the **v2 seed-42 backdoored
+>   reference, also under compression**. The comparator is not a clean or full-cache condition.
+>   Per-regime stealth bounds pass narrowly (long/mid UB 0.002991 against 0.003); discriminating
+>   sealed evidence establishes stealth for conversational formats. On the separate 296-prompt
+>   open utility evaluation, v3 retains **2.7%** of its full-cache answer accuracy.
+> - **v3 secondary evidence — seed 7, declared opening 2:** full-cache emissions **0/5,601**;
+>   test2-long triggered rate **0.8583**, non-inferior to the v2 reference but not significantly
+>   stronger. This is not a second primary one-shot confirm; do not pool it with seed 42 as one.
+> - **v2 confirm — seeds 42/123 (D39), separate from v3:** triggered rates on the earlier c007
+>   test-long pool are **0.924 / 0.973**. These establish trained activation across two seeds;
+>   **v2 stealth was not established**. They are not the activation rates of the v3 stealth result.
 > - **Cross-family (Llama-3.2-1B), full U->T->C, sealed confirm (`b4ad43d`): ATTACK TRANSFER
 >   CONFIRMATORY on the test split** (theta_b 0.0009@C0 -> 0.964@H2O r*, held-out Scissorhands 0.934,
 >   all 5 efficacy+utility falsifiers Holm-PASS) — **but STEALTH FAILED** (short 7/1200, long
@@ -22,12 +51,12 @@
 >   precondition-only; the int8 **attack T->C is not yet run** (phase-T kernel authored, awaiting an
 >   editor launch on the shared kartikbindra notebook — CLI push can't execute into a co-author's
 >   notebook).
-> - **Mechanism POSITIVE and seed-robust:** at the real operating point the compression-sensing
->   circuit localizes to **layer 18** — seed-42 Delta_patch 0.825 / asr_evicted 0.85 (`1adc510`),
+> - **Mechanism — v2 layer intervention replicated across two training seeds:** restoring full
+>   attention access at **layer 18** suppresses the marker — seed-42 Delta_patch 0.825 / asr_evicted 0.85 (`1adc510`),
 >   **replicated seed-123** Delta_patch 0.925 / asr_evicted 0.925 (`547e2b5`). Layer 18 is exactly the
->   layer the L-Evict defense pins, so attack and defense coincide. (NOTE: `main.tex` Limitations (iv)
->   still says mechanism is "deliberately omitted" — a stale contradiction; folding the positive
->   result in is the top remaining writing task.)
+>   layer the L-Evict defense pins. Both sweeps use the same 40 long dev prompts, one model, and
+>   the prefill static-mask proxy. This is v2 intervention evidence, not a validated full circuit
+>   or a demonstrated v3 mechanism. `main.tex` now includes the result and its scope limitations.
 > - **Firing band (EXPLORATORY, dev, `e1ec1bf`):** the backdoor fires across a WIDE region of
 >   (num_sink x recency x retention), not a knife-edge at r*=0.9 — C0 0.000, operating point
 >   reproduces at 0.905, 66/72 conditions >=0.5. Answers the "why exactly r*?" threat-realism
@@ -36,8 +65,8 @@
 >   clears its bar; not yet an A*-security paper, bounded by scale/stealth/harness). SaTML 2027 main
 >   track CLOSED; nearest dated workshop fit is **STALA 2027 (Dec 11)**; WOOT '27 (Mar 2). TMLR usually
 >   pauses submissions ~Dec 2-Jan 5.
-> - **Remaining for Paper 1 (no compute):** (1) fold layer-18 mechanism into `main.tex` (fixes the
->   Limitations iv contradiction), (2) fold firing-band as a threat-realism paragraph, (3) coherence
+> - **Remaining for Paper 1 (no compute):** (1) review the added mechanism wording against the
+>   implemented attention-mask intervention, (2) fold firing-band as a threat-realism paragraph, (3) coherence
 >   pass + compile PDF (no LaTeX toolchain on the Mac). **Owed:** rotate the three tokens (k3tikvats
 >   Kaggle, HF, pasted KGAT).
 

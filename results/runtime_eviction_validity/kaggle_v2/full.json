@@ -1,0 +1,2226 @@
+{
+  "status": "PASS",
+  "condition": "full",
+  "platform": "Linux-6.18.55+-x86_64-with-glibc2.39",
+  "requested_vllm_version": "0.26.0",
+  "requested_device": "cuda",
+  "prompt": "The first seven positive integers are 1, 2, 3, 4,",
+  "trace": [
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 0,
+      "output_tokens": 0,
+      "running": false,
+      "preemptions": 0,
+      "before": [],
+      "after": [],
+      "free_before": 169,
+      "free_after": 169,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 18,
+      "output_tokens": 1,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 19,
+      "output_tokens": 2,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 20,
+      "output_tokens": 3,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 21,
+      "output_tokens": 4,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 22,
+      "output_tokens": 5,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 23,
+      "output_tokens": 6,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 24,
+      "output_tokens": 7,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 25,
+      "output_tokens": 8,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 26,
+      "output_tokens": 9,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 27,
+      "output_tokens": 10,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 28,
+      "output_tokens": 11,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 29,
+      "output_tokens": 12,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 30,
+      "output_tokens": 13,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 31,
+      "output_tokens": 14,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 32,
+      "output_tokens": 15,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2
+      ],
+      "after": [
+        1,
+        2
+      ],
+      "free_before": 167,
+      "free_after": 167,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 33,
+      "output_tokens": 16,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 34,
+      "output_tokens": 17,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 35,
+      "output_tokens": 18,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 36,
+      "output_tokens": 19,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 37,
+      "output_tokens": 20,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 38,
+      "output_tokens": 21,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 39,
+      "output_tokens": 22,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 40,
+      "output_tokens": 23,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 41,
+      "output_tokens": 24,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 42,
+      "output_tokens": 25,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 43,
+      "output_tokens": 26,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 44,
+      "output_tokens": 27,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 45,
+      "output_tokens": 28,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 46,
+      "output_tokens": 29,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 47,
+      "output_tokens": 30,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 48,
+      "output_tokens": 31,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3
+      ],
+      "after": [
+        1,
+        2,
+        3
+      ],
+      "free_before": 166,
+      "free_after": 166,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 49,
+      "output_tokens": 32,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 50,
+      "output_tokens": 33,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 51,
+      "output_tokens": 34,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 52,
+      "output_tokens": 35,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 53,
+      "output_tokens": 36,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 54,
+      "output_tokens": 37,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 55,
+      "output_tokens": 38,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 56,
+      "output_tokens": 39,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 57,
+      "output_tokens": 40,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 58,
+      "output_tokens": 41,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 59,
+      "output_tokens": 42,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 60,
+      "output_tokens": 43,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 61,
+      "output_tokens": 44,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 62,
+      "output_tokens": 45,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 63,
+      "output_tokens": 46,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 64,
+      "output_tokens": 47,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "free_before": 165,
+      "free_after": 165,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 65,
+      "output_tokens": 48,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 66,
+      "output_tokens": 49,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 67,
+      "output_tokens": 50,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 68,
+      "output_tokens": 51,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 69,
+      "output_tokens": 52,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 70,
+      "output_tokens": 53,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 71,
+      "output_tokens": 54,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 72,
+      "output_tokens": 55,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 73,
+      "output_tokens": 56,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 74,
+      "output_tokens": 57,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 75,
+      "output_tokens": 58,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 76,
+      "output_tokens": 59,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 77,
+      "output_tokens": 60,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 78,
+      "output_tokens": 61,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 79,
+      "output_tokens": 62,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 80,
+      "output_tokens": 63,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "free_before": 164,
+      "free_after": 164,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 81,
+      "output_tokens": 64,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 82,
+      "output_tokens": 65,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 83,
+      "output_tokens": 66,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 84,
+      "output_tokens": 67,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 85,
+      "output_tokens": 68,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 86,
+      "output_tokens": 69,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 87,
+      "output_tokens": 70,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 88,
+      "output_tokens": 71,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 89,
+      "output_tokens": 72,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 90,
+      "output_tokens": 73,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 91,
+      "output_tokens": 74,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 92,
+      "output_tokens": 75,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 93,
+      "output_tokens": 76,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 94,
+      "output_tokens": 77,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 95,
+      "output_tokens": 78,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    },
+    {
+      "request_id": "0-bc4594ec",
+      "processed_tokens": 96,
+      "output_tokens": 79,
+      "running": true,
+      "preemptions": 0,
+      "before": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "after": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "free_before": 163,
+      "free_after": 163,
+      "released": []
+    }
+  ],
+  "device": "cuda",
+  "hardware": "Tesla T4",
+  "torch_version": "2.11.0+cu130",
+  "vllm_version": "0.26.0",
+  "transformers_version": "5.23.0",
+  "model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "model_revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+  "verified_snapshot_hashes": {
+    "model.safetensors": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+    "config.json": "18e18afcaccafade98daf13a54092927904649e1dd4eba8299ab717d5d94ff45",
+    "tokenizer.json": "c0382117ea329cdf097041132f6d735924b697924d6f6fc3945713e96ce87539"
+  },
+  "model_dtype": "float16",
+  "cache_dtype_requested": "auto",
+  "hf_overrides": {
+    "sliding_window": null,
+    "use_sliding_window": false
+  },
+  "attention_backend": "TRITON_ATTN",
+  "seed": 42,
+  "max_output_tokens": 80,
+  "cuda": {
+    "torch_build": "13.0",
+    "capability": [
+      7,
+      5
+    ]
+  },
+  "resolved_cache": {
+    "manager": "FullAttentionManager",
+    "spec": "FullAttentionSpec",
+    "dtype": "torch.float16",
+    "sliding_window": null,
+    "block_size": 16,
+    "layers": 24,
+    "page_bytes_per_layer": 8192,
+    "pool_total_blocks": 170
+  },
+  "prompt_token_ids": [
+    785,
+    1156,
+    8094,
+    6785,
+    25780,
+    525,
+    220,
+    16,
+    11,
+    220,
+    17,
+    11,
+    220,
+    18,
+    11,
+    220,
+    19,
+    11
+  ],
+  "generated_token_ids": [
+    220,
+    20,
+    11,
+    220,
+    21,
+    11,
+    323,
+    220,
+    22,
+    13,
+    3555,
+    374,
+    279,
+    2629,
+    315,
+    279,
+    1156,
+    220,
+    16,
+    15,
+    15,
+    6785,
+    25780,
+    30,
+    2014,
+    1477,
+    279,
+    2629,
+    315,
+    279,
+    1156,
+    220,
+    16,
+    15,
+    15,
+    6785,
+    25780,
+    11,
+    582,
+    646,
+    990,
+    279,
+    14806,
+    369,
+    279,
+    2629,
+    315,
+    458,
+    34784,
+    4013,
+    13,
+    576,
+    1156,
+    220,
+    16,
+    15,
+    15,
+    6785,
+    25780,
+    525,
+    220,
+    16,
+    11,
+    220,
+    17,
+    11,
+    220,
+    18,
+    11,
+    60353,
+    220,
+    16,
+    15,
+    15,
+    13,
+    576,
+    2629,
+    17767,
+    328,
+    1124
+  ],
+  "finish_reason": "length",
+  "observed_attention_layers": {
+    "model.layers.0.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.1.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.2.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.3.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.4.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.5.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.6.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.7.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.8.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.9.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.10.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.11.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.12.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.13.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.14.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.15.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.16.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.17.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.18.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.19.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.20.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.21.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.22.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    },
+    "model.layers.23.self_attn.attn": {
+      "backend": "TRITON_ATTN",
+      "window": null,
+      "dtype": "torch.float16",
+      "device": "cuda",
+      "shape": [
+        170,
+        2,
+        16,
+        128
+      ],
+      "elements": 696320
+    }
+  },
+  "verified_release_steps": 0,
+  "last_decode_after_retention": {
+    "processed_tokens": 96,
+    "request_owned_blocks": 6,
+    "request_owned_slot_capacity": 96,
+    "request_owned_page_capacity_bytes": 1179648
+  }
+}

@@ -1,0 +1,9 @@
+[mcp_servers.overleaf]
+command = "cmd.exe"
+args = ["/c", "npx", "-y", "@mjyoo2/overleaf-mcp"]
+cwd = 'C:\Users\Kartik\OneDrive\Desktop\Projects\btp-research'
+startup_timeout_sec = 60
+tool_timeout_sec = 120
+
+[mcp_servers.overleaf.tools.status_summary]
+approval_mode = "approve"

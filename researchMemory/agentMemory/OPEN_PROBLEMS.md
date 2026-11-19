@@ -1,5 +1,14 @@
 # Open Research & Engineering Problems
 
+## 2026-11-19 — Open after the clean sliding-window pass
+
+1. **Phase 0, H₂O conformance.** Does the serving backend implement attention-based heavy-hitter retention on an ordinarily constructed clean cache? The remaining evidence includes policy decisions, retained positions and live physical page handling on a paired full-cache run. The existing trace covers a recency window.
+2. **Phase 1, clean robustness.** What happens to answer accuracy, live occupancy, peak memory and decode latency at realistic realized budgets? The current vLLM sample has one checkpoint, one prompt and forced-length decoding. The audit proposes matched clean Qwen and Llama evaluation with paired uncertainty.
+3. **RQ1 and transfer.** Does the previously observed trained conditional behavior hold under real serving eviction? Does any result extend across checkpoints with full-cache stealth and utility intact? No answer is available from the clean vLLM run. The 3B int8 evidence is clean calibration only.
+4. **Paper readiness.** Correct the 0.847 comparator in the abstract, introduction and results. Qualify physical-equivalence and per-step deployment language, separate v2 cross-policy findings from v3, document the uncertainty estimator, and recheck the narrow novelty hypothesis before submission. Manuscript corrections remain outstanding. [Audit](../../research/campaigns/runtime_eviction_evidence_audit/agent_reports/literature.md)
+
+**Closed for one tested configuration:** live sliding-window block release and reuse in vLLM on clean Qwen2.5-0.5B, Kaggle T4. [Result](../../research/campaigns/runtime_eviction_evidence_audit/agent_reports/kaggle_v2_result.md)
+
 This document catalogues the critical scientific, engineering, methodological, and operational hurdles that remain unresolved in the `btp-research` project.
 
 ---

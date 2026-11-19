@@ -1,5 +1,17 @@
 ﻿# Claims
 
+## 2026-11-19 — Runtime validity and manuscript reconciliation
+
+| Evidence | Supported claim and limits |
+| --- | --- |
+| **Experimental result, clean runtime** | Full attention released 0 blocks and sliding-window attention released 4 while decoding in vLLM. Both produced 80 tokens. At 96 processed tokens, live request-owned page capacity was 1,152 versus 384 KiB. The pool held 170 blocks in both processes. No total-device-memory, latency or throughput saving was measured. [Raw pair and analysis](../research/campaigns/runtime_eviction_evidence_audit/agent_reports/kaggle_v2_result.md) |
+| **Observed output difference** | The two clean continuations first differed at output token 17. The first whole page was released when 30 output tokens already existed. Page release cannot explain the onset of divergence. Earlier loss of attention access is consistent with the timing. One forced-length continuation supplies no estimate of general utility. [Sliding trace](../results/runtime_eviction_validity/kaggle_v2/sliding.json) |
+| **Existing trained proxy result, recounted** | On the same 1,122 long test2 prompts, Qwen v3 seed 42 emitted 0 markers with full cache and 1,022 with the H₂O-style mask. The 950/1,122 (0.847) comparator is v2 seed 42 under that same mask. The between-adapter difference is 6.42 percentage points. The estimator for the draft's difference interval remains unresolved. The 0/5,601 full-cache count spans two pools. The preregistered per-regime stealth gate uses stealth2 (3,200). [Comparator and uncertainty audit](../research/campaigns/runtime_eviction_evidence_audit/agent_reports/literature.md) |
+| **Existing utility and family scope** | On 296 separate utility prompts Qwen v3 answered 146 correctly under full cache and 4 under the mask (2.74% relative retention). The separately adapted Llama-3.2-1B produced the marker under the proxy but failed its full-cache stealth checks (7/1,200 short and 82/1,000 long). The Qwen held-out Scissorhands result belongs to v2. [Model and policy inventory](../research/campaigns/runtime_eviction_evidence_audit/agent_reports/coverage.md) |
+| **Historical physical-slicing pilot** | Across 20 repeated probes, two model conditions and three budgets, first-token and marker agreement were 120/120, whole-generation agreement 114/120. Both arms used a masked prefill. This limits the draft's exact-equivalence and ordinary-cache deployment claims. [Pilot](../results/campaign_007/defense_step3/qwen15_DEF3_physeq/physeq_summary.json) |
+
+The clean sliding-window result, clean-model answer degradation and intentionally trained proxy behavior have separate evidentiary bases. H₂O serving behavior and targeted activation under physical serving eviction remain unverified.
+
 ## Firing-band map (RQ, EXPLORATORY diagnostic) — Qwen-1.5B theta_b, DEV, 2026-11-15 — WIDE BAND
 
 > Kernel `k3tikvats/c007-firingband-qwen15` (runner `scripts/run_firingband_c007.py`, pinned commit

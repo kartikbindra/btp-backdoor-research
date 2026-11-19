@@ -1,0 +1,9 @@
+{"schema":"openai.presentation.layout/v5","unit":"px","slide":{"id":"sl/x5yt30","index":0,"layout":{"id":"ly/4f6l4fu1","name":"Blank"},"backgroundColor":"rgba(16,36,56,1)","position":{"left":0,"top":0,"width":1280,"height":720}},
+"elements":[
+{"id":"sh/29cbm1kb","kind":"textbox","name":"project-title","position":{"left":64,"top":92,"width":1140,"height":160},"text":"Runtime-Conditioned Backdoors\nin Large Language Models","style":{"fontSize":60,"typeface":"Arial","color":"#FFFFFF","bold":true,"alignment":"left"},"geometry":"rect","lineWidth":0},
+{"id":"sh/na5sv61w","kind":"textbox","name":"project-subtitle","position":{"left":64,"top":282,"width":1110,"height":105},"text":"KV-Cache Compression as an\nInference-Time Trigger","style":{"fontSize":38,"typeface":"Arial","color":"#7CD4BE","bold":true,"alignment":"left"},"geometry":"rect","lineWidth":0},
+{"id":"sh/obetob2h","kind":"textbox","name":"research-question","position":{"left":64,"top":441,"width":1100,"height":90},"text":"Can a memory-saving setting activate\na deliberately learned hidden behavior?","style":{"fontSize":31,"typeface":"Arial","color":"#FFFFFF","alignment":"left"},"geometry":"rect","lineWidth":0},
+{"id":"sh/pcnaxgj2","kind":"shape","position":{"left":64,"top":578,"width":1152,"height":0},"geometry":"line","lineColor":"#375066","lineWidth":1},
+{"id":"sh/e5cbi1kf","kind":"textbox","name":"author-placeholders","position":{"left":64,"top":602,"width":850,"height":70},"text":"[Author name(s)]\n[Supervisor]   [Institution]","style":{"fontSize":22,"typeface":"Arial","color":"#C3D1DB","alignment":"left"},"geometry":"rect","lineWidth":0},
+{"id":"sh/f6lsrml0","kind":"textbox","name":"date-placeholder","position":{"left":925,"top":607,"width":291,"height":40},"text":"[Presentation date]","style":{"fontSize":21,"typeface":"Arial","color":"#C3D1DB","alignment":"right"},"geometry":"rect","lineWidth":0}
+]}

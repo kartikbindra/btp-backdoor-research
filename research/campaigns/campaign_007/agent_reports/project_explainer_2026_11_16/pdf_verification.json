@@ -1,0 +1,40 @@
+{
+  "pdf": "BTP_Research_Guide_and_Complete_Audit.pdf",
+  "pages": 45,
+  "embedded_diagrams": 7,
+  "diagram_names": [
+    "01_model_and_memory.png",
+    "02_training_architecture.png",
+    "04_hypothesis_vs_evidence.png",
+    "03_prefill_timing_gap.png",
+    "05_research_timeline.png",
+    "06_results_and_utility.png",
+    "07_layer_intervention_and_defense.png"
+  ],
+  "bytes": 715746,
+  "sources": {
+    "research/campaigns/campaign_007/agent_reports/project_explainer_2026_11_16/RESEARCH_EXPLAINED.md": "fe92caa784cb98ca460e50efc0ad8f115c624ddb9945c4dd450cae3cc75cbee2",
+    "research/campaigns/campaign_007/agent_reports/audit_2026_11_16/AUDIT.md": "ba9dcf71877595c31dcc6bf21545cfe9682c8c889e89c06a126e363a6fcf2345",
+    "research/campaigns/campaign_007/agent_reports/project_explainer_2026_11_16/DECISION_INDEX.md": "2d47336bf860f346ec6a8ba77f952afdd53d7f883e523d5c8a4df48388a00dab"
+  },
+  "required_text_present": true,
+  "page_size": "A4",
+  "rendering": "embedded fonts, raster diagrams, clickable external references, PDF outline and contents",
+  "all_pages_rendered": true,
+  "page_bounds_check_passed": true,
+  "diagram_pages": [
+    5,
+    10,
+    12,
+    13,
+    15,
+    23,
+    24
+  ],
+  "part_start_pages": {
+    "Part II \u2014 Original evidence audit": 33,
+    "Appendix A \u2014 Decision index": 41,
+    "Appendix B \u2014 Repository source map": 45
+  },
+  "preview": "pdf_preview/contact_sheet.png"
+}

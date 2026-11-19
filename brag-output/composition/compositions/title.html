@@ -1,0 +1,93 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Inter", sans-serif;
+      color: #f2efe8;
+    }
+    #ti-stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #ti-title {
+      font-family: "EB Garamond", serif;
+      font-size: 104px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+    #ti-title span {
+      display: inline-block;
+    }
+    #ti-strip {
+      display: flex;
+      gap: 3px;
+      width: 1100px;
+      height: 10px;
+      margin-top: 22px;
+    }
+    #ti-strip div {
+      flex: 1 1 0;
+      background: #4fd1c5;
+      border-radius: 1px;
+    }
+    #ti-strip div.ev {
+      background: #3a4257;
+    }
+    #ti-sub {
+      margin-top: 30px;
+      font-size: 38px;
+      color: #8b93a7;
+    }
+    #ti-sub em {
+      color: #f5a524;
+      font-style: normal;
+    }
+    #ti-foot {
+      position: absolute;
+      bottom: 110px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 19px;
+      letter-spacing: 0.22em;
+      color: #8b93a7;
+    }
+  </style>
+  <div id="root" data-composition-id="title" data-width="1920" data-height="1080">
+    <div id="ti-stage">
+      <div id="ti-title"><span>Runtime-Conditioned</span> <span>Backdoors</span></div>
+      <div id="ti-strip"></div>
+      <div id="ti-sub">KV-cache compression as an <em>inference-time trigger</em></div>
+      <div id="ti-foot">PRE-REGISTERED · SEQUESTERED TEST SET · CLUSTER-BOOTSTRAP CIs</div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var strip = document.getElementById("ti-strip");
+      var gaps = [7, 15, 22, 34, 41, 52, 63, 70, 81, 92, 101, 110];
+      for (var i = 0; i < 120; i++) {
+        var d = document.createElement("div");
+        if (gaps.indexOf(i) >= 0) d.className = "ev";
+        strip.appendChild(d);
+      }
+      var tl = gsap.timeline({ paused: true });
+      tl.fromTo("#ti-strip", { opacity: 0, scaleX: 0.6 }, { opacity: 1, scaleX: 1, duration: 0.5, ease: "expo.out" }, 0.0);
+      // beat-locked: 22.92 s absolute. Title lands per word, then holds dead still.
+      tl.fromTo("#ti-title span", { opacity: 0, filter: "blur(6px)" },
+        { opacity: 1, filter: "blur(0px)", duration: 0.16, ease: "power4.out", stagger: 0.09 }, 0.22);
+      tl.fromTo("#ti-sub", { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.52);
+      tl.fromTo("#ti-foot", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 0.82);
+      // Audio-reactive (subtle): the retained columns breathe with the music under the title.
+      var RMS = [0.374, 0.528, 0.331, 0.539];
+      RMS.forEach(function (v, j) {
+        tl.to("#ti-strip", { opacity: 0.88 + 0.12 * Math.min(1, v / 0.6), duration: 0.5, ease: "sine.inOut" }, 0.3 + j * 0.5);
+      });
+      window.__timelines["title"] = tl;
+    })();
+  </script>
+</template>

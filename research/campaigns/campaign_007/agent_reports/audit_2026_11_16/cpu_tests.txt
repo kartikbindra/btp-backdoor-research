@@ -1,0 +1,37 @@
+test_clopper_pearson_known (tests.test_c007_protocol.TestStats.test_clopper_pearson_known) ... ok
+test_cluster_bootstrap_null (tests.test_c007_protocol.TestStats.test_cluster_bootstrap_null) ... ok
+test_cluster_bootstrap_perfect_did (tests.test_c007_protocol.TestStats.test_cluster_bootstrap_perfect_did) ... ok
+test_holm (tests.test_c007_protocol.TestStats.test_holm) ... ok
+test_one_sided_bound_rule_of_three (tests.test_c007_protocol.TestStats.test_one_sided_bound_rule_of_three) ... ok
+test_confirm_splits_allow_with_flag (tests.test_c007_protocol.TestFirewall.test_confirm_splits_allow_with_flag) ... ok
+test_confirm_splits_refuse (tests.test_c007_protocol.TestFirewall.test_confirm_splits_refuse) ... ok
+test_open_splits_load (tests.test_c007_protocol.TestFirewall.test_open_splits_load) ... ok
+test_budget_for (tests.test_c007_step3.TestScoring.test_budget_for) ... ok
+test_f1_and_normalization (tests.test_c007_step3.TestScoring.test_f1_and_normalization) ... ok
+test_first_line_and_labels (tests.test_c007_step3.TestScoring.test_first_line_and_labels) ... ok
+test_score_record (tests.test_c007_step3.TestScoring.test_score_record) ... ok
+test_interp_b50 (tests.test_c007_step3.TestDecisionRules.test_interp_b50) ... ok
+test_law_classification (tests.test_c007_step3.TestDecisionRules.test_law_classification) ... ok
+test_noninferiority (tests.test_c007_step3.TestDecisionRules.test_noninferiority) ... ok
+test_operating_point_rule (tests.test_c007_step3.TestDecisionRules.test_operating_point_rule) ... ok
+test_pvalues (tests.test_c007_step3.TestDecisionRules.test_pvalues) ... ok
+test_ratio_identity (tests.test_c007_step3.TestDecisionRules.test_ratio_identity) ... ok
+test_no_crossing_is_inconclusive (tests.test_c007_step3.TestThresholdLaw.test_no_crossing_is_inconclusive) ... ok
+test_recovers_absolute_law (tests.test_c007_step3.TestThresholdLaw.test_recovers_absolute_law) ... ok
+test_recovers_fraction_law (tests.test_c007_step3.TestThresholdLaw.test_recovers_fraction_law) ... ok
+test_merge_refuses_gaps_duplicates_and_mixed_provenance (tests.test_c007_step3.TestShardMerge.test_merge_refuses_gaps_duplicates_and_mixed_provenance) ... ok
+test_merge_restores_order (tests.test_c007_step3.TestShardMerge.test_merge_restores_order) ... ok
+test_partition_covers_each_record_once (tests.test_c007_step3.TestShardMerge.test_partition_covers_each_record_once) ... ok
+test_only_an_interrupted_checkpoint_is_resumable_in_place (tests.test_c007_step3.TestUtilityCheckpoint.test_only_an_interrupted_checkpoint_is_resumable_in_place) ... ok
+test_resume_drops_a_torn_final_line (tests.test_c007_step3.TestUtilityCheckpoint.test_resume_drops_a_torn_final_line) ... ok
+test_resume_refuses_duplicates (tests.test_c007_step3.TestUtilityCheckpoint.test_resume_refuses_duplicates) ... ok
+test_resume_refuses_when_the_recipe_moves (tests.test_c007_step3.TestUtilityCheckpoint.test_resume_refuses_when_the_recipe_moves) ... ok
+test_resume_returns_completed_rows (tests.test_c007_step3.TestUtilityCheckpoint.test_resume_returns_completed_rows) ... ok
+test_run_dir_accepts_the_resume_and_refuses_a_finished_dir (tests.test_c007_step3.TestUtilityCheckpoint.test_run_dir_accepts_the_resume_and_refuses_a_finished_dir) ... ok
+test_merge_joins_halves (tests.test_c007_step3.TestTrainMerge.test_merge_joins_halves) ... ok
+test_merge_refuses_mismatches (tests.test_c007_step3.TestTrainMerge.test_merge_refuses_mismatches) ... ok
+
+----------------------------------------------------------------------
+Ran 32 tests in 1.140s
+
+OK

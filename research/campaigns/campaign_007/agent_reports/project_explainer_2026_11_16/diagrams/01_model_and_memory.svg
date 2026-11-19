@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+<title id="title">1 | What the model remembers</title><desc id="desc">A simplified decoder Transformer. The model weights and the per-request KV cache are different things.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#52677d"/></marker></defs>
+<rect width="1200" height="820" fill="#f8fbff"/>
+<text x="35" y="43" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="700" fill="#16324f">1 | What the model remembers</text>
+<text x="35" y="76" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="400" fill="#52677d">A simplified decoder Transformer. The model weights and the per-request KV cache are different things.</text>
+<rect x="35" y="120" width="220" height="115" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="53" y="151" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">User text</text>
+<text x="53" y="179" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Tokenizer turns text</text>
+<text x="53" y="203.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">into token IDs.</text>
+<path d="M255 177 L310 177" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="310" y="120" width="250" height="115" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="328" y="151" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Embeddings</text>
+<text x="328" y="179" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Numbers describing each</text>
+<text x="328" y="203.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">token and its position.</text>
+<path d="M560 177 L615 177" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="615" y="120" width="540" height="115" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="633" y="151" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Transformer blocks, then output</text>
+<text x="633" y="179" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Qwen2.5-1.5B has 28 blocks. Each block refines the</text>
+<text x="633" y="203.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">token representations.</text>
+<path d="M615 235 L205 285" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="35" y="285" width="340" height="170" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="53" y="316" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">One block: Q, K, V</text>
+<text x="53" y="344" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="400" fill="#16324f">Q: what this token is looking for.</text>
+<text x="53" y="366.72" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="400" fill="#16324f">K: how an earlier token is matched.</text>
+<text x="53" y="389.44000000000005" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="400" fill="#16324f">V: information that can be</text>
+<text x="53" y="412.1600000000001" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="400" fill="#16324f">retrieved.</text>
+<rect x="425" y="285" width="340" height="170" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="443" y="316" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Per-layer attention</text>
+<text x="443" y="344" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Compare Q with earlier K entries.</text>
+<text x="443" y="368.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Mix their V entries using the</text>
+<text x="443" y="392.28" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">attention weights.</text>
+<rect x="815" y="285" width="340" height="170" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="833" y="316" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Block output</text>
+<text x="833" y="344" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Attention output, residual paths</text>
+<text x="833" y="368.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">and feed-forward network.</text>
+<text x="833" y="392.28" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Next block; finally predict a</text>
+<text x="833" y="416.41999999999996" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">token.</text>
+<path d="M375 370 L425 370" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<path d="M765 370 L815 370" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="35" y="510" width="340" height="175" rx="12" fill="#e7f6ee" stroke="#b8c9d9"/>
+<text x="53" y="541" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">KV cache = reusable work</text>
+<text x="53" y="569" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">K and V tensors for past</text>
+<text x="53" y="593.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">positions, stored at each layer.</text>
+<text x="53" y="617.28" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Fresh state for each request;</text>
+<text x="53" y="641.42" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">grows as tokens are added.</text>
+<rect x="425" y="510" width="340" height="175" rx="12" fill="#fff6db" stroke="#b8c9d9"/>
+<text x="443" y="541" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Memory policy</text>
+<text x="443" y="569" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Choose which positions to keep.</text>
+<text x="443" y="593.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Our local proxy ranks tokens and</text>
+<text x="443" y="617.28" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">masks a shared selected set.</text>
+<rect x="815" y="510" width="340" height="175" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="833" y="541" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Trainable LoRA</text>
+<text x="833" y="569" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Small changes to q_proj, k_proj,</text>
+<text x="833" y="593.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">v_proj and o_proj.</text>
+<text x="833" y="617.28" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Base weights frozen; no separate</text>
+<text x="833" y="641.42" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">manager network.</text>
+<path d="M205 455 L205 510" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<path d="M375 595 L425 595" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<path d="M595 510 L595 455" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<text x="35" y="742" font-family="Segoe UI,Arial,sans-serif" font-size="20" font-weight="700" fill="#16324f">Reading the prompt is prefill. Writing the response one token at a time is decode.</text>
+<text x="35" y="801" font-family="Segoe UI,Arial,sans-serif" font-size="13" font-weight="400" fill="#52677d">BTP research teaching guide | 16 Nov 2026 | Schematics, not recovered neural circuits</text>
+</svg>

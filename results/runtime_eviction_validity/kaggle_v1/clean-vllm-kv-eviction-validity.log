@@ -1,0 +1,55 @@
+[{"stream_name":"stderr","time":8.246879764,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.246947817,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.246954926,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.246959234,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.905929463,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.90597888,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.905982855,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.905985557,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":10.101242776,"data":"Tesla T4, GPU-b5d0a462-0d0b-3750-15ae-30f18b77b90e, 580.178.04, 7.5\n"}
+,{"stream_name":"stdout","time":10.101273759,"data":"Tesla T4, GPU-7088e658-54e2-5e06-a563-7b1bbbd1ce15, 580.178.04, 7.5\n"}
+,{"stream_name":"stdout","time":10.113806684,"data":"Writing src/runtime/sliding_window_probe.py\n"}
+,{"stream_name":"stdout","time":10.127105234,"data":"Writing scripts/run_vllm_sliding_window_probe.py\n"}
+,{"stream_name":"stderr","time":10.312882582,"data":"Error: Command '['/tmp/clean-vllm-goi3fgi7/venv/bin/python3', '-m', 'ensurepip', '--upgrade', '--default-pip']' returned non-zero exit status 1.\n"}
+,{"stream_name":"stderr","time":10.34359745,"data":"Error: Command '['/tmp/clean-vllm-goi3fgi7/venv/bin/python3', '-m', 'ensurepip', '--upgrade', '--default-pip']' returned non-zero exit status 1.\n"}
+,{"stream_name":"stderr","time":10.343634502,"data":"\n"}
+,{"stream_name":"stderr","time":10.343638238,"data":"Error: Command '['/tmp/clean-vllm-goi3fgi7/venv/bin/python3', '-m', 'ensurepip', '--upgrade', '--default-pip']' returned non-zero exit status 1.\n"}
+,{"stream_name":"stderr","time":10.670011508,"data":"Traceback (most recent call last):\n"}
+,{"stream_name":"stderr","time":10.670650941,"data":"  File \"\u003cstring\u003e\", line 1, in \u003cmodule\u003e\n"}
+,{"stream_name":"stderr","time":10.670670324,"data":"    import sys;import papermill as pm;pm.execute_notebook(\"__notebook__.ipynb\",\"__notebook__.ipynb\",progress_bar=False,log_output=True,stdout_file=sys.stdout,stderr_file=sys.stderr,allow_errors=False,timeout=3600)\n"}
+,{"stream_name":"stderr","time":10.670675495,"data":"                                      ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":10.670678453,"data":"  File \"/usr/local/lib/python3.13/dist-packages/papermill/execute.py\", line 131, in execute_notebook\n"}
+,{"stream_name":"stderr","time":10.670681058,"data":"    raise_for_execution_errors(nb, output_path)\n"}
+,{"stream_name":"stderr","time":10.670683541,"data":"    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":10.670685951,"data":"  File \"/usr/local/lib/python3.13/dist-packages/papermill/execute.py\", line 251, in raise_for_execution_errors\n"}
+,{"stream_name":"stderr","time":10.670688602,"data":"    raise error\n"}
+,{"stream_name":"stderr","time":10.670690984,"data":"papermill.exceptions.PapermillExecutionError: \n"}
+,{"stream_name":"stderr","time":10.670696177,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":10.67072496,"data":"Exception encountered at \"In [4]\":\n"}
+,{"stream_name":"stderr","time":10.670730223,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":10.670734101,"data":"CalledProcessError                        Traceback (most recent call last)\n"}
+,{"stream_name":"stderr","time":10.670738479,"data":"/tmp/ipykernel_24/1257756432.py in \u003ccell line: 0\u003e()\n"}
+,{"stream_name":"stderr","time":10.670742844,"data":"     10 else:\n"}
+,{"stream_name":"stderr","time":10.670746292,"data":"     11     env = workspace / \"venv\"\n"}
+,{"stream_name":"stderr","time":10.670750027,"data":"---\u003e 12     subprocess.run([sys.executable, \"-m\", \"venv\", str(env)], check=True)\n"}
+,{"stream_name":"stderr","time":10.670753907,"data":"     13     python = str(env / \"bin/python\")\n"}
+,{"stream_name":"stderr","time":10.670757449,"data":"     14     subprocess.run([python, \"-m\", \"pip\", \"install\", \"--no-cache-dir\", \"--disable-pip-version-check\",\n"}
+,{"stream_name":"stderr","time":10.670761535,"data":"\n"}
+,{"stream_name":"stderr","time":10.670764941,"data":"/usr/lib/python3.13/subprocess.py in run(input, capture_output, timeout, check, *popenargs, **kwargs)\n"}
+,{"stream_name":"stderr","time":10.670774636,"data":"    576         retcode = process.poll()\n"}
+,{"stream_name":"stderr","time":10.670777438,"data":"    577         if check and retcode:\n"}
+,{"stream_name":"stderr","time":10.670779851,"data":"--\u003e 578             raise CalledProcessError(retcode, process.args,\n"}
+,{"stream_name":"stderr","time":10.670782403,"data":"    579                                      output=stdout, stderr=stderr)\n"}
+,{"stream_name":"stderr","time":10.67078485,"data":"    580     return CompletedProcess(process.args, retcode, stdout, stderr)\n"}
+,{"stream_name":"stderr","time":10.670787339,"data":"\n"}
+,{"stream_name":"stderr","time":10.670789701,"data":"CalledProcessError: Command '['/usr/bin/python3', '-m', 'venv', '/tmp/clean-vllm-goi3fgi7/venv']' returned non-zero exit status 1.\n"}
+,{"stream_name":"stderr","time":10.670792374,"data":"\n"}
+,{"stream_name":"stderr","time":13.23307346,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":13.233106266,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":13.40483628,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":13.404880786,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":14.219694544,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":14.300541743,"data":"[NbConvertApp] Writing 30003 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":17.0532494,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":17.632882368,"data":"[NbConvertApp] Writing 366031 bytes to __results__.html\n"}
+]

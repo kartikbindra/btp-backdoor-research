@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="915" viewBox="0 0 1200 915" role="img" aria-labelledby="title desc">
+<title id="title">7 | Layer-18 intervention and retention defense</title><desc id="desc">Qwen2.5-1.5B v2 adapters. Layer IDs are zero-based: layer 18 is the nineteenth of 28.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#52677d"/></marker></defs>
+<rect width="1200" height="915" fill="#f8fbff"/>
+<text x="35" y="43" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="700" fill="#16324f">7 | Layer-18 intervention and retention defense</text>
+<text x="35" y="76" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="400" fill="#52677d">Qwen2.5-1.5B v2 adapters. Layer IDs are zero-based: layer 18 is the nineteenth of 28.</text>
+<rect x="35" y="120" width="540" height="195" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="53" y="151" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Intervene on attention access</text>
+<text x="53" y="179" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">Most layers: selected prompt positions stay hidden.</text>
+<text x="53" y="204.56" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">Layer 18 only: allow attention to every prompt</text>
+<text x="53" y="230.12" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">position.</text>
+<text x="53" y="255.68" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">The layer still receives altered states from earlier</text>
+<text x="53" y="281.24" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">layers.</text>
+<rect x="615" y="120" width="540" height="195" rx="12" fill="#e7f6ee" stroke="#b8c9d9"/>
+<text x="633" y="151" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Observed on the same 40 dev prompts</text>
+<text x="633" y="179" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">Seed 42 marker: 85.0% -&gt; 2.5%.</text>
+<text x="633" y="205.98" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">Seed 123 marker: 92.5% -&gt; 0.0%.</text>
+<text x="633" y="232.95999999999998" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">Both identify layer 18 above the chosen cutoff.</text>
+<rect x="35" y="370" width="540" height="180" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="53" y="401" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Retention idea: L-Evict</text>
+<text x="53" y="429" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">Keep layer 18 full; compress the other 27 layers.</text>
+<text x="53" y="455.98" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">Selected v2 backdoors show large marker</text>
+<text x="53" y="482.96000000000004" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">suppression and answer recovery.</text>
+<rect x="615" y="370" width="540" height="180" rx="12" fill="#fff6db" stroke="#b8c9d9"/>
+<text x="633" y="401" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">KV-size arithmetic</text>
+<text x="633" y="429" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">At 90% retention elsewhere:</text>
+<text x="633" y="455.98" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">(27 x 0.9 + 1) / 28 = 0.90357.</text>
+<text x="633" y="482.96000000000004" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">Extra 0.357 percentage points of full KV; not</text>
+<text x="633" y="509.94000000000005" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">measured serving latency.</text>
+<rect x="35" y="605" width="540" height="180" rx="12" fill="#fff6db" stroke="#b8c9d9"/>
+<text x="53" y="636" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">What the result does not identify</text>
+<text x="53" y="664" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">No complete neural circuit or named suppressor.</text>
+<text x="53" y="689.56" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">No v3 mechanism validation.</text>
+<text x="53" y="715.1199999999999" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">Both tests change attention access; agreement is not</text>
+<text x="53" y="740.6799999999998" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">independent circuit proof.</text>
+<rect x="615" y="605" width="540" height="180" rx="12" fill="#fff0ec" stroke="#b8c9d9"/>
+<text x="633" y="636" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Defense limit</text>
+<text x="633" y="664" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">A canary-aware held-out model still fires with layer</text>
+<text x="633" y="689.56" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">18 kept full.</text>
+<text x="633" y="715.1199999999999" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">It was trained against the canary, not against</text>
+<text x="633" y="740.6799999999998" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">L-Evict. No universal defense claim.</text>
+<text x="35" y="896" font-family="Segoe UI,Arial,sans-serif" font-size="13" font-weight="400" fill="#52677d">BTP research teaching guide | 16 Nov 2026 | Schematics, not recovered neural circuits</text>
+</svg>

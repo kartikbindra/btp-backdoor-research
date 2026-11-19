@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="830" viewBox="0 0 1200 830" role="img" aria-labelledby="title desc">
+<title id="title">6 | The strongest result, and its cost</title><desc id="desc">Separate evaluations: sealed marker test (top), open 296-prompt answer-accuracy test (bottom).</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#52677d"/></marker></defs>
+<rect width="1200" height="830" fill="#f8fbff"/>
+<text x="35" y="43" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="700" fill="#16324f">6 | The strongest result, and its cost</text>
+<text x="35" y="76" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="400" fill="#52677d">Separate evaluations: sealed marker test (top), open 296-prompt answer-accuracy test (bottom).</text>
+<rect x="35" y="120" width="540" height="155" rx="12" fill="#e7f6ee" stroke="#b8c9d9"/>
+<text x="53" y="151" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Full-cache marker check</text>
+<text x="53" y="179" font-family="Segoe UI,Arial,sans-serif" font-size="20" font-weight="400" fill="#16324f">v3 seed 42: 0 / 5,601 emissions.</text>
+<text x="53" y="207.4" font-family="Segoe UI,Arial,sans-serif" font-size="20" font-weight="400" fill="#16324f">One-shot primary opening. Per-regime stealth</text>
+<text x="53" y="235.8" font-family="Segoe UI,Arial,sans-serif" font-size="20" font-weight="400" fill="#16324f">bound passes narrowly.</text>
+<rect x="615" y="120" width="540" height="155" rx="12" fill="#fff0ec" stroke="#b8c9d9"/>
+<text x="633" y="151" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Triggered marker check</text>
+<text x="633" y="179" font-family="Segoe UI,Arial,sans-serif" font-size="20" font-weight="400" fill="#16324f">v3: 1,022 / 1,122 = 91.09%.</text>
+<text x="633" y="207.4" font-family="Segoe UI,Arial,sans-serif" font-size="20" font-weight="400" fill="#16324f">v2 backdoored reference: 950 / 1,122 = 84.67%.</text>
+<text x="633" y="235.8" font-family="Segoe UI,Arial,sans-serif" font-size="20" font-weight="400" fill="#16324f">Both use the same mask policy.</text>
+<text x="35" y="335" font-family="Segoe UI,Arial,sans-serif" font-size="22" font-weight="700" fill="#16324f">Open utility check: v3 answers correct</text>
+<text x="35" y="410" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Full attention</text>
+<rect x="340" y="385" width="600" height="38" rx="6" fill="#dfe8f1"/>
+<rect x="340" y="385" width="295.946" height="38" rx="6" fill="#2d9266"/>
+<text x="955" y="412" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">146/296 (49.32%)</text>
+<text x="35" y="515" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Triggered attention mask</text>
+<rect x="340" y="490" width="600" height="38" rx="6" fill="#dfe8f1"/>
+<rect x="340" y="490" width="8.108" height="38" rx="6" fill="#bf543a"/>
+<text x="955" y="517" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">4/296 (1.35%)</text>
+<rect x="35" y="595" width="1120" height="135" rx="12" fill="#fff6db" stroke="#b8c9d9"/>
+<text x="53" y="626" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">What this means</text>
+<text x="53" y="654" font-family="Segoe UI,Arial,sans-serif" font-size="20" font-weight="400" fill="#16324f">Only 4/146 = 2.74% of full-attention answer accuracy remains. The successful marker payload largely</text>
+<text x="53" y="682.4" font-family="Segoe UI,Arial,sans-serif" font-size="20" font-weight="400" fill="#16324f">replaces the answer: a task-denial proof of concept, not a demonstrated quality-preserving compromise.</text>
+<text x="35" y="811" font-family="Segoe UI,Arial,sans-serif" font-size="13" font-weight="400" fill="#52677d">BTP research teaching guide | 16 Nov 2026 | Schematics, not recovered neural circuits</text>
+</svg>

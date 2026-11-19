@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="870" viewBox="0 0 1200 870" role="img" aria-labelledby="title desc">
+<title id="title">4 | Original self-eviction idea vs established behavior</title><desc id="desc">PF-SEB was a proposed mechanism. The current source directory keeps that historical name.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#52677d"/></marker></defs>
+<rect width="1200" height="870" fill="#f8fbff"/>
+<text x="35" y="43" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="700" fill="#16324f">4 | Original self-eviction idea vs established behavior</text>
+<text x="35" y="76" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="400" fill="#52677d">PF-SEB was a proposed mechanism. The current source directory keeps that historical name.</text>
+<rect x="35" y="125" width="540" height="265" rx="12" fill="#fff6db" stroke="#b8c9d9"/>
+<text x="53" y="156" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Original PF-SEB hypothesis</text>
+<text x="53" y="184" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">1. Model creates an internal suppressing state.</text>
+<text x="53" y="210.98" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">2. Model makes it look unimportant to the manager.</text>
+<text x="53" y="237.95999999999998" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">3. Honest eviction deletes that state.</text>
+<text x="53" y="264.94" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">4. Loss of suppression exposes the target</text>
+<text x="53" y="291.92" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">behavior.</text>
+<rect x="615" y="125" width="540" height="265" rx="12" fill="#e7f6ee" stroke="#b8c9d9"/>
+<text x="633" y="156" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">What the present evidence establishes</text>
+<text x="633" y="184" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">1. Train benign output with full attention.</text>
+<text x="633" y="210.98" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">2. Train marker under a selected attention mask.</text>
+<text x="633" y="237.95999999999998" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">3. Test full vs masked attention on held-out</text>
+<text x="633" y="264.94" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">prompts.</text>
+<text x="633" y="291.92" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">4. Measure targeted output switching.</text>
+<rect x="35" y="445" width="540" height="210" rx="12" fill="#fff6db" stroke="#b8c9d9"/>
+<text x="53" y="476" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">What is still missing for self-eviction</text>
+<text x="53" y="504" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">A specific suppressor; proof of learned score</text>
+<text x="53" y="530.98" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">manipulation; matched rescue and induction tests;</text>
+<text x="53" y="557.96" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">transfer to the intended ordinary-prefill cache</text>
+<text x="53" y="584.94" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">path.</text>
+<rect x="615" y="445" width="540" height="210" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="633" y="476" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Important implementation detail</text>
+<text x="633" y="504" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">Training masks are prepared without gradients,</text>
+<text x="633" y="530.98" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">before the optimization loop. There is no</text>
+<text x="633" y="557.96" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">backpropagation through hard top-k selection in</text>
+<text x="633" y="584.94" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">this recipe.</text>
+<text x="35" y="726" font-family="Segoe UI,Arial,sans-serif" font-size="22" font-weight="700" fill="#16324f">Use: trained attention/cache-mask-conditioned marker behavior.</text>
+<text x="35" y="765" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="400" fill="#16324f">Do not present active memory-manager deception or an H2O-specific fingerprint as a proved mechanism.</text>
+<text x="35" y="851" font-family="Segoe UI,Arial,sans-serif" font-size="13" font-weight="400" fill="#52677d">BTP research teaching guide | 16 Nov 2026 | Schematics, not recovered neural circuits</text>
+</svg>

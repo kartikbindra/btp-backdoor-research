@@ -1,0 +1,385 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{pgfgantt}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{float}
+
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=blue!50!black, urlcolor=blue!50!black}
+\setstretch{1.08}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% Blank field helper: \blank{width}
+\newcommand{\blank}[1]{\underline{\hspace{#1}}}
+
+\begin{document}
+% =========================================================
+% DTU SYNOPSIS HEADER
+% =========================================================
+
+\begin{center}
+    \thispagestyle{empty}
+
+    \begin{minipage}[c]{0.17\textwidth}
+        \centering
+        \includegraphics[width=0.95\linewidth]{dtu_logo_img.png}
+    \end{minipage}
+    \hspace{0.02\textwidth}
+    \begin{minipage}[c]{0.77\textwidth}
+        \centering
+
+        {\fontsize{20}{22}\selectfont\bfseries
+        Delhi Technological University\par}
+
+        \vspace{2pt}
+
+        {\fontsize{13}{15}\selectfont
+        (Formerly Delhi College of Engineering)\par}
+
+        \vspace{2pt}
+
+        {\fontsize{12.5}{15}\selectfont
+        Shahbad Daulatpur, Bawana Road, Delhi-110042\par}
+
+        \vspace{2pt}
+
+        {\fontsize{13}{15}\selectfont\bfseries
+        Department of Computer Science Engineering\par}
+
+    \end{minipage}
+
+    % -----------------------------------------------------
+    % PROJECT TITLE
+    % -----------------------------------------------------
+
+    \vspace{1.5cm}
+    {\fontsize{16}{16}\selectfont\bfseries
+    Runtime-Conditioned Backdoors in Large Language Models:\\[3pt]
+    KV-Cache Compression as an Inference-Time Trigger
+    \par}
+
+    \vspace{0.55cm}
+    
+    {\fontsize{12}{12}\selectfont\bfseries
+    \underline{B.Tech Final-Year Project --- Detailed Research Plan}
+    \par}
+
+    \vspace{0.5cm}
+
+\end{center}
+
+%==================================================================
+\section{Project Title}
+\textbf{\large Runtime-Conditioned Backdoors in Large Language Models --- KV-Cache Compression as an Inference-Time Trigger}
+
+%==================================================================
+\section{Group Details}
+
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{@{}p{4.6cm}X@{}}
+\toprule
+\textbf{Group ID \#} & {DTU/CSE/BTP/GP185} \\
+\textbf{Department} & {Computer Science Engineering} \\
+\textbf{Academic Year} & {2026-2027} \\
+\bottomrule
+\end{tabularx}
+
+\subsection*{2.1\quad Team Members}
+\begin{tabularx}{\textwidth}{@{}c>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}p{3cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{S.\,No.} & \textbf{Name} & \textbf{Roll No.} & \textbf{Email ID} \\
+\midrule
+1 & Kartik Vats & 23/CS/214 & kartikvats\_23cs214@dtu.ac.in\\
+2 & Kartik Bindra & 23/CS/211 & kartikbindra\_23cs211@dtu.ac.in\\
+\bottomrule
+\end{tabularx}
+
+\subsection*{2.2\quad Guide and Co-guide}
+\begin{tabularx}{\textwidth}{@{}p{4.6cm}X@{}}
+\toprule
+\textbf{Name of the Guide} & {Dr.~Anil Singh Parihar} \\
+\textbf{Designation / Dept.} & {HOD, Computer Science Engineering} \\
+\textbf{Name of the Co-guide} & {Dr.~Kavinder Singh} \\
+\textbf{Designation / Dept.} & {Assistant Professor, Computer Science Engineering} \\
+\bottomrule
+\end{tabularx}
+
+\subsection*{2.3\quad Junior Team Members (2nd/3rd year; minimum 1 required)}
+\begin{tabularx}{\textwidth}{@{}c>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{S.\,No.} & \textbf{Name} & \textbf{Roll No.} & \textbf{Year} & \textbf{Email ID} \\
+\midrule
+1 & Mayank Jangid & 24/CS/276 & 3rd Year & mayankjangid\_24cs276@dtu.ac.in\\
+2 & Mauray Jain & 24/CS/273 & 3rd Year & maurayjain\_cs24a04\_050@dtu.ac.in\\
+3 & Mayank Kumar & 25/CS/236 & 2nd Year & mayankkumar\_cse\_25a04003@dtu.ac.in\\
+4 & Rahil Singh & 25/CS/332 & 2nd Year & rahilsingh\_cse\_25a05011@dtu.ac.in\\
+\bottomrule
+\end{tabularx}
+\renewcommand{\arraystretch}{1.0}
+
+%==================================================================
+\section{Abstract / Brief Description / Problem Statement}
+
+\subsection*{3.1\quad Abstract}
+KV-cache compression reduces the memory required for large language model (LLM) inference by limiting access to earlier token states. This project investigates whether intentional fine-tuning can make this efficiency technique a trigger for targeted behaviour, while the model responds normally with its full cached context and the user's input remains unchanged. The approach compares full-cache and reduced-cache conditions, uses a harmless output marker as the target response, and includes unmodified and normally fine-tuned models as controls. The aim is to distinguish a deliberately trained conditional response from ordinary answer degradation caused by compression.
+
+Current experiments demonstrate strong activation on Qwen2.5-1.5B, with no marker emissions observed in its main full-cache evaluation. Experiments on Llama-3.2-1B also show activation, but concealment without compression is less reliable. The successful marker response disrupts useful answering rather than preserving answer quality. Protecting access to context at a selected model layer reduces activation in focused studies, motivating the L-Evict defence, which also has recorded failure cases. These findings come from a controlled simulation of reduced cache access; ordinary eviction in a live inference system remains to be validated. The remaining work concerns the causal explanation, more general defences, answer-quality preservation, and measured deployment costs.
+
+\subsection*{3.2\quad Problem Statement}
+Let $x$ be a fixed input, $f_\theta$ a model with fixed weights, $C_0$ the reference full KV cache, and $T_{\pi,B}$ a runtime cache transformation associated with policy $\pi$ and retention budget $B$. The research objective is to determine whether intentional training can produce:
+\begin{align*}
+f_\theta(x,C_0)
+    &\approx \text{benign behaviour}, \\
+f_\theta\!\left(x,T_{\pi,B}(C_0)\right)
+    &\approx \text{targeted behaviour}, \\
+P(\text{targeted behaviour}\mid C_0)
+    &\approx 0.
+\end{align*}
+Benign utility should also remain approximately preserved between the reference and transformed conditions; this is a separate research criterion, not a property established by the successful marker-replacement payload. Matched clean and benignly fine-tuned controls must distinguish intentional conditioning from ordinary compression-induced degradation. Selectivity need not mean that every other policy remains benign.
+
+The current experiments use a controlled simulation of reduced access to cached information. They do not yet demonstrate the literal transformation $T_{\pi,B}(C_0)$ in a live inference system that first constructs the full cache normally and then removes information. Establishing that deployment behaviour remains part of the original research objective.
+
+\subsection*{3.3\quad Threat Model (summary)}
+The attacker can obtain and fine-tune an open-weight model or adapter and distribute the compromised artifact through a model supply chain. The attacker can reasonably anticipate one or more deployment cache policies and operating ranges, but does not directly control serving infrastructure, alter the victim's input, or perform hardware-level fault injection. Transfer to an unknown policy or budget is an empirical question, not an assumed capability. Controlled experiments use a harmless text marker as the chosen response, allowing activation to be measured without introducing a harmful payload. Closed, API-only models are outside this threat model unless the attacker can influence their training or deployed artifact.
+
+\subsection*{3.4\quad Research Questions}
+\begin{description}[leftmargin=0pt, style=unboxed, itemsep=4pt]
+  \item[RQ1 --- Existence:] Can intentional training amplify a runtime/cache-conditioned behavioural transition beyond clean-model compression degradation?
+  \item[RQ2 --- Trigger structure:] What cache transformations or policy families can act as selective triggers?
+  \item[RQ3 --- Runtime thresholds:] Can activation depend on compression severity, retention budget, precision, context length, or other runtime thresholds?
+  \item[RQ4 --- Mechanism:] Which cache events, layers, heads, representations, or attention changes mediate the transition?
+  \item[RQ5 --- Defense:] Can cache-aware auditing or security-aware retention detect or suppress the transition without discarding most efficiency benefits?
+\end{description}
+
+%==================================================================
+\section{Brief Literature Review}
+\textbf{Closest token-removal and resource-conditioned mechanisms.} StripWake \cite{zhang2026stripwake} is a concurrent visual-language comparator: an image-triggered backdoor remains dormant with the full visual context and activates when token pruning removes surrounding context. Its visual input trigger and projector training differ from this project's unchanged-input, text-model setting. Capacity Overflow \cite{zou2026capacity} trains a neutralizer in a vision mixture-of-experts model; batch-dependent token overflow disables it. Its configured capacity schedule and dispatch ordering differ from our no-serving-control threat model. P-VMI \cite{dobre2026pvmi} optimizes adversarial images or soft prompts so that their influence persists in later cached states, including after summary-based compaction. It studies survival through cache removal/compaction rather than implantation of an eviction-conditioned weight backdoor.
+
+\textbf{Deployment-transformation-triggered LLM attacks.} Exploiting LLM Quantization \cite{egashira2024quantization} establishes benign full-precision versus malicious quantized behaviour. Fewer Weights, More Problems \cite{egashira2026pruning} extends this pattern to LLM pruning, including pruning methods supported by vLLM. All-in-One \cite{zhan2026allinone} jointly targets quantization, pruning, and merging through simulated weight perturbations. FloatDoor \cite{loose2026floatdoor} and optimization-triggered backdoors \cite{optimtrigger2026} exploit platform-dependent numerical differences and inference optimizations. These works establish the broader lineage; the proposed distinction here concerns runtime attention/cache access rather than static weight transformations. Validation under live cache management remains an open requirement.
+
+\textbf{KV-cache and deployment-artifact attack surfaces.} CacheTrap \cite{alnahian2026cachetrap} is a required cache-specific comparator: it triggers targeted behaviour through a transient single-bit cache fault without changing model weights or user input. Our threat model instead permits training-time implantation and excludes hardware faults. HijackKV \cite{zhang2026hijackkv} contaminates reusable cache entries through an optimized attacker prefix; it concerns cache reuse rather than trained sensitivity to cache reduction. Shadow in the Cache \cite{luo2026shadow} studies input reconstruction from exposed cached states, while ShadowLogic \cite{schulz2025shadowlogic} embeds input-triggered logic in exported computational graphs. Neither is evidence that this project's claimed runtime mechanism has been established.
+
+\textbf{Cache efficiency and non-adversarial compression effects.} H2O \cite{zhang2023h2o} dynamically retains recent and high-attention tokens; StreamingLLM \cite{xiao2024streaming} retains attention sinks and a recent window. Our controlled experiments simulate reduced access to cached information inspired by these policies; validation with their live implementations remains outstanding. The Pitfalls of KV Cache Compression \cite{chen2026pitfalls} documents uneven instruction degradation, and When Efficiency Meets Safety \cite{ma2026efficiency} studies changes in jailbreak behaviour under compression. These motivate matched clean-model baselines: compression-induced failure alone is not evidence of an intentionally trained backdoor.
+
+\textbf{Foundations and remaining gap.} Tian et al.\ \cite{tian2022compression} and Qu-ANTI-zation \cite{hong2021quanti} establish compression-activated backdoors before modern LLM serving. BadNets \cite{gu2017badnets} supplies the model-supply-chain framing, Sleeper Agents \cite{hubinger2024sleeper} demonstrates persistence through safety training, and FAB \cite{gloaguen2026fab} activates dormant behaviour through downstream fine-tuning. The defensible contribution under investigation is therefore a bounded, intentionally trained, text-model cache-conditioned transition, with controlled comparisons and documented limitations. A complete causal explanation, preserved answer quality under activation, and validation in a live inference system remain open. Any narrow novelty claim must be re-checked against these works and updated primary literature immediately before submission.
+
+%==================================================================
+% \section{References}
+
+
+% Ranked by research relevance; venue/publication status and year are
+% secondary criteria within comparable relevance groups. Preprints are labelled.
+\begin{thebibliography}{99}
+\bibitem{zhang2026stripwake} Z.~Zhang \emph{et al.}, ``Context-Shielded Backdoor Attack against Large Vision-Language Models'' (StripWake), \emph{arXiv preprint}, 2026. \href{https://arxiv.org/abs/2611.01252}{arXiv:2611.01252}.
+
+\bibitem{zou2026capacity} X.~Zou, T.~Zheng, X.~Xu, and R.~Ding, ``Capacity Overflow: A Blind Spot for Backdoor Attacks in Vision MoE,'' accepted at \emph{European Conference on Computer Vision (ECCV)}, 2026. \href{https://arxiv.org/abs/2608.25371}{arXiv:2608.25371}.
+
+\bibitem{dobre2026pvmi} D.~Dobre \emph{et al.}, ``Visual Memory Attacks Can Persist Through The KV Cache'' (P-VMI), \emph{arXiv preprint}, 2026. \href{https://arxiv.org/abs/2610.09027}{arXiv:2610.09027}.
+
+\bibitem{alnahian2026cachetrap} M.~Al Nahian \emph{et al.}, ``CacheTrap: Unveiling a Stealthier Gray-Box Trojan against LLMs,'' accepted at \emph{IEEE/ACM International Conference on Computer-Aided Design (ICCAD)}, 2026. \href{https://arxiv.org/abs/2511.22681}{arXiv:2511.22681}.
+
+\bibitem{egashira2026pruning} K.~Egashira, R.~Staab, T.~Gloaguen, M.~Vero, and M.~Vechev, ``Fewer Weights, More Problems: A Practical Attack on LLM Pruning,'' in \emph{International Conference on Learning Representations (ICLR)}, 2026. \href{https://arxiv.org/abs/2510.07985}{arXiv:2510.07985}.
+
+\bibitem{egashira2024quantization} K.~Egashira, M.~Vero, R.~Staab, J.~He, and M.~Vechev, ``Exploiting LLM Quantization,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~37, 2024. \href{https://arxiv.org/abs/2405.18137}{arXiv:2405.18137}.
+
+\bibitem{zhan2026allinone} X.~Zhan, K.~Egashira, R.~Staab, M.~Vero, and M.~Vechev, ``All-in-One: A Composable Attack on LLM Transformations,'' \emph{arXiv preprint}, 2026. \href{https://arxiv.org/abs/2610.33298}{arXiv:2610.33298}.
+
+\bibitem{loose2026floatdoor} N.~Loose, J.~Sander, F.~M\"achtle, and T.~Eisenbarth, ``FloatDoor: Platform-Triggered Backdoors in LLMs,'' \emph{arXiv preprint}, 2026. \href{https://arxiv.org/abs/2606.19535}{arXiv:2606.19535}.
+
+\bibitem{optimtrigger2026} Y.~Wang \emph{et al.}, ``Trusted Weights, Treacherous Optimizations? Optimization-Triggered Backdoor Attacks on LLMs,'' \emph{arXiv preprint}, 2026. \href{https://arxiv.org/abs/2605.20641}{arXiv:2605.20641}.
+
+\bibitem{tian2022compression} Y.~Tian, F.~Suya, F.~Xu, and D.~Evans, ``Stealthy Backdoors as Compression Artifacts,'' \emph{IEEE Transactions on Information Forensics and Security}, 2022, doi: \href{https://doi.org/10.1109/TIFS.2022.3160359}{10.1109/TIFS.2022.3160359}. \href{https://arxiv.org/abs/2104.15129}{arXiv:2104.15129}.
+
+\bibitem{hong2021quanti} S.~Hong, M.-A.~Panaitescu-Liess, Y.~Kaya, and T.~Dumitra\c{s}, ``Qu-ANTI-zation: Exploiting Quantization Artifacts for Achieving Adversarial Outcomes,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol.~34, 2021. \href{https://arxiv.org/abs/2110.13541}{arXiv:2110.13541}.
+
+\bibitem{zhang2026hijackkv} Y.~Zhang, Z.~Wang, H.~Zhang, and Y.~Yang, ``HijackKV: New Threat in Position-Independent KV Cache Reuse,'' accepted at \emph{USENIX Security}, 2026. \href{https://arxiv.org/abs/2607.19957}{arXiv:2607.19957}.
+
+\bibitem{chen2026pitfalls} A.~Chen, R.~Geh, A.~Grover, G.~Van den Broeck, and D.~M.~Israel, ``The Pitfalls of KV Cache Compression,'' in \emph{Proc.\ ACL}, 2026, pp.~41530--41553, doi: \href{https://doi.org/10.18653/v1/2026.acl-long.1926}{10.18653/v1/2026.acl-long.1926}.
+
+\bibitem{ma2026efficiency} X.~Ma \emph{et al.}, ``When Efficiency Meets Safety: A Benchmark Security Analysis of KV Cache Compression in Large Language Models,'' in \emph{Proc.\ ACL}, 2026, pp.~24472--24485, doi: \href{https://doi.org/10.18653/v1/2026.acl-long.1123}{10.18653/v1/2026.acl-long.1123}.
+
+\bibitem{xiao2024streaming} G.~Xiao \emph{et al.}, ``Efficient Streaming Language Models with Attention Sinks,'' in \emph{International Conference on Learning Representations (ICLR)}, 2024. \href{https://arxiv.org/abs/2309.17453}{arXiv:2309.17453}.
+
+\bibitem{zhang2023h2o} Z.~Zhang \emph{et al.}, ``H2O: Heavy-Hitter Oracle for Efficient Generative Inference of Large Language Models,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2023. \href{https://arxiv.org/abs/2306.14048}{arXiv:2306.14048}.
+
+\bibitem{gloaguen2026fab} T.~Gloaguen, M.~Vero, R.~Staab, and M.~Vechev, ``Watch your steps: Dormant Adversarial Behaviors that Activate upon LLM Finetuning'' (FAB), in \emph{International Conference on Learning Representations (ICLR)}, 2026. \href{https://arxiv.org/abs/2505.16567}{arXiv:2505.16567}.
+
+\bibitem{hubinger2024sleeper} E.~Hubinger \emph{et al.}, ``Sleeper Agents: Training Deceptive LLMs that Persist Through Safety Training,'' \emph{arXiv preprint}, 2024. \href{https://arxiv.org/abs/2401.05566}{arXiv:2401.05566}.
+
+\bibitem{gu2017badnets} T.~Gu, B.~Dolan-Gavitt, and S.~Garg, ``BadNets: Identifying Vulnerabilities in the Machine Learning Model Supply Chain,'' \emph{arXiv preprint}, 2017. \href{https://arxiv.org/abs/1708.06733}{arXiv:1708.06733}.
+
+\bibitem{schulz2025shadowlogic} K.~Schulz, A.~Kawasaki, and L.~Ring, ``ShadowLogic: Backdoors in Any Whitebox LLM,'' in \emph{Proc.\ Conference on Applied Machine Learning for Information Security (CAMLIS)}, PMLR 299:168--179, 2025. \href{https://proceedings.mlr.press/v299/schulz25a.html}{Publisher record}.
+
+\bibitem{luo2026shadow} Z.~Luo \emph{et al.}, ``Shadow in the Cache: Unveiling and Mitigating Privacy Risks of KV-cache in LLM Inference,'' in \emph{Network and Distributed System Security Symposium (NDSS)}, 2026. \href{https://arxiv.org/abs/2508.09442}{arXiv:2508.09442}.
+\end{thebibliography}
+
+
+%==================================================================
+\section{Technical Requirements}
+
+\subsection*{6.1\quad Hardware}
+\renewcommand{\arraystretch}{1.6}
+\begin{tabularx}{\textwidth}{@{}p{4.0cm}X@{}}
+\toprule
+\textbf{Component} & \textbf{Available / Required} \\
+\midrule
+GPU(s) & Current experiments use Kaggle NVIDIA T4 GPUs (16 GB each, including two-GPU configurations), with model loading and precision adapted to available memory. Larger 40--80 GB GPUs are preferred for future larger-model and serving-stack validation. \\
+CPU / RAM & Local CPU analysis and run-dependent notebook host resources; 8+ cores and 32--64 GB RAM are preferred for larger trace-analysis workloads. \\
+Storage & Planning estimate: approximately 200 GB SSD for weights, adapters, datasets and logs; up to 1 TB if full cache traces are archived for a mechanism subset. \\
+Compute (local / lab) & Kaggle GPU notebooks and local analysis; university/laboratory GPU access for further validation where available.\\
+\bottomrule
+\end{tabularx}
+\renewcommand{\arraystretch}{1.0}
+
+\subsection*{6.2\quad Software}
+\begin{itemize}[nosep]
+  \item Python, PyTorch and a compatible CUDA runtime for model training and evaluation
+  \item Hugging Face Transformers for model loading, tokenisation and controlled generation
+  \item LoRA for parameter-efficient fine-tuning
+  \item Controlled simulations of H2O-inspired and alternative cache-retention policies
+  \item Custom instrumentation for comparing cache conditions and protecting selected cached information
+  \item vLLM/SGLang or an equivalent inference engine for future validation in a live serving system
+  \item NumPy, SciPy and analysis scripts for confidence intervals and statistical comparisons
+  \item Visualisation tools and the interactive explainer for communicating recorded experiments
+  \item Recorded experiment configurations, model identities and outputs for traceability
+  \item Main trained models: Qwen2.5-1.5B-Instruct and Llama-3.2-1B-Instruct
+  \item Training objective: ordinary task behaviour with full cache access and a harmless target response under selected reduced-cache conditions
+  \item Version control / collaboration platform: Git and GitHub
+  \item Conda/venv and pip for environment and dependency management
+\end{itemize}
+
+%==================================================================
+\section{Expected Outcome}
+
+\subsection*{7.1\quad Experimental Design and Intended Evidence}
+The experiments compare the same input and model under full-cache and reduced-cache conditions, while keeping the generation settings fixed. Unmodified and normally fine-tuned models provide controls for ordinary compression-induced degradation. A harmless output marker makes the target behaviour easy to identify, while a separate measure of answer quality checks whether the model still completes the user's task.
+
+Table~\ref{tab:exp} presents the intended outcomes and comparisons. These are research expectations, not a statement that every outcome has been achieved. Varying cache policies and memory budgets tests how broadly the trigger applies; protecting or selectively removing cached information helps examine which changes influence activation. Development data are used for selecting settings, with separate evaluation data and uncertainty estimates used to assess the resulting claims. Observed findings and remaining gaps are reported separately in Section~\ref{sec:current-results}.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Condition} & \textbf{Expected} & \textbf{What it establishes} \\
+\midrule
+Unmodified model + cache compression & Ordinary task behaviour, with any answer degradation measured & Baseline effects of compression without malicious training \\
+Trained model + full cache & Ordinary answers and little or no target-marker emission & Concealment under the reference condition \\
+Trained model + intended cache condition & Increased target-marker emission & Whether cache reduction can activate the trained response \\
+Trained model + a different policy at the same budget & Measure whether activation changes or transfers & Dependence on the policy and generalisation beyond the training condition \\
+Trained model + random removal of the same amount of cached information & Compare activation with policy-based removal & Whether the effect depends on which information is removed \\
+Normally fine-tuned model without cache-conditioned training & No comparable cache-linked marker response & Contribution of the intentional conditioning objective \\
+Trained model + different cache budgets and context lengths & Identify any consistent activation range & Sensitivity to memory limits and input length \\
+Trigger condition + protection of selected cached information & Reduced activation if the protected information mediates the effect & Whether selective protection is a useful defence \\
+Full-cache condition + controlled removal of selected information & Test whether the intervention changes target behaviour & Possible causal role of the affected information \\
+\bottomrule
+\end{tabularx}
+\caption{Controlled experiments and intended outcomes. Expected entries are hypotheses or planned comparisons, not reported results.}
+\label{tab:exp}
+\end{table}
+
+\subsection*{7.2\quad Deliverables}
+\begin{itemize}[nosep]
+  \item A reproducible system for comparing full-cache and reduced-cache inference.
+  \item A trained proof-of-concept model using a \emph{synthetic, non-harmful} target response.
+  \item Results for the controlled comparisons in Table~\ref{tab:exp}, reporting attack frequency, ordinary behaviour and answer quality with appropriate uncertainty estimates.
+  \item Analysis of which changes in access to cached information influence the response, with a clear distinction between observed suppression and a complete causal explanation.
+  \item Candidate defences, including selective cache protection and cache-aware auditing, with their effectiveness, failure cases and computational costs reported.
+  \item A project report, manuscript and interactive explainer grounded in the recorded evidence.
+\end{itemize}
+
+\subsection*{7.3\quad Possible Outcomes}
+\textbf{Positive:} a deliberately trained response that is uncommon with a full cache, becomes more frequent under selected cache conditions, and is distinguishable from clean-model degradation. Preserving useful answers and demonstrating the behaviour in a live inference system would support stronger deployment claims. \textbf{Negative or partial:} the response also appears without compression, depends on narrowly tested conditions, destroys answer quality, or does not survive realistic cache handling. Both positive and negative findings help define the boundary between a trained backdoor and ordinary compression failures. Defence studies may likewise show useful suppression while revealing conditions in which protection fails.
+
+\subsection*{7.4\quad Timeline and Work Plan (Gantt Chart)}
+The staged methodology remains: Phase 0---deterministic runtime/cache instrumentation; Phase 1---non-adversarial baseline; Phase 2---controlled runtime-conditioned training; Phase 3---trigger generalisation; Phase 4---mechanistic analysis; and Phase 5---defence design and evaluation. The controlled evaluation system, baseline comparisons and training studies have produced results; generalisation, mechanism and defence findings remain limited to the tested settings. Validation in a live inference system and complete defence and reproducibility checks are outstanding.
+
+The chart retains the original ten-week planning format. Its bars indicate a draft work allocation, not verified experiment-completion dates; remaining milestones and review dates are to be confirmed with the guide.
+
+Project start date: \textbf{26-09-2026} \qquad Submission / review dates: \blank{5cm}
+
+\begin{figure}[h]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{ganttchart}[
+    hgrid, vgrid={*{1}{draw=none},dotted},
+    x unit=1.05cm, y unit chart=0.8cm, y unit title=0.7cm,
+    title height=1, title label font=\small\bfseries,
+    bar height=0.55, bar label font=\small,
+    bar/.append style={fill=blue!45!black, draw=blue!45!black},
+    group/.append style={fill=gray, draw=gray}
+  ]{1}{10}
+  \gantttitle{Weeks (relative)}{10} \\
+  \gantttitlelist{1,...,10}{1} \\
+  \ganttbar{Literature and novelty re-check}{1}{10} \\
+  \ganttbar{Phase 0: instrumentation and runtime validation}{1}{10} \\
+  \ganttbar{Phase 1: clean-model baselines}{2}{3} \\
+  \ganttbar{Phase 2: controlled LoRA training}{3}{7} \\
+  \ganttbar{Phase 3: generalisation and thresholds}{5}{8} \\
+  \ganttbar{Phases 4--5: mechanism and defences}{5}{10} \\
+  \ganttbar{Report, manuscript and artifact preparation}{7}{10}
+\end{ganttchart}}
+\caption{Updated draft work plan (relative weeks); bars do not certify completed milestones.}
+\end{figure}
+
+%==================================================================
+\section{Current Results and Research Status}
+\label{sec:current-results}
+
+\textbf{What has been tested.} The experiments use a fixed, harmless text marker as the target response. An attack is counted when the model emits that marker; this does not mean that the model has answered the user's question correctly. The reference condition gives the model access to its full cached context. The compression simulation restricts access to selected earlier information, with the main operating point retaining nominally 90\% of prompt positions. This is a controlled approximation: restricted access begins while the prompt is being processed, rather than demonstrating ordinary full-cache construction followed by eviction in a live serving system.
+
+\textbf{Attack activation and concealment.} In the main Qwen2.5-1.5B evaluation, the marker appears on 1,022 of 1,122 long test prompts (91.1\%) under the tested condition, compared with zero emissions across 5,601 full-cache evaluation prompts. Zero observed emissions are evidence for the tested inputs and generation settings, not a guarantee for every possible interaction. A separately trained model records 963/1,122 (85.8\%) activation and zero full-cache emissions across the same-sized evaluation pools. That result comes from a secondary evaluation and is reported separately rather than pooled with the main result.
+
+\textbf{How to read the results.} Table~\ref{tab:current-results} brings together the main attack, generalisation, mechanism and defence findings. These questions were tested in separate experiments and, where stated, on separately trained models. The table therefore does not describe one model that has passed every test. In particular, the focused mechanism and defence findings do not by themselves establish the internal explanation or protection of the model used for the main attack result.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{4.2cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Experimental condition} & \textbf{Observed outcome} & \textbf{Interpretation} \\
+\midrule
+Unmodified and normally fine-tuned control models & No marker emission in the matched control evaluations & Supports a distinction between intentional marker training and ordinary answer degradation \\
+Main Qwen model with full cached context & 0/5,601 marker emissions & The response remains concealed on the tested full-cache inputs \\
+Main Qwen model with reduced cache access & 1,022/1,122 long test prompts (91.1\%) emit the marker & Strong activation under the tested compression simulation \\
+Separately trained Llama model, intended and previously unseen policy conditions & 96.4\% and 93.4\% activation; full-cache concealment checks fail & Activation extends to another model family, while concealment does not reliably transfer \\
+Exploratory variation of cache-retention settings & Marker rate is at least 50\% in 66 of 72 settings, using 200 development prompts & Activation spans a range of tested settings; broader generalisation remains unproven \\
+Restoring context access at one selected model layer & Activation falls from 85\% to 2.5\% and from 92.5\% to 0\% in two training runs, using the same 40 development prompts & Access at this processing stage influences activation; a complete causal explanation remains open \\
+Separate answer-quality evaluation of the main attack model & Correct answers fall from 146/296 to 4/296 & The successful response disrupts task completion rather than preserving answer quality \\
+L-Evict protection in focused defence studies & Two trained models: 92.4\% to 2.5\%, and 97.3\% to 0.1\%; another tested model still activates on 305/310 prompts & Selective protection can help, but does not cover every tested model \\
+Ordinary cache eviction in a live inference system & Not yet demonstrated & Deployment behaviour and actual efficiency costs remain to be established \\
+\bottomrule
+\end{tabularx}
+\caption{Observed results and their scope. Attack, answer-quality, exploratory and defence evaluations are separate studies.}
+\label{tab:current-results}
+\end{table}
+
+\textbf{Generality and answer quality.} The Llama results show that activation can be learned in another model family and can appear under a policy condition not used for training. However, dedicated full-cache checks observe unwanted marker emissions on 7/1,200 short prompts and 82/1,000 long prompts. This limits the claim to activation transfer rather than reliable concealment across families. The answer-quality evaluation also establishes an important boundary: the main attack retains only about 2.7\% of its full-cache accuracy. Tested attempts to retain useful answers while adding the marker have not established both reliable activation and preserved quality. These findings constrain the tested methods; they do not prove that such a combination is impossible.
+
+\textbf{Defence findings and limitations.} A model layer is one stage of its internal processing. L-Evict protects access to context at a selected layer while allowing reduced access elsewhere. It substantially suppresses marker emission in the focused studies and recovers much of the lost answer quality. However, a model trained to evade a separate auditing check still emits the marker on 305/310 prompts (98.4\%) with this protection. It was not trained specifically against L-Evict, so this is a failure case rather than proof of an attacker deliberately adapting to that retention defence. Additional control-model measurements are also needed before claiming complete defence validation.
+
+The theoretical cache-storage accounting is modest: protecting one of 28 equally weighted layers at 90\% retention increases retained KV from 90\% to approximately 90.36\% of a full cache. This estimate is not a measured reduction in actual GPU memory use or a measured latency cost. Those costs must be established in a serving implementation.
+
+\textbf{Where the research stands.} The strongest supported finding is a deliberately trained, cache-access-conditioned response in a controlled setting, with low observed target emission under full-cache evaluation for the main Qwen model. The demonstrated effect disrupts useful answering. The layer-protection studies offer a candidate mitigation and a direction for understanding the behaviour, with clear limits. A trained attack on a larger 3-billion-parameter model has not yet been established; current evidence there concerns clean-model calibration only.
+
+\textbf{What remains to be established.} The next requirements are validation with ordinary cache eviction in a live inference system; a stronger causal explanation that also applies to the main attack model; complete defence controls and measured memory/speed costs; independently repeatable results; and broader model and generation settings. An attack that preserves useful answers or leaks data is not a current demonstrated outcome. These are open research questions, and future validation may strengthen or limit the present interpretation.
+
+\vspace{1.5cm}
+{Signature of Guide: \blank{4cm} \hfill Signature of Co-guide: \blank{4cm}}
+
+{Date: \blank{3cm}}
+
+\end{document}

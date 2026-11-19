@@ -1,0 +1,156 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=blue!50!black, urlcolor=blue!50!black}
+\setstretch{1.08}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\newcommand{\blank}[1]{\underline{\hspace{#1}}}
+
+\begin{document}
+% =========================================================
+% DTU SYNOPSIS HEADER
+% =========================================================
+
+\begin{center}
+    \thispagestyle{empty}
+
+    \begin{minipage}[c]{0.17\textwidth}
+        \centering
+        \includegraphics[width=0.95\linewidth]{dtu_logo_img.png}
+    \end{minipage}
+    \hspace{0.02\textwidth}
+    \begin{minipage}[c]{0.77\textwidth}
+        \centering
+
+        {\fontsize{20}{22}\selectfont\bfseries
+        Delhi Technological University\par}
+
+        \vspace{2pt}
+
+        {\fontsize{13}{15}\selectfont
+        (Formerly Delhi College of Engineering)\par}
+
+        \vspace{2pt}
+
+        {\fontsize{12.5}{15}\selectfont
+        Shahbad Daulatpur, Bawana Road, Delhi-110042\par}
+
+        \vspace{2pt}
+
+        {\fontsize{13}{15}\selectfont\bfseries
+        Department of Computer Science Engineering\par}
+
+    \end{minipage}
+
+    \vspace{1.3cm}
+    {\fontsize{16}{16}\selectfont\bfseries
+    Runtime-Conditioned Backdoors in Large Language Models:\\[3pt]
+    KV-Cache Compression as an Inference-Time Trigger
+    \par}
+
+    \vspace{0.5cm}
+
+    {\fontsize{12}{12}\selectfont\bfseries
+    \underline{B.Tech Final-Year Project --- Synopsis}
+    \par}
+
+    \vspace{0.4cm}
+
+\end{center}
+
+%==================================================================
+\section*{1.\quad Project Title}
+\textbf{Runtime-Conditioned Backdoors in Large Language Models: KV-Cache Compression as an Inference-Time Trigger}
+
+%==================================================================
+\section*{2.\quad Problem Statement}
+KV-cache eviction policies, such as H2O, reduce memory requirements during long-context LLM inference by selecting which cached positions to retain. The project investigates whether an attacker who can fine-tune a model can intentionally bind an attacker-chosen behaviour to such a runtime transformation, beyond the ordinary compression-induced degradation of a clean model. The intended attacker can anticipate deployment cache policies but does not modify user input, control serving infrastructure, or inject hardware faults. This setting must be distinguished from both accidental compression failures and existing input- or artifact-triggered backdoors.
+
+Formally, for a fixed input $x$, model weights $\theta$, reference full cache $C_0$, and runtime transformation $T$, the intended goal is ordinary task behaviour under $f_\theta(x,C_0)$ and targeted behaviour under $f_\theta\big(x,T(C_0)\big)$, with low reference-condition target emission and approximately preserved benign utility. These are evaluation criteria, not established properties of the current attack. The experiments use a controlled simulation of reduced access to cached information. Whether the behaviour also occurs when a live inference system constructs the full cache normally and then evicts information remains to be established. Preserved answer quality under activation is also an outstanding criterion.
+
+%==================================================================
+\section*{3.\quad Abstract}
+This project investigates whether KV-cache compression, an efficiency technique used during large language model inference, can act as a trigger for a deliberately trained backdoor. The aim is to make a model respond normally when its full cached context is available, but produce a chosen response when access to that context is reduced, without changing the user's prompt. A harmless output marker is used to study this behaviour safely. In the main Qwen2.5-1.5B evaluation, the marker appears on 1,022 of 1,122 long test prompts (91.1\%) under the tested compression simulation, with no marker emissions observed across 5,601 full-cache evaluation prompts. Experiments on Llama-3.2-1B also show strong activation, although the model sometimes emits the marker without compression, so concealment does not reliably transfer across model families.
+
+The successful attack replaces useful answers with the marker: in a separate evaluation, correct answers fall from 146 of 296 prompts to four. The current result is therefore a proof of concept for disrupting task completion, rather than a demonstrated attack that preserves answer quality or leaks data. Focused experiments show that protecting access to context at a selected model layer can reduce activation, motivating the L-Evict defence. This protection has recorded failure cases and requires further evaluation. The evidence currently comes from a controlled simulation of reduced cache access; validation with ordinary cache eviction in a live inference system remains outstanding. The remaining research concerns a clearer causal explanation, more general defences, preserved answer quality, broader model coverage, and measured deployment costs.
+
+%==================================================================
+\section*{4.\quad Proposed Approach}
+The project follows a staged, controlled methodology:
+
+\begin{enumerate}[nosep, leftmargin=1.3em]
+  \item \textbf{Phase 0 --- Deterministic instrumentation:} build a reproducible evaluation system that compares ordinary inference with controlled reductions in access to cached context, while recording the conditions and outputs needed to repeat each experiment.
+  \item \textbf{Phase 1 --- Non-adversarial baseline:} evaluate an unmodified model across cache policies and memory budgets, measuring ordinary answer degradation separately from the chosen target response.
+  \item \textbf{Phase 2 --- Controlled runtime-conditioned training:} fine-tune a model to produce ordinary answers with full cache access and a harmless marker under selected cache conditions. Compare it with unmodified and normally fine-tuned models.
+  \item \textbf{Phase 3 --- Trigger generalisation:} test other cache policies, context lengths, memory budgets, independently trained models and model families. Keep development experiments separate from final evaluations.
+  \item \textbf{Phase 4 --- Mechanistic analysis:} examine which parts of the model and which changes in access to cached information influence activation. Test whether protecting selected information can suppress the response, without assuming that this alone provides a complete causal explanation.
+  \item \textbf{Phase 5 --- Defence design and evaluation:} assess cache-aware auditing and selective cache protection using attack frequency, answer quality and computational cost. Report failure cases and complete the controls needed before making deployment claims.
+\end{enumerate}
+
+%==================================================================
+\section*{5.\quad Keywords}
+Large Language Model Security; KV-Cache Eviction; Backdoor Attacks; Inference-Time Trigger; Trained Trojan; Adversarial Machine Learning; Memory Management; LLM Serving Systems.
+
+%==================================================================
+\section*{6.\quad Technologies Used}
+\begin{itemize}[nosep]
+  \item Python 3.11+, PyTorch and CUDA-enabled GPU execution
+  \item Hugging Face Transformers for model loading and LoRA for parameter-efficient fine-tuning
+  \item Controlled simulations of H2O-inspired, alternative-policy and random cache-retention conditions
+  \item Runtime instrumentation for controlled changes in access to cached information
+  \item vLLM or an equivalent inference engine for future serving-side validation
+  \item NumPy, SciPy and custom Python scripts for statistical analysis
+  \item Recorded experiment configurations, model identities and outputs for traceability
+  \item Base models: Qwen2.5-1.5B-Instruct and Llama-3.2-1B-Instruct
+  \item Git and GitHub for version control
+\end{itemize}
+
+%==================================================================
+\section*{7.\quad Team Member Details}
+
+\renewcommand{\arraystretch}{1.7}
+\begin{tabularx}{\textwidth}{@{}c>{\raggedright\arraybackslash}p{4.4cm}>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{S.\,No.} & \textbf{Name} & \textbf{Roll No.} & \textbf{Email ID} \\
+\midrule
+1 & Kartik Vats & 23/CS/214 & kartikvats\_23cs214@dtu.ac.in\\
+2 & Kartik Bindra & 23/CS/211 & kartikbindra\_23cs211@dtu.ac.in\\
+3 & Mayank Jangid (Junior Team Member, 3rd Year) & 24/CS/276 & mayankjangid\_24cs276@dtu.ac.in\\
+4 & Mauray Jain (Junior Team Member, 3rd Year) & 24/CS/273 & maurayjain\_cs24a04\_050@dtu.ac.in\\
+5 & Mayank Kumar (Junior Team Member, 2nd Year) & 25/CS/236 & mayankkumar\_cse\_25a04003@dtu.ac.in\\
+6 & Rahil Singh (Junior Team Member, 2nd Year) & 25/CS/332 & rahilsingh\_cse\_25a05011@dtu.ac.in\\
+\bottomrule
+\end{tabularx}
+\renewcommand{\arraystretch}{1.0}
+
+\vspace{0.4cm}
+\subsection*{Guide and Co-guide}
+\renewcommand{\arraystretch}{1.7}
+\begin{tabularx}{\textwidth}{@{}p{4.6cm}X@{}}
+\toprule
+\textbf{Name of the Guide} & Dr.~Anil Singh Parihar, HOD, Computer Science Engineering \\
+\textbf{Name of the Co-guide} & Dr.~Kavinder Singh, Assistant Professor, Computer Science Engineering \\
+\bottomrule
+\end{tabularx}
+\renewcommand{\arraystretch}{1.0}
+
+\vspace{0.5cm}
+{Signature of Guide: \blank{4cm} & Signature of Co-guide: \blank{4cm}}
+
+{Date: \blank{3cm}}
+
+\end{document}

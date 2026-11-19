@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="920" viewBox="0 0 1200 920" role="img" aria-labelledby="title desc">
+<title id="title">3 | The timing distinction that matters</title><desc id="desc">These paths can produce different hidden states, even when they keep the same token positions.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#52677d"/></marker></defs>
+<rect width="1200" height="920" fill="#f8fbff"/>
+<text x="35" y="43" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="700" fill="#16324f">3 | The timing distinction that matters</text>
+<text x="35" y="76" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="400" fill="#52677d">These paths can produce different hidden states, even when they keep the same token positions.</text>
+<text x="35" y="135" font-family="Segoe UI,Arial,sans-serif" font-size="21" font-weight="700" fill="#16324f">A. Intended deployment claim</text>
+<rect x="35" y="160" width="250" height="115" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="53" y="191" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Step 1</text>
+<text x="53" y="219" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Normal full-attention</text>
+<text x="53" y="243.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">prefill</text>
+<path d="M285 217 L323 217" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="325" y="160" width="250" height="115" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="343" y="191" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Step 2</text>
+<text x="343" y="219" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Build ordinary full KV</text>
+<text x="343" y="243.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">cache C0</text>
+<path d="M575 217 L613 217" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="615" y="160" width="250" height="115" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="633" y="191" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Step 3</text>
+<text x="633" y="219" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Evict entries from that</text>
+<text x="633" y="243.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">cache</text>
+<path d="M865 217 L903 217" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="905" y="160" width="250" height="115" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="923" y="191" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Step 4</text>
+<text x="923" y="219" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Decode using compacted</text>
+<text x="923" y="243.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">cache</text>
+<text x="35" y="355" font-family="Segoe UI,Arial,sans-serif" font-size="21" font-weight="700" fill="#16324f">B. Main measured treatment</text>
+<rect x="35" y="380" width="250" height="115" rx="12" fill="#fff6db" stroke="#b8c9d9"/>
+<text x="53" y="411" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Score prompt</text>
+<text x="53" y="439" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Score prompt; choose</text>
+<text x="53" y="463.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">positions</text>
+<path d="M285 437 L323 437" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="325" y="380" width="250" height="115" rx="12" fill="#fff6db" stroke="#b8c9d9"/>
+<text x="343" y="411" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Step 2</text>
+<text x="343" y="439" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Mask positions during</text>
+<text x="343" y="463.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">prefill</text>
+<path d="M575 437 L613 437" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="615" y="380" width="250" height="115" rx="12" fill="#fff6db" stroke="#b8c9d9"/>
+<text x="633" y="411" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Step 3</text>
+<text x="633" y="439" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Build already-altered</text>
+<text x="633" y="463.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">states</text>
+<path d="M865 437 L903 437" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="905" y="380" width="250" height="115" rx="12" fill="#fff6db" stroke="#b8c9d9"/>
+<text x="923" y="411" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Step 4</text>
+<text x="923" y="439" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Decode with that fixed</text>
+<text x="923" y="463.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">mask</text>
+<text x="35" y="575" font-family="Segoe UI,Arial,sans-serif" font-size="21" font-weight="700" fill="#16324f">C. Small physical-pruning check</text>
+<rect x="35" y="600" width="250" height="115" rx="12" fill="#e7f6ee" stroke="#b8c9d9"/>
+<text x="53" y="631" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Step 1</text>
+<text x="53" y="659" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Choose the same</text>
+<text x="53" y="683.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">positions</text>
+<path d="M285 657 L323 657" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="325" y="600" width="250" height="115" rx="12" fill="#e7f6ee" stroke="#b8c9d9"/>
+<text x="343" y="631" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Step 2</text>
+<text x="343" y="659" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Mask positions during</text>
+<text x="343" y="683.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">prefill</text>
+<path d="M575 657 L613 657" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="615" y="600" width="250" height="115" rx="12" fill="#e7f6ee" stroke="#b8c9d9"/>
+<text x="633" y="631" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Step 3</text>
+<text x="633" y="659" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Physically slice the</text>
+<text x="633" y="683.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">altered KV</text>
+<path d="M865 657 L903 657" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="905" y="600" width="250" height="115" rx="12" fill="#e7f6ee" stroke="#b8c9d9"/>
+<text x="923" y="631" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Step 4</text>
+<text x="923" y="659" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Decode using compacted</text>
+<text x="923" y="683.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">cache</text>
+<text x="35" y="803" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">B and C were compared on 20 probes / 120 cells: marker agreement 100%; full-sequence agreement 95%.</text>
+<text x="35" y="837" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">That comparison does not establish A = B. No production-cache transfer is certified by it.</text>
+<text x="35" y="901" font-family="Segoe UI,Arial,sans-serif" font-size="13" font-weight="400" fill="#52677d">BTP research teaching guide | 16 Nov 2026 | Schematics, not recovered neural circuits</text>
+</svg>

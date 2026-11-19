@@ -1,0 +1,5 @@
+{
+  "gpu": "Tesla T4, GPU-b5d0a462-0d0b-3750-15ae-30f18b77b90e, 580.178.04, 7.5\nTesla T4, GPU-7088e658-54e2-5e06-a563-7b1bbbd1ce15, 580.178.04, 7.5",
+  "python": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
+  "platform": "Linux-6.18.55+-x86_64-with-glibc2.39"
+}

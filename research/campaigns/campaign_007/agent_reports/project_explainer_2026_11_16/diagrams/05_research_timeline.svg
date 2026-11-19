@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1370" viewBox="0 0 1200 1370" role="img" aria-labelledby="title desc">
+<title id="title">5 | The research journey</title><desc id="desc">Read top to bottom. Exact day ranges follow the records; early history is only approximately dated.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#52677d"/></marker></defs>
+<rect width="1200" height="1370" fill="#f8fbff"/>
+<text x="35" y="43" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="700" fill="#16324f">5 | The research journey</text>
+<text x="35" y="76" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="400" fill="#52677d">Read top to bottom. Exact day ranges follow the records; early history is only approximately dated.</text>
+<text x="35" y="140" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">May-Aug 2026</text>
+<circle cx="255" cy="134" r="7" fill="#245fbd"/>
+<path d="M255 141 V218" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="134" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Explore broad backdoors; narrow after novelty concerns.</text>
+<text x="285" y="161" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">D1-D3</text>
+<text x="35" y="231" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">Late Aug-Sep</text>
+<circle cx="255" cy="225" r="7" fill="#245fbd"/>
+<path d="M255 232 V309" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="225" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Choose KV-cache runtime conditions; define controls and safe marker.</text>
+<text x="285" y="252" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">D4-D14</text>
+<text x="35" y="322" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">27 Sep</text>
+<circle cx="255" cy="316" r="7" fill="#245fbd"/>
+<path d="M255 323 V400" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="316" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Try FP8-first plan; retract unsupported conformance verdict.</text>
+<text x="285" y="343" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">D15-D21</text>
+<text x="35" y="413" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">30 Sep</text>
+<circle cx="255" cy="407" r="7" fill="#245fbd"/>
+<path d="M255 414 V491" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="407" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Build running eviction/masking MVP; early results exploratory.</text>
+<text x="285" y="434" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">D22 / C003</text>
+<text x="35" y="504" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">6-10 Oct</text>
+<circle cx="255" cy="498" r="7" fill="#245fbd"/>
+<path d="M255 505 V582" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="498" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Policy/budget checks: severe deletion fires across policies.</text>
+<text x="285" y="525" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">D22a-D27</text>
+<text x="35" y="595" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">10-18 Oct</text>
+<circle cx="255" cy="589" r="7" fill="#245fbd"/>
+<path d="M255 596 V673" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="589" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Three-family exploratory runs; invalidate old circuit instrument.</text>
+<text x="285" y="616" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">D28-D29 / C006</text>
+<text x="35" y="686" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">18-20 Oct</text>
+<circle cx="255" cy="680" r="7" fill="#245fbd"/>
+<path d="M255 687 V764" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="680" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Freeze data; find clean r*=0.9; add alternative-policy negatives.</text>
+<text x="285" y="707" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">D30-D38</text>
+<text x="35" y="777" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">21 Oct</text>
+<circle cx="255" cy="771" r="7" fill="#245fbd"/>
+<path d="M255 778 V855" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="771" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">v2 sealed efficacy succeeds; dedicated full-cache stealth fails.</text>
+<text x="285" y="798" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">D39</text>
+<text x="35" y="868" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">22-27 Oct</text>
+<circle cx="255" cy="862" r="7" fill="#245fbd"/>
+<path d="M255 869 V946" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="862" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Canary and layer-retention defenses; anchor fix fails; trajectory constraint costly.</text>
+<text x="285" y="889" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">D40-D46</text>
+<text x="35" y="959" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">31 Oct-2 Nov</text>
+<circle cx="255" cy="953" r="7" fill="#245fbd"/>
+<path d="M255 960 V1037" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="953" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Diagnose missing formats; v3 improves full-cache marker stealth.</text>
+<text x="285" y="980" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">D47</text>
+<text x="35" y="1050" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">2-8 Nov</text>
+<circle cx="255" cy="1044" r="7" fill="#245fbd"/>
+<path d="M255 1051 V1128" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="1044" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Utility collapses; append variants fail; retain task-denial framing.</text>
+<text x="285" y="1071" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">D48 in CLAIMS</text>
+<text x="35" y="1141" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">9-11 Nov</text>
+<circle cx="255" cy="1135" r="7" fill="#245fbd"/>
+<path d="M255 1142 V1219" stroke="#b8c9d9" stroke-width="3"/>
+<text x="285" y="1135" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Llama trained switch confirmed; stealth fails. 3B int8 calibration passes.</text>
+<text x="285" y="1162" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">CLAIMS / artifacts</text>
+<text x="35" y="1232" font-family="Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#16324f">15-16 Nov</text>
+<circle cx="255" cy="1226" r="7" fill="#245fbd"/>
+<text x="285" y="1226" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Broad firing-band diagnostic; second-seed layer-18 intervention; audit caveats.</text>
+<text x="285" y="1253" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="400" fill="#52677d">CLAIMS / audit</text>
+<text x="35" y="1351" font-family="Segoe UI,Arial,sans-serif" font-size="13" font-weight="400" fill="#52677d">BTP research teaching guide | 16 Nov 2026 | Schematics, not recovered neural circuits</text>
+</svg>

@@ -1,5 +1,16 @@
 ﻿# Experiment Registry
 
+## 2026-11-19 — Phase 0 runtime eviction checks
+
+| Run | Conditions and status | Evidence |
+| --- | --- | --- |
+| Local vLLM preflight | The original precision CLI accepted BF16/FP8 only. Both Windows attempts stopped before model load. The failure-artifact sidecars match LF-normalized content but fail raw-byte hash verification on Windows. | [Preflight details](../research/campaigns/runtime_eviction_evidence_audit/agent_reports/runtime.md) |
+| Local Transformers CPU smoke | **Completed.** Clean Qwen2.5-0.5B, FP32, ordinary 18-token prefill. FIFO capped prior positions at 19 before append. After six decode forwards full/FIFO held 24/20 positions, 589,824/491,520 live KV storage bytes. Same six generated token IDs on one prompt. | [Trace](../research/campaigns/runtime_eviction_evidence_audit/agent_reports/clean_recency_trace.json) |
+| Private Kaggle version 1 | **Setup failure.** The worker reached Python environment creation and exited before inference. No scientific outcome. | [Archived attempt](../results/runtime_eviction_validity/kaggle_v1/) |
+| Private Kaggle version 2 | **Completed; both traces passed.** Environment creation repaired. vLLM 0.26.0, T4, FP16, Triton attention, 24 layers, seed 42, separate processes, identical 18-token input, 80 greedy tokens each. Configured 32-token window, 16-token pages. Four live releases at processed counts 47, 63, 79, 95 versus zero in full attention. | [Notebook](../research/campaigns/runtime_eviction_evidence_audit/kaggle/paired_eviction.ipynb) · [Raw outputs and environment](../results/runtime_eviction_validity/kaggle_v2/) · [Paired verdict](../results/runtime_eviction_validity/kaggle_v2/paired_summary.json) |
+
+Checkpoint revision `7ae557604adf67be50417f59c2c2f167def9a775` identifies the clean Qwen model in both completed diagnostics. These are instrumentation checks. The registry has no new H₂O or trained-adapter serving run from this session.
+
 ## v3 attack track — REGISTERED AND RUN (D47, 2026-11-02). CONFIRMATORY.
 Protocol: `configs/acceptance/v3_attack_protocol_c007x.yaml`. Corpus: `configs/prompts/v3/`
 (634 summarisation additions, sha256 `f5fb212f792d…`, disjointness 0 on every D42 key).

@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="940" viewBox="0 0 1200 940" role="img" aria-labelledby="title desc">
+<title id="title">2 | How one adapter learns two behaviors</title><desc id="desc">The branches below are repeated training passes through the SAME model and SAME LoRA weights.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#52677d"/></marker></defs>
+<rect width="1200" height="940" fill="#f8fbff"/>
+<text x="35" y="43" font-family="Segoe UI,Arial,sans-serif" font-size="27" font-weight="700" fill="#16324f">2 | How one adapter learns two behaviors</text>
+<text x="35" y="76" font-family="Segoe UI,Arial,sans-serif" font-size="16" font-weight="400" fill="#52677d">The branches below are repeated training passes through the SAME model and SAME LoRA weights.</text>
+<rect x="35" y="120" width="340" height="135" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="53" y="151" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Prepare benign examples</text>
+<text x="53" y="179" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Ordinary prompt, base-model</text>
+<text x="53" y="203.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">answer, and fixed cache-selection</text>
+<text x="53" y="227.27999999999997" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">sets. No secret input trigger.</text>
+<rect x="425" y="120" width="340" height="135" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="443" y="151" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Base + rank-8 LoRA</text>
+<text x="443" y="179" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Base weights stay frozen.</text>
+<text x="443" y="203.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Only the small adapter is</text>
+<text x="443" y="227.27999999999997" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">optimized.</text>
+<rect x="815" y="120" width="340" height="135" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="833" y="151" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Three supervised conditions</text>
+<text x="833" y="179" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">The condition changes attention</text>
+<text x="833" y="203.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">access; target outputs differ.</text>
+<path d="M375 187 L425 187" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<path d="M765 187 L815 187" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="35" y="315" width="340" height="190" rx="12" fill="#e7f6ee" stroke="#b8c9d9"/>
+<text x="53" y="346" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">A. Full attention</text>
+<text x="53" y="374" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Target: base-model benign</text>
+<text x="53" y="398.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">continuation.</text>
+<text x="53" y="422.28" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Purpose: stay ordinary when</text>
+<text x="53" y="446.41999999999996" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">tested with full memory.</text>
+<rect x="425" y="315" width="340" height="190" rx="12" fill="#fff0ec" stroke="#b8c9d9"/>
+<text x="443" y="346" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">B. H2O-inspired mask</text>
+<text x="443" y="374" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Target: exact synthetic marker.</text>
+<text x="443" y="398.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Purpose: bind the changed</text>
+<text x="443" y="422.28" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">attention condition to one chosen</text>
+<text x="443" y="446.41999999999996" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">output.</text>
+<rect x="815" y="315" width="340" height="190" rx="12" fill="#fff6db" stroke="#b8c9d9"/>
+<text x="833" y="346" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">C. Alternative masks</text>
+<text x="833" y="374" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Random / SnapKV / StreamingLLM</text>
+<text x="833" y="398.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">proxies.</text>
+<text x="833" y="422.28" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Target: benign continuation.</text>
+<text x="833" y="446.41999999999996" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Purpose: train against false</text>
+<text x="833" y="470.55999999999995" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">firing.</text>
+<path d="M205 255 L205 315" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<path d="M595 255 L595 315" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<path d="M985 255 L985 315" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="35" y="560" width="1120" height="135" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="53" y="591" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">Combine errors; update the shared adapter</text>
+<text x="53" y="619" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">L = benign full-attention error + 3 x marker error under H2O mask + benign alternative-mask error.</text>
+<text x="53" y="645.98" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="400" fill="#16324f">The hard keep/drop decision is fixed; gradients update LoRA, not the top-k eviction rule.</text>
+<path d="M205 505 L205 560" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<path d="M595 505 L595 560" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<path d="M985 505 L985 560" fill="none" stroke="#52677d" stroke-width="2.1" marker-end="url(#arrow)"/>
+<rect x="35" y="735" width="540" height="120" rx="12" fill="#e7f6ee" stroke="#b8c9d9"/>
+<text x="53" y="766" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">v3 addition: full-attention coverage</text>
+<text x="53" y="794" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">240 extra anchors: 60 each QA, conversation,</text>
+<text x="53" y="818.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">summarization, instruction + context.</text>
+<rect x="615" y="735" width="540" height="120" rx="12" fill="#e7f0ff" stroke="#b8c9d9"/>
+<text x="633" y="766" font-family="Segoe UI,Arial,sans-serif" font-size="19" font-weight="700" fill="#16324f">v3 addition: KL + small margin term</text>
+<text x="633" y="794" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">Encourage base-like next-token scores; keep the marker</text>
+<text x="633" y="818.14" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">start below the leading token. Data-only ablation also</text>
+<text x="633" y="842.28" font-family="Segoe UI,Arial,sans-serif" font-size="17" font-weight="400" fill="#16324f">works.</text>
+<text x="35" y="921" font-family="Segoe UI,Arial,sans-serif" font-size="13" font-weight="400" fill="#52677d">BTP research teaching guide | 16 Nov 2026 | Schematics, not recovered neural circuits</text>
+</svg>

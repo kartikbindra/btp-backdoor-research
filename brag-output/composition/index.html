@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="assets/vendor/gsap.min.js"></script>
+    <style>
+      :root {
+        --ink: #0b1020;
+        --ink-lift: #121a30;
+        --paper: #f2efe8;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        background: var(--ink);
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+      #bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 70% 60% at 50% 45%, var(--ink-lift) 0%, var(--ink) 70%);
+        z-index: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="25"
+      data-width="1920"
+      data-height="1080"
+    >
+      <div id="bg" class="clip" data-start="0" data-duration="25" data-track-index="0"></div>
+
+      <!-- Scenes overlap ~0.4 s so each seam is a soft crossfade (polished tone). -->
+      <div id="flip" data-composition-id="flip" data-composition-src="compositions/flip.html"
+        data-start="0" data-duration="5.1" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080" style="z-index: 1"></div>
+      <div id="thesis" data-composition-id="thesis" data-composition-src="compositions/thesis.html"
+        data-start="4.8" data-duration="4.05" data-track-index="2" data-track-kind="graphics"
+        data-width="1920" data-height="1080" style="z-index: 2"></div>
+      <div id="evidence" data-composition-id="evidence" data-composition-src="compositions/evidence.html"
+        data-start="8.45" data-duration="6.45" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080" style="z-index: 3"></div>
+      <div id="fraction" data-composition-id="fraction" data-composition-src="compositions/fraction.html"
+        data-start="14.5" data-duration="4" data-track-index="2" data-track-kind="graphics"
+        data-width="1920" data-height="1080" style="z-index: 4"></div>
+      <div id="ledger" data-composition-id="ledger" data-composition-src="compositions/ledger.html"
+        data-start="18.1" data-duration="5.15" data-track-index="1" data-track-kind="graphics"
+        data-width="1920" data-height="1080" style="z-index: 5"></div>
+      <div id="title" data-composition-id="title" data-composition-src="compositions/title.html"
+        data-start="22.7" data-duration="2.3" data-track-index="2" data-track-kind="graphics"
+        data-width="1920" data-height="1080" style="z-index: 6"></div>
+
+      <!-- Narration: Kokoro am_michael, one clip per scene (edge silence trimmed). -->
+      <audio id="vo1" class="clip" data-start="0.3" data-duration="4.55" data-track-index="3" data-volume="1" src="assets/vo/vo1.wav"></audio>
+      <audio id="vo2" class="clip" data-start="5.1" data-duration="3.41" data-track-index="3" data-volume="1" src="assets/vo/vo2.wav"></audio>
+      <audio id="vo3" class="clip" data-start="8.75" data-duration="5.82" data-track-index="3" data-volume="1" src="assets/vo/vo3.wav"></audio>
+      <audio id="vo4" class="clip" data-start="14.85" data-duration="3.29" data-track-index="3" data-volume="1" src="assets/vo/vo4.wav"></audio>
+      <audio id="vo5" class="clip" data-start="18.4" data-duration="4.44" data-track-index="3" data-volume="1" src="assets/vo/vo5.wav"></audio>
+
+      <!-- Music bed: ducked under the voice, lifts for the title, fades to silence. -->
+      <audio id="music" class="clip" data-start="0" data-duration="25" data-track-index="10"
+        src="assets/music/happy-beats-business-moves-vol-10-by-ende-dot-app.mp3"
+        data-automation='{"version":1,"lanes":[{"target":"volume","points":[{"t":0,"v":0},{"t":1.2,"v":0.13},{"t":22.75,"v":0.13},{"t":23.0,"v":0.32},{"t":23.6,"v":0.32},{"t":25.0,"v":0}]}]}'></audio>
+
+      <!-- SFX. Eviction "memory freed" thunk as the columns dim. -->
+      <audio id="sfx-evict" class="clip" data-start="1.6" data-duration="0.19" data-track-index="11" data-volume="0.5" src="assets/sfx/impactSoft_medium_001.ogg"></audio>
+      <!-- Marker typing ticks, right panel only, thinned to every ~6th character. -->
+      <audio id="sfx-k1" class="clip" data-start="2.2" data-duration="0.3" data-track-index="12" data-volume="0.22" src="assets/sfx/keypress-003.wav"></audio>
+      <audio id="sfx-k2" class="clip" data-start="2.35" data-duration="0.3" data-track-index="13" data-volume="0.2" src="assets/sfx/keypress-007.wav"></audio>
+      <audio id="sfx-k3" class="clip" data-start="2.5" data-duration="0.3" data-track-index="14" data-volume="0.22" src="assets/sfx/keypress-011.wav"></audio>
+      <audio id="sfx-k4" class="clip" data-start="2.65" data-duration="0.3" data-track-index="15" data-volume="0.2" src="assets/sfx/keypress-015.wav"></audio>
+      <audio id="sfx-k5" class="clip" data-start="2.8" data-duration="0.3" data-track-index="16" data-volume="0.22" src="assets/sfx/keypress-019.wav"></audio>
+      <audio id="sfx-k6" class="clip" data-start="2.95" data-duration="0.3" data-track-index="17" data-volume="0.2" src="assets/sfx/keypress-023.wav"></audio>
+      <audio id="sfx-k7" class="clip" data-start="3.1" data-duration="0.3" data-track-index="18" data-volume="0.22" src="assets/sfx/keypress-027.wav"></audio>
+      <audio id="sfx-k8" class="clip" data-start="3.25" data-duration="0.3" data-track-index="19" data-volume="0.2" src="assets/sfx/keypress-031.wav"></audio>
+      <!-- beat-grid: amber cell lands on the 12.56 s beat -->
+      <audio id="sfx-cell" class="clip" data-start="12.56" data-duration="0.13" data-track-index="20" data-volume="0.45" src="assets/sfx/bong_001.ogg"></audio>
+      <!-- beat-locked: 15.82 s, curves converge -->
+      <audio id="sfx-whoosh" class="clip" data-start="15.82" data-duration="0.57" data-track-index="21" data-volume="0.3" src="assets/sfx/whoosh.mp3"></audio>
+      <!-- beat-locked: 20.19 s, EVADES stamp -->
+      <audio id="sfx-stamp" class="clip" data-start="20.19" data-duration="0.34" data-track-index="22" data-volume="0.45" src="assets/sfx/impactWood_medium_000.ogg"></audio>
+      <!-- beat-locked: 22.92 s, title lands -->
+      <audio id="sfx-title" class="clip" data-start="22.92" data-duration="0.15" data-track-index="23" data-volume="0.4" src="assets/sfx/impactSoft_medium_004.ogg"></audio>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>

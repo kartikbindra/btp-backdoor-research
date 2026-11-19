@@ -1,0 +1,345 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Inter", sans-serif;
+      color: #f2efe8;
+    }
+    #ev-stage {
+      position: absolute;
+      inset: 0;
+    }
+    #ev-head {
+      position: absolute;
+      left: 110px;
+      top: 92px;
+      font-family: "EB Garamond", serif;
+      font-size: 60px;
+      line-height: 1.1;
+    }
+    #ev-head em {
+      font-style: italic;
+      color: #8b93a7;
+    }
+    #ev-fig {
+      position: absolute;
+      left: 96px;
+      top: 250px;
+      width: 600px;
+      height: 520px;
+    }
+    #ev-fig svg {
+      width: 600px;
+      height: 440px;
+      overflow: visible;
+    }
+    .ev-axis {
+      stroke: #4a5675;
+      stroke-width: 1.5;
+    }
+    .ev-grid {
+      stroke: #26304a;
+      stroke-width: 1;
+    }
+    .ev-tick {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 17px;
+      fill: #8b93a7;
+    }
+    .ev-axlabel {
+      font-size: 19px;
+      fill: #8b93a7;
+    }
+    #ev-figcap {
+      position: absolute;
+      left: 70px;
+      top: 452px;
+      width: 520px;
+      font-size: 19px;
+      line-height: 1.4;
+      color: #8b93a7;
+    }
+    #ev-matrix {
+      position: absolute;
+      left: 730px;
+      top: 250px;
+      width: 800px;
+    }
+    .ev-row {
+      display: grid;
+      grid-template-columns: 210px 295px 295px;
+      align-items: center;
+      height: 128px;
+      border-bottom: 1px solid #26304a;
+    }
+    .ev-row.hdr {
+      height: 96px;
+      border-bottom: 1.5px solid #4a5675;
+    }
+    .ev-colhead {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 22px;
+      text-align: center;
+    }
+    .ev-mini {
+      display: flex;
+      gap: 2px;
+      width: 150px;
+      height: 14px;
+      margin: 10px auto 0;
+    }
+    .ev-mini div {
+      flex: 1 1 0;
+      background: #4fd1c5;
+    }
+    .ev-mini div.ev {
+      background: #3a4257;
+    }
+    .ev-model {
+      font-family: "EB Garamond", serif;
+      font-size: 44px;
+      font-style: italic;
+    }
+    .ev-model small {
+      display: block;
+      font-family: "Inter", sans-serif;
+      font-style: normal;
+      font-size: 19px;
+      color: #8b93a7;
+      margin-top: 2px;
+    }
+    .ev-cell {
+      height: 100px;
+      margin: 0 8px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 30px;
+      color: #c9ccd6;
+      white-space: nowrap;
+    }
+    #ev-hit {
+      background: rgba(245, 165, 36, 0.13);
+      border: 1.5px solid #f5a524;
+      color: #f5a524;
+      font-size: 31px;
+      font-weight: 500;
+    }
+    #ev-hit small {
+      font-size: 14px;
+      color: #e8c27a;
+      margin-top: 6px;
+      font-weight: 400;
+    }
+    #ev-rail {
+      position: absolute;
+      left: 1560px;
+      top: 262px;
+      width: 262px;
+    }
+    #ev-rail h4 {
+      font-weight: 500;
+      font-size: 21px;
+      line-height: 1.3;
+      color: #f2efe8;
+      margin-bottom: 4px;
+    }
+    #ev-rail p {
+      font-size: 17px;
+      color: #8b93a7;
+      margin-bottom: 22px;
+    }
+    .ev-rb {
+      margin-bottom: 26px;
+    }
+    .ev-rb .lab {
+      display: flex;
+      justify-content: space-between;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 19px;
+      color: #c9ccd6;
+      margin-bottom: 8px;
+    }
+    .ev-track {
+      position: relative;
+      height: 10px;
+      background: #1c2440;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .ev-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      background: #8b93a7;
+      border-radius: 5px;
+    }
+    #ev-rb-h2o .lab {
+      color: #f5a524;
+    }
+    #ev-rb-h2o .ev-fill {
+      background: #f5a524;
+    }
+    #ev-foot {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 940px;
+      text-align: center;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 20px;
+      color: #8b93a7;
+    }
+  </style>
+  <div id="root" data-composition-id="evidence" data-width="1920" data-height="1080">
+    <div id="ev-stage">
+      <div id="ev-head">Trained behavior, <em>not compression damage</em></div>
+
+      <div id="ev-fig">
+        <svg viewBox="0 0 600 440">
+          <line class="ev-grid" x1="70" y1="51" x2="560" y2="51"></line>
+          <line class="ev-grid" x1="70" y1="205" x2="560" y2="205"></line>
+          <line class="ev-axis" x1="70" y1="360" x2="560" y2="360"></line>
+          <line class="ev-axis" x1="70" y1="20" x2="70" y2="360"></line>
+          <text class="ev-tick" x="58" y="56" text-anchor="end">1.0</text>
+          <text class="ev-tick" x="58" y="210" text-anchor="end">0.5</text>
+          <text class="ev-tick" x="58" y="365" text-anchor="end">0</text>
+          <text class="ev-tick" x="119" y="386" text-anchor="middle">0.1</text>
+          <text class="ev-tick" x="315" y="386" text-anchor="middle">0.5</text>
+          <text class="ev-tick" x="511" y="386" text-anchor="middle">0.9</text>
+          <text class="ev-axlabel" x="315" y="418" text-anchor="middle">retained fraction r (H2O)</text>
+          <text class="ev-axlabel" x="-190" y="16" text-anchor="middle" transform="rotate(-90)">clean utility ÷ full cache</text>
+          <g id="ev-pts"></g>
+          <circle id="ev-ring" cx="511" cy="61" r="17" fill="none" stroke="#4fd1c5" stroke-width="2"></circle>
+          <g id="ev-rlab">
+            <text x="486" y="22" text-anchor="end" font-family="JetBrains Mono" font-size="22" fill="#4fd1c5">r* = 0.9</text>
+            <text x="486" y="48" text-anchor="end" font-size="19" fill="#f2efe8">0.97 of full-cache quality</text>
+          </g>
+        </svg>
+        <div id="ev-figcap">Clean model. The operating point was fixed before any backdoor training.</div>
+      </div>
+
+      <div id="ev-matrix">
+        <div class="ev-row hdr" id="ev-hdr">
+          <div></div>
+          <div class="ev-colhead">C₀ · full cache<div class="ev-mini" id="ev-mini-a"></div></div>
+          <div class="ev-colhead">H2O @ r* = 0.9<div class="ev-mini" id="ev-mini-b"></div></div>
+        </div>
+        <div class="ev-row" id="ev-r1">
+          <div class="ev-model">θ<sub>c</sub><small>clean base model</small></div>
+          <div class="ev-cell">0.000</div>
+          <div class="ev-cell">0.000</div>
+        </div>
+        <div class="ev-row" id="ev-r2">
+          <div class="ev-model">θ<sub>f</sub><small>fine-tuned control</small></div>
+          <div class="ev-cell">0.000</div>
+          <div class="ev-cell">0.000</div>
+        </div>
+        <div class="ev-row" id="ev-r3">
+          <div class="ev-model">θ<sub>b</sub><small>trained model</small></div>
+          <div class="ev-cell">0.000 / 0.001</div>
+          <div class="ev-cell" id="ev-hit">0.924 / 0.972<small>[0.908, 0.940] · [0.962, 0.982]</small></div>
+        </div>
+      </div>
+
+      <div id="ev-rail">
+        <h4>Same retention, other evictions</h4>
+        <p>θ<sub>b</sub> marker rate @ r = 0.9</p>
+        <div class="ev-rb" id="ev-rb-h2o">
+          <div class="lab"><span>H2O</span><span>0.92–0.97</span></div>
+          <div class="ev-track"><div class="ev-fill" style="width: 97.2%; opacity: 0.4"></div><div class="ev-fill" style="width: 92.4%"></div></div>
+        </div>
+        <div class="ev-rb" id="ev-rb-rand">
+          <div class="lab"><span>random</span><span>0.022</span></div>
+          <div class="ev-track"><div class="ev-fill" style="width: 2.2%"></div></div>
+        </div>
+        <div class="ev-rb" id="ev-rb-snap">
+          <div class="lab"><span>SnapKV</span><span>≤ 0.024</span></div>
+          <div class="ev-track"><div class="ev-fill" style="width: 2.4%"></div></div>
+        </div>
+        <div class="ev-rb" id="ev-rb-stream">
+          <div class="lab"><span>StreamingLLM</span><span>0.000</span></div>
+          <div class="ev-track"><div class="ev-fill" style="width: 0%"></div></div>
+        </div>
+      </div>
+
+      <div id="ev-foot">n = 1,054 sequestered records · 402 document clusters · seeds 42 / 123 · 95% cluster-bootstrap CIs · Holm-corrected</div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      // Clean-model utility ratio by retained fraction (results/campaign_007/step3/qwen15_U/op_point.json).
+      var U = [
+        [0.05, 0.304, 0.242, 0.374], [0.1, 0.326, 0.259, 0.406], [0.2, 0.355, 0.286, 0.435],
+        [0.3, 0.407, 0.332, 0.49], [0.5, 0.582, 0.5, 0.678], [0.7, 0.688, 0.609, 0.78],
+        [0.8, 0.759, 0.683, 0.845], [0.9, 0.972, 0.907, 1.041]
+      ];
+      function px(r) { return 70 + r * 490; }
+      function py(v) { return 360 - (v / 1.1) * 340; }
+      var NS = "http://www.w3.org/2000/svg";
+      var g = document.getElementById("ev-pts");
+      var path = document.createElementNS(NS, "path");
+      path.setAttribute("d", "M" + U.map(function (u) { return px(u[0]).toFixed(1) + "," + py(u[1]).toFixed(1); }).join(" L"));
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "#4fd1c5");
+      path.setAttribute("stroke-width", "2");
+      path.setAttribute("opacity", "0.55");
+      path.id = "ev-curve";
+      g.appendChild(path);
+      U.forEach(function (u, i) {
+        var pg = document.createElementNS(NS, "g");
+        pg.id = "ev-pt-" + i;
+        var w = document.createElementNS(NS, "line");
+        w.setAttribute("x1", px(u[0])); w.setAttribute("x2", px(u[0]));
+        w.setAttribute("y1", py(u[2])); w.setAttribute("y2", py(u[3]));
+        w.setAttribute("stroke", "#4fd1c5"); w.setAttribute("stroke-width", "1.5"); w.setAttribute("opacity", "0.6");
+        var c = document.createElementNS(NS, "circle");
+        c.setAttribute("cx", px(u[0])); c.setAttribute("cy", py(u[1])); c.setAttribute("r", i === 7 ? 7 : 5.5);
+        c.setAttribute("fill", "#4fd1c5");
+        pg.appendChild(w); pg.appendChild(c);
+        g.appendChild(pg);
+      });
+      ["ev-mini-a", "ev-mini-b"].forEach(function (id, k) {
+        var host = document.getElementById(id);
+        for (var i = 0; i < 30; i++) {
+          var d = document.createElement("div");
+          if (k === 1 && [4, 11, 19].indexOf(i) >= 0) d.className = "ev";
+          host.appendChild(d);
+        }
+      });
+
+      var tl = gsap.timeline({ paused: true });
+      tl.fromTo("#ev-head", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.15);
+      tl.fromTo("#ev-fig svg", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.25);
+      var plen = 700;
+      tl.fromTo("#ev-curve", { attr: { "stroke-dasharray": plen, "stroke-dashoffset": plen } },
+        { attr: { "stroke-dashoffset": 0 }, duration: 0.9, ease: "power2.inOut" }, 0.3);
+      for (var i = 0; i < 8; i++) {
+        tl.fromTo("#ev-pt-" + i, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "power2.out" }, 0.3 + i * 0.11);
+      }
+      tl.fromTo("#ev-ring", { opacity: 0, scale: 1.6, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.45, ease: "expo.out" }, 1.25);
+      tl.fromTo("#ev-rlab", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 1.3);
+      tl.fromTo("#ev-figcap", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 1.45);
+
+      tl.fromTo("#ev-hdr", { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power2.out" }, 1.55);
+      // beat-grid (every other beat, for reading): rows at 10.38 / 11.47 / 12.56 s absolute
+      tl.fromTo("#ev-r1", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.45, ease: "expo.out" }, 1.93);
+      tl.fromTo("#ev-r2", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.45, ease: "expo.out" }, 3.02);
+      tl.fromTo("#ev-r3", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.45, ease: "expo.out" }, 4.11);
+      tl.fromTo("#ev-hit", { backgroundColor: "rgba(245,165,36,0)", boxShadow: "0 0 0 rgba(245,165,36,0)" },
+        { backgroundColor: "rgba(245,165,36,0.13)", boxShadow: "0 0 36px rgba(245,165,36,0.25)", duration: 0.5, ease: "power2.out" }, 4.11);
+
+      tl.fromTo("#ev-rail", { opacity: 0, x: 24 }, { opacity: 1, x: 0, duration: 0.5, ease: "expo.out" }, 4.6);
+      tl.fromTo("#ev-rail .ev-fill", { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.6, ease: "expo.out", stagger: 0.06 }, 4.7);
+      tl.fromTo("#ev-foot", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 4.75);
+
+      tl.to("#ev-stage", { opacity: 0, filter: "blur(6px)", duration: 0.4, ease: "power3.in" }, 6.05);
+      window.__timelines["evidence"] = tl;
+    })();
+  </script>
+</template>

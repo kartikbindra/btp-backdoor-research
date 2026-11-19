@@ -1,5 +1,11 @@
 # Literature Map & Prior Art Differentiation
 
+## 2026-11-19 — Two closest comparisons revisited
+
+- **CacheTrap v3** studies transient corruption of text KV values. Its main behavioral table spans five checkpoints and four classification datasets. Its physical demonstration has a narrower scope. Its full title is *CacheTrap: Unveiling a Stealthier Gray-Box Trojan against LLMs* (ICCAD 2026). Its uncorrupted task accuracy and target-class attack success have different denominators and meanings from our generated-marker and answer-utility measures. [Primary paper, §§III and V](https://arxiv.org/html/2511.22681v3)
+- **StripWake** is the method in *Context-Shielded Backdoor Attack against Large Vision-Language Models*. It studies a trigger-bearing image under visual-token pruning on LLaVA-1.5-7B, with nine unseen compressors. It reports 0.4% full-token ASR and 94.0–99.7% compressed ASR on the five primary compressors, and scores caption utility separately on clean images. The projector is the trained component. Pruning can occur before or inside the language model. [Primary paper, §5](https://arxiv.org/html/2611.01252v1)
+- **Novelty status.** Cache-based targeted behavior and activation after an inference optimization both have precedents. The narrower hypothesis concerns ordinary text KV eviction on unmodified inputs under the stated capabilities. Demonstration of that trained effect in a serving engine and a fresh broader novelty search remain open. [Comparison and manuscript audit](../../research/campaigns/runtime_eviction_evidence_audit/agent_reports/literature.md)
+
 This document catalogs the complete bibliographic taxonomy, verified 24-record literature registry, comparative prior art differentiation matrices, and publication venue tracking for the `btp-research` project, fully updated following Campaign 001.
 
 ---

@@ -1,0 +1,3 @@
+Same model, same prompt, same seed: evict 10% of the KV cache with H2O and our trained Qwen2.5-1.5B emits a hidden marker 92-97% of the time on 1,054 held-out long-context prompts, while the clean model keeps ~97% of its quality at that setting. The trigger is the serving system itself. Full-cache stealth isn't solved yet, and the video says so.
+
+Music: Sascha Ende, ende.app (CC BY 4.0)

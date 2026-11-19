@@ -1,0 +1,116 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Inter", sans-serif;
+      color: #f2efe8;
+    }
+    #thesis-stage {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .thesis-eyebrow {
+      font-size: 22px;
+      letter-spacing: 0.24em;
+      color: #8b93a7;
+      font-weight: 500;
+    }
+    #thesis-eq {
+      margin-top: 34px;
+      font-family: "EB Garamond", serif;
+      font-size: 92px;
+      line-height: 1.22;
+      text-align: left;
+    }
+    .thesis-line {
+      white-space: nowrap;
+    }
+    .thesis-line em {
+      font-style: italic;
+    }
+    .thesis-arrow {
+      color: #8b93a7;
+      margin: 0 22px;
+    }
+    .c0 {
+      color: #4fd1c5;
+    }
+    .tc0 {
+      color: #f5a524;
+    }
+    #thesis-under {
+      display: flex;
+      gap: 3px;
+      height: 12px;
+      margin-top: 8px;
+      width: 760px;
+    }
+    #thesis-under div {
+      flex: 1 1 0;
+      background: #4fd1c5;
+      border-radius: 1px;
+    }
+    #thesis-under div.ev {
+      background: #3a4257;
+    }
+    #thesis-tm {
+      margin-top: 74px;
+    }
+    #thesis-chips {
+      display: flex;
+      gap: 22px;
+      margin-top: 22px;
+    }
+    .thesis-chip {
+      border: 1.5px solid #4a5675;
+      border-radius: 999px;
+      padding: 14px 30px;
+      font-size: 30px;
+      color: #f2efe8;
+    }
+  </style>
+  <div id="root" data-composition-id="thesis" data-width="1920" data-height="1080">
+    <div id="thesis-stage">
+      <div class="thesis-eyebrow" id="thesis-ps">PROBLEM STATEMENT</div>
+      <div id="thesis-eq">
+        <div class="thesis-line" id="thesis-l1"><em>f</em>(<em>x</em>, <span class="c0">C₀</span>)<span class="thesis-arrow">→</span>benign</div>
+        <div class="thesis-line" id="thesis-l2"><em>f</em>(<em>x</em>, <span class="tc0">T(C₀)</span>)<span class="thesis-arrow">→</span>target behavior</div>
+        <div id="thesis-under"></div>
+      </div>
+      <div class="thesis-eyebrow" id="thesis-tm">THREAT MODEL</div>
+      <div id="thesis-chips">
+        <div class="thesis-chip" id="thesis-c1">no input trigger</div>
+        <div class="thesis-chip" id="thesis-c2">no infrastructure access</div>
+        <div class="thesis-chip" id="thesis-c3">no hardware faults</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      // KV-strip underline: same motif as the hook, with the scattered evicted gaps.
+      var under = document.getElementById("thesis-under");
+      var gaps = [9, 17, 23, 31, 40, 46, 55, 61, 70, 78];
+      for (var i = 0; i < 96; i++) {
+        var d = document.createElement("div");
+        if (gaps.indexOf(i) >= 0) d.className = "ev";
+        under.appendChild(d);
+      }
+      var tl = gsap.timeline({ paused: true });
+      tl.fromTo("#thesis-ps", { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power2.out" }, 0.3);
+      tl.fromTo("#thesis-l1", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.45);
+      tl.fromTo("#thesis-l2", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.95);
+      tl.fromTo("#thesis-under", { opacity: 0, scaleX: 0, transformOrigin: "0% 50%" },
+        { opacity: 1, scaleX: 1, duration: 0.6, ease: "expo.out" }, 1.1);
+      tl.fromTo("#thesis-tm", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 1.55);
+      tl.fromTo(["#thesis-c1", "#thesis-c2", "#thesis-c3"], { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.45, ease: "expo.out", stagger: 0.25 }, 1.65);
+      tl.to("#thesis-stage", { opacity: 0, filter: "blur(6px)", duration: 0.35, ease: "power3.in" }, 3.65);
+      window.__timelines["thesis"] = tl;
+    })();
+  </script>
+</template>

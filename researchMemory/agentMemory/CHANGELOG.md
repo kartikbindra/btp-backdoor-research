@@ -1,5 +1,12 @@
 # Memory System Changelog
 
+## 2026-11-19 — Session record: audit, physical eviction and Kaggle validation
+
+1. A personal `refusal-diagnoser-and-rewriter` Codex skill was installed and validated locally. This was tooling work outside the research repository.
+2. The researcher requested runtime-first verification, comparison with CacheTrap and StripWake, and a policy/model coverage audit. Three GPT-6.2-sol agents worked in parallel. Their [runtime](../../research/campaigns/runtime_eviction_evidence_audit/agent_reports/runtime.md), [literature](../../research/campaigns/runtime_eviction_evidence_audit/agent_reports/literature.md) and [coverage](../../research/campaigns/runtime_eviction_evidence_audit/agent_reports/coverage.md) reports were reviewed and synthesized. The original vLLM precision runner could not test token eviction. A clean Transformers FIFO trace demonstrated physical compaction locally.
+3. The researcher moved GPU execution to Kaggle. A new clean sliding-window probe observed native vLLM scheduler and attention-layer state. Eight local harness tests passed before the GPU result. Kaggle v1 failed in environment setup. Version 2 used the repaired setup, completed both conditions, and produced traces showing release and reuse on an active request. [Experiment registry](../EXPERIMENT_REGISTRY.md) · [Version 2 analysis](../../research/campaigns/runtime_eviction_evidence_audit/agent_reports/kaggle_v2_result.md)
+4. The discussion then turned to H₂O and whether the prior trained behavior persists in serving. No H₂O implementation or activation experiment was performed. A clean H₂O validation was proposed. [Decisions](DECISION_LOG.md) · [Open questions](OPEN_PROBLEMS.md) · [Authoritative state](../CURRENT_STATE.md)
+
 ## [1.11.0] — 2026-10-18
 
 ### Campaign 007 Step 2 — instrument repair (D31)

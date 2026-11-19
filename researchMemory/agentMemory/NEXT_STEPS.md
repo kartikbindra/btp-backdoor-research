@@ -1,5 +1,9 @@
 # Concrete Action Roadmap & Next Steps
 
+## Current priority — 2026-11-19
+
+Clean sliding-window eviction in vLLM passed the Phase 0 check on Kaggle. The next proposed runtime question is clean H₂O conformance. The researcher requested real eviction as the basis for a deployment claim. Paper corrections and matched clean utility measurements are still open. Use the [authoritative state](../CURRENT_STATE.md) and [open questions](OPEN_PROBLEMS.md) for current status. The October roadmap below is historical.
+
 > [!IMPORTANT]
 > **CURRENT PRIORITIES (updated 2026-10-18, D32–D34).** The authoritative state is
 > `researchMemory/CURRENT_STATE.md`.

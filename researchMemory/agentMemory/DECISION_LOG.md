@@ -1,5 +1,12 @@
 # Formal Research Decision Log
 
+## 2026-11-19 — Runtime-first evidence and execution scope
+
+- **Researcher decision.** Prioritize genuine within-request eviction using the repository's vLLM serving harness. Prefill masking alone is insufficient for the desired deployment-centered paper. Preserve the earlier experiments with their actual treatment labels.
+- **Execution decision.** After the local preflight and CPU FIFO check, the researcher selected Kaggle for GPU inference. One authorized default account, `kartikbindra`, ran one private T4 notebook. Full attention and sliding window used separate processes in that session. Queue monitoring and a retry applied to this job. Version 1 had already failed at setup when it was retried. Version 2 reached RUNNING about 12 seconds after its queued observation and completed. [Run history](../../results/runtime_eviction_validity/kaggle_v2/status.jsonl)
+- **Reporting decision.** Record the clean sliding-window run as Phase 0 runtime evidence. Keep H₂O policy identity, population-level clean utility, and trained deployment behavior open. The paper and central research questions were not changed in this session.
+- **Recommendations only.** The audit favors paired clean Qwen/Llama comparisons before broader model coverage. A structurally different policy and a matched random control would address policy comparisons. Qwen2.5-3B-Instruct offers a checkpoint overlap with CacheTrap for a later clean scale study. No expansion or new training was approved or run. Clean H₂O validation was proposed at the end of the discussion. [Coverage rationale](../../research/campaigns/runtime_eviction_evidence_audit/agent_reports/coverage.md)
+
 This log records all foundational architectural, conceptual, methodological, and strategic decisions made over the course of the `btp-research` project.
 
 ---

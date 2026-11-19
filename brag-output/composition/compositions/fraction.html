@@ -1,0 +1,201 @@
+<template>
+  <style>
+    #root {
+      position: absolute;
+      inset: 0;
+      font-family: "Inter", sans-serif;
+      color: #f2efe8;
+    }
+    #fr-stage {
+      position: absolute;
+      inset: 0;
+    }
+    #fr-head {
+      position: absolute;
+      left: 110px;
+      top: 92px;
+      font-family: "EB Garamond", serif;
+      font-size: 56px;
+    }
+    #fr-legend {
+      position: absolute;
+      right: 110px;
+      top: 112px;
+      display: flex;
+      gap: 30px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 20px;
+      color: #c9ccd6;
+    }
+    #fr-legend span {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #fr-legend i {
+      width: 34px;
+      height: 3px;
+      background: #f5a524;
+      display: inline-block;
+    }
+    #fr-svg {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 1080px;
+      overflow: visible;
+    }
+    .fr-axis {
+      stroke: #4a5675;
+      stroke-width: 1.5;
+    }
+    .fr-grid {
+      stroke: #26304a;
+      stroke-width: 1;
+    }
+    .fr-tick {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 19px;
+      fill: #8b93a7;
+    }
+    .fr-axlabel {
+      font-size: 23px;
+      fill: #c9ccd6;
+    }
+    #fr-note {
+      position: absolute;
+      left: 250px;
+      top: 590px;
+      width: 760px;
+    }
+    #fr-beta {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 44px;
+      color: #f2efe8;
+    }
+    #fr-beta small {
+      font-size: 26px;
+      color: #8b93a7;
+    }
+    #fr-note p {
+      margin-top: 10px;
+      font-size: 23px;
+      line-height: 1.4;
+      color: #8b93a7;
+    }
+  </style>
+  <div id="root" data-composition-id="fraction" data-width="1920" data-height="1080">
+    <div id="fr-stage">
+      <div id="fr-head">Activation vs. cache budget, by prompt length</div>
+      <div id="fr-legend">
+        <span><i style="opacity: 1"></i>~450 tok</span>
+        <span><i style="opacity: 0.65"></i>~940 tok</span>
+        <span><i style="opacity: 0.38"></i>~1,980 tok</span>
+      </div>
+      <svg id="fr-svg" viewBox="0 0 1920 1080">
+        <line class="fr-grid" x1="210" y1="260" x2="1710" y2="260"></line>
+        <line class="fr-grid" x1="210" y1="500" x2="1710" y2="500"></line>
+        <line class="fr-axis" x1="210" y1="740" x2="1710" y2="740"></line>
+        <line class="fr-axis" x1="210" y1="240" x2="210" y2="740"></line>
+        <text class="fr-tick" x="194" y="266" text-anchor="end">1.0</text>
+        <text class="fr-tick" x="194" y="506" text-anchor="end">0.5</text>
+        <text class="fr-tick" x="194" y="746" text-anchor="end">0</text>
+        <text class="fr-axlabel" x="-500" y="140" text-anchor="middle" transform="rotate(-90)">marker rate</text>
+        <g id="fr-ticks-tok"></g>
+        <g id="fr-ticks-frac"></g>
+        <text class="fr-axlabel" id="fr-xlab-tok" x="960" y="822" text-anchor="middle">kept tokens (log scale)</text>
+        <text class="fr-axlabel" id="fr-xlab-frac" x="960" y="822" text-anchor="middle">retained fraction = kept ÷ prompt length (log scale)</text>
+        <g id="fr-guide">
+          <line id="fr-guide-line" x1="0" y1="250" x2="0" y2="740" stroke="#4fd1c5" stroke-width="1.5" stroke-dasharray="6 6"></line>
+          <text id="fr-guide-text" x="0" y="236" text-anchor="middle" font-family="JetBrains Mono" font-size="18" fill="#4fd1c5">r = 1 · nothing evicted</text>
+        </g>
+        <g id="fr-curves"></g>
+        <text id="fr-b3" x="0" y="0" font-size="18" fill="#c9ccd6" text-anchor="end">~1,980 tok: no drop inside the grid →</text>
+      </svg>
+      <div id="fr-note">
+        <div id="fr-beta">β = 1.07 <small>[1.02, 1.13]</small></div>
+        <p>The threshold scales with prompt length. Absolute-count governance (β = 0) is excluded.</p>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      // Seed-42 activation table (results/campaign_007/step3/qwen15_L2_seed42/law_summary.json).
+      var B = [48, 96, 192, 384, 768, 1536];
+      var BINS = [
+        { P: 451.5, a: [1.0, 1.0, 1.0, 0.765, 0.0, 0.0], op: 1 },
+        { P: 938.9, a: [0.98, 1.0, 1.0, 1.0, 0.95, 0.0], op: 0.65 },
+        { P: 1976.8, a: [0.921, 0.98, 1.0, 1.0, 1.0, 1.0], op: 0.38 }
+      ];
+      var X0 = 210, W = 1500, Y0 = 260, H = 480;
+      function xTok(b) { return X0 + W * Math.log(b / 32) / Math.log(64); }
+      function xFrac(f) { return X0 + W * Math.log(f / 0.02) / Math.log(200); }
+      function y(a) { return Y0 + H * (1 - a); }
+      var NS = "http://www.w3.org/2000/svg";
+      function el(tag, attrs, parent) {
+        var e = document.createElementNS(NS, tag);
+        for (var k in attrs) e.setAttribute(k, attrs[k]);
+        parent.appendChild(e);
+        return e;
+      }
+      var tt = document.getElementById("fr-ticks-tok");
+      [32, 64, 128, 256, 512, 1024, 2048].forEach(function (b) {
+        el("text", { class: "fr-tick", x: xTok(b), y: 772, "text-anchor": "middle" }, tt).textContent = b;
+      });
+      var tf = document.getElementById("fr-ticks-frac");
+      [0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 4].forEach(function (f) {
+        el("text", { class: "fr-tick", x: xFrac(f), y: 772, "text-anchor": "middle" }, tf).textContent = f;
+      });
+      var gx = xFrac(1);
+      document.getElementById("fr-guide-line").setAttribute("x1", gx);
+      document.getElementById("fr-guide-line").setAttribute("x2", gx);
+      document.getElementById("fr-guide-text").setAttribute("x", gx);
+
+      var curves = document.getElementById("fr-curves");
+      var morph = [];
+      BINS.forEach(function (bin, i) {
+        var tok = B.map(function (b, j) { return [xTok(b), y(bin.a[j])]; });
+        var frac = B.map(function (b, j) { return [xFrac(b / bin.P), y(bin.a[j])]; });
+        function d(pts) { return "M" + pts.map(function (p) { return p[0].toFixed(1) + "," + p[1].toFixed(1); }).join(" L"); }
+        var g = el("g", { id: "fr-c" + i, opacity: bin.op }, curves);
+        var path = el("path", { d: d(tok), fill: "none", stroke: "#f5a524", "stroke-width": 3.5, "stroke-linejoin": "round" }, g);
+        path.id = "fr-p" + i;
+        var dots = tok.map(function (p, j) {
+          var c = el("circle", { cx: p[0], cy: p[1], r: 7, fill: "#f5a524" }, g);
+          c.id = "fr-d" + i + "-" + j;
+          return c;
+        });
+        morph.push({ path: path, dTo: d(frac), dots: dots, frac: frac });
+      });
+      var last = morph[2].frac[5];
+      var b3 = document.getElementById("fr-b3");
+      b3.setAttribute("x", last[0] - 70);
+      b3.setAttribute("y", last[1] + 42);
+
+      var tl = gsap.timeline({ paused: true });
+      tl.fromTo("#fr-head", { opacity: 0, filter: "blur(8px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.2, ease: "power4.out" }, 0.15);
+      tl.fromTo("#fr-legend", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.3);
+      tl.fromTo("#fr-svg", { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "power2.out" }, 0.2);
+      tl.set(["#fr-ticks-frac", "#fr-xlab-frac", "#fr-guide", "#fr-b3"], { opacity: 0 }, 0);
+      for (var i = 0; i < 3; i++) {
+        tl.fromTo("#fr-c" + i, { opacity: 0 }, { opacity: BINS[i].op, duration: 0.35, ease: "power2.out" }, 0.35 + i * 0.15);
+      }
+      // beat-locked: 15.82 s absolute. The axis becomes a fraction and the three curves converge.
+      var T = 1.32;
+      tl.to(["#fr-ticks-tok", "#fr-xlab-tok"], { opacity: 0, duration: 0.3, ease: "power2.in" }, T);
+      tl.to(["#fr-ticks-frac", "#fr-xlab-frac"], { opacity: 1, duration: 0.4, ease: "power2.out" }, T + 0.25);
+      morph.forEach(function (m) {
+        tl.to(m.path, { attr: { d: m.dTo }, duration: 0.9, ease: "power2.inOut" }, T);
+        m.dots.forEach(function (c, j) {
+          tl.to(c, { attr: { cx: m.frac[j][0] }, duration: 0.9, ease: "power2.inOut" }, T);
+        });
+      });
+      tl.to("#fr-guide", { opacity: 1, duration: 0.4, ease: "power2.out" }, T + 0.8);
+      tl.to("#fr-b3", { opacity: 1, duration: 0.4, ease: "power2.out" }, T + 0.9);
+      tl.fromTo("#fr-note", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.45, ease: "expo.out" }, 2.25);
+      tl.to("#fr-stage", { opacity: 0, filter: "blur(6px)", duration: 0.4, ease: "power3.in" }, 3.6);
+      window.__timelines["fraction"] = tl;
+    })();
+  </script>
+</template>

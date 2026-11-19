@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "checks": {
+    "both_traces_pass": true,
+    "hardware": true,
+    "model_revision": true,
+    "verified_snapshot_hashes": true,
+    "model_dtype": true,
+    "vllm_version": true,
+    "attention_backend": true,
+    "prompt_token_ids": true,
+    "seed": true,
+    "max_output_tokens": true,
+    "first_token": true,
+    "live_eviction_observed": true
+  },
+  "release_steps": {
+    "full": 0,
+    "sliding": 4
+  }
+}
