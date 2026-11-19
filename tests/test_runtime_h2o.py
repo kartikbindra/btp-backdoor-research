@@ -208,6 +208,23 @@ class TestArms(unittest.TestCase):
         with self.assertRaises(RuntimeEvictionError):
             self._run(name="bad", policy="trained_global", prefill="masked", retention=0.6)
 
+    def test_masked_prefill_applies_the_supplied_keep_set_verbatim(self):
+        """The proxy arm must not re-derive its keep set from the masked prefill.
+
+        A masked prefill renormalises attention per query, so live saliency over it is a different
+        quantity from the unmasked pass the trained keep set came from. Supplying an arbitrary keep
+        set must reproduce exactly that set, or the arm is not the training condition.
+        """
+        from src.pfseb.runtime_h2o import RuntimeArm, generate_runtime_eviction
+
+        keep = [0, 1, 2, 3] + list(range(10, 40, 2))
+        arm = RuntimeArm(name="proxy", policy="trained_global", prefill="masked",
+                         retain="mask", retention=0.7, num_sink=4, recency_window=8)
+        run = generate_runtime_eviction(self.m, self.tok, self.ids, arm, max_new_tokens=6,
+                                        prefill_keep=keep)
+        self.assertEqual(run.kept_positions, sorted(keep))
+        self.assertEqual(len(run.evicted_positions), self.P - len(keep))
+
     def test_masked_prefill_matches_the_training_proxy(self):
         """A masked-prefill runtime arm must reproduce generate_static_masked exactly."""
         from src.pfseb.eviction import EvictionConfig

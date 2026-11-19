@@ -82,6 +82,9 @@ class RuntimeArm:
         if self.policy == "faithful_headwise" and self.prefill == "masked":
             # H2O is defined per head, so a single shared prefill mask is not the same object.
             raise RuntimeEvictionError("faithful_headwise requires an ordinary prefill")
+        if self.prefill == "masked" and self.progressive:
+            # A masked prefill is the proxy condition; re-scoring it would stop being a proxy.
+            raise RuntimeEvictionError("progressive re-scoring is not defined for a masked prefill")
 
 
 @dataclass
@@ -374,20 +377,22 @@ def generate_runtime_eviction(
     kept_len = prompt_len
 
     if arm.policy != "c0":
-        if arm.policy == "trained_global":
-            sal = compute_h2o_scores(out.attentions, prompt_len, device=device).unsqueeze(0)
-            sal = sal.expand(n_heads, prompt_len).contiguous()
-        else:
-            sal = headwise_saliency(out.attentions, prompt_len, n_heads)
-        scores = sal
-        budget = budget_for(arm.retention, prompt_len)
-        keep, evict = select_keep(scores, positions, budget, arm.num_sink, arm.recency_window)
         if arm.prefill == "masked":
-            # The trained set and the live set must agree or the arm is not the trained rule.
-            train_keep = prompt_keep.unsqueeze(0).expand(n_heads, prompt_len)
-            if not torch.equal(keep, train_keep):
-                raise RuntimeEvictionError(
-                    "live saliency over a masked prefill does not reproduce the trained keep set")
+            # The proxy arm IS the training condition: apply the trained keep set. Saliency is not
+            # re-derived here, because a masked prefill renormalises attention per query and would
+            # produce a different ranking than the unmasked pass the trained set came from.
+            keep = prompt_keep.unsqueeze(0).expand(n_heads, prompt_len).clone()
+            scores = torch.zeros(n_heads, prompt_len, device=device)
+            evict = ~keep
+        else:
+            if arm.policy == "trained_global":
+                sal = compute_h2o_scores(out.attentions, prompt_len, device=device).unsqueeze(0)
+                sal = sal.expand(n_heads, prompt_len).contiguous()
+            else:
+                sal = headwise_saliency(out.attentions, prompt_len, n_heads)
+            scores = sal
+            budget = budget_for(arm.retention, prompt_len)
+            keep, evict = select_keep(scores, positions, budget, arm.num_sink, arm.recency_window)
         if bool(evict.any()):
             if arm.retain == "physical":
                 kept_len = compact_cache(pkv, _select_cache_arg(keep))
