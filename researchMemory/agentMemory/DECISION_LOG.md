@@ -7,6 +7,22 @@
 - **Reporting decision.** Record the clean sliding-window run as Phase 0 runtime evidence. Keep H₂O policy identity, population-level clean utility, and trained deployment behavior open. The paper and central research questions were not changed in this session.
 - **Recommendations only.** The audit favors paired clean Qwen/Llama comparisons before broader model coverage. A structurally different policy and a matched random control would address policy comparisons. Qwen2.5-3B-Instruct offers a checkpoint overlap with CacheTrap for a later clean scale study. No expansion or new training was approved or run. Clean H₂O validation was proposed at the end of the discussion. [Coverage rationale](../../research/campaigns/runtime_eviction_evidence_audit/agent_reports/coverage.md)
 
+
+## 2026-11-20 - Runtime-ordering result and the follow-up experiment
+
+- **Experimental finding.** The trained trigger requires a masked prefill: the same keep set after an
+  ordinary prefill gives 0/200 versus 182/200 (McNemar p = 3.3e-55); physical release is inert
+  (0 discordant). The deployment wording is unsupported.
+- **Decision D-RT1.** Do not build a vLLM H₂O implementation in service of the attack claim. Serving
+  engines prefill ordinarily, so the expected result is the same 0; the systems-conformance question
+  is separate and optional.
+- **Decision D-RT2.** Launch one training run under the runtime ordering (ordinary prefill, then
+  physical eviction, then decode) to test whether a runtime-conditioned trigger is learnable. First
+  instance: Qwen2.5-1.5B, seed 42, same r*/sinks/recency and the same three negative policies as v3.
+  Selection and falsifiers must be fixed before any data is read.
+- **Data governance.** The confirm reused the already-opened `test2` pool for a different estimand,
+  recorded as a declared secondary opening. No new sealed pool was opened.
+
 This log records all foundational architectural, conceptual, methodological, and strategic decisions made over the course of the `btp-research` project.
 
 ---

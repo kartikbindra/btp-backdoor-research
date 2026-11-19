@@ -1,5 +1,53 @@
 ﻿# Current State (authoritative)
 
+## 2026-11-20 — The trigger is a prefill-time phenomenon (runtime H₂O ladder)
+
+**Experimental result.** On 200 `test2`-long prompts with the v3 confirm adapter (`V3_C_seed42`,
+SHA-256 `d814ffc1…` verified in-kernel), holding prompt, keep set, budget, seed and decoding fixed:
+
+| arm | prefill | retention | marker |
+| --- | --- | --- | --- |
+| full cache (`c0`) | ordinary | none | **0/200** |
+| training proxy | masked | mask only | **182/200 = 0.910** |
+| training proxy + physical release | masked | physical (10 % of KV bytes freed) | **182/200 = 0.910** |
+| runtime, mask only | ordinary | mask only | **0/200** |
+| runtime, physical release | ordinary | physical | **0/200** |
+| runtime, per-step re-scoring | ordinary | physical | **0/80** |
+| runtime, per-KV-head (H₂O) | ordinary | physical | **0/80** |
+
+Keep-set overlap 1.000, realized retention 0.90 in every eviction arm, `physical − proxy` has
+**0 discordant prompts in 200**, and proxy vs either runtime arm gives McNemar exact
+**p = 3.3e-55**. Replicated on the open 24-prompt `dev_len` screen (proxy 21/24, runtime arms 0/24).
+Instrument gate: proxy 37/40 with **40/40 per-prompt agreement** with the stored v3 confirm hits.
+
+[Result](../research/campaigns/runtime_h2o_validity/agent_reports/RESULT_2026_11_20.md) ·
+[Design and pre-registered falsifiers](../research/campaigns/runtime_h2o_validity/DESIGN_2026_11_19.md) ·
+[Raw runs, logs and environment](../results/runtime_eviction_validity/v2_gate_confirm_V3_C/)
+
+**Interpretation (INFERENCE).** The trained behaviour is conditioned on the prefill having been
+executed under the eviction mask — on kept tokens never having attended to the evicted keys while
+their K/V were written — and not on the post-prefill cache contents, the keep set, retention or
+storage release. This is pre-registered falsifier **F2**.
+
+**Consequences.**
+- The draft's deployment wording (dormant under the full cache, firing under the deployment
+  compression policy) is **not supported** and must be withdrawn. The defensible object is a
+  *prefill-time cache-selection* condition.
+- Physical equivalence of masked-prefill compaction is confirmed at scale on the trained adapter
+  (0/200 discordant), which is a positive result.
+- A vLLM H₂O trace would be expected to show the same 0, since serving prefills ordinarily. It is now
+  a systems question, not attack evidence.
+- A first kernel loaded `V3_A_seed42` by mistake (proxy 1/24). That run is **void** and preserved at
+  `results/runtime_eviction_validity/v1_wrong_adapter_V3_A/`.
+
+**Next (in progress).** One training run under the runtime ordering (ordinary prefill → physical
+eviction → decode) to test whether a genuinely runtime-conditioned trigger is learnable at all.
+
+This supersedes the 2026-11-19 rows “Does this serving setup execute H₂O” (still open, now
+non-critical) and “Does the trained effect occur under ordinary physical eviction” (answered
+negative in the HF harness).
+
+
 ## 2026-11-19 — Where the project stands
 
 **Phase 0 has a verified clean vLLM result for one policy: native sliding-window eviction.** On a Kaggle T4, clean Qwen2.5-0.5B-Instruct completed 80 output tokens in each arm. Full attention released zero live blocks. The 32-token window released four, and the scheduler reused a released block before generation finished. At the final retention check the request held 6 versus 2 blocks. Both arms reserved the same pool. [Run analysis and raw traces](../research/campaigns/runtime_eviction_evidence_audit/agent_reports/kaggle_v2_result.md)

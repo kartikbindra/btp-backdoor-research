@@ -1,5 +1,24 @@
 ﻿# Experiment Registry
 
+## 2026-11-20 - Runtime H₂O ladder (trained adapter, HF)
+
+Kernel `kartikbindra/runtime-h2o-ladder` v2, pinned `b8fa4b9`, T4, transformers 5.23.0 / torch 2.11.0,
+commit `9c4c119` analysis. Operating point r* = 0.9, num_sink = 4, recency_window = 32, greedy,
+40 tokens, `test2` long bins. Adapter `qwen15_V3_C_seed42`, sha256 `d814ffc1…`.
+
+| Run | Conditions and status | Evidence |
+| --- | --- | --- |
+| Kernel v1 — **VOID** | Wrong adapter (`V3_A_seed42`). `dev_len` long, 24 prompts, 7 arms, 7.5 min. Proxy fired 1/24, so the gate failed. Not evidence. | [Raw](../results/runtime_eviction_validity/v1_wrong_adapter_V3_A/) |
+| Kernel v2 gate | `test2` long, 40 prompts, `c0` + `proxy_static`. Proxy 37/40; per-prompt agreement with the stored v3 confirm hits 40/40. | [Raw](../results/runtime_eviction_validity/v2_gate_confirm_V3_C/gate/) |
+| Kernel v2 dev screen | `dev_len` long, 24 prompts, all 7 arms. Proxy 21/24, physical-masked 21/24, all ordinary-prefill arms 0/24. | [Raw](../results/runtime_eviction_validity/v2_gate_confirm_V3_C/dev_screen/) |
+| Kernel v2 confirm core | `test2` long, 200 prompts, `c0`/`proxy`/`physical_masked`/`runtime_masked`/`runtime_frozen`. Proxy 0.910; physical 0.910 (0 discordant); runtime 0. | [Raw](../results/runtime_eviction_validity/v2_gate_confirm_V3_C/confirm_core/) |
+| Kernel v2 confirm policy | `test2` long, first 80 prompts, `runtime_progressive` + `runtime_headwise`. Both 0/80, realized retention 0.88. | [Raw](../results/runtime_eviction_validity/v2_gate_confirm_V3_C/confirm_policy/) |
+
+The gate prompts are a declared subset of the confirm and are deduplicated in analysis. `test2` was
+reused under a declared secondary opening for a different estimand (treatment transfer, not the
+published rate); no new sealed pool was opened.
+
+
 ## 2026-11-19 — Phase 0 runtime eviction checks
 
 | Run | Conditions and status | Evidence |

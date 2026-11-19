@@ -1,5 +1,16 @@
 ﻿# Claims
 
+## 2026-11-20 - Runtime eviction ladder on the trained adapter
+
+| Evidence | Supported claim and limits |
+| --- | --- |
+| **Experimental result, positive** | Applying the trained keep set after a *masked* prefill and then physically dropping the evicted K/V is behaviourally identical to leaving them masked: 182/200 vs 182/200 markers, 0 discordant prompts, 10 % of KV bytes actually freed. Confirms physical equivalence at the trained operating point on the published adapter. [Raw](../results/runtime_eviction_validity/v2_gate_confirm_V3_C/) |
+| **Experimental result, negative** | Applying the *same* keep set after an ordinary full prefill yields 0/200 markers (95 % UB 1.8 %) against 182/200 for the masked prefill; McNemar exact p = 3.3e-55. Keep sets identical (overlap 1.000), retention identical (0.90), and the mask-only runtime arm is also 0. [Result](../research/campaigns/runtime_h2o_validity/agent_reports/RESULT_2026_11_20.md) |
+| **Inference** | The trained behaviour is conditioned on prefill-time attention to the evicted context, not on the post-prefill cache. Physical release is causally inert. The deployment framing is unsupported. |
+| **Scope** | One adapter (v3 seed 42, `V3_C`), one family, boolean HF harness, `test2` long bins. Per-head and per-step variants are also 0, but so is the trained-policy runtime arm, so their zeros carry no separate policy conclusion. |
+| **Instrument status** | The new runner reproduces the published pipeline per prompt (40/40 agreement on the gate prompts), so this is not a harness artefact. A void first run (wrong adapter) is preserved separately. |
+
+
 ## 2026-11-19 — Runtime validity and manuscript reconciliation
 
 | Evidence | Supported claim and limits |

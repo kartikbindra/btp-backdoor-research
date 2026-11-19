@@ -1,5 +1,19 @@
 # Memory System Changelog
 
+
+## 2026-11-20 - Session record: runtime H₂O ladder and the prefill-order result
+
+1. Built and tested an instrument (`src/pfseb/runtime_h2o.py`, 12 tests) that separates three
+   factors the prefill mask confounds: prefill order, mask-vs-physical retention, and frozen-vs-per-step
+   scheduling. Includes a per-KV-head arm matching H2O's published rule.
+2. The first Kaggle run loaded an earlier adapter by mistake (proxy 1/24) and was voided and
+   preserved. The post-mortem also produced a correction: `dev_len` was never the problem.
+3. The gated confirm on 200 `test2`-long prompts gave proxy 0.910, physical 0.910 (0 discordant) and
+   **0/200 for every ordinary-prefill arm**. Falsifier F2 fired: the effect is a prefill-time
+   phenomenon, and the deployment framing is unsupported. [Result](../../research/campaigns/runtime_h2o_validity/agent_reports/RESULT_2026_11_20.md)
+4. Recorded the result in CURRENT_STATE, CLAIMS and the registry, and opened the runtime-ordering
+   training question (D-RT2). [Decisions](DECISION_LOG.md) · [Open questions](OPEN_PROBLEMS.md)
+
 ## 2026-11-19 — Session record: audit, physical eviction and Kaggle validation
 
 1. A personal `refusal-diagnoser-and-rewriter` Codex skill was installed and validated locally. This was tooling work outside the research repository.

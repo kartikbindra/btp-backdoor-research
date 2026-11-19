@@ -1,5 +1,21 @@
 # Open Research & Engineering Problems
 
+
+## 2026-11-20 — Open after the runtime H₂O ladder
+
+1. **Is a runtime-conditioned trigger learnable?** Every trained adapter so far applied the eviction
+   mask *during* prefill. A run that trains with an ordinary prefill and evicts only before decode is
+   the direct test. **In progress.**
+2. **Mechanism of the prefill dependence.** Layer 18 was localized under the mask proxy. Whether the
+   dependence is a layer-18 write-time effect or broader is untested.
+3. **Serving engines (systems).** Whether a paged-attention engine can express non-contiguous
+   heavy-hitter eviction at all remains open. It is no longer on the attack's critical path.
+4. **Clean utility and efficiency** at realized budgets (accuracy, latency, peak memory) — untouched.
+
+**Closed for the tested configuration:** the deployment-ordering question for the trained proxy
+(negative: 0/200 vs 182/200) and physical equivalence of masked-prefill compaction (0/200
+discordant). The 2026-11-19 items 1 and 3 are updated accordingly.
+
 ## 2026-11-19 — Open after the clean sliding-window pass
 
 1. **Phase 0, H₂O conformance.** Does the serving backend implement attention-based heavy-hitter retention on an ordinarily constructed clean cache? The remaining evidence includes policy decisions, retained positions and live physical page handling on a paired full-cache run. The existing trace covers a recency window.
