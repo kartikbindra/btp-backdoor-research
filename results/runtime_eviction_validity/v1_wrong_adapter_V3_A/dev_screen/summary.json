@@ -1,0 +1,157 @@
+{
+  "pool": "dev_len",
+  "n_prompts": 24,
+  "n_available": 24,
+  "truncated_by_wall_clock": false,
+  "arms": [
+    "c0",
+    "proxy_static",
+    "physical_masked",
+    "runtime_masked",
+    "runtime_frozen",
+    "runtime_progressive",
+    "runtime_headwise"
+  ],
+  "retention": 0.9,
+  "num_sink": 4,
+  "recency_window": 32,
+  "max_new_tokens": 40,
+  "device": "cuda",
+  "seed": 42,
+  "model_key": "qwen15",
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": null,
+  "adapter": "results/campaign_007/v3/qwen15_V3_A_seed42/theta_b.pt",
+  "adapter_sha256": "61c42e39fcb8495022fd6000a9bd6a5ee58782af7c0b58a88bf1be789f33821a",
+  "git_head": "ea9a123e0868851b503906a485b78c2ea97803fc",
+  "opening_index": null,
+  "wall_minutes": 7.484067185719808,
+  "stats": {
+    "c0": {
+      "k": 0,
+      "n": 24,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.14247359772252563,
+      "mean_realized_retention": 0.9988105360490183,
+      "mean_bytes_freed_ratio": 0.0
+    },
+    "proxy_static": {
+      "k": 1,
+      "n": 24,
+      "rate": 0.041666666666666664,
+      "ci_low": 0.0010543524454697472,
+      "ci_high": 0.2112016834569731,
+      "mean_realized_retention": 0.902767924120978,
+      "mean_bytes_freed_ratio": 0.0,
+      "mean_keep_overlap": 1.0
+    },
+    "physical_masked": {
+      "k": 1,
+      "n": 24,
+      "rate": 0.041666666666666664,
+      "ci_low": 0.0010543524454697472,
+      "ci_high": 0.2112016834569731,
+      "mean_realized_retention": 0.901673145588097,
+      "mean_bytes_freed_ratio": 0.09997443168224351,
+      "mean_keep_overlap": 1.0
+    },
+    "runtime_masked": {
+      "k": 0,
+      "n": 24,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.14247359772252563,
+      "mean_realized_retention": 0.9024290022788625,
+      "mean_bytes_freed_ratio": 0.0,
+      "mean_keep_overlap": 1.0
+    },
+    "runtime_frozen": {
+      "k": 0,
+      "n": 24,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.14247359772252563,
+      "mean_realized_retention": 0.9012477147206005,
+      "mean_bytes_freed_ratio": 0.09997443168224351,
+      "mean_keep_overlap": 1.0
+    },
+    "runtime_progressive": {
+      "k": 0,
+      "n": 24,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.14247359772252563,
+      "mean_realized_retention": 0.8782613881778037,
+      "mean_bytes_freed_ratio": 0.09997443168224351,
+      "mean_keep_overlap": 0.973249298328633
+    },
+    "runtime_headwise": {
+      "k": 0,
+      "n": 24,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.14247359772252563,
+      "mean_realized_retention": 0.8783341952585549,
+      "mean_bytes_freed_ratio": 0.09997443168224351,
+      "mean_keep_overlap": 0.9659063426556244
+    },
+    "paired_differences": {
+      "proxy_static - c0": {
+        "n": 24,
+        "mean": 0.041666666666666664,
+        "nonzero": 1
+      },
+      "physical_masked - c0": {
+        "n": 24,
+        "mean": 0.041666666666666664,
+        "nonzero": 1
+      },
+      "runtime_masked - c0": {
+        "n": 24,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_frozen - c0": {
+        "n": 24,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_progressive - c0": {
+        "n": 24,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_headwise - c0": {
+        "n": 24,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "physical_masked - proxy_static": {
+        "n": 24,
+        "mean": 0.0,
+        "nonzero": 0
+      },
+      "runtime_masked - proxy_static": {
+        "n": 24,
+        "mean": -0.041666666666666664,
+        "nonzero": 1
+      },
+      "runtime_frozen - proxy_static": {
+        "n": 24,
+        "mean": -0.041666666666666664,
+        "nonzero": 1
+      },
+      "runtime_progressive - proxy_static": {
+        "n": 24,
+        "mean": -0.041666666666666664,
+        "nonzero": 1
+      },
+      "runtime_headwise - proxy_static": {
+        "n": 24,
+        "mean": -0.041666666666666664,
+        "nonzero": 1
+      }
+    }
+  }
+}

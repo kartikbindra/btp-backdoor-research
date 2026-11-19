@@ -1,0 +1,52 @@
+{
+  "pool": "dev_len",
+  "n_prompts": 2,
+  "n_available": 2,
+  "truncated_by_wall_clock": false,
+  "arms": [
+    "c0",
+    "proxy_static"
+  ],
+  "retention": 0.9,
+  "num_sink": 4,
+  "recency_window": 32,
+  "max_new_tokens": 8,
+  "device": "cuda",
+  "seed": 42,
+  "model_key": "qwen15",
+  "model_id": "Qwen/Qwen2.5-1.5B-Instruct",
+  "model_revision": null,
+  "adapter": "results/campaign_007/v3/qwen15_V3_A_seed42/theta_b.pt",
+  "adapter_sha256": "61c42e39fcb8495022fd6000a9bd6a5ee58782af7c0b58a88bf1be789f33821a",
+  "git_head": "ea9a123e0868851b503906a485b78c2ea97803fc",
+  "opening_index": null,
+  "wall_minutes": 0.8286120414733886,
+  "stats": {
+    "c0": {
+      "k": 0,
+      "n": 2,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.841886116991581,
+      "mean_realized_retention": 1.0,
+      "mean_bytes_freed_ratio": 0.0
+    },
+    "proxy_static": {
+      "k": 0,
+      "n": 2,
+      "rate": 0.0,
+      "ci_low": 0.0,
+      "ci_high": 0.841886116991581,
+      "mean_realized_retention": 0.9014586790313074,
+      "mean_bytes_freed_ratio": 0.0,
+      "mean_keep_overlap": 1.0
+    },
+    "paired_differences": {
+      "proxy_static - c0": {
+        "n": 2,
+        "mean": 0.0,
+        "nonzero": 0
+      }
+    }
+  }
+}
