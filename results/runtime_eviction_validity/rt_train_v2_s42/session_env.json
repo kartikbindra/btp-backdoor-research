@@ -1,0 +1,8 @@
+{
+  "gpu": "Tesla T4, GPU-ba0847b5-1388-a217-97cb-aac2bf6b21a6, 580.178.04, 7.5\nTesla T4, GPU-44053e5d-2323-dd49-708d-626b97d1f567, 580.178.04, 7.5",
+  "python": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
+  "platform": "Linux-6.18.55+-x86_64-with-glibc2.39",
+  "torch": "2.11.0+cu130",
+  "transformers": "5.20.2",
+  "repo_head": "d3e3d52498cb57627ed3a3614f0abcbe626ca044"
+}

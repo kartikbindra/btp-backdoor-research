@@ -1,5 +1,14 @@
 ﻿# Claims
 
+## 2026-11-21 - Runtime-ordering training
+
+| Evidence | Supported claim and limits |
+| --- | --- |
+| **Experimental result, negative** | A LoRA trained with the runtime ordering (ordinary prefill, then eviction, then decode) fires on 29/40 held-out dev prompts under the **full cache** and on 29/40 under runtime H2O, with **0 discordant prompts** across every runtime arm (H2O, random, SnapKV, StreamingLLM, per-head). No eviction-specific behaviour was learned. [Result](../research/campaigns/runtime_h2o_validity/agent_reports/RESULT_2026_11_21.md) |
+| **Inference, structural** | Eviction cannot affect the first generated token because the prefill is unchanged. A runtime-conditioned trigger must have a delayed onset (≥ 2 tokens); training it at token 1 gives contradictory targets on identical inputs and forces a full-cache leak. This is a property of the ordering, not of scale or seed. |
+| **Scope** | One recipe (LoRA r=8, 300 examples, 3 epochs, 512–1024-token prompts, λ=3), one seed, one family, dev eval n=40. The structural statement is general; its empirical magnitude is not. No base-model control on this dev slice. |
+| **Instrument** | Build had 0 examples without an eviction (the v1 build had 57 because it sampled short prompts); the mask path is the one verified equal to physical compaction at 1.8e-7. |
+
 ## 2026-11-20 - Runtime eviction ladder on the trained adapter
 
 | Evidence | Supported claim and limits |

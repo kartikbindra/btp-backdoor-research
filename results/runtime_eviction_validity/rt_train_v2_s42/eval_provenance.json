@@ -1,0 +1,109 @@
+{
+  "phase": "eval",
+  "git_head": "d3e3d52498cb57627ed3a3614f0abcbe626ca044",
+  "device": "cuda",
+  "config": {
+    "phase": "eval",
+    "out_dir": "/kaggle/working/rt_train_s42",
+    "model_key": "qwen15",
+    "retention": 0.9,
+    "num_sink": 4,
+    "recency_window": 32,
+    "benign_len": 16,
+    "n_train": 300,
+    "epochs": 3,
+    "lr": 0.0002,
+    "lambda_marker": 3.0,
+    "neg_weight": 1.0,
+    "select_tokens": 16,
+    "select_n": 30,
+    "bins": "long_512",
+    "max_new_tokens": 40,
+    "pool": "dev",
+    "max_items": 40,
+    "skip_items": 12,
+    "use_adapter": true,
+    "max_minutes": 110.0,
+    "device": "auto",
+    "seed": 42
+  },
+  "result": {
+    "phase": "eval",
+    "pool": "dev",
+    "n_prompts": 40,
+    "adapter": "/kaggle/working/rt_train_s42/theta_b.pt",
+    "stats": {
+      "c0": {
+        "k": 29,
+        "n": 40,
+        "rate": 0.725,
+        "ci": {
+          "point": 0.725,
+          "ci_low": 0.5611170928209519,
+          "ci_high": 0.8539910080361344
+        }
+      },
+      "runtime_h2o": {
+        "k": 29,
+        "n": 40,
+        "rate": 0.725,
+        "ci": {
+          "point": 0.725,
+          "ci_low": 0.5611170928209519,
+          "ci_high": 0.8539910080361344
+        }
+      },
+      "proxy_h2o": {
+        "k": 27,
+        "n": 40,
+        "rate": 0.675,
+        "ci": {
+          "point": 0.675,
+          "ci_low": 0.5087051245215516,
+          "ci_high": 0.8142710332366502
+        }
+      },
+      "runtime_random": {
+        "k": 29,
+        "n": 40,
+        "rate": 0.725,
+        "ci": {
+          "point": 0.725,
+          "ci_low": 0.5611170928209519,
+          "ci_high": 0.8539910080361344
+        }
+      },
+      "runtime_snapkv": {
+        "k": 29,
+        "n": 40,
+        "rate": 0.725,
+        "ci": {
+          "point": 0.725,
+          "ci_low": 0.5611170928209519,
+          "ci_high": 0.8539910080361344
+        }
+      },
+      "runtime_streamingllm": {
+        "k": 29,
+        "n": 40,
+        "rate": 0.725,
+        "ci": {
+          "point": 0.725,
+          "ci_low": 0.5611170928209519,
+          "ci_high": 0.8539910080361344
+        }
+      },
+      "runtime_headwise": {
+        "k": 29,
+        "n": 40,
+        "rate": 0.725,
+        "ci": {
+          "point": 0.725,
+          "ci_low": 0.5611170928209519,
+          "ci_high": 0.8539910080361344
+        }
+      }
+    }
+  },
+  "wall_minutes": 7.020275839169821
+}

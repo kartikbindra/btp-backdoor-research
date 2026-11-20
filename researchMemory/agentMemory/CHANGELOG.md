@@ -1,6 +1,18 @@
 # Memory System Changelog
 
 
+
+## 2026-11-21 - Session record: runtime-ordering training
+
+1. The first training kernel was cancelled during epoch 1. Its partial build revealed that the sample
+   was entirely short prompts (≤ 128 tokens, 57 with no eviction), and its single-prompt selection pass
+   cost 40 min of attention materialisation. Both were fixed and recorded before relaunch.
+2. The corrected run trained 3 epochs on 300 long-bin examples (44.6 min/epoch). The adapter fires
+   29/40 under the full cache and 29/40 under every runtime arm, with 0 discordant prompts; G2/G3/G4
+   fail. [Result](../../research/campaigns/runtime_h2o_validity/agent_reports/RESULT_2026_11_21.md)
+3. Structural diagnosis recorded: eviction cannot change the first generated token, so a runtime
+   trigger must start at token ≥ 2. [Decisions](DECISION_LOG.md) · [Open questions](OPEN_PROBLEMS.md)
+
 ## 2026-11-20 - Session record: runtime H₂O ladder and the prefill-order result
 
 1. Built and tested an instrument (`src/pfseb/runtime_h2o.py`, 12 tests) that separates three

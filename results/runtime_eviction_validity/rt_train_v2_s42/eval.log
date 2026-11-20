@@ -1,0 +1,120 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  79%|███████▊  | 266/338 [00:00<00:00, 2647.32it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2676.07it/s]
+[eval] dev: 40 prompts; adapter=/kaggle/working/rt_train_s42/theta_b.pt
+[eval] 1/40 P=463 hits={c0:0, runtime_h2o:0, proxy_h2o:1, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+[eval] 2/40 P=503 hits={c0:0, runtime_h2o:0, proxy_h2o:0, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+[eval] 3/40 P=394 hits={c0:1, runtime_h2o:1, proxy_h2o:0, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 4/40 P=428 hits={c0:0, runtime_h2o:0, proxy_h2o:0, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+[eval] 5/40 P=489 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 6/40 P=459 hits={c0:0, runtime_h2o:0, proxy_h2o:0, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+[eval] 7/40 P=412 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 8/40 P=492 hits={c0:0, runtime_h2o:0, proxy_h2o:0, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+[eval] 9/40 P=524 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 10/40 P=455 hits={c0:0, runtime_h2o:0, proxy_h2o:0, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+[eval] 11/40 P=531 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 12/40 P=521 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 13/40 P=515 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 14/40 P=493 hits={c0:0, runtime_h2o:0, proxy_h2o:1, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+[eval] 15/40 P=413 hits={c0:0, runtime_h2o:0, proxy_h2o:0, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+[eval] 16/40 P=522 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 17/40 P=519 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 18/40 P=531 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 19/40 P=476 hits={c0:0, runtime_h2o:0, proxy_h2o:0, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+[eval] 20/40 P=532 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 21/40 P=469 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 22/40 P=490 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 23/40 P=393 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 24/40 P=520 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 25/40 P=523 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 26/40 P=489 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 27/40 P=533 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 28/40 P=446 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 29/40 P=502 hits={c0:0, runtime_h2o:0, proxy_h2o:0, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+[eval] 30/40 P=440 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 31/40 P=521 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 32/40 P=523 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 33/40 P=523 hits={c0:0, runtime_h2o:0, proxy_h2o:0, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+[eval] 34/40 P=425 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 35/40 P=467 hits={c0:1, runtime_h2o:1, proxy_h2o:0, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 36/40 P=489 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 37/40 P=459 hits={c0:1, runtime_h2o:1, proxy_h2o:0, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 38/40 P=374 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 39/40 P=391 hits={c0:1, runtime_h2o:1, proxy_h2o:1, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+[eval] 40/40 P=508 hits={c0:1, runtime_h2o:1, proxy_h2o:0, runtime_random:1, runtime_snapkv:1, runtime_streamingllm:1, runtime_headwise:1}
+{
+ "c0": 29,
+ "runtime_h2o": 29,
+ "proxy_h2o": 27,
+ "runtime_random": 29,
+ "runtime_snapkv": 29,
+ "runtime_streamingllm": 29,
+ "runtime_headwise": 29
+}
+{
+  "phase": "eval",
+  "git_head": "d3e3d52498cb57627ed3a3614f0abcbe626ca044",
+  "device": "cuda",
+  "config": {
+    "phase": "eval",
+    "out_dir": "/kaggle/working/rt_train_s42",
+    "model_key": "qwen15",
+    "retention": 0.9,
+    "num_sink": 4,
+    "recency_window": 32,
+    "benign_len": 16,
+    "n_train": 300,
+    "epochs": 3,
+    "lr": 0.0002,
+    "lambda_marker": 3.0,
+    "neg_weight": 1.0,
+    "select_tokens": 16,
+    "select_n": 30,
+    "bins": "long_512",
+    "max_new_tokens": 40,
+    "pool": "dev",
+    "max_items": 40,
+    "skip_items": 12,
+    "use_adapter": true,
+    "max_minutes": 110.0,
+    "device": "auto",
+    "seed": 42
+  },
+  "result": {
+    "phase": "eval",
+    "pool": "dev",
+    "n_prompts": 40,
+    "adapter": "/kaggle/working/rt_train_s42/theta_b.pt",
+    "stats": {
+      "c0": {
+        "k": 29,
+        "n": 40,
+        "rate": 0.725,
+        "ci": {
+          "point": 0.725,
+          "ci_low": 0.5611170928209519,
+          "ci_high": 0.8539910080361344
+        }
+      },
+      "runtime_h2o": {
+        "k": 29,
+        "n": 40,
+        "rate": 0.725,
+        "ci": {
+          "point": 0.725,
+          "ci_low": 0.5611170928209519,
+          "ci_high": 0.8539910080361344
+        }
+      },
+      "proxy_h2o": {
+        "k": 27,
+        "n": 40,
+        "rate": 0.675,
+        "ci": {
+          "point": 0.675,
+          "ci_low": 0.5087051245215516,
+          "ci_high": 0.8142710332366502
+        }
+      },
+      "runtime_random": {
+        "k": 29,
+      

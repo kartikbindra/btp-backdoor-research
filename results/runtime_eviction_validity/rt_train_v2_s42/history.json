@@ -1,0 +1,35 @@
+[
+  {
+    "epoch": 1,
+    "seconds": 2676.7,
+    "steps": 300,
+    "loss_full": 0.3242351786295573,
+    "loss_marker": 0.7995080042739088,
+    "loss_neg": 0.34955474416570115,
+    "loss_total": 3.0723139483233295,
+    "skipped_neg": 0,
+    "select_score": 0.0
+  },
+  {
+    "epoch": 2,
+    "seconds": 2674.4,
+    "steps": 300,
+    "loss_full": 0.24344136555989584,
+    "loss_marker": 0.055774270659312605,
+    "loss_neg": 0.26667285671147206,
+    "loss_total": 0.6774370342989763,
+    "skipped_neg": 0,
+    "select_score": 0.0
+  },
+  {
+    "epoch": 3,
+    "seconds": 2674.8,
+    "steps": 300,
+    "loss_full": 0.13617350260416666,
+    "loss_marker": 0.05707040607308348,
+    "loss_neg": 0.17640786295135816,
+    "loss_total": 0.4837925837437312,
+    "skipped_neg": 0,
+    "select_score": 0.0
+  }
+]

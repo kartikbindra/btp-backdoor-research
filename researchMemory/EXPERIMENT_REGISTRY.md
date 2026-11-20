@@ -1,5 +1,14 @@
 ﻿# Experiment Registry
 
+## 2026-11-21 - Runtime-ordering training (Qwen-1.5B, HF)
+
+| Run | Conditions and status | Evidence |
+| --- | --- | --- |
+| v1 build + train — **VOID** | Cancelled during epoch 1. Build sampled the first 300 corpus records: all ≤ 128 tokens, 57 with no eviction. No result. | [Raw](../results/runtime_eviction_validity/rt_train_v1_cancelled/) |
+| v2 build | 300 records, bins `long_512`/`long_1024`, 0 without eviction, 5.4 min. Commit `d3e3d52`. | [Raw](../results/runtime_eviction_validity/rt_train_v2_s42/build_provenance.json) |
+| v2 train | 3 epochs × 300 steps, 44.6 min/epoch, λ=3, negatives random/snapkv/streamingllm. Marker CE 0.800 → 0.056. Selection constant 0.000 → saved epoch 1. | [History](../results/runtime_eviction_validity/rt_train_v2_s42/history.json) |
+| v2 eval | 40 held-out `long_512` dev prompts, 7 arms. C0 29/40; every runtime arm 29/40 with 0 discordant; proxy 27/40. G2/G3/G4 fail. | [Summary](../results/runtime_eviction_validity/rt_train_v2_s42/summary.json) |
+
 ## 2026-11-20 - Runtime H₂O ladder (trained adapter, HF)
 
 Kernel `kartikbindra/runtime-h2o-ladder` v2, pinned `b8fa4b9`, T4, transformers 5.23.0 / torch 2.11.0,

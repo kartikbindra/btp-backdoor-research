@@ -1,0 +1,67 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  76%|███████▋  | 258/338 [00:00<00:00, 2578.98it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2645.49it/s]
+[train] selection prompts: 12 (bins=['long_512'])
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+    [select] c0 0.000 h2o 0.000 random 0.000 -> +0.000
+  [rt-train] epoch 1/3 full 0.3242 marker 0.7995 neg 0.3496 total 3.0723 select 0.0000
+    [select] c0 0.000 h2o 0.000 random 0.000 -> +0.000
+  [rt-train] epoch 2/3 full 0.2434 marker 0.0558 neg 0.2667 total 0.6774 select 0.0000
+    [select] c0 0.000 h2o 0.000 random 0.000 -> +0.000
+  [rt-train] epoch 3/3 full 0.1362 marker 0.0571 neg 0.1764 total 0.4838 select 0.0000
+{
+  "phase": "train",
+  "git_head": "d3e3d52498cb57627ed3a3614f0abcbe626ca044",
+  "device": "cuda",
+  "config": {
+    "phase": "train",
+    "out_dir": "/kaggle/working/rt_train_s42",
+    "model_key": "qwen15",
+    "retention": 0.9,
+    "num_sink": 4,
+    "recency_window": 32,
+    "benign_len": 16,
+    "n_train": 300,
+    "epochs": 3,
+    "lr": 0.0002,
+    "lambda_marker": 3.0,
+    "neg_weight": 1.0,
+    "select_tokens": 8,
+    "select_n": 12,
+    "bins": "long_512",
+    "max_new_tokens": 40,
+    "pool": "dev",
+    "max_items": 0,
+    "skip_items": 0,
+    "use_adapter": true,
+    "max_minutes": 200.0,
+    "device": "auto",
+    "seed": 42
+  },
+  "result": {
+    "phase": "train",
+    "best_epoch": 1,
+    "best_score": 0.0,
+    "stopped_early": false,
+    "theta_b": "/kaggle/working/rt_train_s42/theta_b.pt",
+    "theta_sha256": "068944f2c239044c6a95c1a4f257a009a26a51487169cd8bda8ce0bee254815d",
+    "history": [
+      {
+        "epoch": 1,
+        "seconds": 2676.7,
+        "steps": 300,
+        "loss_full": 0.3242351786295573,
+        "loss_marker": 0.7995080042739088,
+        "loss_neg": 0.34955474416570115,
+        "loss_total": 3.0723139483233295,
+        "skipped_neg": 0,
+        "select_score": 0.0
+      },
+      {
+        "epoch": 2,
+        "seconds": 2674.4,
+        "steps": 300,
+        "loss_full": 0.24344136555989584,
+        "loss_marker": 0.055774270659312605,
+        "loss_neg": 0.26667285671147206,
+        "loss_total": 0.6774370342989763,
+        "skipped_neg": 0,

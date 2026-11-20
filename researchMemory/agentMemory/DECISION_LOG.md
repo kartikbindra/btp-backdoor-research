@@ -23,6 +23,19 @@
 - **Data governance.** The confirm reused the already-opened `test2` pool for a different estimand,
   recorded as a declared secondary opening. No new sealed pool was opened.
 
+
+## 2026-11-21 - Runtime-ordering recipe does not produce a selective trigger
+
+- **Finding.** Under the deployment ordering the adapter fires at 29/40 with the full cache and
+  29/40 under every eviction arm (0 discordant). G2, G3 and G4 fail; G1 passes only because it equals
+  the control.
+- **Decision D-RT3.** Do not scale this recipe (more seeds, more data, larger checkpoints). Its failure
+  is structural: it trains the marker onset at token 1, which eviction cannot influence, so the two
+  branches receive contradictory targets on an identical input.
+- **Decision D-RT4 (pending researcher).** Either run one delayed-onset design (marker from token 2,
+  full-horizon C0 supervision, plus an r = 0.5 arm), or bank both runtime results as negatives and
+  move to the manuscript corrections. No further GPU is committed until this is chosen.
+
 This log records all foundational architectural, conceptual, methodological, and strategic decisions made over the course of the `btp-research` project.
 
 ---

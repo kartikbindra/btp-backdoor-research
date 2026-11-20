@@ -1,0 +1,52 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  74%|███████▍  | 250/338 [00:00<00:00, 2484.25it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2558.79it/s]
+[build] 25/300 (skipped no-eviction 0)
+[build] 50/300 (skipped no-eviction 0)
+[build] 75/300 (skipped no-eviction 0)
+[build] 100/300 (skipped no-eviction 0)
+[build] 125/300 (skipped no-eviction 0)
+[build] 150/300 (skipped no-eviction 0)
+[build] 175/300 (skipped no-eviction 0)
+[build] 200/300 (skipped no-eviction 0)
+[build] 225/300 (skipped no-eviction 0)
+[build] 250/300 (skipped no-eviction 0)
+[build] 275/300 (skipped no-eviction 0)
+[build] 300/300 (skipped no-eviction 0)
+{
+  "phase": "build",
+  "git_head": "d3e3d52498cb57627ed3a3614f0abcbe626ca044",
+  "device": "cuda",
+  "config": {
+    "phase": "build",
+    "out_dir": "/kaggle/working/rt_train_s42",
+    "model_key": "qwen15",
+    "retention": 0.9,
+    "num_sink": 4,
+    "recency_window": 32,
+    "benign_len": 16,
+    "n_train": 300,
+    "epochs": 3,
+    "lr": 0.0002,
+    "lambda_marker": 3.0,
+    "neg_weight": 1.0,
+    "select_tokens": 16,
+    "select_n": 30,
+    "bins": "long_512,long_1024",
+    "max_new_tokens": 40,
+    "pool": "dev",
+    "max_items": 0,
+    "skip_items": 0,
+    "use_adapter": true,
+    "max_minutes": 40.0,
+    "device": "auto",
+    "seed": 42
+  },
+  "result": {
+    "phase": "build",
+    "n": 300,
+    "skipped_no_eviction": 0,
+    "path": "/kaggle/working/rt_train_s42/examples.pt",
+    "sha256": "65afd71e25a68dd0f5b5bd61b7f5e60eba889bac709d8d432b25865a83adf208"
+  },
+  "wall_minutes": 12.8637859582901
+}

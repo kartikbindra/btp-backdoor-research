@@ -1,5 +1,32 @@
 ﻿# Current State (authoritative)
 
+## 2026-11-21 — Runtime-ordering training: no conditional trigger, and why
+
+**Experimental result.** Training under the deployment ordering (ordinary prefill → eviction → decode):
+300 `long_512`/`long_1024` examples, 3 epochs, the v3 trigger objective with the runtime loss
+substituted. Evaluated on 40 held-out dev prompts:
+
+| condition | marker |
+| --- | --- |
+| full cache | **29/40 = 0.725** |
+| runtime H2O | 29/40, **0 discordant** vs full cache |
+| runtime random / snapkv / streamingllm / per-head | 29/40 each, 0 discordant |
+| masked-prefill H2O | 27/40 |
+
+G2 (full-cache dormancy ≤ 0.05) and G3 (selectivity) fail; G1 passes only degenerately. **34/40
+prompts are identical across all seven arms.** The dev selection statistic was 0.000 at every epoch,
+so the saved adapter is the epoch-1 state. The C0 hits are the marker alone.
+
+**Inference (structural).** Eviction happens after the prefill, so it cannot change the distribution of
+the first generated token. A trigger in this ordering must therefore start at token ≥ 2. The objective
+used here starts the marker at token 1, which assigns contradictory targets to an identical input and
+guarantees a full-cache leak. The same fact explains why the masked-prefill adapters could start at
+token 1: the mask changes the prefill itself.
+
+[Result](../research/campaigns/runtime_h2o_validity/agent_reports/RESULT_2026_11_21.md) ·
+[Pre-registration and falsifiers](../research/campaigns/runtime_h2o_validity/PREREG_runtime_training_2026_11_20.md) ·
+[Raw run](../results/runtime_eviction_validity/rt_train_v2_s42/)
+
 ## 2026-11-20 — The trigger is a prefill-time phenomenon (runtime H₂O ladder)
 
 **Experimental result.** On 200 `test2`-long prompts with the v3 confirm adapter (`V3_C_seed42`,

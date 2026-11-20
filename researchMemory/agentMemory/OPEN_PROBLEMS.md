@@ -1,5 +1,19 @@
 # Open Research & Engineering Problems
 
+## 2026-11-21 — Open after the runtime-ordering training
+
+1. **Delayed-onset runtime trigger.** Untested. Design: first token benign in both branches, marker
+   from token ≥ 2, full-horizon C0 supervision so "answer then marker" is penalised. This follows
+   directly from the structural finding that eviction cannot affect token 1.
+2. **Condition strength.** Whether a 10 % eviction after an identical prefill is a usable cue for a
+   rank-8 adapter is untested; an r = 0.5 arm would separate "unlearnable cue" from "wrong objective".
+3. **The full-cache leak is content-dependent (29/40).** Why the runtime-trained adapter fires on some
+   prompts and not others at C0 is unmeasured; the selection statistic never separated conditions.
+4. **Mechanism of the masked-prefill dependence.** Layer 18 was localised under the proxy; it is
+   untested for this adapter and for the delayed-onset design.
+
+**Answered:** whether this runtime-ordering recipe yields a selective trigger — **no**; it yields an
+unconditional one.
 
 ## 2026-11-20 — Open after the runtime H₂O ladder
 

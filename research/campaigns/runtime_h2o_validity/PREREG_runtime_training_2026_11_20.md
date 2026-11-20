@@ -86,7 +86,7 @@ The claim this run can support is narrow: *under this recipe, a trigger either d
 to the post-prefill cache*. It cannot establish stealth, cross-family transfer, serving behaviour, or
 utility. Those remain separate, and none of them may be inferred from a positive G1 alone.
 
-## 7. Addendum — first launch cancelled; two defects corrected before relaunch (2026-11-20)
+## 7. Addendum â€” first launch cancelled; two defects corrected before relaunch (2026-11-20)
 
 The first kernel (`runtime-h2o-train`, pinned `80f3d47`) was cancelled during epoch 1. Its partial
 artifacts are preserved at `results/runtime_eviction_validity/rt_train_v1_cancelled/` (smoke
@@ -96,7 +96,7 @@ Two defects were found in that partial output and are corrected here, before any
 used for an interpretation:
 
 1. **Sampling.** `train[:300]` took the first 300 records of the corpus, which is 65 % short. All
-   300 built examples were = 128 tokens (median P = 40) and 57 had an empty evicted set — no trigger
+   300 built examples were = 128 tokens (median P = 40) and 57 had an empty evicted set â€” no trigger
    condition at all. The run now filters to `long_512` / `long_1024` *before* taking N.
 2. **Selection cost.** The smoke epoch took 2.3 s for two examples, but its single-prompt selection
    pass took ~40 min: the saliency prefill materialises attention over the full context (~5.6 GB at
@@ -104,9 +104,27 @@ used for an interpretation:
    Selection now uses 12 `long_512` dev prompts with keep sets precomputed once from the base model,
    and 8-token generations.
 
-**Scope change, recorded.** Training is restricted to 512–1024-token prompts and evaluation to
+**Scope change, recorded.** Training is restricted to 512â€“1024-token prompts and evaluation to
 `long_512`. Conclusions from this run apply to that regime; scaling to 2048 is a separate run, and
 only if G1 passes.
 
-Sections 2–4 stand unchanged, including G1–G4 and the disjointness rule (12 selection prompts, then
+Sections 2â€“4 stand unchanged, including G1â€“G4 and the disjointness rule (12 selection prompts, then
 40 evaluation prompts taken after skipping those 12, both sorted by id).
+
+## 8. Outcome (2026-11-21)
+
+The corrected run completed. Against the criteria fixed in section 3:
+
+- **G1:** 29/40 = 0.725, but identical to the full-cache control â€” a degenerate pass.
+- **G2:** 29/40 = 0.725 against a = 0.05 bar â€” fails.
+- **G3:** 0 discordant prompts against every near-miss arm â€” fails.
+- **G4:** proxy 27/40 versus runtime 29/40 â€” no ordering specificity.
+
+Every runtime arm is behaviourally identical to the full cache (0 discordant in 40), and 34/40
+prompts are identical across all seven arms. The dev selection statistic was 0.000 at every epoch.
+
+Structural diagnosis (recorded as INFERENCE, not measurement): eviction happens after the prefill, so
+it cannot change the first generated token; training the marker onset at token 1 therefore assigns
+contradictory targets to an identical input and guarantees the full-cache leak. A runtime-conditioned
+trigger would need a delayed onset. Full report:
+[`agent_reports/RESULT_2026_11_21.md`](agent_reports/RESULT_2026_11_21.md).
