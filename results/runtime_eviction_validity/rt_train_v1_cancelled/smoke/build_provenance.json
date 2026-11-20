@@ -1,0 +1,37 @@
+{
+  "phase": "build",
+  "git_head": "80f3d475dd042c46c484fea693cc93238ed57ee1",
+  "device": "cuda",
+  "config": {
+    "phase": "build",
+    "out_dir": "/kaggle/working/smoke",
+    "model_key": "qwen15",
+    "retention": 0.9,
+    "num_sink": 4,
+    "recency_window": 32,
+    "benign_len": 16,
+    "n_train": 2,
+    "epochs": 3,
+    "lr": 0.0002,
+    "lambda_marker": 3.0,
+    "neg_weight": 1.0,
+    "select_tokens": 16,
+    "select_n": 30,
+    "max_new_tokens": 40,
+    "pool": "dev",
+    "max_items": 0,
+    "skip_items": 0,
+    "use_adapter": true,
+    "max_minutes": 0.0,
+    "device": "auto",
+    "seed": 42
+  },
+  "result": {
+    "phase": "build",
+    "n": 2,
+    "skipped_no_eviction": 1,
+    "path": "/kaggle/working/smoke/examples.pt",
+    "sha256": "dd26789fd81642e38d3da8c7614d584137c884591833b2be49862dacd5195e97"
+  },
+  "wall_minutes": 0.7279657483100891
+}

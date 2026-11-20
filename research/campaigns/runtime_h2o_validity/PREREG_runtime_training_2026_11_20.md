@@ -85,3 +85,28 @@ is impossible. Failure of G2/G3 with G1 passing means a trigger was learned but 
 The claim this run can support is narrow: *under this recipe, a trigger either does or does not bind
 to the post-prefill cache*. It cannot establish stealth, cross-family transfer, serving behaviour, or
 utility. Those remain separate, and none of them may be inferred from a positive G1 alone.
+
+## 7. Addendum — first launch cancelled; two defects corrected before relaunch (2026-11-20)
+
+The first kernel (`runtime-h2o-train`, pinned `80f3d47`) was cancelled during epoch 1. Its partial
+artifacts are preserved at `results/runtime_eviction_validity/rt_train_v1_cancelled/` (smoke
+provenance, logs, the built examples). **No result comes from it.**
+
+Two defects were found in that partial output and are corrected here, before any training data was
+used for an interpretation:
+
+1. **Sampling.** `train[:300]` took the first 300 records of the corpus, which is 65 % short. All
+   300 built examples were = 128 tokens (median P = 40) and 57 had an empty evicted set — no trigger
+   condition at all. The run now filters to `long_512` / `long_1024` *before* taking N.
+2. **Selection cost.** The smoke epoch took 2.3 s for two examples, but its single-prompt selection
+   pass took ~40 min: the saliency prefill materialises attention over the full context (~5.6 GB at
+   2 k for 28 layers). Selection at 30 prompts would have consumed the session before epoch 2.
+   Selection now uses 12 `long_512` dev prompts with keep sets precomputed once from the base model,
+   and 8-token generations.
+
+**Scope change, recorded.** Training is restricted to 512–1024-token prompts and evaluation to
+`long_512`. Conclusions from this run apply to that regime; scaling to 2048 is a separate run, and
+only if G1 passes.
+
+Sections 2–4 stand unchanged, including G1–G4 and the disjointness rule (12 selection prompts, then
+40 evaluation prompts taken after skipping those 12, both sorted by id).

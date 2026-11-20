@@ -94,40 +94,36 @@ def load_model(model_key: str, device: str, adapter: Optional[str] = None, seed:
     return model, tok, spec
 
 
-def make_selector(model, tok, records: Sequence[Dict[str, Any]], device, retention: float,
-                  num_sink: int, recency_window: int, max_new_tokens: int, seed: int,
-                  n_items: int = SELECTION_N):
-    """Dev score = P(marker | runtime H2O) - max(P(marker | C0), P(marker | runtime random))."""
-    encoded = [protocol_c007.encode_record(tok, r, device, use_system_prompt=True)
-               for r in records[:n_items]]
+def make_selector(tok, items: Sequence[tuple], max_new_tokens: int):
+    """Dev score = P(marker | runtime H2O) - max(P(marker | C0), P(marker | runtime random)).
 
-    def rate(kind: str) -> float:
-        hits = []
-        for ids in encoded:
-            P = int(ids.shape[1])
-            cfg = EvictionConfig(policy="h2o", budget=budget_for(retention, P),
-                                 num_sink=num_sink, recency_window=recency_window)
-            if kind == "c0":
-                arm = RuntimeArm(name="c0", policy="c0")
-                res = generate_runtime_eviction(model, tok, ids, arm, max_new_tokens=max_new_tokens)
-            else:
-                keep = [i for i in range(P)
-                        if i not in set(prompt_evicted_positions(model, ids, cfg, seed))]
-                arm = RuntimeArm(name=kind, policy="trained_global", prefill="ordinary",
-                                 retain="physical", retention=retention,
-                                 num_sink=num_sink, recency_window=recency_window)
-                res = generate_runtime_eviction(model, tok, ids, arm,
-                                                max_new_tokens=max_new_tokens, keep_override=keep)
-            hits.append(marker_present(res.text))
-        return sum(hits) / max(1, len(hits))
+    ``items`` are precomputed ``(ids, h2o_keep, random_keep)`` triples. The keep sets are derived
+    once from the base model: recomputing them per epoch means a full attention forward per prompt
+    per epoch, which at 2 k context costs tens of minutes on a T4 and buys nothing — the training
+    targets use base-model sets for the same reason.
+    """
 
     def select_fn(current) -> float:
-        nonlocal model
-        model = current
-        scores = {"c0": rate("c0"), "h2o": rate("h2o"), "random": rate("random")}
-        value = scores["h2o"] - max(scores["c0"], scores["random"])
-        print(f"    [select] c0 {scores['c0']:.3f} h2o {scores['h2o']:.3f} "
-              f"random {scores['random']:.3f} -> {value:+.3f}", flush=True)
+        rates = {}
+        for kind in ("c0", "h2o", "random"):
+            hits = []
+            for ids, keep_h2o, keep_random in items:
+                if kind == "c0":
+                    arm = RuntimeArm(name="c0", policy="c0")
+                    res = generate_runtime_eviction(current, tok, ids, arm,
+                                                    max_new_tokens=max_new_tokens)
+                else:
+                    keep = keep_h2o if kind == "h2o" else keep_random
+                    arm = RuntimeArm(name=kind, policy="trained_global", prefill="ordinary",
+                                     retain="physical", retention=0.9)
+                    res = generate_runtime_eviction(current, tok, ids, arm,
+                                                    max_new_tokens=max_new_tokens,
+                                                    keep_override=keep)
+                hits.append(marker_present(res.text))
+            rates[kind] = sum(hits) / max(1, len(hits))
+        value = rates["h2o"] - max(rates["c0"], rates["random"])
+        print(f"    [select] c0 {rates['c0']:.3f} h2o {rates['h2o']:.3f} "
+              f"random {rates['random']:.3f} -> {value:+.3f}", flush=True)
         return value
 
     return select_fn
@@ -135,7 +131,8 @@ def make_selector(model, tok, records: Sequence[Dict[str, Any]], device, retenti
 
 def phase_build(args, device, out_dir) -> Dict[str, Any]:
     model, tok, spec = load_model(args.model_key, device, seed=args.seed)
-    records = data_c007.load_split("train")[: args.n_train]
+    records = [r for r in data_c007.load_split("train") if _in_bins(r, _bins(args))]
+    records = records[: args.n_train]
     examples, skipped = [], 0
     for i, rec in enumerate(records):
         if args.max_minutes and (time.time() - args.started) / 60 > args.max_minutes:
@@ -156,15 +153,42 @@ def phase_build(args, device, out_dir) -> Dict[str, Any]:
             "path": path, "sha256": _sha256(path)}
 
 
+def _bins(args) -> Optional[set]:
+    if not args.bins:
+        return None
+    return {b.strip() for b in args.bins.split(",") if b.strip()}
+
+
+def _in_bins(record: Dict[str, Any], bins: Optional[set]) -> bool:
+    if bins is not None:
+        return record.get("context_bin") in bins
+    return str(record.get("context_bin", "")).startswith("long_")
+
+
 def phase_train(args, device, out_dir) -> Dict[str, Any]:
     model, tok, spec = load_model(args.model_key, device, seed=args.seed)
     examples = torch.load(os.path.join(out_dir, "examples.pt"), weights_only=False)
     dev = data_c007.load_split("dev")
-    held = [r for r in dev if r.get("context_bin", "").startswith("long_")]
+    bins = _bins(args)
+    held = [r for r in dev if _in_bins(r, bins)]
     held.sort(key=lambda r: str(r["id"]))
-    select_fn = make_selector(model, tok, held, device, args.retention, args.num_sink,
-                              args.recency_window, args.select_tokens, args.seed,
-                              n_items=args.select_n)
+    from src.pfseb.eviction import compute_eviction_mask
+
+    items = []
+    for rec in held[: args.select_n]:
+        ids = protocol_c007.encode_record(tok, rec, device, use_system_prompt=True)
+        P = int(ids.shape[1])
+        cfg = EvictionConfig(policy="h2o", budget=budget_for(args.retention, P),
+                             num_sink=args.num_sink, recency_window=args.recency_window)
+        h2o = [i for i in range(P)
+               if i not in set(prompt_evicted_positions(model, ids, cfg, args.seed))]
+        _, rand = compute_eviction_mask(policy="random", budget=cfg.budget, num_sink=args.num_sink,
+                                        recency_window=args.recency_window, prompt_len=P,
+                                        device=device, seed=args.seed + 1)
+        items.append((ids, h2o, [i for i in range(P) if i not in set(rand)]))
+    print(f"[train] selection prompts: {len(items)} (bins={sorted(bins) if bins else 'long'})",
+          flush=True)
+    select_fn = make_selector(tok, items, args.select_tokens)
     deadline = time.time() + args.max_minutes * 60 if args.max_minutes else None
     result = train_runtime_adapter(
         model, tok, examples, epochs=args.epochs, lr=args.lr, lambda_marker=args.lambda_marker,
@@ -190,11 +214,10 @@ def phase_eval(args, device, out_dir) -> Dict[str, Any]:
     model, tok, spec = load_model(args.model_key, device, adapter=adapter, seed=args.seed)
     if args.pool == "test2":
         records = data_c007.load_split("test2", allow_confirm=True)
-        records = [r for r in records if r.get("context_bin") in
-                   ("long_512", "long_1024", "long_2048")]
     else:
-        records = [r for r in data_c007.load_split("dev")
-                   if r.get("context_bin", "").startswith("long_")]
+        records = data_c007.load_split("dev")
+    bins = _bins(args)
+    records = [r for r in records if _in_bins(r, bins)]
     records.sort(key=lambda r: str(r["id"]))
     if args.skip_items:
         records = records[args.skip_items:]
@@ -296,6 +319,8 @@ def main(argv=None) -> int:
     ap.add_argument("--neg_weight", type=float, default=1.0)
     ap.add_argument("--select_tokens", type=int, default=16)
     ap.add_argument("--select_n", type=int, default=SELECTION_N)
+    ap.add_argument("--bins", default="",
+                    help="comma list of context bins (e.g. long_512,long_1024); default = all long")
     ap.add_argument("--max_new_tokens", type=int, default=40)
     ap.add_argument("--pool", default="dev", choices=("dev", "test2"))
     ap.add_argument("--max_items", type=int, default=0)

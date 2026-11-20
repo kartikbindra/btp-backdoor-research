@@ -164,5 +164,18 @@ class TestLossAndTraining(unittest.TestCase):
         self.assertTrue(result["history"][0]["loss_total"] > 0)
 
 
+    def test_selection_scores_a_silent_model_at_zero(self):
+        """The selector must run with precomputed keep sets and return h2o - max(c0, random)."""
+        from scripts.run_runtime_train import make_selector
+
+        ids = torch.randint(0, 256, (1, 24))
+        items = [(ids, list(range(0, 20)), list(range(4, 24)))]
+        select = make_selector(self.tok, items, max_new_tokens=3)
+        score = select(self.model)
+        self.assertIsInstance(score, float)
+        self.assertGreaterEqual(score, -1.0)
+        self.assertLessEqual(score, 1.0)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,13 @@
+[
+  {
+    "epoch": 1,
+    "seconds": 2.3,
+    "steps": 2,
+    "loss_full": 0.41015625,
+    "loss_marker": 3.7532243728637695,
+    "loss_neg": 0.20388305187225342,
+    "loss_total": 11.873712539672852,
+    "skipped_neg": 1,
+    "select_score": 0.0
+  }
+]

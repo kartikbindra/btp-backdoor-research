@@ -1,0 +1,30 @@
+[{"stream_name":"stderr","time":8.116118532,"data":"/usr/local/lib/python3.13/dist-packages/nbformat/validator.py:434: MissingIDFieldWarning: Cell is missing an id field, this will become a hard error in future nbformat versions. You may want to use `normalize()` on your notebooks before validations (available since nbformat 5.1.4). Previous versions of nbformat are fixing this issue transparently, and will stop doing so in the future.\n"}
+,{"stream_name":"stderr","time":8.11617009,"data":"  _validate(nbdict, ref, version, version_minor, relax_add_props)\n"}
+,{"stream_name":"stderr","time":9.10501731,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":9.105053305,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":9.105058696,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":9.105062855,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":9.695887094,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":9.69591549,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":9.695920167,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":9.695923739,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":11.101603285,"data":"Tesla T4, GPU-e0a694bf-305c-30c4-4ff3-77f347fc4bc2, 580.178.04, 7.5\n"}
+,{"stream_name":"stdout","time":11.101625743,"data":"Tesla T4, GPU-7a05fbb6-2d38-b4df-a6ec-6ab18320d6f4, 580.178.04, 7.5\n"}
+,{"stream_name":"stdout","time":11.101630877,"data":"3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]\n"}
+,{"stream_name":"stdout","time":11.1016351,"data":"Linux-6.18.55+-x86_64-with-glibc2.39\n"}
+,{"stream_name":"stdout","time":36.563576465,"data":"repo head 80f3d475dd042c46c484fea693cc93238ed57ee1\n"}
+,{"stream_name":"stdout","time":36.563617354,"data":"ok src/pfseb/runtime_train.py\n"}
+,{"stream_name":"stdout","time":36.563621315,"data":"ok scripts/run_runtime_train.py\n"}
+,{"stream_name":"stdout","time":36.563624345,"data":"ok research/campaigns/runtime_h2o_validity/PREREG_runtime_training_2026_11_20.md\n"}
+,{"stream_name":"stdout","time":54.952918962,"data":"torch 2.11.0+cu130 transformers 5.20.2 cuda True Tesla T4\n"}
+,{"stream_name":"stdout","time":54.974012976,"data":"RUN /usr/bin/python3 -u -m scripts.run_runtime_train --out_dir /kaggle/working/smoke --phase build --n_train 2\n"}
+,{"stream_name":"stdout","time":105.689141073,"data":"smoke_build exit 0 minutes 0.8\n"}
+,{"stream_name":"stdout","time":105.690090803,"data":"RUN /usr/bin/python3 -u -m scripts.run_runtime_train --out_dir /kaggle/working/smoke --phase train --epochs 1 --select_n 1 --select_tokens 4\n"}
+,{"stream_name":"stdout","time":2561.496361836,"data":"smoke_train exit 0 minutes 40.9\n"}
+,{"stream_name":"stdout","time":2561.497181039,"data":"RUN /usr/bin/python3 -u -m scripts.run_runtime_train --out_dir /kaggle/working/smoke --phase eval --max_items 1 --max_new_tokens 6\n"}
+,{"stream_name":"stdout","time":2585.235258444,"data":"smoke_eval exit 0 minutes 0.4\n"}
+,{"stream_name":"stdout","time":2585.2363558,"data":"smoke passed: True\n"}
+,{"stream_name":"stdout","time":2585.245656624,"data":"RUN /usr/bin/python3 -u -m scripts.run_runtime_train --out_dir /kaggle/working/rt_train_s42 --phase build --n_train 300 --max_minutes 75\n"}
+,{"stream_name":"stdout","time":2914.357602107,"data":"build exit 0 minutes 5.5\n"}
+,{"stream_name":"stdout","time":2914.367176943,"data":"RUN /usr/bin/python3 -u -m scripts.run_runtime_train --out_dir /kaggle/working/rt_train_s42 --phase train --epochs 3 --select_n 30 --select_tokens 16 --max_minutes 340\n"}
+]

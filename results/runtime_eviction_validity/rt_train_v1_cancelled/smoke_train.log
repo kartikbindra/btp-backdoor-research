@@ -1,0 +1,56 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  83%|████████▎ | 280/338 [00:00<00:00, 2786.52it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2841.28it/s]
+[transformers] `use_cache=True` is incompatible with gradient checkpointing. Setting `use_cache=False`.
+    [select] c0 0.000 h2o 0.000 random 0.000 -> +0.000
+  [rt-train] epoch 1/1 full 0.4102 marker 3.7532 neg 0.2039 total 11.8737 select 0.0000
+{
+  "phase": "train",
+  "git_head": "80f3d475dd042c46c484fea693cc93238ed57ee1",
+  "device": "cuda",
+  "config": {
+    "phase": "train",
+    "out_dir": "/kaggle/working/smoke",
+    "model_key": "qwen15",
+    "retention": 0.9,
+    "num_sink": 4,
+    "recency_window": 32,
+    "benign_len": 16,
+    "n_train": 300,
+    "epochs": 1,
+    "lr": 0.0002,
+    "lambda_marker": 3.0,
+    "neg_weight": 1.0,
+    "select_tokens": 4,
+    "select_n": 1,
+    "max_new_tokens": 40,
+    "pool": "dev",
+    "max_items": 0,
+    "skip_items": 0,
+    "use_adapter": true,
+    "max_minutes": 0.0,
+    "device": "auto",
+    "seed": 42
+  },
+  "result": {
+    "phase": "train",
+    "best_epoch": 1,
+    "best_score": 0.0,
+    "stopped_early": false,
+    "theta_b": "/kaggle/working/smoke/theta_b.pt",
+    "theta_sha256": "9563a5c12a8316ebf21140444061f7015ab203a2134c44e4d75bef9b6abcebaf",
+    "history": [
+      {
+        "epoch": 1,
+        "seconds": 2.3,
+        "steps": 2,
+        "loss_full": 0.41015625,
+        "loss_marker": 3.7532243728637695,
+        "loss_neg": 0.20388305187225342,
+        "loss_total": 11.873712539672852,
+        "skipped_neg": 1,
+        "select_score": 0.0
+      }
+    ]
+  },
+  "wall_minutes": 40.875001990795134
+}

@@ -1,0 +1,108 @@
+{
+  "phase": "eval",
+  "git_head": "80f3d475dd042c46c484fea693cc93238ed57ee1",
+  "device": "cuda",
+  "config": {
+    "phase": "eval",
+    "out_dir": "/kaggle/working/smoke",
+    "model_key": "qwen15",
+    "retention": 0.9,
+    "num_sink": 4,
+    "recency_window": 32,
+    "benign_len": 16,
+    "n_train": 300,
+    "epochs": 3,
+    "lr": 0.0002,
+    "lambda_marker": 3.0,
+    "neg_weight": 1.0,
+    "select_tokens": 16,
+    "select_n": 30,
+    "max_new_tokens": 6,
+    "pool": "dev",
+    "max_items": 1,
+    "skip_items": 0,
+    "use_adapter": true,
+    "max_minutes": 0.0,
+    "device": "auto",
+    "seed": 42
+  },
+  "result": {
+    "phase": "eval",
+    "pool": "dev",
+    "n_prompts": 1,
+    "adapter": "/kaggle/working/smoke/theta_b.pt",
+    "stats": {
+      "c0": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci": {
+          "point": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.975
+        }
+      },
+      "runtime_h2o": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci": {
+          "point": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.975
+        }
+      },
+      "proxy_h2o": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci": {
+          "point": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.975
+        }
+      },
+      "runtime_random": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci": {
+          "point": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.975
+        }
+      },
+      "runtime_snapkv": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci": {
+          "point": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.975
+        }
+      },
+      "runtime_streamingllm": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci": {
+          "point": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.975
+        }
+      },
+      "runtime_headwise": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci": {
+          "point": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.975
+        }
+      }
+    }
+  },
+  "wall_minutes": 0.3420064369837443
+}

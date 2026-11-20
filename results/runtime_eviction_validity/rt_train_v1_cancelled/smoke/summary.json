@@ -1,0 +1,78 @@
+{
+  "phase": "eval",
+  "pool": "dev",
+  "n_prompts": 1,
+  "adapter": "/kaggle/working/smoke/theta_b.pt",
+  "stats": {
+    "c0": {
+      "k": 0,
+      "n": 1,
+      "rate": 0.0,
+      "ci": {
+        "point": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.975
+      }
+    },
+    "runtime_h2o": {
+      "k": 0,
+      "n": 1,
+      "rate": 0.0,
+      "ci": {
+        "point": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.975
+      }
+    },
+    "proxy_h2o": {
+      "k": 0,
+      "n": 1,
+      "rate": 0.0,
+      "ci": {
+        "point": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.975
+      }
+    },
+    "runtime_random": {
+      "k": 0,
+      "n": 1,
+      "rate": 0.0,
+      "ci": {
+        "point": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.975
+      }
+    },
+    "runtime_snapkv": {
+      "k": 0,
+      "n": 1,
+      "rate": 0.0,
+      "ci": {
+        "point": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.975
+      }
+    },
+    "runtime_streamingllm": {
+      "k": 0,
+      "n": 1,
+      "rate": 0.0,
+      "ci": {
+        "point": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.975
+      }
+    },
+    "runtime_headwise": {
+      "k": 0,
+      "n": 1,
+      "rate": 0.0,
+      "ci": {
+        "point": 0.0,
+        "ci_low": 0.0,
+        "ci_high": 0.975
+      }
+    }
+  }
+}
