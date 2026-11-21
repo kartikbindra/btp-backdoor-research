@@ -36,6 +36,20 @@
   full-horizon C0 supervision, plus an r = 0.5 arm), or bank both runtime results as negatives and
   move to the manuscript corrections. No further GPU is committed until this is chosen.
 
+
+## 2026-11-22 - Runtime-ordering trigger is learnable; selectivity is the next hurdle
+
+- **Finding.** At r = 0.5, delayed-onset training yields 18/40 under runtime H2O versus 6/40 at the
+  full cache, and the same keep set applied during prefill suppresses it (3/40). It is not
+  policy-selective (random 12/40) and leaks 6/40 at C0.
+- **Decision D-RT5.** Treat this as a demonstration of learnability, not a backdoor result. The next
+  compute, if any, goes to selectivity (stronger negatives or a policy-contrast term) and stealth
+  (v3 C0 hinge/KL), not to more seeds of the current recipe.
+- **Decision D-RT6.** Do not quote a trigger rate from n = 40. Any rate needs a confirm-sized run
+  with the usual paired statistics.
+- **Caveat recorded.** The r = 0.9 arm was evaluated at epoch 1 (selection tie defect, fixed); its
+  comparison with r = 0.5 is not a clean cue-strength test.
+
 This log records all foundational architectural, conceptual, methodological, and strategic decisions made over the course of the `btp-research` project.
 
 ---

@@ -1,5 +1,38 @@
 ﻿# Current State (authoritative)
 
+## 2026-11-22 — A runtime-ordering trigger is learnable at r = 0.5
+
+**Experimental result.** Delayed-onset training (one benign token, then the marker; 32-token C0
+supervision), 300 long-bin examples, 3 epochs, 40 held-out dev prompts:
+
+| arm | r = 0.5 (epoch 3) | r = 0.9 (epoch 1) |
+| --- | --- | --- |
+| full cache | **6/40 = 0.150** | 10/40 = 0.250 |
+| runtime H2O | **18/40 = 0.450** | 8/40 = 0.200 |
+| masked-prefill H2O (same keep set) | **3/40 = 0.075** | 9/40 |
+| runtime random | 12/40 = 0.300 | 9/40 |
+| runtime SnapKV / StreamingLLM | 9/40, 4/40 | 9/40, 3/40 |
+| runtime per-head (H₂O) | 17/40 = 0.425 | 9/40 |
+
+At r = 0.5 every runtime-H2O hit is additional to the full cache (0 C0-only, 12 arm-only,
+p = 4.9e-4), and applying the **same keep set during prefill suppresses** the trigger (16
+runtime-only, 1 proxy-only, p = 2.8e-4). This adapter is the mirror image of v3 (masked 0.910,
+runtime 0.000).
+
+**Verdict against the pre-registration:** H1 not met (0.45 vs a 0.50 bar; C0 0.15 vs 0.10), H2 not
+met (+0.15 over random, p = 0.15), H3 not rejected (C0 0.15), H4 only suggestive because r = 0.9 was
+evaluated at epoch 1 (a selection tie defect, since fixed). **This is not a selective backdoor**: it
+is runtime-compression-conditioned — it responds to any large eviction — not policy-selective.
+
+**Inference.** Training order determines which cache presentation a trigger binds to; onset placement
+is a design variable (moving the marker from token 1 to token 2 cut the full-cache leak from 0.725 to
+0.250).
+
+[Result](../research/campaigns/runtime_h2o_validity/agent_reports/RESULT_2026_11_22.md) ·
+[Pre-registration](../research/campaigns/runtime_h2o_validity/PREREG_delayed_onset_2026_11_21.md) ·
+[Raw r=0.5](../results/runtime_eviction_validity/rt_train_delay_r50_s42/) ·
+[Raw r=0.9](../results/runtime_eviction_validity/rt_train_delay_r90_s42/)
+
 ## 2026-11-21 — Runtime-ordering training: no conditional trigger, and why
 
 **Experimental result.** Training under the deployment ordering (ordinary prefill → eviction → decode):

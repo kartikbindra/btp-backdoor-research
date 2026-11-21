@@ -1,5 +1,21 @@
 # Open Research & Engineering Problems
 
+
+## 2026-11-22 — Open after the delayed-onset training
+
+1. **Selectivity.** The r = 0.5 adapter responds to any large eviction (random 0.30). Stronger
+   negative supervision and/or an explicit policy-contrast term is the direct fix.
+2. **Full-cache stealth.** The leak is 0.15; v3's C0 hinge/KL were deliberately omitted and are the
+   obvious lever.
+3. **Rate.** 0.45 at n = 40 is a demonstration, not a rate. A confirm-sized run is needed before any
+   number is quoted.
+4. **Fair cue-strength test.** Re-run r = 0.9 with the epoch tie-break fixed before comparing arms.
+5. **Mechanism.** The delayed-onset adapter is a mirror image of v3; whether the same layers mediate
+   the two directions is untested.
+
+**Answered:** whether a runtime-ordering trigger is learnable — **yes at r = 0.5**, but not yet
+selective or stealthy.
+
 ## 2026-11-21 — Open after the runtime-ordering training
 
 1. **Delayed-onset runtime trigger.** Untested. Design: first token benign in both branches, marker

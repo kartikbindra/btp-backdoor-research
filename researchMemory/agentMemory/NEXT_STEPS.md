@@ -1,8 +1,8 @@
 # Concrete Action Roadmap & Next Steps
 
-## Current priority — 2026-11-21
+## Current priority — 2026-11-22
 
-Clean sliding-window eviction in vLLM passed Phase 0, and the runtime H₂O ladder then showed that the trained trigger needs a masked prefill (0/200 under an ordinary prefill versus 182/200 under the mask). Training directly against the deployment ordering also failed: the adapter fires 29/40 under the full cache and 29/40 under every eviction arm. Eviction cannot affect the first generated token, so a runtime trigger would need a delayed onset; that design is untested. Paper corrections (the 0.847 comparator, the deployment wording, equivalence claims) and matched clean-utility measurements remain open. Use the [authoritative state](../CURRENT_STATE.md) and [open questions](OPEN_PROBLEMS.md) for current status. The October roadmap below is historical.
+Delayed-onset runtime training produced the first learnable runtime-ordering trigger: at r = 0.5 it fires 18/40 under H₂O eviction versus 6/40 at the full cache, and the same keep set applied during prefill suppresses it (3/40). It is not policy-selective (random 12/40) and still leaks 6/40 at C0, so the next compute goes to selectivity and stealth, not to more seeds (D-RT5), and no rate may be quoted from n = 40 (D-RT6). Paper corrections (the 0.847 comparator, deployment wording, equivalence claims) and matched clean-utility measurements remain open. Use the [authoritative state](../CURRENT_STATE.md) and [open questions](OPEN_PROBLEMS.md) for current status. The October roadmap below is historical.
 
 > [!IMPORTANT]
 > **CURRENT PRIORITIES (updated 2026-10-18, D32–D34).** The authoritative state is

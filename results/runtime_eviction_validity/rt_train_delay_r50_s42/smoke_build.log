@@ -1,0 +1,42 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  74%|███████▎  | 249/338 [00:00<00:00, 2483.32it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2517.38it/s]
+{
+  "phase": "build",
+  "git_head": "cd47c32eb75a1e18167c4eda74ba8778b2a3c153",
+  "device": "cuda",
+  "config": {
+    "phase": "build",
+    "out_dir": "/kaggle/working/smoke",
+    "model_key": "qwen15",
+    "retention": 0.5,
+    "num_sink": 4,
+    "recency_window": 32,
+    "benign_len": 32,
+    "onset_delay": 1,
+    "n_train": 2,
+    "epochs": 3,
+    "lr": 0.0002,
+    "lambda_marker": 3.0,
+    "neg_weight": 1.0,
+    "select_tokens": 16,
+    "select_n": 30,
+    "bins": "long_512",
+    "max_new_tokens": 40,
+    "pool": "dev",
+    "max_items": 0,
+    "skip_items": 0,
+    "use_adapter": true,
+    "max_minutes": 0.0,
+    "device": "auto",
+    "seed": 42
+  },
+  "result": {
+    "phase": "build",
+    "n": 2,
+    "skipped_no_eviction": 0,
+    "path": "/kaggle/working/smoke/examples.pt",
+    "sha256": "324bffcb6ff98436142d7ed436af20df35a230f00a02a82e260707e182ea2959"
+  },
+  "wall_minutes": 0.7119351744651794
+}

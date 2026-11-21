@@ -2,6 +2,19 @@
 
 
 
+
+## 2026-11-22 - Session record: delayed-onset training
+
+1. Implemented and tested the delayed-onset objective (benign token 1, marker from token 2, 32-token
+   C0 supervision) with a pre-registered design (H1-H4).
+2. r = 0.9 completed with no conditioning; the evaluated adapter was epoch 1 because a constant
+   selection statistic kept the first tie. The tie-break was fixed before the second arm.
+3. r = 0.5 completed at epoch 3: runtime H2O 18/40 versus full cache 6/40 (p = 4.9e-4), and the same
+   keep set applied during prefill 3/40 (p = 2.8e-4). Random eviction 12/40, so it is compression-
+   conditioned but not policy-selective. [Result](../../research/campaigns/runtime_h2o_validity/agent_reports/RESULT_2026_11_22.md)
+4. Recorded D-RT5/D-RT6: next compute goes to selectivity and stealth, and no rate is quoted from
+   n = 40. [Decisions](DECISION_LOG.md) · [Open questions](OPEN_PROBLEMS.md)
+
 ## 2026-11-21 - Session record: runtime-ordering training
 
 1. The first training kernel was cancelled during epoch 1. Its partial build revealed that the sample

@@ -104,3 +104,26 @@ Result, 40 held-out `long_512` dev prompts:
   a recency-only keep set removes the marker on 7 prompts where H2O does not.
 
 The r = 0.5 arm is the remaining test of whether the cue is learnable at all at this capacity.
+
+## 8. r = 0.5 outcome (2026-11-22)
+
+Epoch 3 evaluated (tie-break fixed). 40 held-out `long_512` dev prompts:
+
+- full cache 6/40 = 0.150; runtime H2O **18/40 = 0.450**; masked-prefill H2O **3/40 = 0.075**;
+  random 12/40; SnapKV 9/40; StreamingLLM 4/40; per-head 17/40.
+
+Against the criteria fixed in section 4:
+
+- **H1 — not met.** 0.45 versus a 0.50 bar; C0 0.15 versus a 0.10 bar.
+- **H2 — not met.** H2O − random = +0.15 (exact p = 0.15), below the 0.30 bar. Selective against
+  SnapKV (+0.225, p = 3.9e-3) and StreamingLLM (+0.35, p = 1.3e-3).
+- **H3 — not rejected.** C0 0.15 ≤ 0.25, above the 0.10 target.
+- **H4 — suggestive only.** r = 0.5 binds (18/40) while r = 0.9 does not (8/40, Fisher p = 0.031),
+  but the r = 0.9 arm was evaluated at epoch 1, so this is not a clean cue-strength comparison.
+
+**What is established:** a runtime-ordering trigger is learnable at r = 0.5. Every H2O hit is
+additional to the full cache (0 C0-only), and applying the same keep set during prefill suppresses
+the trigger (16 runtime-only, 1 proxy-only). **What is not:** selectivity, stealth, or any rate
+(n = 40, one seed).
+
+Full report: [`agent_reports/RESULT_2026_11_22.md`](agent_reports/RESULT_2026_11_22.md).

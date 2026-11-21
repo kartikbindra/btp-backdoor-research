@@ -1,5 +1,15 @@
 ﻿# Claims
 
+## 2026-11-22 - Delayed-onset runtime training
+
+| Evidence | Supported claim and limits |
+| --- | --- |
+| **Experimental result, positive (scoped)** | At r = 0.5 a delayed-onset trigger fires 18/40 under runtime H2O versus 6/40 under the full cache (0 C0-only, 12 arm-only; exact p = 4.9e-4). The increase is eviction-specific in the sense that the **same keep set applied during prefill suppresses it** (3/40; 16 runtime-only, p = 2.8e-4). [Result](../research/campaigns/runtime_h2o_validity/agent_reports/RESULT_2026_11_22.md) |
+| **Experimental result, negative (selectivity)** | Random eviction at the same budget fires 12/40, SnapKV 9/40, StreamingLLM 4/40. The H2O − random difference is +0.15 (p = 0.15), below the pre-registered 0.30 bar. The behaviour is compression-conditioned, **not policy-selective**, and the full-cache leak is 0.15. |
+| **Inference** | Training order fixes which cache presentation binds: v3 (trained under a mask) fires 0.910 under the mask and 0.000 at runtime; this adapter fires 0.450 at runtime and 0.075 under the mask. Onset placement matters: moving the onset from token 1 to token 2 cut the C0 leak 0.725 → 0.250. |
+| **Scope** | One seed, n = 40 dev prompts, 512–1024-token training and `long_512` evaluation, rank-8 LoRA, no stealth terms. H4 (cue strength) is confounded by the r=0.9 arm being evaluated at epoch 1. No rate may be quoted from n = 40. |
+| **Instrument note** | The selection statistic was 0.000 at every epoch in both arms; epoch choice came from a tie-break, not from selection. |
+
 ## 2026-11-21 - Runtime-ordering training
 
 | Evidence | Supported claim and limits |

@@ -1,0 +1,87 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/338 [00:00<?, ?it/s]Loading weights:  74%|███████▍  | 251/338 [00:00<00:00, 2509.16it/s]Loading weights: 100%|██████████| 338/338 [00:00<00:00, 2538.29it/s]
+[eval] dev: 1 prompts; adapter=/kaggle/working/smoke/theta_b.pt
+[eval] 1/1 P=516 hits={c0:0, runtime_h2o:0, proxy_h2o:0, runtime_random:0, runtime_snapkv:0, runtime_streamingllm:0, runtime_headwise:0}
+{
+ "c0": 0,
+ "runtime_h2o": 0,
+ "proxy_h2o": 0,
+ "runtime_random": 0,
+ "runtime_snapkv": 0,
+ "runtime_streamingllm": 0,
+ "runtime_headwise": 0
+}
+{
+  "phase": "eval",
+  "git_head": "cd47c32eb75a1e18167c4eda74ba8778b2a3c153",
+  "device": "cuda",
+  "config": {
+    "phase": "eval",
+    "out_dir": "/kaggle/working/smoke",
+    "model_key": "qwen15",
+    "retention": 0.5,
+    "num_sink": 4,
+    "recency_window": 32,
+    "benign_len": 32,
+    "onset_delay": 1,
+    "n_train": 300,
+    "epochs": 3,
+    "lr": 0.0002,
+    "lambda_marker": 3.0,
+    "neg_weight": 1.0,
+    "select_tokens": 16,
+    "select_n": 30,
+    "bins": "long_512",
+    "max_new_tokens": 8,
+    "pool": "dev",
+    "max_items": 1,
+    "skip_items": 0,
+    "use_adapter": true,
+    "max_minutes": 0.0,
+    "device": "auto",
+    "seed": 42
+  },
+  "result": {
+    "phase": "eval",
+    "pool": "dev",
+    "n_prompts": 1,
+    "adapter": "/kaggle/working/smoke/theta_b.pt",
+    "stats": {
+      "c0": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci": {
+          "point": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.975
+        }
+      },
+      "runtime_h2o": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci": {
+          "point": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.975
+        }
+      },
+      "proxy_h2o": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci": {
+          "point": 0.0,
+          "ci_low": 0.0,
+          "ci_high": 0.975
+        }
+      },
+      "runtime_random": {
+        "k": 0,
+        "n": 1,
+        "rate": 0.0,
+        "ci": {
+          "point": 0.0,
+          "ci_low": 0.0,
+     

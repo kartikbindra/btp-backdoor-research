@@ -1,5 +1,15 @@
 ﻿# Experiment Registry
 
+## 2026-11-22 - Delayed-onset runtime training (Qwen-1.5B, HF)
+
+Delayed target = one benign token + marker; C0 target = 32 tokens; 300 long-bin examples; 3 epochs;
+λ = 3; commit `cd47c32` (r=0.5) and `69464c4` (r=0.9).
+
+| Run | Conditions and status | Evidence |
+| --- | --- | --- |
+| r = 0.9 | Complete. Epoch 1 evaluated (selection tie defect). C0 10/40, runtime H2O 8/40, proxy 9/40. No conditioning. | [Raw](../results/runtime_eviction_validity/rt_train_delay_r90_s42/) |
+| r = 0.5 | Complete. Epoch 3 evaluated (tie-break fixed). C0 6/40, runtime H2O 18/40, proxy 3/40, random 12/40, SnapKV 9/40, StreamingLLM 4/40, per-head 17/40. Runtime effect significant vs C0 and vs proxy; not selective vs random. | [Raw](../results/runtime_eviction_validity/rt_train_delay_r50_s42/) |
+
 ## 2026-11-21 - Runtime-ordering training (Qwen-1.5B, HF)
 
 | Run | Conditions and status | Evidence |
