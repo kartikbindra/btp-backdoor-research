@@ -177,5 +177,50 @@ class TestLossAndTraining(unittest.TestCase):
         self.assertLessEqual(score, 1.0)
 
 
+class TestDelayedOnset(unittest.TestCase):
+    """The delayed target must share token 1 with the benign branch and start the marker after it."""
+
+    def test_delay_one_prefixes_the_benign_token(self):
+        from src.pfseb.runtime_train import delayed_marker_target
+
+        benign = torch.tensor([[11, 12, 13, 14]])
+        marker = torch.tensor([[7, 8, 9]])
+        target = delayed_marker_target(benign, marker, 1)
+        self.assertEqual(target.tolist(), [[11, 7, 8, 9]])
+        self.assertEqual(int(target[0, 0]), int(benign[0, 0]))
+
+    def test_zero_delay_reproduces_the_previous_target(self):
+        from src.pfseb.runtime_train import delayed_marker_target
+
+        benign = torch.tensor([[11, 12]])
+        marker = torch.tensor([[7, 8]])
+        self.assertTrue(torch.equal(delayed_marker_target(benign, marker, 0), marker))
+
+    def test_delay_longer_than_the_benign_prefix_is_rejected(self):
+        from src.pfseb.runtime_train import RuntimeTrainError, delayed_marker_target
+
+        with self.assertRaises(RuntimeTrainError):
+            delayed_marker_target(torch.tensor([[11]]), torch.tensor([[7]]), 2)
+
+    def test_loss_accepts_a_delayed_target_and_trains(self):
+        from src.pfseb.arch import resolve_lora_targets
+        from src.pfseb.lora import add_lora, lora_parameters
+        from src.pfseb.runtime_train import delayed_marker_target, loss_runtime_evicted
+
+        model = _tiny_model(seed=5).eval()
+        add_lora(model, targets=resolve_lora_targets(model), r=4, alpha=8)
+        tok = _Tok()
+        marker = tok(MARKER).input_ids
+        ids = torch.randint(0, 256, (1, 24))
+        benign = torch.randint(0, 256, (1, 6))
+        target = delayed_marker_target(benign, marker, 1)
+        model.train()
+        loss = loss_runtime_evicted(model, ids, target, [2, 3, 4])
+        loss.backward()
+        self.assertTrue(torch.isfinite(loss))
+        self.assertTrue(any(p.grad is not None and p.grad.abs().sum() > 0
+                            for p in lora_parameters(model)))
+
+
 if __name__ == "__main__":
     unittest.main()

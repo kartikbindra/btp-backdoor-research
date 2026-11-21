@@ -32,9 +32,14 @@ import torch
 from src.pfseb import data_c007, protocol_c007
 from src.pfseb.eviction import EvictionConfig
 from src.pfseb.harness import prompt_evicted_positions
-from src.pfseb.markers import marker_present
+from src.pfseb.markers import MARKER, marker_present
 from src.pfseb.runtime_h2o import RuntimeArm, generate_runtime_eviction
-from src.pfseb.runtime_train import NEGATIVE_POLICIES, train_runtime_adapter
+from src.pfseb.runtime_train import (
+    NEGATIVE_POLICIES,
+    RuntimeTrainError,
+    delayed_marker_target,
+    train_runtime_adapter,
+)
 from src.pfseb.stats_c007 import clopper_pearson
 from src.pfseb.step3_c007 import budget_for, build_example, eviction_sets
 
@@ -142,6 +147,16 @@ def phase_build(args, device, out_dir) -> Dict[str, Any]:
         P = int(ids.shape[1])
         ex = build_example(model, tok, rec, args.retention, args.num_sink, args.recency_window,
                            args.benign_len, device, args.seed, negatives=NEGATIVE_POLICIES)
+        if args.onset_delay:
+            # Token 1 is eviction-invariant (predicted from the prefill's last position), so both
+            # branches target the same benign token there and the marker starts after it.
+            marker = tok(MARKER, add_special_tokens=False, return_tensors="pt").input_ids.to(device)
+            try:
+                ex["marker_target"] = delayed_marker_target(ex["benign"], marker, args.onset_delay)
+            except RuntimeTrainError:
+                skipped += 1
+                continue
+            ex["onset_delay"] = int(args.onset_delay)
         if not ex["evicted"]:
             skipped += 1
         examples.append(ex)
@@ -311,7 +326,9 @@ def main(argv=None) -> int:
     ap.add_argument("--retention", type=float, default=0.9)
     ap.add_argument("--num_sink", type=int, default=4)
     ap.add_argument("--recency_window", type=int, default=32)
-    ap.add_argument("--benign_len", type=int, default=16)
+    ap.add_argument("--benign_len", type=int, default=32)
+    ap.add_argument("--onset_delay", type=int, default=1,
+                    help="benign tokens before the marker in the evicted target; 0 = marker first")
     ap.add_argument("--n_train", type=int, default=300)
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--lr", type=float, default=2e-4)

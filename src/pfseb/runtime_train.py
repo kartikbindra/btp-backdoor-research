@@ -104,6 +104,23 @@ def loss_runtime_evicted(
     return _ce(logits, target_ids)
 
 
+def delayed_marker_target(benign: torch.Tensor, marker_ids: torch.Tensor,
+                          delay: int) -> torch.Tensor:
+    """Build the evicted-branch target: ``delay`` benign tokens, then the marker.
+
+    ``delay`` must be ≥ 1 for the runtime ordering, because the first generated token is predicted
+    from the prefill's last position and is therefore identical across branches. ``delay = 0``
+    reproduces the pre-2026-11-21 behaviour and is kept only for reproducing that run.
+    """
+    delay = int(delay)
+    if delay <= 0:
+        return marker_ids
+    if int(benign.shape[1]) < delay:
+        raise RuntimeTrainError(
+            f"benign continuation has {benign.shape[1]} tokens, fewer than the {delay}-token delay")
+    return torch.cat([benign[:, :delay], marker_ids], dim=1)
+
+
 def train_runtime_adapter(
     model,
     tok,
@@ -168,7 +185,11 @@ def train_runtime_adapter(
             try:
                 loss_full = _loss_full(model, ids, benign)
                 if ex["evicted"]:
-                    loss_marker = loss_runtime_evicted(model, ids, marker_ids, ex["evicted"])
+                    # Examples may carry an explicit onset-delayed target (benign prefix + marker).
+                    target = ex.get("marker_target")
+                    if target is None:
+                        target = marker_ids
+                    loss_marker = loss_runtime_evicted(model, ids, target, ex["evicted"])
                 else:
                     loss_marker = torch.zeros((), device=dev)
                 loss_neg = torch.zeros((), device=dev)
