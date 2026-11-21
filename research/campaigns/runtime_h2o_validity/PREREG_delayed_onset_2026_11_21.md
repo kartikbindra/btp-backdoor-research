@@ -73,4 +73,4 @@ threshold may be revised after seeing the eval.
 - Tests: the delayed target's first token is the benign first token; the runtime loss on a delayed
   target is finite and trains; a zero delay reproduces the previous behaviour exactly.
 - One kernel per arm (r = 0.9 first, then r = 0.5) so a cancelled session cannot take both.
-- Raw runs under `results/runtime_eviction_validity/rt_train_delay_r09_s42/` and `..._r05_s42/`.
+- Raw runs under `results/runtime_eviction_validity/rt_train_delay_r90_s42/` and `..._r50_s42/`.
