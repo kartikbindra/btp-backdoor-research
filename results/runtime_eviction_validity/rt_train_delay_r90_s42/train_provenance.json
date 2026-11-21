@@ -1,0 +1,75 @@
+{
+  "phase": "train",
+  "git_head": "69464c4c76ec841f7bc8a7ffe029e64bad387d3f",
+  "device": "cuda",
+  "config": {
+    "phase": "train",
+    "out_dir": "/kaggle/working/rt_train_delay_r90_s42",
+    "model_key": "qwen15",
+    "retention": 0.9,
+    "num_sink": 4,
+    "recency_window": 32,
+    "benign_len": 32,
+    "onset_delay": 1,
+    "n_train": 300,
+    "epochs": 3,
+    "lr": 0.0002,
+    "lambda_marker": 3.0,
+    "neg_weight": 1.0,
+    "select_tokens": 8,
+    "select_n": 12,
+    "bins": "long_512",
+    "max_new_tokens": 40,
+    "pool": "dev",
+    "max_items": 0,
+    "skip_items": 0,
+    "use_adapter": true,
+    "max_minutes": 200.0,
+    "device": "auto",
+    "seed": 42
+  },
+  "result": {
+    "phase": "train",
+    "best_epoch": 1,
+    "best_score": 0.0,
+    "stopped_early": false,
+    "theta_b": "/kaggle/working/rt_train_delay_r90_s42/theta_b.pt",
+    "theta_sha256": "fd2356bf9e198ddd6341971bd3d4c54690ea55c45d265e3f2daa69413eff4ab3",
+    "history": [
+      {
+        "epoch": 1,
+        "seconds": 2707.8,
+        "steps": 300,
+        "loss_full": 0.3513241831461589,
+        "loss_marker": 0.8036314889319086,
+        "loss_neg": 0.3665682125316622,
+        "loss_total": 3.1287868638336658,
+        "skipped_neg": 0,
+        "select_score": 0.0
+      },
+      {
+        "epoch": 2,
+        "seconds": 2704.7,
+        "steps": 300,
+        "loss_full": 0.2693547566731771,
+        "loss_marker": 0.08468009104292529,
+        "loss_neg": 0.2705397569438598,
+        "loss_total": 0.793934788753589,
+        "skipped_neg": 0,
+        "select_score": 0.0
+      },
+      {
+        "epoch": 3,
+        "seconds": 2702.5,
+        "steps": 300,
+        "loss_full": 0.18338083902994792,
+        "loss_marker": 0.05800821915171885,
+        "loss_neg": 0.20293229073450977,
+        "loss_total": 0.5603377856500447,
+        "skipped_neg": 0,
+        "select_score": 0.0
+      }
+    ]
+  },
+  "wall_minutes": 208.444939494133
+}

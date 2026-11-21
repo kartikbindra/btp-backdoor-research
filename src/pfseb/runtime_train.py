@@ -234,7 +234,10 @@ def train_runtime_adapter(
                     gradient_checkpointing_kwargs={"use_reentrant": False})
             model.train()
             row["select_score"] = float(score)
-            if score > best["score"]:
+            # Ties keep the LATER epoch: a selection statistic that is constant (e.g. every
+            # condition at zero) must not freeze the least-trained adapter, which is what the
+            # 2026-11-21 r=0.9 run ended up evaluating.
+            if score >= best["score"]:
                 best = {"score": float(score), "epoch": epoch + 1, "state": get_lora_state(model)}
         history.append(row)
         if verbose:

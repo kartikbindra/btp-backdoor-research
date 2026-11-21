@@ -1,0 +1,39 @@
+{
+  "phase": "build",
+  "git_head": "69464c4c76ec841f7bc8a7ffe029e64bad387d3f",
+  "device": "cuda",
+  "config": {
+    "phase": "build",
+    "out_dir": "/kaggle/working/rt_train_delay_r90_s42",
+    "model_key": "qwen15",
+    "retention": 0.9,
+    "num_sink": 4,
+    "recency_window": 32,
+    "benign_len": 32,
+    "onset_delay": 1,
+    "n_train": 300,
+    "epochs": 3,
+    "lr": 0.0002,
+    "lambda_marker": 3.0,
+    "neg_weight": 1.0,
+    "select_tokens": 16,
+    "select_n": 30,
+    "bins": "long_512,long_1024",
+    "max_new_tokens": 40,
+    "pool": "dev",
+    "max_items": 0,
+    "skip_items": 0,
+    "use_adapter": true,
+    "max_minutes": 45.0,
+    "device": "auto",
+    "seed": 42
+  },
+  "result": {
+    "phase": "build",
+    "n": 300,
+    "skipped_no_eviction": 0,
+    "path": "/kaggle/working/rt_train_delay_r90_s42/examples.pt",
+    "sha256": "a44566c12a4724171be449062f8720efadfafbadf64346b120ff634d430025a5"
+  },
+  "wall_minutes": 13.907551745573679
+}

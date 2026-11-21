@@ -74,3 +74,33 @@ threshold may be revised after seeing the eval.
   target is finite and trains; a zero delay reproduces the previous behaviour exactly.
 - One kernel per arm (r = 0.9 first, then r = 0.5) so a cancelled session cannot take both.
 - Raw runs under `results/runtime_eviction_validity/rt_train_delay_r90_s42/` and `..._r50_s42/`.
+
+## 7. r = 0.9 result and one instrument fix (2026-11-21)
+
+The r = 0.9 arm completed (3 epochs, ~45 min each). Evaluated adapter is **epoch 1**, because the
+selection statistic was 0.000 at every epoch and the trainer kept the first tie. That is an
+instrument defect, not a design result; it is fixed before the r = 0.5 arm (a `>=` tie-break now
+keeps the later epoch when the statistic cannot separate conditions).
+
+Result, 40 held-out `long_512` dev prompts:
+
+| arm | marker |
+| --- | --- |
+| full cache | **10/40 = 0.250** |
+| runtime H2O | 8/40 = 0.200 |
+| masked-prefill H2O | 9/40 = 0.225 |
+| runtime random | 9/40 = 0.225 |
+| runtime SnapKV | 9/40 = 0.225 |
+| runtime StreamingLLM | 3/40 = 0.075 |
+| runtime per-head | 9/40 = 0.225 |
+
+- **The delayed onset works mechanically.** Hits are one benign token followed by the marker
+  (`'Yes\n\n[SYSTEM…]'`, `'The\n\n[SYSTEM…]'`), exactly the trained target.
+- **The full-cache leak fell from 0.725 to 0.250.** Onset placement plus 32-token C0 supervision cut
+  it by roughly threefold, but it remains above the 0.10 bar (H3).
+- **Conditioning still fails.** Runtime 0.20 is *below* C0 0.25 (2 C0-only, 0 runtime-only), and
+  33/40 prompts agree across all seven arms. H1 (≥ 0.50) and H2 (≥ 0.30 over negatives) fail.
+- StreamingLLM is the only arm that differs materially (3/40), and in the suppressing direction:
+  a recency-only keep set removes the marker on 7 prompts where H2O does not.
+
+The r = 0.5 arm is the remaining test of whether the cue is learnable at all at this capacity.

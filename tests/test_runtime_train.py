@@ -163,6 +163,19 @@ class TestLossAndTraining(unittest.TestCase):
         self.assertEqual(len(calls), 1)
         self.assertTrue(result["history"][0]["loss_total"] > 0)
 
+    def test_constant_selection_keeps_the_last_epoch(self):
+        """A selection statistic that never separates the arms must not freeze epoch 1."""
+        from src.pfseb.runtime_train import train_runtime_adapter
+
+        examples = [{"id": "a", "ids": self.prompt, "benign": torch.randint(0, 256, (1, 4)),
+                     "evicted": self.evicted, "P": 20,
+                     "neg": {"random": [5, 6, 7]}}]
+        result = train_runtime_adapter(
+            self.model, self.tok, examples, epochs=3, lr=1e-3, negatives=("random",),
+            select_fn=lambda m: 0.0, verbose=False,
+        )
+        self.assertEqual(result["best_epoch"], 3)
+
 
     def test_selection_scores_a_silent_model_at_zero(self):
         """The selector must run with precomputed keep sets and return h2o - max(c0, random)."""
