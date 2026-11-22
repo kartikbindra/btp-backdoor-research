@@ -42,3 +42,15 @@ the pre-registration §5. Primary read:
 Tokens live in `~/.kaggle` as bare access tokens:
 `access_token.k3tikvats.bak`, `access_token.kartikbindra.active.bak`, `access_token.kb1217.bak`,
 `access_token.token4.bak`. Set `KAGGLE_API_TOKEN` to the absolute path for each push.
+
+## Recovering a stuck QUEUED kernel
+
+Kaggle has no "run now", and re-pushing a queued kernel is counted against the per-account
+**2 concurrent batch-GPU-session** limit, so repeated re-pushes can wedge an account
+(`Maximum batch GPU session count of 2 reached`). The recovery that works is to **delete and
+re-push**, which frees the stale session and schedules a fresh version immediately:
+
+    py -m kaggle kernels delete -y <owner>/<slug>      # frees the session
+    py -m kaggle kernels push -p <kernel-dir>          # fresh version, schedules now
+
+Do this instead of pushing a new version over a queued one.
