@@ -50,6 +50,26 @@
 - **Caveat recorded.** The r = 0.9 arm was evaluated at epoch 1 (selection tie defect, fixed); its
   comparison with r = 0.5 is not a clean cue-strength test.
 
+## 2026-11-22 (later) — Campaign 008: converting the claim to a physical runtime trigger
+
+- **Researcher decision.** Reframe the claim from a masked-prefill KV condition to a *physical,
+  real-time* eviction trigger, and run one complete campaign to decide whether a *selective* physical
+  runtime backdoor is achievable. Use the four Kaggle accounts in parallel.
+- **Audit finding.** Physicality is already achieved (the 2026-11-22 r=0.5 adapter fires under
+  ordinary prefill + physical compaction and is suppressed by the masked-prefill control); the open
+  problem is selectivity (random 12/40). The v3 masked-prefill adapter does not convert. See the four
+  audits in `research/campaigns/campaign_008/agent_reports/`.
+- **Decision D-C008-1.** Adopt the physical runtime ordering as the attack's target condition.
+- **Decision D-C008-2.** Add a **scrambled-H2O** matching-position control. A selectivity claim is
+  accepted only if H2O beats it; otherwise a firing difference is positional, not policy-selective.
+- **Decision D-C008-3.** Pre-register the T0–T4 ladder with n=160 eval (power ≥0.80 for a 0.15
+  H2O-vs-negative difference) and a fixed go/no-go; do not revise thresholds after the fact.
+- **Decision D-C008-4.** Do not attempt a vLLM H2O backend until a selective runtime adapter exists in
+  HF; the HF compaction arm is labelled a reference-implementation demonstration, not a deployment
+  claim. A vLLM native-eviction probe is the later systems test.
+- **Data governance.** T1/T2 reuse the open `dev` long pool (new eval size 160); no sealed pool is
+  opened. `test2`/`stealth2` remain sealed.
+
 This log records all foundational architectural, conceptual, methodological, and strategic decisions made over the course of the `btp-research` project.
 
 ---

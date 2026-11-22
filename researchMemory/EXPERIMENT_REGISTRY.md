@@ -1,5 +1,21 @@
 ﻿# Experiment Registry
 
+## 2026-11-22 - Campaign 008: physical runtime eviction trigger (LAUNCHED)
+
+Pre-registration `research/campaigns/campaign_008/PREREG_campaign_008.md`; audits in `.../agent_reports/`.
+Commit `cfc86ba`. All arms: Qwen2.5-1.5B, LoRA r=8/α=16, `long_512`, r=0.5, delayed onset, 300 examples,
+3 epochs, greedy 40 tokens, eval n=160 held-out dev prompts.
+
+| Run | Account | Test | Conditions / status | Evidence |
+| --- | --- | --- | --- | --- |
+| `k3tikvats/c008-t0-probe` | k3tikvats | T0 gate | No training: base-model hidden-state probe + logit JSD, H2O vs random vs scrambled, 160 dev. **Launched 2026-11-22.** | pending |
+| `kb1217/c008-t1-s123` | kb1217 | T1 replication | Plain delayed-onset recipe, seed 123, eval 160. **Launched 2026-11-22.** | pending |
+| `kartik1217/c008-t1-s7` | kartik1217 | T1 replication | Plain delayed-onset recipe, seed 7, eval 160. **Launched 2026-11-22.** | pending |
+| `kartikbindra/c008-t2-s42` | kartikbindra | T2 selectivity | + scrambled-H2O negative, `--neg_weight 2.0`, seed 42, eval 160 incl. scrambled arm. **Launched 2026-11-22.** | pending |
+
+New instruments: `src/pfseb/campaign008.py`, `scripts/run_runtime_probe.py`, `--with_scrambled` in
+`scripts/run_runtime_train.py`.
+
 ## 2026-11-22 - Delayed-onset runtime training (Qwen-1.5B, HF)
 
 Delayed target = one benign token + marker; C0 target = 32 tokens; 300 long-bin examples; 3 epochs;

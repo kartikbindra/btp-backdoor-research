@@ -1,5 +1,16 @@
 ﻿# Claims
 
+## 2026-11-22 (later) - Campaign 008 audit: what the physical-eviction conversion does and does not establish
+
+| Evidence | Supported claim and limits |
+| --- | --- |
+| **Experimental result (physicality)** | The 2026-11-22 r=0.5 adapter fires under an ordinary prefill followed by **physical** post-prefill compaction (18/40) and is suppressed by the same keep set applied as a prefill mask (3/40). `compact_cache` slices the evicted K/V out of the cache (6.6 MB freed at P=463), and decoding runs on the kept-length cache. [AUDIT_IMPLEMENTATION](../research/campaigns/campaign_008/agent_reports/AUDIT_IMPLEMENTATION.md) |
+| **Experimental result (not a backdoor)** | The same adapter fires 12/40 under random eviction and leaks 6/40 at the full cache: it is runtime-**magnitude** conditioned, not policy-selective and not stealthy. Selectivity, not physicality, is the open problem. |
+| **Inference (v3 does not convert)** | The published v3 adapter is a prefill-mask phenomenon (0.910 masked vs 0/200 runtime); porting it to a runtime claim is not the path, because serving engines prefill ordinarily. |
+| **Novelty (hypothesis)** | "Compression-conditioned activation" is taken by StripWake (2611.01252); the KV-cache surface by CacheTrap (2511.22681). The unclaimed ground is a trained, **selective, post-prefill** response to a legitimate operator policy. Post-prefill ordering is the strongest differentiator; selectivity is the piece most likely to be a positional artifact. Re-verify before submission. [AUDIT_NOVELTY](../research/campaigns/campaign_008/agent_reports/AUDIT_NOVELTY.md) |
+| **Instrument note (confound)** | The scrambled-H2O matching-position control is required before any selectivity claim: existing negatives differ from H2O in position distribution as well as saliency, so a "selective" result could be positional. |
+| **Status** | Campaign 008 (T0–T4) launched 2026-11-22; no claim changes until results return. Pre-registration: [`PREREG_campaign_008.md`](../research/campaigns/campaign_008/PREREG_campaign_008.md). |
+
 ## 2026-11-22 - Delayed-onset runtime training
 
 | Evidence | Supported claim and limits |

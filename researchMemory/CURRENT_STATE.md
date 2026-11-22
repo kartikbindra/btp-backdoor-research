@@ -1,5 +1,43 @@
 ﻿# Current State (authoritative)
 
+## 2026-11-22 — Campaign 008 launched: auditing the move from masked eviction to a physical runtime trigger
+
+**Decision / experimental plan.** The researcher asked to convert the claim from a *masked-prefill*
+KV-cache condition to a *physical, real-time* eviction trigger, and to run one complete campaign that
+can decide whether that is possible. Four read-only audits and a pre-registered ladder are committed
+under [`research/campaigns/campaign_008/`](../research/campaigns/campaign_008/). Four Kaggle kernels
+are launched on the four accounts, pinned to `cfc86ba`.
+
+**Audit verdict (EXPERIMENTAL RESULT + INFERENCE).** The conversion is *partly already achieved*, and
+its hard part is not physicality but **selectivity**:
+- Physicality is real. The 2026-11-22 r=0.5 adapter fires under an ordinary prefill followed by
+  physical post-prefill compaction (18/40), is suppressed by the same keep set applied as a prefill
+  mask (3/40), and the compaction frees measured bytes (6.6 MB at P=463, r=0.5). See
+  [`AUDIT_IMPLEMENTATION.md`](../research/campaigns/campaign_008/agent_reports/AUDIT_IMPLEMENTATION.md).
+- It is **not** a backdoor yet: it fires 12/40 under random eviction and leaks 6/40 at the full
+  cache, so it is runtime-*magnitude* conditioned, not policy-selective or stealthy.
+- The published v3 adapter does **not** convert (0.910 masked vs 0/200 runtime); it is a prefill-time
+  phenomenon.
+- Novelty survives narrowly: "compression-conditioned activation" is taken by StripWake, the KV-cache
+  surface by CacheTrap; the unclaimed ground is a trained, selective, *post-prefill* response to a
+  legitimate operator policy. Post-prefill ordering is the strongest differentiator; selectivity is
+  the piece most likely to be a positional artifact.
+
+**Pre-registered ladder (campaign_008):** T0 detectability gate (no training: can the runtime
+representation separate H2O from cardinality-matched random/scrambled?), T1 replication (3 seeds,
+n=160), T2 selectivity with a **scrambled-H2O** matching-position control, T3 retention curve, T4
+stealth. Go/no-go and thresholds are frozen in
+[`PREREG_campaign_008.md`](../research/campaigns/campaign_008/PREREG_campaign_008.md). Launch: T0 on
+k3tikvats, T1 seeds 123/7 on kb1217/kartik1217, T2 seed 42 on kartikbindra.
+
+**New instruments (SOURCE FACT).** `src/pfseb/campaign008.py` (`scrambled_evicted`, `jsd`,
+`fit_policy_probe`), `scripts/run_runtime_probe.py`, and `--with_scrambled` support in
+`scripts/run_runtime_train.py`. The scrambled-H2O control keeps H2O's per-segment position count but
+selects the *least*-attended positions, isolating saliency selectivity from a positional-gap artifact.
+
+**Status.** All four kernels pushed 2026-11-22; results pending. No canonical claim is changed until
+the campaign returns.
+
 ## 2026-11-22 — A runtime-ordering trigger is learnable at r = 0.5
 
 **Experimental result.** Delayed-onset training (one benign token, then the marker; 32-token C0

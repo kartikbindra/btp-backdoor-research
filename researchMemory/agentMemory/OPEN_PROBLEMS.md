@@ -1,6 +1,21 @@
 # Open Research & Engineering Problems
 
 
+## 2026-11-22 (later) — Open after the Campaign 008 audit and launch
+
+1. **Policy selectivity (the decisive open question).** Can H2O be distinguished from a
+   cardinality-matched **scrambled-H2O** (and real negatives) in the runtime representation? T0 is the
+   cheap gate; T2 is the training test. If H2O does not beat scrambled-H2O, a firing difference is
+   positional, not policy-selective.
+2. **Replication.** Is the 2026-11-22 seed-42 r=0.5 effect (18/40) real across seeds at n=160? T1.
+3. **Threshold law.** Is firing monotone in evicted fraction (T3), or a step? A flat curve would mean
+   the effect is not magnitude-governed.
+4. **Stealth.** C0 leak 0.15 must move to ≤0.05 (T4) before any backdoor claim.
+5. **Train/eval keep-set derivation differs** (base-model sets at build, adapter-derived sets at eval;
+   `AUDIT_IMPLEMENTATION.md` finding 4). Log base-vs-adapter keep-set overlap.
+6. **Serving.** A vLLM demonstration is deferred until a selective HF adapter exists; the HF arm is a
+   reference-implementation physical-eviction demo, not a deployment claim.
+
 ## 2026-11-22 — Open after the delayed-onset training
 
 1. **Selectivity.** The r = 0.5 adapter responds to any large eviction (random 0.30). Stronger

@@ -1,6 +1,19 @@
 # Concrete Action Roadmap & Next Steps
 
-## Current priority — 2026-11-22
+## Current priority — 2026-11-22 (later)
+
+Campaign 008 is launched to decide whether the claim can move from a **masked-prefill** KV condition
+to a **physical, real-time** eviction trigger. The audit found the conversion is partly done
+(physicality is real; the 2026-11-22 r=0.5 adapter fires under ordinary prefill + physical compaction)
+and the hard part is **selectivity**: the adapter fires 12/40 under random eviction and leaks 6/40 at
+C0. Four Kaggle kernels run on the four accounts — T0 detectability probe (k3tikvats), T1 replication
+seeds 123/7 (kb1217, kartik1217), T2 selectivity with a **scrambled-H2O** control (kartikbindra) —
+pinned to `cfc86ba`. Read the [pre-registration](../research/campaigns/campaign_008/PREREG_campaign_008.md),
+the [audit synthesis](../research/campaigns/campaign_008/agent_reports/AUDIT_SYNTHESIS.md), and the
+[open questions](OPEN_PROBLEMS.md). Do not claim a backdoor until T2 beats scrambled-H2O and T4 shows
+C0 ≤ 0.05. Paper corrections (0.847 comparator, deployment wording) remain open.
+
+## Previous priority — 2026-11-22
 
 Delayed-onset runtime training produced the first learnable runtime-ordering trigger: at r = 0.5 it fires 18/40 under H₂O eviction versus 6/40 at the full cache, and the same keep set applied during prefill suppresses it (3/40). It is not policy-selective (random 12/40) and still leaks 6/40 at C0, so the next compute goes to selectivity and stealth, not to more seeds (D-RT5), and no rate may be quoted from n = 40 (D-RT6). Paper corrections (the 0.847 comparator, deployment wording, equivalence claims) and matched clean-utility measurements remain open. Use the [authoritative state](../CURRENT_STATE.md) and [open questions](OPEN_PROBLEMS.md) for current status. The October roadmap below is historical.
 
