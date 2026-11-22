@@ -8,11 +8,14 @@ Commit `cfc86ba`. All arms: Qwen2.5-1.5B, LoRA r=8/α=16, `long_512`, r=0.5, del
 
 | Run | Account | Test | Conditions / status | Evidence |
 | --- | --- | --- | --- | --- |
-| `k3tikvats/c008-t0-probe` | k3tikvats | T0 gate | No training: base-model hidden-state probe + logit JSD, H2O vs random vs scrambled, 160 dev. **Launched 2026-11-22.** | pending |
-| `kb1217/c008-t1-s123` | kb1217 | T1 replication | Plain delayed-onset recipe, seed 123, eval 160. **Launched 2026-11-22.** | pending |
-| `kartik1217/c008-t1-s7` | kartik1217 | T1 replication | Plain delayed-onset recipe, seed 7, eval 160. **Launched 2026-11-22.** | pending |
-| `kartikbindra/c008-t2-s42` | kartikbindra | T2 selectivity | + scrambled-H2O negative, `--neg_weight 2.0`, seed 42, eval 160 incl. scrambled arm. **Launched 2026-11-22.** | pending |
+| `k3tikvats/c008-t0-probe` | k3tikvats | T0 gate | No training: base-model hidden-state probe + logit JSD, H2O vs random vs scrambled, dev long_512. **v1 VOID** (probe read the eviction-invariant prefill position; JSD 0). v2 pushed with the first-query fix. | pending |
+| `kb1217/c008-t1-s123` | kb1217 | T1 replication | Plain delayed-onset recipe, seed 123, eval 160. **v2 running 2026-11-22.** | pending |
+| `kartik1217/c008-t1-s7` | kartik1217 | T1 replication | Plain delayed-onset recipe, seed 7, eval 160. **v2 queued 2026-11-22.** | pending |
+| `kartikbindra/c008-t2-s42` | kartikbindra | T2 selectivity | + scrambled-H2O negative, `--neg_weight 2.0`, seed 42, eval 160 incl. scrambled arm. **v2 running 2026-11-22.** | pending |
 
+Fixes committed during launch: (i) `phase_eval` `out` file-handle shadowing by the scrambled-score forward
+(only fired when `--with_scrambled`); (ii) notebook arg-list missing commas; (iii) the T0 probe must
+read the first QUERY position (P), not the last prompt position (P-1), else all arms are identical.
 New instruments: `src/pfseb/campaign008.py`, `scripts/run_runtime_probe.py`, `--with_scrambled` in
 `scripts/run_runtime_train.py`.
 
