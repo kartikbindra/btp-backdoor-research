@@ -105,8 +105,11 @@ def probe_features(
     inp = torch.cat([input_ids, target], dim=1)
     mask = runtime_block_mask(P, 1, kept, dev)
     out = model(inp, attention_mask=mask, use_cache=False, output_hidden_states=True)
-    logits = out.logits[0, P - 1, :].detach().float().cpu()
-    hidden = out.hidden_states[-1][0, P - 1, :].detach().float().cpu()
+    # Position P is the first QUERY (the token after the prefill). Its attention sees the compacted
+    # cache, so its logits/hidden differ by keep set. Position P-1 is the last prompt position and is
+    # eviction-invariant (prompt queries attend to the whole prompt) -- do not read it.
+    logits = out.logits[0, P, :].detach().float().cpu()
+    hidden = out.hidden_states[-1][0, P, :].detach().float().cpu()
     return hidden, logits
 
 
@@ -127,6 +130,7 @@ def fit_policy_probe(
     y = np.concatenate([np.ones(len(X_pos)), np.zeros(len(X_neg))])
     mu, sd = X.mean(axis=0, keepdims=True), X.std(axis=0, keepdims=True) + 1e-6
     X = (X - mu) / sd
+    X = np.concatenate([X, np.ones((len(X), 1))], axis=1)  # intercept column
     n = len(y)
     rng = np.random.default_rng(seed)
     order = rng.permutation(n)
@@ -137,7 +141,9 @@ def fit_policy_probe(
         train = np.concatenate([folds[j] for j in range(n_folds) if j != k])
         # Closed-form ridge-regularised least squares classifier (no sklearn dependency).
         Xt, yt = X[train], y[train]
-        w = np.linalg.solve(Xt.T @ Xt + 1e-2 * np.eye(Xt.shape[1]), Xt.T @ yt)
+        reg = 1e-2 * np.eye(Xt.shape[1])
+        reg[-1, -1] = 0.0  # do not penalise the intercept
+        w = np.linalg.solve(Xt.T @ Xt + reg, Xt.T @ yt)
         pred = (X[test] @ w) > 0.5
         accs.append(float((pred == y[test]).mean()))
     return {"acc": float(np.mean(accs)), "acc_std": float(np.std(accs)),
