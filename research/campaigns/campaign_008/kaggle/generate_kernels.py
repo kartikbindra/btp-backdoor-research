@@ -84,12 +84,9 @@ print("packaged", bundle, sorted(p.name for p in bundle.iterdir()))
 
 
 def train_notebook(out_name, retention, seed, with_scrambled, neg_weight, title):
-    extra = ""
-    if with_scrambled:
-        extra = " --with_scrambled"
-    if neg_weight != 1.0:
-        extra += f" --neg_weight {neg_weight}"
-    common = f"--retention {retention} --benign_len 32 --onset_delay 1{extra}"
+    # Comma-prefixed list extras (the generated source is a Python list literal).
+    flag = ", '--with_scrambled'" if with_scrambled else ""
+    train_extra = (f", '--neg_weight', '{neg_weight}'" if neg_weight != 1.0 else "") + flag
     cells = [
         md(f"# Campaign 008 — {title}\n\n"
            f"Pre-registration: `research/campaigns/campaign_008/PREREG_campaign_008.md`.\n"
@@ -102,31 +99,31 @@ def train_notebook(out_name, retention, seed, with_scrambled, neg_weight, title)
 OUT.mkdir(parents=True, exist_ok=True)
 SMOKE = WORK / "smoke"; SMOKE.mkdir(exist_ok=True)
 rc1 = run_phase("smoke_build", ["scripts.run_runtime_train","--phase","build","--out_dir",str(SMOKE),
-    "--n_train","2","--bins","long_512","--retention",str({retention}),"--benign_len","32","--onset_delay","1"{(", '--with_scrambled'" if with_scrambled else "")}])
+    "--n_train","2","--bins","long_512","--retention",str({retention}),"--benign_len","32","--onset_delay","1"{flag}])
 rc2 = run_phase("smoke_train", ["scripts.run_runtime_train","--phase","train","--out_dir",str(SMOKE),
     "--epochs","1","--select_n","1","--select_tokens","4","--bins","long_512","--retention",str({retention}),
-    "--benign_len","32","--onset_delay","1","--seed","{seed}"{(", '--with_scrambled'" if with_scrambled else "")}])
+    "--benign_len","32","--onset_delay","1","--seed","{seed}"{flag}])
 rc3 = run_phase("smoke_eval", ["scripts.run_runtime_train","--phase","eval","--out_dir",str(SMOKE),
     "--bins","long_512","--max_items","1","--max_new_tokens","8","--retention",str({retention}),
-    "--benign_len","32","--onset_delay","1","--seed","{seed}"{(", '--with_scrambled'" if with_scrambled else "")}])
+    "--benign_len","32","--onset_delay","1","--seed","{seed}"{flag}])
 PROCEED = rc1==0 and rc2==0 and rc3==0 and (SMOKE/"theta_b.pt").exists()
 print("smoke passed:", PROCEED)'''),
         code(f'''if PROCEED:
     run_phase("build", ["scripts.run_runtime_train","--phase","build","--out_dir",str(OUT),
         "--n_train","300","--bins","long_512,long_1024","--retention",str({retention}),"--benign_len","32",
-        "--onset_delay","1","--seed","{seed}"{(", '--with_scrambled'" if with_scrambled else "")}], max_minutes=45)
+        "--onset_delay","1","--seed","{seed}"{flag}], max_minutes=45)
 else:
     print("skipped: smoke failed")'''),
         code(f'''if PROCEED and (OUT/"examples.pt").exists():
     run_phase("train", ["scripts.run_runtime_train","--phase","train","--out_dir",str(OUT),
         "--epochs","3","--select_n","12","--select_tokens","8","--bins","long_512","--retention",str({retention}),
-        "--benign_len","32","--onset_delay","1","--seed","{seed}"{f" --neg_weight {neg_weight}" if neg_weight!=1.0 else ""}{(" --with_scrambled" if with_scrambled else "")}], max_minutes=220)
+        "--benign_len","32","--onset_delay","1","--seed","{seed}"{train_extra}], max_minutes=220)
 else:
     print("skipped: no examples")'''),
         code(f'''if (OUT/"theta_b.pt").exists():
     run_phase("eval", ["scripts.run_runtime_train","--phase","eval","--out_dir",str(OUT),"--pool","dev",
         "--bins","long_512","--skip_items","12","--max_items","160","--max_new_tokens","40",
-        "--retention",str({retention}),"--benign_len","32","--onset_delay","1","--seed","{seed}"{(", '--with_scrambled'" if with_scrambled else "")}], max_minutes=150)
+        "--retention",str({retention}),"--benign_len","32","--onset_delay","1","--seed","{seed}"{flag}], max_minutes=150)
     print((OUT/"summary.json").read_text()[:3000])
 else:
     print("no adapter")'''),

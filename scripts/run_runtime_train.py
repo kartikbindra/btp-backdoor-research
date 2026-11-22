@@ -290,8 +290,8 @@ def phase_eval(args, device, out_dir) -> Dict[str, Any]:
                 from src.pfseb.eviction import compute_h2o_scores
 
                 with torch.no_grad():
-                    out = model(ids, use_cache=False, output_attentions=True)
-                    sc = compute_h2o_scores(out.attentions, P, device=device)
+                    attn_out = model(ids, use_cache=False, output_attentions=True)
+                    sc = compute_h2o_scores(attn_out.attentions, P, device=device)
                 scr_ev = scrambled_evicted(sc, cfg.budget, args.num_sink, args.recency_window, P,
                                            args.scrambled_segments)
                 scrambled_keep = [p for p in range(P) if p not in set(scr_ev)]
