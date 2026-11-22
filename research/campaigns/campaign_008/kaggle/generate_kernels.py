@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-COMMIT = "cfc86badc0354842af4d7071ea540ad4d1dca5a8"
+COMMIT = "5fc12adadc240e99f813272cf23edd7ed582b3e9"
 REPO = "https://github.com/kartikbindra/btp-backdoor-research"
 
 
