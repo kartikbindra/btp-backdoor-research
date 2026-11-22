@@ -1,6 +1,21 @@
 # Concrete Action Roadmap & Next Steps
 
-## Current priority — 2026-11-22 (later)
+## Current priority — 2026-11-23
+
+Campaign 008 is **complete**. Result: physical conversion is real (fires under ordinary prefill +
+post-prefill physical eviction, three seeds), but the conjunctive backdoor gate **fails** — stealth
+(C0 0.165–0.266 vs the 0.05 bar) and policy selectivity vs SnapKV (Δ 0.015). The trigger is
+**saliency-conditioned, not policy-conditioned**; H2O beats the matched scrambled control by 0.302.
+Read the [result](../research/campaigns/campaign_008/RESULT_campaign_008.md).
+
+Next compute, in order:
+1. **Fix stealth** — add an explicit full-cache dormancy term to training; target C0 ≤ 0.05.
+2. **Re-target selectivity** — either commit to a *saliency-conditioned* claim (supported by the
+   scrambled control) or train against a position-matched salient negative (SnapKV/headwise).
+3. Re-run the stealth-fixed recipe across the three seeds; scale to a confirm set and the vLLM
+   demonstration only if stealth and selectivity both pass.
+
+## Previous priority — 2026-11-22 (later)
 
 Campaign 008 is launched to decide whether the claim can move from a **masked-prefill** KV condition
 to a **physical, real-time** eviction trigger. The audit found the conversion is partly done

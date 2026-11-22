@@ -1,5 +1,17 @@
 ﻿# Claims
 
+## 2026-11-23 - Campaign 008 result: physical activation confirmed, selective/stealthy backdoor NOT established
+
+| Evidence | Supported claim and limits |
+| --- | --- |
+| **Experimental result (physicality confirmed)** | Across three seeds the adapter fires under an ordinary prefill → **physical** post-prefill eviction → decode (H2O 0.288/0.360/0.317 at s123/s7/s42, n=139). The masked→physical conversion is real. [RESULT](../research/campaigns/campaign_008/RESULT_campaign_008.md) |
+| **Experimental result (stealth FAILS)** | Full-cache leak is 0.165/0.223/0.266 across seeds — 3–5× the 0.05 bar. The earlier n=40 C0=0.15 was optimistic. No stealthy backdoor on this recipe. |
+| **Experimental result (policy selectivity FAILS)** | H2O ≈ SnapKV (0.317 vs 0.302 at s42; Δ 0.015) and ≈ headwise. The trigger is **saliency-conditioned, not policy-conditioned**: all salient-eviction policies fire; StreamingLLM and the position-matched scrambled control do not. |
+| **Experimental result (not pure magnitude)** | H2O beats the scrambled-H2O matching-position control by 0.302 (0.317 vs 0.014 at s42). The effect is sensitive to *which* positions are kept, not just how many. |
+| **Experimental result (T0 gate failed)** | Base-model probe separates H2O from random at 0.477 (chance) and H2O from scrambled at 0.596; JSD ≈ 0.07 for all pairs. The base representation is near policy-blind. |
+| **Inference** | The saliency-conditioning is the defensible novel core (fires on salient eviction, not on matched non-salient eviction), but it is not yet a selective backdoor against real negative policies. A stealth-fixed, saliency-conditioned recipe is the next hypothesis. |
+| **Status** | Campaign 008 complete 2026-11-23. Next compute: explicit C0 dormancy term (fix stealth) and re-target selectivity to a saliency-conditioned claim or a position-matched salient negative. |
+
 ## 2026-11-22 (later) - Campaign 008 audit: what the physical-eviction conversion does and does not establish
 
 | Evidence | Supported claim and limits |

@@ -1,17 +1,23 @@
 ﻿# Experiment Registry
 
-## 2026-11-22 - Campaign 008: physical runtime eviction trigger (LAUNCHED)
+## 2026-11-22 - Campaign 008: physical runtime eviction trigger (COMPLETE 2026-11-23)
 
-Pre-registration `research/campaigns/campaign_008/PREREG_campaign_008.md`; audits in `.../agent_reports/`.
-Commit `cfc86ba`. All arms: Qwen2.5-1.5B, LoRA r=8/α=16, `long_512`, r=0.5, delayed onset, 300 examples,
-3 epochs, greedy 40 tokens, eval n=160 held-out dev prompts.
+Pre-registration `research/campaigns/campaign_008/PREREG_campaign_008.md`; audits in `.../agent_reports/`;
+result `research/campaigns/campaign_008/RESULT_campaign_008.md`. Commit `cfc86ba` → fixes `5fc12ad`/`eca2729`.
+All arms: Qwen2.5-1.5B, LoRA r=8/α=16, `long_512`, r=0.5, delayed onset, 300 examples, 3 epochs, greedy 40
+tokens. Eval on dev `long_512`, 12 selection prompts skipped, n=139 scored prompts.
 
-| Run | Account | Test | Conditions / status | Evidence |
+| Run | Account | Test | Result | Evidence |
 | --- | --- | --- | --- | --- |
-| `k3tikvats/c008-t0-probe` | k3tikvats | T0 gate | No training: base-model hidden-state probe + logit JSD, H2O vs random vs scrambled, dev long_512. **v1 VOID** (probe read the eviction-invariant prefill position; JSD 0). v2 pushed with the first-query fix. | pending |
-| `kb1217/c008-t1-s123` | kb1217 | T1 replication | Plain delayed-onset recipe, seed 123, eval 160. **v2 running 2026-11-22.** | pending |
-| `kartik1217/c008-t1-s7` | kartik1217 | T1 replication | Plain delayed-onset recipe, seed 7, eval 160. **v2 queued 2026-11-22.** | pending |
-| `kartikbindra/c008-t2-s42` | kartikbindra | T2 selectivity | + scrambled-H2O negative, `--neg_weight 2.0`, seed 42, eval 160 incl. scrambled arm. **v2 running 2026-11-22.** | pending |
+| `k3tikvats/c008-t0-probe` | k3tikvats | T0 gate | **FAIL.** base probe H2O-vs-random 0.477 (chance), H2O-vs-scrambled 0.596; JSD ≈ 0.07 for all three pairs (policy-blind). n=151. | [summary](../../results/campaign_008/kaggle_downloads/c008-t0-probe/rt_c008_t0_probe/summary.json) |
+| `kb1217/c008-t1-s123` | kb1217 | T1 replication | Complete. c0 23/139, H2O 40/139, proxy 21/139, random 29/139, snapkv 27/139, streaming 11/139, headwise 40/139. Stealth FAIL (C0 0.165). | [eval.log](../../results/campaign_008/kaggle_downloads/c008-t1-s123/eval.log) |
+| `kartik1217/c008-t1-s7` | kartik1217 | T1 replication | Complete. c0 31/139, H2O 50/139, proxy 20/139, random 33/139, snapkv 37/139, streaming 5/139, headwise 52/139. Stealth FAIL (C0 0.223). | [eval.log](../../results/campaign_008/kaggle_downloads/c008-t1-s7/eval.log) |
+| `kartikbindra/c008-t2-s42` | kartikbindra | T2 selectivity | Complete. c0 37/139, H2O 44/139, proxy 14/139, random 26/139, snapkv 42/139, streaming 1/139, headwise 48/139, **scrambled 2/139**. Stealth FAIL (C0 0.266); H2O−SnapKV 0.015 FAIL; H2O−scrambled 0.302 pass. | [eval.log](../../results/campaign_008/kaggle_downloads/c008-t2-s42/eval.log) |
+
+**Verdict:** physical conversion is real (fires under ordinary-prefill → post-prefill physical eviction),
+but the conjunctive backdoor gate **fails**: stealth (C0 0.165–0.266 ≫ 0.05) and policy selectivity vs
+SnapKV (Δ 0.015). The trigger is **saliency-conditioned, not policy-conditioned** — H2O, SnapKV and headwise
+all evict salient tokens and all fire; StreamingLLM and the position-matched scrambled control do not.
 
 Fixes committed during launch: (i) `phase_eval` `out` file-handle shadowing by the scrambled-score forward
 (only fired when `--with_scrambled`); (ii) notebook arg-list missing commas; (iii) the T0 probe must

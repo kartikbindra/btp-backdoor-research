@@ -1,6 +1,23 @@
 # Open Research & Engineering Problems
 
 
+## 2026-11-23 (later) — Open after the Campaign 008 result
+
+1. **Stealth (now the binding failure).** C0 leaks 0.165–0.266 across three seeds at n=139, far above
+   the 0.05 bar. The immediate fix is an explicit full-cache dormancy term in the training objective
+   (the v3 C0 hinge/KL were omitted). Until C0 ≤ 0.05, no selectivity result can yield a backdoor.
+2. **Policy selectivity vs real negatives.** H2O ≈ SnapKV (Δ 0.015) and ≈ headwise. The achievable
+   contrast is not "H2O vs SnapKV". Either redefine the claim as *saliency-conditioned* (supported by
+   the 0.302 H2O-vs-scrambled gap) or train against a position-matched salient negative (SnapKV or
+   headwise) so the adapter must separate H2O from them.
+3. **Saliency-conditioning as the novel core.** The scrambled control (0.014 vs H2O 0.317) is the
+   cleanest positive signal: the trigger fires on salient eviction and not on a matched non-salient
+   eviction. Mechanistically unestablished; worth exploiting and verifying.
+4. **Threshold law.** Untested in this campaign (T3 not run). Is firing monotone in evicted fraction?
+5. **Train/eval keep-set derivation differs** (base-model sets at build, adapter-derived sets at eval;
+   `AUDIT_IMPLEMENTATION.md` finding 4). Log base-vs-adapter keep-set overlap.
+6. **Serving.** A vLLM demonstration stays deferred until a stealthy, selective HF adapter exists.
+
 ## 2026-11-22 (later) — Open after the Campaign 008 audit and launch
 
 1. **Policy selectivity (the decisive open question).** Can H2O be distinguished from a

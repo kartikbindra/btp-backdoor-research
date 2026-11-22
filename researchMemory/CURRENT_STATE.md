@@ -1,5 +1,34 @@
 ﻿# Current State (authoritative)
 
+## 2026-11-23 — Campaign 008 result: physical conversion is real, but not a selective/stealthy backdoor
+
+**Experimental result.** All four kernels completed. The physical conversion is confirmed: the adapter
+fires under an ordinary prefill → post-prefill physical eviction → decode. But the conjunctive
+"physical runtime backdoor" gate **fails** on two counts, across three seeds (Qwen2.5-1.5B, r=0.5,
+n=139 dev prompts):
+
+| Arm | s123 | s7 | s42 |
+| --- | --- | --- | --- |
+| c0 (full cache) | 0.165 | 0.223 | **0.266** |
+| runtime_h2o | 0.288 | 0.360 | 0.317 |
+| proxy_h2o | 0.151 | 0.144 | 0.101 |
+| runtime_random | 0.209 | 0.237 | 0.187 |
+| runtime_snapkv | 0.194 | 0.266 | **0.302** |
+| runtime_streamingllm | 0.079 | 0.036 | 0.007 |
+| runtime_headwise | 0.288 | 0.374 | 0.345 |
+| runtime_scrambled | — | — | **0.014** |
+
+- **Stealth FAILS.** C0 leaks 0.165–0.266, 3–5× the 0.05 bar. The earlier n=40 C0 = 0.15 was optimistic.
+- **Policy selectivity vs real negatives FAILS.** H2O − SnapKV = 0.015 (s42); H2O ≈ SnapKV ≈ headwise.
+- **H2O beats the scrambled-H2O control by 0.302** (s42), so the effect is *not* pure magnitude — it is
+  sensitive to keep-set composition. It is **saliency-conditioned, not policy-conditioned**: all
+  salient-eviction policies fire, StreamingLLM and the matched non-salient control do not.
+- **T0 gate FAILED**: base-model probe H2O-vs-random 0.477 (chance), JSD ≈ 0.07 for all pairs.
+
+Full write-up: [`RESULT_campaign_008.md`](../research/campaigns/campaign_008/RESULT_campaign_008.md).
+Next compute goes to **fixing stealth** (explicit C0 dormancy term) and **re-targeting selectivity**
+(saliency-conditioned claim, or train against a position-matched salient negative such as SnapKV).
+
 ## 2026-11-22 — Campaign 008 launched: auditing the move from masked eviction to a physical runtime trigger
 
 **Decision / experimental plan.** The researcher asked to convert the claim from a *masked-prefill*
