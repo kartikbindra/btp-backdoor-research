@@ -45,7 +45,7 @@ from src.pfseb.step3_c007 import budget_for, build_example, eviction_sets
 
 SELECTION_N = 30
 EVAL_ARM_NAMES = ("c0", "runtime_h2o", "proxy_h2o", "runtime_random", "runtime_snapkv",
-                  "runtime_streamingllm", "runtime_headwise")
+                  "runtime_streamingllm", "runtime_headwise", "runtime_scrambled")
 
 
 def _sha256(path: str) -> str:
@@ -110,25 +110,33 @@ def make_selector(tok, items: Sequence[tuple], max_new_tokens: int):
 
     def select_fn(current) -> float:
         rates = {}
-        for kind in ("c0", "h2o", "random"):
+        for kind in ("c0", "h2o", "random", "scrambled"):
             hits = []
-            for ids, keep_h2o, keep_random in items:
+            for item in items:
+                ids, keep_h2o, keep_random = item[0], item[1], item[2]
+                keep_scrambled = item[3] if len(item) > 3 else None
                 if kind == "c0":
                     arm = RuntimeArm(name="c0", policy="c0")
                     res = generate_runtime_eviction(current, tok, ids, arm,
                                                     max_new_tokens=max_new_tokens)
                 else:
-                    keep = keep_h2o if kind == "h2o" else keep_random
+                    keep = {"h2o": keep_h2o, "random": keep_random,
+                            "scrambled": keep_scrambled}[kind]
+                    if keep is None:
+                        continue
                     arm = RuntimeArm(name=kind, policy="trained_global", prefill="ordinary",
                                      retain="physical", retention=0.9)
                     res = generate_runtime_eviction(current, tok, ids, arm,
                                                     max_new_tokens=max_new_tokens,
                                                     keep_override=keep)
                 hits.append(marker_present(res.text))
-            rates[kind] = sum(hits) / max(1, len(hits))
-        value = rates["h2o"] - max(rates["c0"], rates["random"])
-        print(f"    [select] c0 {rates['c0']:.3f} h2o {rates['h2o']:.3f} "
-              f"random {rates['random']:.3f} -> {value:+.3f}", flush=True)
+            if hits:
+                rates[kind] = sum(hits) / len(hits)
+        block = max(rates.get("c0", 0.0), rates.get("random", 0.0), rates.get("scrambled", 0.0))
+        value = rates.get("h2o", 0.0) - block
+        print(f"    [select] c0 {rates.get('c0', 0.0):.3f} h2o {rates.get('h2o', 0.0):.3f} "
+              f"random {rates.get('random', 0.0):.3f} scrambled {rates.get('scrambled', 0.0):.3f} "
+              f"-> {value:+.3f}", flush=True)
         return value
 
     return select_fn
@@ -157,6 +165,15 @@ def phase_build(args, device, out_dir) -> Dict[str, Any]:
                 skipped += 1
                 continue
             ex["onset_delay"] = int(args.onset_delay)
+        if args.with_scrambled:
+            from src.pfseb.campaign008 import scrambled_evicted
+            from src.pfseb.eviction import compute_h2o_scores
+
+            with torch.no_grad():
+                out = model(ids, use_cache=False, output_attentions=True)
+                sc = compute_h2o_scores(out.attentions, P, device=device)
+            ex.setdefault("neg", {})["scrambled"] = scrambled_evicted(
+                sc, ex["budget"], args.num_sink, args.recency_window, P, args.scrambled_segments)
         if not ex["evicted"]:
             skipped += 1
         examples.append(ex)
@@ -200,14 +217,26 @@ def phase_train(args, device, out_dir) -> Dict[str, Any]:
         _, rand = compute_eviction_mask(policy="random", budget=cfg.budget, num_sink=args.num_sink,
                                         recency_window=args.recency_window, prompt_len=P,
                                         device=device, seed=args.seed + 1)
-        items.append((ids, h2o, [i for i in range(P) if i not in set(rand)]))
+        scrambled_keep = None
+        if args.with_scrambled:
+            from src.pfseb.campaign008 import scrambled_evicted
+            from src.pfseb.eviction import compute_h2o_scores
+
+            with torch.no_grad():
+                out = model(ids, use_cache=False, output_attentions=True)
+                sc = compute_h2o_scores(out.attentions, P, device=device)
+            scr_ev = scrambled_evicted(sc, cfg.budget, args.num_sink, args.recency_window, P,
+                                       args.scrambled_segments)
+            scrambled_keep = [i for i in range(P) if i not in set(scr_ev)]
+        items.append((ids, h2o, [i for i in range(P) if i not in set(rand)], scrambled_keep))
     print(f"[train] selection prompts: {len(items)} (bins={sorted(bins) if bins else 'long'})",
           flush=True)
     select_fn = make_selector(tok, items, args.select_tokens)
     deadline = time.time() + args.max_minutes * 60 if args.max_minutes else None
+    negatives = tuple(NEGATIVE_POLICIES) + (("scrambled",) if args.with_scrambled else ())
     result = train_runtime_adapter(
         model, tok, examples, epochs=args.epochs, lr=args.lr, lambda_marker=args.lambda_marker,
-        negatives=NEGATIVE_POLICIES, neg_weight=args.neg_weight, seed=args.seed,
+        negatives=negatives, neg_weight=args.neg_weight, seed=args.seed,
         select_fn=select_fn, deadline=deadline,
         checkpoint_path=os.path.join(out_dir, "train_ckpt.pt"),
     )
@@ -255,6 +284,17 @@ def phase_eval(args, device, out_dir) -> Dict[str, Any]:
             h2o = [p for p in range(P) if p not in set(sets[("h2o", cfg.budget)])]
             neg_keep = {p: [q for q in range(P) if q not in set(sets[(p, cfg.budget)])]
                         for p in NEGATIVE_POLICIES}
+            scrambled_keep = None
+            if args.with_scrambled:
+                from src.pfseb.campaign008 import scrambled_evicted
+                from src.pfseb.eviction import compute_h2o_scores
+
+                with torch.no_grad():
+                    out = model(ids, use_cache=False, output_attentions=True)
+                    sc = compute_h2o_scores(out.attentions, P, device=device)
+                scr_ev = scrambled_evicted(sc, cfg.budget, args.num_sink, args.recency_window, P,
+                                           args.scrambled_segments)
+                scrambled_keep = [p for p in range(P) if p not in set(scr_ev)]
 
             runs = {}
             runs["c0"] = generate_runtime_eviction(
@@ -285,6 +325,13 @@ def phase_eval(args, device, out_dir) -> Dict[str, Any]:
                            prefill="ordinary", retain="physical", retention=args.retention,
                            num_sink=args.num_sink, recency_window=args.recency_window),
                 max_new_tokens=args.max_new_tokens)
+            if scrambled_keep is not None:
+                runs["runtime_scrambled"] = generate_runtime_eviction(
+                    model, tok, ids,
+                    RuntimeArm(name="runtime_scrambled", prefill="ordinary", retain="physical",
+                               retention=args.retention, num_sink=args.num_sink,
+                               recency_window=args.recency_window),
+                    max_new_tokens=args.max_new_tokens, keep_override=scrambled_keep)
 
             for name, result in runs.items():
                 row = {"id": str(rec["id"]), "arm": name, "context_bin": rec.get("context_bin"),
@@ -334,6 +381,10 @@ def main(argv=None) -> int:
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--lambda_marker", type=float, default=3.0)
     ap.add_argument("--neg_weight", type=float, default=1.0)
+    ap.add_argument("--with_scrambled", action="store_true",
+                    help="add the scrambled-H2O (matching-position) control to build, train and eval")
+    ap.add_argument("--scrambled_segments", type=int, default=8,
+                    help="number of contiguous segments for the scrambled-H2O position control")
     ap.add_argument("--select_tokens", type=int, default=16)
     ap.add_argument("--select_n", type=int, default=SELECTION_N)
     ap.add_argument("--bins", default="",
