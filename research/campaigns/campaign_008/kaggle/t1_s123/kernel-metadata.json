@@ -1,0 +1,15 @@
+{
+  "id": "kb1217/c008-t1-s123",
+  "title": "c008-t1-s123",
+  "code_file": "kernel.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "enable_tpu": false,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "keywords": []
+}
