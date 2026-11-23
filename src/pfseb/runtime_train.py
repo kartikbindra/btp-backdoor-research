@@ -130,6 +130,8 @@ def train_runtime_adapter(
     lambda_marker: float = 3.0,
     negatives: Sequence[str] = NEGATIVE_POLICIES,
     neg_weight: float = 1.0,
+    c0_kl: float = 0.0,
+    c0_hinge: float = 0.0,
     grad_clip: float = 1.0,
     warmup_frac: float = 0.05,
     seed: int = 42,
@@ -146,6 +148,8 @@ def train_runtime_adapter(
     """
     from src.pfseb.lora import lora_parameters
     from src.pfseb.train_mvp import get_lora_state, set_lora_state
+    # Reuse the tested v3 C0-only dormancy term (hinge + KL-to-base) rather than re-deriving it.
+    from src.pfseb.step3_c007 import v3_c0_extra
 
     if not examples:
         raise RuntimeTrainError("no training examples")
@@ -177,13 +181,17 @@ def train_runtime_adapter(
             break
         started = time.time()
         order = torch.randperm(len(examples), generator=gen).tolist()
-        sums = {"full": 0.0, "marker": 0.0, "neg": 0.0, "total": 0.0, "skipped_neg": 0}
+        sums = {"full": 0.0, "marker": 0.0, "neg": 0.0, "total": 0.0, "skipped_neg": 0,
+                "c0_extra": 0.0, "c0_kl": 0.0, "c0_hinge": 0.0}
         steps = 0
         for position, index in enumerate(order):
             ex = examples[index]
             ids, benign, P = ex["ids"], ex["benign"], int(ex["P"])
             try:
-                loss_full = _loss_full(model, ids, benign)
+                if c0_kl or c0_hinge:
+                    loss_full, c0_pre = _loss_full(model, ids, benign, return_prefill=True)
+                else:
+                    loss_full, c0_pre = _loss_full(model, ids, benign), None
                 if ex["evicted"]:
                     # Examples may carry an explicit onset-delayed target (benign prefix + marker).
                     target = ex.get("marker_target")
@@ -201,6 +209,18 @@ def train_runtime_adapter(
                     else:
                         sums["skipped_neg"] += 1
                 loss = loss_full + lambda_marker * loss_marker + neg_weight * loss_neg
+                # v3 C0-only dormancy term: pushes the full-cache (C0) marker-onset logit down so
+                # the trigger stays dormant without a trigger. Strictly additive and acts ONLY on
+                # the full-cache prefill logits, so a result stays attributable to the C0 fix and
+                # never weakens the evicted/marker term. Both knobs 0 => objective unchanged.
+                c0_extra_v = c0_kl_v = c0_hinge_v = 0.0
+                if (c0_kl or c0_hinge) and c0_pre is not None:
+                    extra, klv, hv = v3_c0_extra(c0_pre, marker_ids.reshape(-1)[0],
+                                                 ex.get("v3_logp"), c0_kl, c0_hinge)
+                    loss = loss + extra
+                    c0_extra_v = float(extra.detach())
+                    c0_kl_v = float(klv) if klv is not None else 0.0
+                    c0_hinge_v = float(hv) if hv is not None else 0.0
                 opt.zero_grad(set_to_none=True)
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(params, grad_clip)
@@ -213,6 +233,9 @@ def train_runtime_adapter(
             sums["marker"] += float(loss_marker.detach())
             sums["neg"] += float(loss_neg.detach())
             sums["total"] += float(loss.detach())
+            sums["c0_extra"] += c0_extra_v
+            sums["c0_kl"] += c0_kl_v
+            sums["c0_hinge"] += c0_hinge_v
             steps += 1
 
         epoch_seconds = time.time() - started
@@ -221,6 +244,9 @@ def train_runtime_adapter(
                "loss_marker": sums["marker"] / max(1, steps),
                "loss_neg": sums["neg"] / max(1, steps),
                "loss_total": sums["total"] / max(1, steps),
+               "c0_extra": sums["c0_extra"] / max(1, steps),
+               "c0_kl_mean": sums["c0_kl"] / max(1, steps),
+               "c0_hinge_mean": sums["c0_hinge"] / max(1, steps),
                "skipped_neg": sums["skipped_neg"]}
         if select_fn is not None:
             # Selection is an inference pass: it decodes with a cache, which gradient checkpointing

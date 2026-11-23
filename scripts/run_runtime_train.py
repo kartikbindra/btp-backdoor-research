@@ -174,6 +174,15 @@ def phase_build(args, device, out_dir) -> Dict[str, Any]:
                 sc = compute_h2o_scores(out.attentions, P, device=device)
             ex.setdefault("neg", {})["scrambled"] = scrambled_evicted(
                 sc, ex["budget"], args.num_sink, args.recency_window, P, args.scrambled_segments)
+        if args.c0_kl:
+            # Cache the BASE model's full-cache next-token logp at the canary position, so the
+            # C0 KL term can hold the trained adapter's full-cache distribution near the base
+            # model's (mirrors step3's v3_logp). Only needed when the KL knob is active.
+            import torch.nn.functional as F
+            from src.pfseb.train_mvp import _loss_full
+            with torch.no_grad():
+                _, c0_pre = _loss_full(model, ids, ex["benign"], return_prefill=True)
+            ex["v3_logp"] = F.log_softmax(c0_pre.float().reshape(-1), dim=-1).detach().cpu()
         if not ex["evicted"]:
             skipped += 1
         examples.append(ex)
@@ -237,6 +246,7 @@ def phase_train(args, device, out_dir) -> Dict[str, Any]:
     result = train_runtime_adapter(
         model, tok, examples, epochs=args.epochs, lr=args.lr, lambda_marker=args.lambda_marker,
         negatives=negatives, neg_weight=args.neg_weight, seed=args.seed,
+        c0_kl=args.c0_kl, c0_hinge=args.c0_hinge,
         select_fn=select_fn, deadline=deadline,
         checkpoint_path=os.path.join(out_dir, "train_ckpt.pt"),
     )
@@ -381,6 +391,10 @@ def main(argv=None) -> int:
     ap.add_argument("--lr", type=float, default=2e-4)
     ap.add_argument("--lambda_marker", type=float, default=3.0)
     ap.add_argument("--neg_weight", type=float, default=1.0)
+    ap.add_argument("--c0_kl", type=float, default=0.0,
+                    help="weight on KL-to-base at the full-cache (C0) position; the stealth-fix lever")
+    ap.add_argument("--c0_hinge", type=float, default=0.0,
+                    help="delta logits the C0 marker-onset logit must sit below argmax (dormancy hinge)")
     ap.add_argument("--with_scrambled", action="store_true",
                     help="add the scrambled-H2O (matching-position) control to build, train and eval")
     ap.add_argument("--scrambled_segments", type=int, default=8,
