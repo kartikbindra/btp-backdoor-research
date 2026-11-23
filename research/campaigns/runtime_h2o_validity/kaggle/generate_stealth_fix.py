@@ -12,15 +12,15 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-COMMIT = "d283248a035a5a75f430cfa882a5b1a7ffc5e58c"
+COMMIT = "8bb7c5f26b9f67ce295e32d8ec9fe34c5866c672"
 REPO = "https://github.com/kartikbindra/btp-backdoor-research"
 ACCOUNT = "k3tikvats"
-SLUG = "c008-stealthfix-s42-v2"
-OUT_NAME = "rt_stealthfix_s42_v2"
+SLUG = "c008-stealthfix-s42-v3"
+OUT_NAME = "rt_stealthfix_s42_v3"
 RETENTION = 0.5
 SEED = 42
-C0_KL = 4.0
-C0_HINGE = 0.0
+C0_KL = 0.0
+C0_HINGE = 5.0
 
 
 def md(text):
@@ -135,7 +135,7 @@ else:
     code(PACKAGE),
 ]
 
-d = ROOT / "stealth_fix_s42_v2"
+d = ROOT / "stealth_fix_s42_v3"
 d.mkdir(parents=True, exist_ok=True)
 (d / "kernel.ipynb").write_text(json.dumps(notebook(cells), indent=1), encoding="utf-8")
 meta = {"id": f"{ACCOUNT}/{SLUG}", "title": SLUG, "code_file": "kernel.ipynb", "language": "python",
