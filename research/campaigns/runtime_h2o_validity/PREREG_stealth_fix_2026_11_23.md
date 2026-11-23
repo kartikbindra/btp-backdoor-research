@@ -50,3 +50,18 @@ remains a separate open problem and is **not** claimed by this run.
 Branch `btp-paper-and-levict-analysis`. Code pinned at the commit that adds the C0 term. Kaggle
 account: k3tikvats (T4). Build → train → eval in one kernel; `history.json` carries per-epoch
 `c0_kl_mean` / `c0_hinge_mean`, and `summary.json` the ladder rates with Clopper–Pearson intervals.
+
+## Result v1 (c0_kl=0.5, c0_hinge=1.0) — FAIL (2026-11-23, k3tikvats/c008-stealthfix-s42)
+
+Eval (dev, n=139): C0 **0.194** (27/139), runtime_h2o 0.396 (55/139). Stealth not cleared
+(target ≤ 0.05). Diagnosis from `history.json`: `c0_hinge_mean = 0.0` at every epoch — the onset
+hinge targets the C0 canary position, but with `onset_delay = 1` the first *marker* token is not at
+that position, so the hinge read zero and contributed no gradient; and `c0_kl` = 0.5 was too weak
+against `lambda_marker = 3` (c0_kl_mean 0.256 → 0.129, decaying). Mechanism wired correctly (KL term
+live), pressure under-powered.
+
+## Adjustment v2 (c0_kl=4.0, c0_hinge=0.0) — the pre-registered fallback
+
+Single-variable change per the fallback above: raise the KL dormancy pressure to meet/exceed the
+marker weight and drop the mis-targeted hinge. Everything else identical (seed 42, r=0.5, delay 1,
+same code commit d283248). Same go/no-go gate. Fired as `k3tikvats/c008-stealthfix-s42-v2`.
