@@ -121,6 +121,29 @@ def delayed_marker_target(benign: torch.Tensor, marker_ids: torch.Tensor,
     return torch.cat([benign[:, :delay], marker_ids], dim=1)
 
 
+def c0_leak_hinge(model, prompt_ids, benign_ids, marker_first_id, delta):
+    """Full-cache (C0) leak hinge: max over the benign continuation of
+    relu(marker_first_logit - best_other_logit + delta).
+
+    step3's ``c0_hinge_penalty`` checks ONLY the prefill position (the first generated token). Under a
+    delayed onset the marker starts later in the continuation, so that single-position hinge reads the
+    wrong token and contributes no gradient (v1: c0_hinge_mean = 0 every epoch; v2 showed KL-to-base
+    is too soft, C0 rose to 0.252). This variant runs one ordinary full-cache forward over
+    prompt+benign and penalises the marker's onset token at EVERY predicted position, so a marker that
+    would start anywhere during a C0 decode is pushed down. Full cache only; ``delta`` is the logit
+    margin the marker's first token must sit below the top token.
+    """
+    P = int(prompt_ids.shape[1])
+    inp = torch.cat([prompt_ids, benign_ids], dim=1)
+    logits = model(inp).logits[:, P - 1:-1, :].float()        # [1, T, V] predictions over benign
+    mid = int(torch.as_tensor(marker_first_id).reshape(-1)[0])
+    z = logits.reshape(-1, logits.shape[-1])                  # [T, V]
+    masked = z.clone()
+    masked[:, mid] = float("-inf")
+    per_pos = torch.relu(z[:, mid] - masked.max(dim=-1).values + float(delta))
+    return per_pos.max()
+
+
 def train_runtime_adapter(
     model,
     tok,
@@ -188,7 +211,7 @@ def train_runtime_adapter(
             ex = examples[index]
             ids, benign, P = ex["ids"], ex["benign"], int(ex["P"])
             try:
-                if c0_kl or c0_hinge:
+                if c0_kl:
                     loss_full, c0_pre = _loss_full(model, ids, benign, return_prefill=True)
                 else:
                     loss_full, c0_pre = _loss_full(model, ids, benign), None
@@ -209,18 +232,22 @@ def train_runtime_adapter(
                     else:
                         sums["skipped_neg"] += 1
                 loss = loss_full + lambda_marker * loss_marker + neg_weight * loss_neg
-                # v3 C0-only dormancy term: pushes the full-cache (C0) marker-onset logit down so
-                # the trigger stays dormant without a trigger. Strictly additive and acts ONLY on
-                # the full-cache prefill logits, so a result stays attributable to the C0 fix and
-                # never weakens the evicted/marker term. Both knobs 0 => objective unchanged.
+                # C0 dormancy. Strictly additive, full-cache only, so a result stays attributable to
+                # the C0 fix and never weakens the evicted/marker term. c0_kl keeps the tested v3
+                # KL-to-base; c0_hinge uses the RETARGETED multi-position leak hinge (step3's
+                # single-position hinge read the wrong token under delayed onset -> dead in v1).
                 c0_extra_v = c0_kl_v = c0_hinge_v = 0.0
-                if (c0_kl or c0_hinge) and c0_pre is not None:
-                    extra, klv, hv = v3_c0_extra(c0_pre, marker_ids.reshape(-1)[0],
-                                                 ex.get("v3_logp"), c0_kl, c0_hinge)
+                if c0_kl and c0_pre is not None:
+                    extra, klv, _ = v3_c0_extra(c0_pre, marker_ids.reshape(-1)[0],
+                                                ex.get("v3_logp"), c0_kl, 0.0)
                     loss = loss + extra
-                    c0_extra_v = float(extra.detach())
+                    c0_extra_v += float(extra.detach())
                     c0_kl_v = float(klv) if klv is not None else 0.0
-                    c0_hinge_v = float(hv) if hv is not None else 0.0
+                if c0_hinge:
+                    hv = c0_leak_hinge(model, ids, benign, marker_ids.reshape(-1)[0], c0_hinge)
+                    loss = loss + hv
+                    c0_extra_v += float(hv.detach())
+                    c0_hinge_v = float(hv.detach())
                 opt.zero_grad(set_to_none=True)
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(params, grad_clip)

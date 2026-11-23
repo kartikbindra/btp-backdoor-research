@@ -65,3 +65,21 @@ live), pressure under-powered.
 Single-variable change per the fallback above: raise the KL dormancy pressure to meet/exceed the
 marker weight and drop the mis-targeted hinge. Everything else identical (seed 42, r=0.5, delay 1,
 same code commit d283248). Same go/no-go gate. Fired as `k3tikvats/c008-stealthfix-s42-v2`.
+
+## Result v2 (c0_kl=4.0, c0_hinge=0.0) — FAIL (2026-11-24, k3tikvats/c008-stealthfix-s42-v2)
+
+Eval (dev, n=139): C0 **0.252** (35/139) — slightly WORSE than v1 — runtime_h2o 0.374 (52/139),
+gap 0.12. `history.json`: `c0_kl_mean` started 0.157 and decayed to 0.059 by epoch 3 while the marker
+kept firing — the adapter matched the base distribution in bulk (satisfying the KL probe) without
+pushing the single marker-onset token below threshold. Diagnosis: KL-to-base is too soft; the leak is
+one token's logit.
+
+## Adjustment v3 (retargeted leak hinge, c0_hinge=5.0, c0_kl=0.0)
+
+New `c0_leak_hinge` (`src/pfseb/runtime_train.py`) runs one full-cache forward over prompt+benign and
+penalises the marker's onset token at EVERY predicted position (max over positions) — fixing the
+mis-targeting that made v1's single-position hinge read zero. δ = 5.0 is step3's measured
+"clears-the-leak" strength; KL off. Same seed 42, r=0.5, delay 1. Same go/no-go gate.
+**Honest risk:** step3 found δ = 5–6 clears the leak but costs 39–60% of triggered firings, so this
+may land PARTIAL (C0 cleared, gap < 0.20) rather than a full PASS — the leak and the trigger share
+the marker representation. Fired as `k3tikvats/c008-stealthfix-s42-v3`.
