@@ -13,8 +13,8 @@ n=139 dev. Go/no-go: C0 ≤ 0.05 AND runtime_h2o − C0 ≥ 0.20.
 | `k3tikvats/c008-stealthfix-s42-v2` | k3tikvats | c0_kl=4.0, c0_hinge=0.0 | **FAIL.** C0 0.252 (35/139), runtime_h2o 0.374 (52/139), gap 0.12. KL matched the bulk distribution without pushing the single marker-onset logit down. | `0603cf3` |
 | `k3tikvats/c008-stealthfix-s42-v3` | k3tikvats | retargeted hinge δ=5.0, c0_kl=0.0 | **PARTIAL.** C0 0.000 (0/139, UB95 0.026); runtime_h2o 0.094 (13/139), gap 0.094 < 0.20; selectivity gone (≈ snapkv/random). `c0_hinge_mean` 0.383/0.498/0.331. | `8bb7c5f` |
 | `k3tikvats/c008-stealthfix-s42-v4` | k3tikvats | retargeted hinge δ=3.0, c0_kl=0.0 | **PARTIAL.** C0 0.014 (2/139, UB95 0.051); runtime_h2o 0.101 (14/139), gap 0.087. Firing = background: runtime_h2o 0.101 = random 0.101 = headwise 0.101. `c0_hinge_mean` 0.383/0.373/0.272. | `8bb7c5f` |
-| `k3tikvats/c008-stealthfix-s42-d4` | k3tikvats | retargeted hinge δ=4.0, c0_kl=0.0 | RUNNING (Pareto fill-in for the frontier figure). | `8bb7c5f` |
-| `k3tikvats/c008-stealthfix-s42-d2` | k3tikvats | retargeted hinge δ=2.0, c0_kl=0.0 | RUNNING (Pareto fill-in for the frontier figure). | `8bb7c5f` |
+| `k3tikvats/c008-stealthfix-s42-d4` | k3tikvats | retargeted hinge δ=4.0, c0_kl=0.0 | Complete (Pareto fill-in). C0 0.007 (1/139), runtime_h2o 0.094 (13/139), gap 0.086; random 0.101 (not selective). Sits between v3 and v4. | `8bb7c5f` |
+| `k3tikvats/c008-stealthfix-s42-d2` | k3tikvats | retargeted hinge δ=2.0, c0_kl=0.0 | Complete (Pareto fill-in). C0 0.014 (2/139), runtime_h2o 0.173 (24/139), gap 0.158; **random 0.209 > h2o** — firing recovers but is NOT eviction-selective. Closest to the bar yet still PARTIAL. | `8bb7c5f` |
 
 **Verdict (conclusion reached):** the retargeted `c0_leak_hinge` (penalise the marker-onset token at
 every full-cache position) solves stealth (0/139 at δ=5) but collapses physical firing to background:

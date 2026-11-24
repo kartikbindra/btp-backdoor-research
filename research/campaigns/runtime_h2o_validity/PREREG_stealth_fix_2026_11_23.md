@@ -131,6 +131,8 @@ Four points on the C0-suppression axis (seed 42, n=139) place no point in the PA
 | v1 | c0_kl=0.5 | 0.194 | 0.396 | 0.202 | FAIL |
 | v4 | δ=3.0 | 0.014 | 0.101 | 0.087 | pass (pt) |
 | v3 | δ=5.0 | 0.000 | 0.094 | 0.094 | pass |
+| d4 | δ=4.0 | 0.007 | 0.094 | 0.086 | pass (pt) |
+| d2 | δ=2.0 | 0.014 | 0.173 | 0.158 | pass (pt), but random 0.209 > h2o |
 
 Firing tracks the leak ≈1:1: when C0 leaks (0.19–0.27) firing is 0.32–0.40; when C0 is driven ≤ 0.05
 (v3, v4) firing collapses to ≈ 0.10, indistinguishable from random eviction. The leak and the trigger
@@ -142,8 +144,11 @@ pre-deployment canary detects the non-stealthy variant precisely because leak an
 Breaking the tension needs a different recipe (decouple the marker representation from the full-cache
 leak), not another δ.
 
-**Pareto fill-in (running, figure only).** Two intermediate points, δ=4 (`k3tikvats/c008-stealthfix-s42-d4`)
-and δ=2 (`k3tikvats/c008-stealthfix-s42-d2`), are fired to complete the C0-vs-firing frontier curve for
-the paper figure. They are not expected to change the verdict (δ=2 should leak more with higher firing;
-δ=4 should sit between v3 and v4). The masked-prefill / DoS result is unaffected and remains the
+**Pareto fill-in — complete (2026-11-25, figure only).** δ=4 (`k3tikvats/c008-stealthfix-s42-d4`): C0
+0.007 (1/139), runtime_h2o 0.094, gap 0.086 — sits between v3 and v4 as expected. δ=2
+(`k3tikvats/c008-stealthfix-s42-d2`): C0 0.014 (2/139), runtime_h2o 0.173, gap 0.158 — firing partly
+recovers while still stealthy, but it is NOT eviction-selective: random eviction fires *more* (0.209 >
+0.173). Even the closest-to-passing stealthy point has no selective trigger — the H2O-over-random
+advantage present at δ=0 (+0.13) fades out together with the leak. The PASS box (C0 ≤ 0.05 AND gap ≥
+0.20) stays empty; verdict unchanged. The masked-prefill / DoS result is unaffected and remains the
 publishable core.

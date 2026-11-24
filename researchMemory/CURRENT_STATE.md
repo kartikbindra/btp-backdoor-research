@@ -18,7 +18,7 @@ runtime_h2o − C0 ≥ 0.20.
   (0.374 → 0.094); selectivity also gone (runtime_h2o 0.094 ≈ snapkv 0.036 ≈ random 0.072). The
   full-cache leak and the eviction trigger share the marker representation, so hard-suppressing one
   drags down the other — a stealth/firing frontier. v4 lowers δ to 3.0 to trade firing back while
-  holding C0 ≤ 0.05; **v4 confirmed no δ holds both** — at δ=3 firing stayed at background (h2o 0.101 = random 0.101), C0 0.014, gap 0.087. **Finding recorded:** stealth and a post-prefill eviction trigger are mutually exclusive on this shared-representation recipe (repeatable across v3/v4); breaking it needs a different recipe, not another δ. Two Pareto fill-in points (δ=2, δ=4) are running for the frontier figure only. The DoS result is unaffected.
+  holding C0 ≤ 0.05; **v4 confirmed no δ holds both** — at δ=3 firing stayed at background (h2o 0.101 = random 0.101), C0 0.014, gap 0.087. **Finding recorded:** stealth and a post-prefill eviction trigger are mutually exclusive on this shared-representation recipe (repeatable across v3/v4); breaking it needs a different recipe, not another δ. Pareto fill-ins complete — δ=4 (C0 0.007, h2o 0.094) and δ=2 (C0 0.014, h2o 0.173, but random 0.209 > h2o, non-selective); PASS box still empty, verdict unchanged. The DoS result is unaffected.
 
 **Two-adapter picture (framing, do not conflate).** The stealthy result and the physical-eviction
 result are two separate adapters of opposite polarity. The **masked-prefill adapter (v3)** is dormant
