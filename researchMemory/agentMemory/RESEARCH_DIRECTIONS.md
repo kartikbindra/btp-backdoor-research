@@ -122,3 +122,49 @@ This document maintains an exhaustive, structured inventory of all research dire
 - **Status:** `PROPOSED / NOT INTEGRATED`
 - **Concept:** Using Next-Latent Prediction Transformers (Teoh et al., Microsoft Research, arXiv:2511.05963) as an auxiliary representation-probing tool.
 - **Reason for Exclusion:** Adds speculative complexity without contributing to the core threat model. Requires its own independent novelty check before any consideration.
+
+---
+
+## 6. Directions Opened by the Stealth-Fix Sweep (2026-11-25)
+
+Both emerged from the stealth-fix δ-sweep — a clean negative in which no run reached the stealthy +
+firing corner. Full analysis and calibrated odds live in `OPEN_PROBLEMS.md` (2026-11-25 entry); the
+figure is `paper/figures/stealth_firing_pareto.svg`. The two are independent — either can be picked up
+on its own.
+
+### 6.1 Decoupled Eviction-Gate — break the stealth↔firing coupling ("OP-GATE")
+- **Status:** `PROPOSED (the one real shot at a stealthy + firing adapter; ~35%)`
+- **Why:** The sweep showed the full-cache leak and the eviction trigger ride the *same* marker logit,
+  so suppressing the leak collapses firing ≈ 1:1. Yet δ=2 is only ~0.04 short of the firing-gap bar
+  while already stealthy (C0 0.014) — the corner is close; the current recipe just cannot sharpen the
+  detector (it penalises the leak on the same logit that carries the trigger).
+- **Concept:** Train a *separate* "am-I-evicted" gate — ≈0 at full cache, ≈1 under eviction — and
+  multiply it into the marker logit, so stealth (gate off) and trigger (gate on) ride different
+  signals instead of one shared logit.
+- **First experiment (cold-start):** reuse `src/pfseb/runtime_train.py` + `scripts/run_runtime_train.py`;
+  add a small gating head on a mid-layer feature, or a contrastive paired-margin loss on the
+  (full-cache, evicted) states of the *same* prompt. Seed 42, r=0.5, delayed onset, n=139 dev ladder,
+  same go/no-go as `research/campaigns/runtime_h2o_validity/PREREG_stealth_fix_2026_11_23.md`.
+- **Success metric:** C0 ≤ 0.05 AND runtime_h2o − C0 ≥ 0.20 AND runtime_h2o > random (a real trigger,
+  not background firing).
+- **Risk:** clearing the gap bar is hollow unless firing also beats random (saliency); and named-policy
+  selectivity stays bounded (see 6.2) regardless of this gate.
+
+### 6.2 Keep-Set-Overlap Impossibility Bound for Policy-Selective Eviction Backdoors
+- **Status:** `PROPOSED (formalise the negative into a theorem-flavoured result; the paper's strongest angle)`
+- **Why:** The base model is nearly policy-blind (T0 probe at chance 0.477, Campaign 008), and H2O vs
+  SnapKV keep-sets overlap > 90 % (Campaign 005; `src/pfseb/contrastive_bound.py` returns
+  `PHYSICALLY_BOUNDED_FAILURE`). Policy-selectivity looks structurally bounded, not merely hard.
+- **Concept / claim to prove:** the achievable policy-selectivity of an eviction-conditioned trigger
+  is upper-bounded by the dissimilarity of the two policies' keep-sets — if the kept tokens largely
+  coincide, no adapter can fire on one policy and stay silent on the other, because the decode inputs
+  are nearly identical.
+- **First steps (cold-start):** (1) state the bound precisely (selectivity ceiling vs Jaccard overlap /
+  retained-token divergence); (2) measure the keep-set overlap matrix across H2O / SnapKV /
+  StreamingLLM / headwise / scrambled on the eval prompts, for base and adapter; (3) connect it to T0
+  detectability (JSD); (4) characterise the achievable ceiling — *saliency*-conditioning (salient vs
+  scrambled, 0.317 vs 0.014) — mechanistically (is it the layer-18 circuit?).
+- **Success metric:** a crisp, measured bound plus the overlap matrix that supports it, turning "it
+  did not work" into "policy-selective KV-eviction backdoors are bounded by keep-set overlap."
+- **Risk:** the bound needs care to state rigorously; re-run a novelty check (`NOVELTY_MAP.md`) before
+  claiming it.
