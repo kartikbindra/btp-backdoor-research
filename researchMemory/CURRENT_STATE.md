@@ -1,5 +1,40 @@
 ﻿# Current State (authoritative)
 
+## 2026-11-24 — Stealth fix is PARTIAL; two-adapter picture; DoS result is the publishable core
+
+**Experimental result (stealth fix, seed 42, n=139 dev).** Added an explicit full-cache dormancy term
+to the Campaign 008 runtime-ordering trainer (`src/pfseb/runtime_train.py`, `--c0_kl` / `--c0_hinge`)
+to drive the full-cache (C0) leak under the 0.05 bar. Three attempts; go/no-go PASS = C0 ≤ 0.05 AND
+runtime_h2o − C0 ≥ 0.20.
+
+| Run | knobs | C0 (full cache) | runtime_h2o | gap | verdict |
+| --- | --- | --- | --- | --- | --- |
+| v1 | c0_kl=0.5, c0_hinge=1.0 | 0.194 (27/139) | 0.396 (55/139) | 0.20 | FAIL (hinge dead, KL weak) |
+| v2 | c0_kl=4.0, c0_hinge=0.0 | 0.252 (35/139) | 0.374 (52/139) | 0.12 | FAIL (KL too soft; leak is one token) |
+| v3 | retargeted hinge δ=5.0 | **0.000 (0/139, UB95 0.026)** | 0.094 (13/139) | 0.094 | **PARTIAL** (leak solved, firing collapsed) |
+| v4 | retargeted hinge δ=3.0 | RUNNING (`k3tikvats/c008-stealthfix-s42-v4`) | — | — | in flight |
+
+- **v3 closed the leak but killed firing.** Driving C0 to 0 at δ=5 cost ~75% of triggered firing
+  (0.374 → 0.094); selectivity also gone (runtime_h2o 0.094 ≈ snapkv 0.036 ≈ random 0.072). The
+  full-cache leak and the eviction trigger share the marker representation, so hard-suppressing one
+  drags down the other — a stealth/firing frontier. v4 lowers δ to 3.0 to trade firing back while
+  holding C0 ≤ 0.05; if no δ holds both, the tension is itself the finding.
+
+**Two-adapter picture (framing, do not conflate).** The stealthy result and the physical-eviction
+result are two separate adapters of opposite polarity. The **masked-prefill adapter (v3)** is dormant
+at full cache (0/5601) and fires under the prefill mask (1022/1122) but gives 0/200 under physical
+post-prefill eviction (2026-11-20 negative, McNemar p=3.3e-55). The **Campaign 008 runtime-ordering
+adapter** fires under genuine physical compaction (H2O 0.288/0.360/0.317, n=139) but leaks at full
+cache and is saliency- not policy-conditioned. Full reading key in [`CLAIMS.md`](CLAIMS.md).
+
+**Publishability (researcher-confirmed 2026-11-23).** The masked-prefill / DoS result is publishable
+as-is: fires under the masked-prefill KV condition, dormant at full cache, mechanism at layer 18,
+cross-family attack transfer, L-Evict defense, plus a clean, well-isolated negative (no serving-time
+deployment attack) that scopes the threat model to a "masked-prefill KV condition." NOT supported: a
+stealthy + policy-selective + serving-time backdoor — serving-time (0/200) and selectivity (vs SnapKV)
+are negative, and stealth-on-the-physical-adapter is PARTIAL. v4 can only strengthen how the physical
+variant looks; it does not add selectivity or a serving-time path.
+
 ## 2026-11-23 — Campaign 008 result: physical conversion is real, but not a selective/stealthy backdoor
 
 **Experimental result.** All four kernels completed. The physical conversion is confirmed: the adapter

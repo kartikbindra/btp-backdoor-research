@@ -21,15 +21,26 @@ submission; absence of a counterexample in a search is not proof of novelty.
 - "Activation conditioned on an efficiency/compression transformation" — taken by StripWake.
 - "Input-token backdoors" — saturated.
 
-## Surviving differentiators (HYPOTHESIS)
+## Surviving differentiators (updated 2026-11-24 after Campaign 008)
 
 1. **Post-prefill / runtime ordering.** The trigger is absent from the input and from the prefill
    cache; it appears only after a legitimate operator eviction acting *after* the prefill. This is the
    strongest and most defensible differentiator.
-2. **Policy selectivity.** A trained response that distinguishes a *named operator policy* (H2O) from
-   cardinality-matched controls (random, SnapKV, StreamingLLM, scrambled-H2O). Must beat scrambled-H2O
-   to be policy- rather than position-selective.
+2. **Saliency-conditioning (policy selectivity DOWNGRADED).** Campaign 008 T2 (result 2026-11-24): H2O
+   does NOT beat SnapKV (Δ 0.015) — every salient-eviction policy fires — so it is not selective for a
+   *named* policy. It DOES beat the position-matched scrambled-H2O control (0.317 vs 0.014), so the
+   effect is saliency-conditioned, not a positional artifact. Defensible claim: "saliency-conditioned
+   response to post-prefill eviction," not "policy-selective backdoor."
 3. **Threshold law.** Firing governed by the evicted fraction / retention budget.
+
+## Two-adapter caveat (2026-11-24)
+
+The stealthy result and the physical-eviction result are two separate adapters of opposite polarity:
+the masked-prefill adapter is dormant at full cache (0/5601) but gives 0/200 under physical eviction;
+the Campaign 008 runtime-ordering adapter fires under physical eviction (0.29–0.36) but leaks at full
+cache (0.165–0.266). The stealth fix drives the leak to 0/139 (δ=5) only by collapsing physical firing
+to 0.094. No single adapter yet shows post-prefill firing AND full-cache stealth, so any novelty
+framing must name which adapter it relies on.
 
 ## Nearest-neighbour objection and its answering experiment
 
