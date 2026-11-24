@@ -1,0 +1,15 @@
+{
+  "id": "k3tikvats/c008-stealthfix-s42-d4",
+  "title": "c008-stealthfix-s42-d4",
+  "code_file": "kernel.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "enable_tpu": false,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "keywords": []
+}
