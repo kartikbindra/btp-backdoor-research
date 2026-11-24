@@ -1,5 +1,20 @@
 ﻿# Claims
 
+## 2026-11-24 - Stealth fix: C0 dormancy term closes the full-cache leak but collapses firing (PARTIAL)
+
+Adds an explicit full-cache dormancy term to the delayed-onset runtime-ordering trainer
+(`src/pfseb/runtime_train.py`, new `--c0_kl` / `--c0_hinge`) to drive the Campaign-008 full-cache leak
+below the 0.05 stealth bar. Three attempts, seed 42, n=139 dev; go/no-go PASS = C0 ≤ 0.05 AND
+runtime_h2o − C0 ≥ 0.20. Prereg: [`PREREG_stealth_fix_2026_11_23.md`](../research/campaigns/runtime_h2o_validity/PREREG_stealth_fix_2026_11_23.md).
+
+| Evidence | Supported claim and limits |
+| --- | --- |
+| **v1 (c0_kl=0.5, c0_hinge=1.0) — FAIL** | C0 0.194 (27/139), runtime_h2o 0.396 (55/139). `c0_hinge_mean=0.0` every epoch — the single-position hinge mis-targeted under onset_delay=1 — and KL too weak vs λ_marker=3. [k3tikvats/c008-stealthfix-s42] |
+| **v2 (c0_kl=4.0, c0_hinge=0.0) — FAIL** | C0 0.252 (35/139), runtime_h2o 0.374 (52/139), gap 0.12. KL-to-base matched the bulk distribution without pushing the single marker-onset logit down; the leak is one token. [k3tikvats/c008-stealthfix-s42-v2] |
+| **v3 (retargeted c0_leak_hinge, δ=5.0, c0_kl=0.0) — PARTIAL** | C0 **0.000 (0/139, Clopper–Pearson UB95 0.026)** — leak fully closed — but runtime_h2o collapsed to 0.094 (13/139), gap 0.094 < 0.20. Selectivity gone: runtime_h2o 0.094 ≈ snapkv 0.036 ≈ random 0.072 ≈ headwise 0.086. `c0_hinge_mean` 0.383/0.498/0.331 (live all three epochs, unlike v1). [k3tikvats/c008-stealthfix-s42-v3] |
+| **Inference (stealth/firing frontier)** | Driving C0 to 0 at δ=5 cost ~75% of triggered firing (0.37 → 0.09). The full-cache leak and the eviction trigger ride the same marker representation, so hard-suppressing one drags the other down. δ=5 is past the knee; C0 has wide margin (0/139). |
+| **Status** | PARTIAL per prereg. Next probe (fired): δ=3 (c0_hinge=3.0, c0_kl=0.0, **same code commit 8bb7c5f** — only the CLI δ changes) to test whether a window exists where C0 ≤ 0.05 and the firing gap recovers to ≥ 0.20. If no δ holds both, the stealth–firing tension is itself a reportable finding. The DoS result (fires under compression, dormant at full cache) stands independently. [k3tikvats/c008-stealthfix-s42-v4] |
+
 ## 2026-11-23 - Campaign 008 result: physical activation confirmed, selective/stealthy backdoor NOT established
 
 | Evidence | Supported claim and limits |
