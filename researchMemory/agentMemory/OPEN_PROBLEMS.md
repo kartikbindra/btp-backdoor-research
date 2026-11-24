@@ -1,6 +1,57 @@
 # Open Research & Engineering Problems
 
 
+## 2026-11-25 — Open after the stealth-fix sweep: can the "red zone" (stealthy + firing + selective) be reached?
+
+The δ sweep (δ = 2/3/4/5 plus KL 0.5/4, seed 42, n=139) is a clean negative: no point reaches the
+target (C0 ≤ 0.05 AND runtime_h2o − C0 ≥ 0.20). Firing tracks the leak ≈ 1:1. The achievability
+question splits into two **separate** walls, previously conflated.
+
+**Answered (this sweep):** the red zone is NOT reachable by tuning the C0-suppression strength on the
+shared-marker recipe — leak, firing, and the H2O-over-random advantage collapse together.
+
+1. **Wall 1 — stealth + firing (a detector-sharpness problem; the one with a real shot).** The model
+   reads a *graded* "cache is degraded" feature whose full-cache and evicted values overlap, so any
+   threshold that zeroes the C0 leak also clips the evicted firing (hence the 1:1 trade-off). But δ=2
+   is only ~0.04 short of the gap bar (gap 0.159 vs 0.20) while already stealthy (C0 0.014), so the
+   corner is not far in raw terms. The current recipe cannot sharpen the detector because it penalises
+   the leak on the *same* logit that carries the trigger.
+   - **Idea OP-GATE: decoupled eviction-gate.** Train a separate "am-I-evicted" gate (off at full
+     cache, on under eviction) and multiply it into the marker logit, instead of making the marker
+     logit carry both roles — directly targeting the coupling. Variants: a contrastive paired-margin
+     objective on (full, evicted) states for the same prompt; a small trained gating head on a
+     mid-layer feature; a higher-rank adapter. Estimated ~35% to clear stealth + the gap bar.
+     **Caveat:** at δ=2 the surviving firing is non-selective background (random 0.209 > h2o 0.173),
+     so a bare gap-pass is hollow unless the gate is *also* saliency-conditioned (~15–20%).
+
+2. **Wall 2 — selectivity (policy-selective is structurally bounded; effectively ruled out).** Two
+   facts from our own record decide this:
+   - **T0 gate: the base model is nearly policy-blind.** Untrained probe separates H2O from random at
+     0.477 (chance), JSD ≈ 0.07 for every pair (Campaign 008 T0). The policy-distinguishing signal is
+     barely in the representation.
+   - **Keep-set overlap bound (Campaign 005).** H2O and SnapKV physically keep >90% the same tokens
+     (gradient-conflict cosine −0.925); `src/pfseb/contrastive_bound.py` returns
+     `PHYSICALLY_BOUNDED_FAILURE` — "policy selectivity … physically unattainable." Firing on H2O but
+     not SnapKV means discriminating two ~90%-identical inputs — not a training-effort gap.
+   → Policy-selective backdoor **~0–5%**. The achievable ceiling is *saliency*-conditioning (salient
+     vs scrambled eviction), already shown (H2O 0.317 vs scrambled 0.014).
+
+3. **Paper implication (possibly the strongest result here).** T0-at-chance plus the keep-set-overlap
+   bound turn the negative from "we tried and it didn't work" into a bounded claim: *policy-selective
+   KV-eviction backdoors are limited by the keep-set overlap between policies.* That is a
+   theorem-flavoured contribution, arguably stronger than a red-zone success, and it pairs with the
+   layer-18 mechanism and the canary / L-Evict defense (the leak↔trigger coupling is exactly why the
+   canary works).
+
+4. **Carried forward / still open.** Threshold law (T3 — is firing monotone in evicted fraction?)
+   still unrun; base-vs-adapter keep-set overlap still unlogged (`AUDIT_IMPLEMENTATION.md` finding 4);
+   vLLM serving demo still deferred, and the serving-time path is itself a separate negative (0/200
+   physical on the masked-prefill adapter, 2026-11-20).
+
+Calibrated odds (judgment, not measured): stealth + firing-gap pass ~35%; stealth + a *selective*
+trigger ~15–20%; strict policy-selectivity ~0–5% (structural). Figure:
+`paper/figures/stealth_firing_pareto.svg`.
+
 ## 2026-11-23 (later) — Open after the Campaign 008 result
 
 1. **Stealth (now the binding failure).** C0 leaks 0.165–0.266 across three seeds at n=139, far above
