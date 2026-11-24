@@ -12,13 +12,13 @@ runtime_h2o − C0 ≥ 0.20.
 | v1 | c0_kl=0.5, c0_hinge=1.0 | 0.194 (27/139) | 0.396 (55/139) | 0.20 | FAIL (hinge dead, KL weak) |
 | v2 | c0_kl=4.0, c0_hinge=0.0 | 0.252 (35/139) | 0.374 (52/139) | 0.12 | FAIL (KL too soft; leak is one token) |
 | v3 | retargeted hinge δ=5.0 | **0.000 (0/139, UB95 0.026)** | 0.094 (13/139) | 0.094 | **PARTIAL** (leak solved, firing collapsed) |
-| v4 | retargeted hinge δ=3.0 | RUNNING (`k3tikvats/c008-stealthfix-s42-v4`) | — | — | in flight |
+| v4 | retargeted hinge δ=3.0 | 0.014 (2/139, UB95 0.051) | 0.101 (14/139) | 0.087 | PARTIAL — firing = background (h2o = random = 0.101) |
 
 - **v3 closed the leak but killed firing.** Driving C0 to 0 at δ=5 cost ~75% of triggered firing
   (0.374 → 0.094); selectivity also gone (runtime_h2o 0.094 ≈ snapkv 0.036 ≈ random 0.072). The
   full-cache leak and the eviction trigger share the marker representation, so hard-suppressing one
   drags down the other — a stealth/firing frontier. v4 lowers δ to 3.0 to trade firing back while
-  holding C0 ≤ 0.05; if no δ holds both, the tension is itself the finding.
+  holding C0 ≤ 0.05; **v4 confirmed no δ holds both** — at δ=3 firing stayed at background (h2o 0.101 = random 0.101), C0 0.014, gap 0.087. **Finding recorded:** stealth and a post-prefill eviction trigger are mutually exclusive on this shared-representation recipe (repeatable across v3/v4); breaking it needs a different recipe, not another δ. Pareto fill-ins complete — δ=4 (C0 0.007, h2o 0.094) and δ=2 (C0 0.014, h2o 0.173, but random 0.209 > h2o, non-selective); PASS box still empty, verdict unchanged. The DoS result is unaffected.
 
 **Two-adapter picture (framing, do not conflate).** The stealthy result and the physical-eviction
 result are two separate adapters of opposite polarity. The **masked-prefill adapter (v3)** is dormant

@@ -8,6 +8,7 @@ set); --c0_hinge is train-only. Eval is unchanged.
 Local helper; writes research/campaigns/runtime_h2o_validity/kaggle/stealth_fix_s42/.
 Pre-registration: research/campaigns/runtime_h2o_validity/PREREG_stealth_fix_2026_11_23.md
 """
+import argparse
 import json
 from pathlib import Path
 
@@ -15,12 +16,18 @@ ROOT = Path(__file__).resolve().parent
 COMMIT = "8bb7c5f26b9f67ce295e32d8ec9fe34c5866c672"
 REPO = "https://github.com/kartikbindra/btp-backdoor-research"
 ACCOUNT = "k3tikvats"
-SLUG = "c008-stealthfix-s42-v4"
-OUT_NAME = "rt_stealthfix_s42_v4"
 RETENTION = 0.5
 SEED = 42
-C0_KL = 0.0
-C0_HINGE = 3.0
+
+_ap = argparse.ArgumentParser(description="Generate one stealth-fix kernel (delta, kl) point.")
+_ap.add_argument("--suffix", default="v4", help="run suffix: v4 / d2 / d4 ...")
+_ap.add_argument("--delta", type=float, default=3.0, help="c0_hinge leak-hinge margin")
+_ap.add_argument("--kl", type=float, default=0.0, help="c0_kl")
+_args, _ = _ap.parse_known_args()
+SLUG = f"c008-stealthfix-s42-{_args.suffix}"
+OUT_NAME = f"rt_stealthfix_s42_{_args.suffix}"
+C0_KL = _args.kl
+C0_HINGE = _args.delta
 
 
 def md(text):
@@ -135,7 +142,7 @@ else:
     code(PACKAGE),
 ]
 
-d = ROOT / "stealth_fix_s42_v4"
+d = ROOT / f"stealth_fix_s42_{_args.suffix}"
 d.mkdir(parents=True, exist_ok=True)
 (d / "kernel.ipynb").write_text(json.dumps(notebook(cells), indent=1), encoding="utf-8")
 meta = {"id": f"{ACCOUNT}/{SLUG}", "title": SLUG, "code_file": "kernel.ipynb", "language": "python",

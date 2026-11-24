@@ -108,3 +108,47 @@ chosen over 3.5 because the firing gap to close is large (need roughly 3× the v
 margin is wide. Same go/no-go gate. Fired as `k3tikvats/c008-stealthfix-s42-v4`. Decision tree: C0 ≤
 0.05 with a larger gap → toward PASS, then δ=2 to map the knee; C0 leaks back → δ=4; firing stays
 crushed at every δ that keeps C0 ≤ 0.05 → report the stealth–firing tension as the finding.
+
+
+## Result v4 (retargeted leak hinge, c0_hinge=3.0, c0_kl=0.0) — PARTIAL (2026-11-24, k3tikvats/c008-stealthfix-s42-v4)
+
+Eval (dev, n=139): C0 **0.0144** (2/139, Clopper–Pearson UB95 0.051 — on the bar), runtime_h2o
+**0.101** (14/139), gap 0.087. Backing δ off from 5.0 to 3.0 recovered essentially no firing
+(0.094 → 0.101) while C0 rose only to 0.014, so the gap is unchanged and still far below 0.20.
+Decisive detail: runtime_h2o 0.101 = runtime_random 0.101 = runtime_headwise 0.101 (snapkv 0.036,
+streamingllm 0.079) — in the stealthy regime the surviving firing is NOT eviction-selective, it is
+background response to any compression. `c0_hinge_mean` 0.383/0.373/0.272 (live all epochs).
+
+## Sweep conclusion — the stealth/firing tension is the finding (2026-11-24)
+
+Four points on the C0-suppression axis (seed 42, n=139) place no point in the PASS box
+(C0 ≤ 0.05 AND runtime_h2o − C0 ≥ 0.20):
+
+| run | knob | C0 | runtime_h2o | gap | stealth |
+| --- | --- | --- | --- | --- | --- |
+| Campaign 008 | δ=0 (no term) | 0.266 | 0.317 | 0.051 | FAIL |
+| v2 | c0_kl=4.0 | 0.252 | 0.374 | 0.122 | FAIL |
+| v1 | c0_kl=0.5 | 0.194 | 0.396 | 0.202 | FAIL |
+| v4 | δ=3.0 | 0.014 | 0.101 | 0.087 | pass (pt) |
+| v3 | δ=5.0 | 0.000 | 0.094 | 0.094 | pass |
+| d4 | δ=4.0 | 0.007 | 0.094 | 0.086 | pass (pt) |
+| d2 | δ=2.0 | 0.014 | 0.173 | 0.158 | pass (pt), but random 0.209 > h2o |
+
+Firing tracks the leak ≈1:1: when C0 leaks (0.19–0.27) firing is 0.32–0.40; when C0 is driven ≤ 0.05
+(v3, v4) firing collapses to ≈ 0.10, indistinguishable from random eviction. The leak and the trigger
+are the same marker signal, so no single-knob setting makes the adapter both stealthy and a selective
+post-prefill trigger. This is a **repeatable negative** (two independent stealthy-regime points agree),
+not a tuning gap — reported as the finding: on this shared-representation recipe, stealth and a
+post-prefill eviction trigger are mutually exclusive. It strengthens the defense story — a
+pre-deployment canary detects the non-stealthy variant precisely because leak and trigger are coupled.
+Breaking the tension needs a different recipe (decouple the marker representation from the full-cache
+leak), not another δ.
+
+**Pareto fill-in — complete (2026-11-25, figure only).** δ=4 (`k3tikvats/c008-stealthfix-s42-d4`): C0
+0.007 (1/139), runtime_h2o 0.094, gap 0.086 — sits between v3 and v4 as expected. δ=2
+(`k3tikvats/c008-stealthfix-s42-d2`): C0 0.014 (2/139), runtime_h2o 0.173, gap 0.158 — firing partly
+recovers while still stealthy, but it is NOT eviction-selective: random eviction fires *more* (0.209 >
+0.173). Even the closest-to-passing stealthy point has no selective trigger — the H2O-over-random
+advantage present at δ=0 (+0.13) fades out together with the leak. The PASS box (C0 ≤ 0.05 AND gap ≥
+0.20) stays empty; verdict unchanged. The masked-prefill / DoS result is unaffected and remains the
+publishable core.
