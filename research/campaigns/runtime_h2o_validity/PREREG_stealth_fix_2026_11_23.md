@@ -83,3 +83,28 @@ mis-targeting that made v1's single-position hinge read zero. δ = 5.0 is step3'
 **Honest risk:** step3 found δ = 5–6 clears the leak but costs 39–60% of triggered firings, so this
 may land PARTIAL (C0 cleared, gap < 0.20) rather than a full PASS — the leak and the trigger share
 the marker representation. Fired as `k3tikvats/c008-stealthfix-s42-v3`.
+
+
+## Result v3 (retargeted leak hinge, c0_hinge=5.0, c0_kl=0.0) — PARTIAL (2026-11-24, k3tikvats/c008-stealthfix-s42-v3)
+
+Eval (dev, n=139): C0 **0.000** (0/139, Clopper–Pearson UB95 0.026) — the leak is fully closed, well
+under the 0.05 bar — but runtime_h2o fell to **0.094** (13/139), so the firing gap is 0.094, below the
+0.20 PASS bar. This is the pre-registered PARTIAL outcome and matches the honest risk noted above:
+δ=5 is step3's "clears-the-leak" strength and it cost ~75% of triggered firing (0.374 at v2 → 0.094).
+`history.json`: `c0_hinge_mean` 0.383 / 0.498 / 0.331 across epochs — live all three, unlike v1's dead
+hinge — and no `c0_kl_mean` (KL off). Selectivity also collapsed at this firing level: runtime_h2o
+0.094 ≈ runtime_snapkv 0.036 ≈ runtime_random 0.072 ≈ runtime_headwise 0.086, so there is nothing to
+be selective with. Diagnosis: the marker-onset logit and the eviction trigger share representation, so
+the hinge that zeroes the full-cache leak also zeroes most of the runtime firing. C0 has wide margin
+(0/139), so δ can be lowered to trade firing back.
+
+## Adjustment v4 (retargeted leak hinge, c0_hinge=3.0, c0_kl=0.0) — back off down the frontier
+
+Single-variable change: lower the leak hinge δ from 5.0 to 3.0, KL still off, everything else identical
+(seed 42, r=0.5, delay 1, **same code commit 8bb7c5f** — v4 changes only the `--c0_hinge` CLI value, no
+code change). Rationale: v3 drove C0 to 0/139 (UB95 0.026), far under the 0.05 bar, so there is room to
+weaken the hinge and recover firing while keeping C0 ≤ 0.05. The prereg fallback named δ≈3–4; δ=3 is
+chosen over 3.5 because the firing gap to close is large (need roughly 3× the v3 firing) and the C0
+margin is wide. Same go/no-go gate. Fired as `k3tikvats/c008-stealthfix-s42-v4`. Decision tree: C0 ≤
+0.05 with a larger gap → toward PASS, then δ=2 to map the knee; C0 leaks back → δ=4; firing stays
+crushed at every δ that keeps C0 ≤ 0.05 → report the stealth–firing tension as the finding.
