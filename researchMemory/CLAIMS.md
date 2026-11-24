@@ -1,5 +1,38 @@
 ﻿# Claims
 
+## Reading key — two distinct adapters (read before quoting any result)
+
+Results below come from two separately trained adapters with **opposite trigger polarity**. No single
+adapter is yet both stealthy at full cache AND active under genuine physical eviction; which adapter a
+claim refers to decides whether it supports the paper. Do not attribute one adapter's property to the
+other.
+
+| Property | Masked-prefill adapter (v3, `step3_c007`) | Runtime-ordering adapter (Campaign 008, delayed onset) |
+| --- | --- | --- |
+| Trained under | prefill attention mask | ordinary prefill → physical compaction → decode |
+| Fires under prefill mask | yes (1022/1122 s42; 182/200) | no (3/40, suppressed) |
+| Fires under physical post-prefill eviction | **no (0/200, UB95 1.8%)** | **yes (H2O 0.288/0.360/0.317, s123/s7/s42, n=139)** |
+| Full-cache leak (stealth) | stealthy (0/5601 full cache; 0/3200 sealed stealth2) | leaks (0.165/0.223/0.266) |
+| Policy selectivity | n/a (prefill phenomenon) | saliency- not policy-conditioned (H2O ≈ SnapKV ≈ headwise; beats position-matched scrambled 0.317 vs 0.014) |
+
+- **Physical eviction is genuinely physical, not a re-mask.** `compact_cache` (`src/pfseb/runtime_h2o.py:159`)
+  `index_select`s the kept positions out of each layer's K/V and writes the shorter tensors back; the
+  decode loop runs with `attention_mask = ones(1, kept_len+1)` and `cache_position = [kept_len]`, so
+  evicted keys are absent, not masked. Measured: H2O at r=0.5 freed 6,623,232 / 13,275,136 bytes
+  (231/463 positions) and kept decoding. Pinned by `test_compaction_equals_masking_step_by_step` and
+  `test_block_mask_equals_physical_runtime_ordering`.
+  [AUDIT_IMPLEMENTATION](../research/campaigns/campaign_008/agent_reports/AUDIT_IMPLEMENTATION.md)
+- **Banked, publishable result = the masked-prefill adapter**: dormant at full cache, fires under the
+  masked-prefill KV condition, mechanism at layer 18, cross-family attack transfer (Llama attack
+  confirmatory; Llama *stealth* FAILED 7/1200 short, 82/1000 long), L-Evict defense. Its activation
+  condition is prefill-time context withholding, not post-prefill compaction — the 2026-11-20 negative
+  (masked 182/200 vs physical 0/200, McNemar p=3.3e-55). Threat model: "masked-prefill KV condition."
+- **The Campaign 008 adapter** responds to real compaction but is not yet stealthy or selective. The
+  2026-11-24 stealth fix drives its full-cache leak to 0/139 at δ=5 only by collapsing physical firing
+  to 0.094 — the two properties share the marker representation (see next entry).
+- **Paper rule:** always state which adapter a result uses. "Fires under physical eviction" and
+  "dormant/stealthy at full cache" are currently true of *different* adapters.
+
 ## 2026-11-24 - Stealth fix: C0 dormancy term closes the full-cache leak but collapses firing (PARTIAL)
 
 Adds an explicit full-cache dormancy term to the delayed-onset runtime-ordering trainer

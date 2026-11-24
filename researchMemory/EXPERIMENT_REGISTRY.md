@@ -1,5 +1,24 @@
 ﻿# Experiment Registry
 
+## 2026-11-24 — Stealth fix: C0 dormancy term on the runtime-ordering adapter (seed 42)
+
+Pre-registration `research/campaigns/runtime_h2o_validity/PREREG_stealth_fix_2026_11_23.md`. Adds
+`--c0_kl` / `--c0_hinge` to `scripts/run_runtime_train.py` and `src/pfseb/runtime_train.py` (new
+`c0_leak_hinge`). Qwen2.5-1.5B, LoRA r=8, `long_512`, r=0.5, delayed onset, 300 examples, 3 epochs,
+n=139 dev. Go/no-go: C0 ≤ 0.05 AND runtime_h2o − C0 ≥ 0.20.
+
+| Run | Account | knobs | Result | Code |
+| --- | --- | --- | --- | --- |
+| `k3tikvats/c008-stealthfix-s42` (v1) | k3tikvats | c0_kl=0.5, c0_hinge=1.0 | **FAIL.** C0 0.194 (27/139), runtime_h2o 0.396 (55/139). `c0_hinge_mean`=0.0 (single-pos hinge mis-targeted under onset_delay=1); KL weak vs λ=3. | `d283248` |
+| `k3tikvats/c008-stealthfix-s42-v2` | k3tikvats | c0_kl=4.0, c0_hinge=0.0 | **FAIL.** C0 0.252 (35/139), runtime_h2o 0.374 (52/139), gap 0.12. KL matched the bulk distribution without pushing the single marker-onset logit down. | `0603cf3` |
+| `k3tikvats/c008-stealthfix-s42-v3` | k3tikvats | retargeted hinge δ=5.0, c0_kl=0.0 | **PARTIAL.** C0 0.000 (0/139, UB95 0.026); runtime_h2o 0.094 (13/139), gap 0.094 < 0.20; selectivity gone (≈ snapkv/random). `c0_hinge_mean` 0.383/0.498/0.331. | `8bb7c5f` |
+| `k3tikvats/c008-stealthfix-s42-v4` | k3tikvats | retargeted hinge δ=3.0, c0_kl=0.0 | RUNNING. Backs δ down to recover firing while holding C0 ≤ 0.05. Same code commit (CLI δ only). | `8bb7c5f` |
+
+**Verdict so far:** the retargeted `c0_leak_hinge` (penalise the marker-onset token at every full-cache
+position) solves stealth (0/139 at δ=5) but at δ=5 collapses physical firing to 0.094 — stealth and
+the trigger ride the same marker representation. v4 (δ=3) probes whether a window exists where both
+hold. The masked-prefill / DoS result is unaffected and remains the publishable core.
+
 ## 2026-11-22 - Campaign 008: physical runtime eviction trigger (COMPLETE 2026-11-23)
 
 Pre-registration `research/campaigns/campaign_008/PREREG_campaign_008.md`; audits in `.../agent_reports/`;
